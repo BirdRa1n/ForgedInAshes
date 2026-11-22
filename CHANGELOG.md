@@ -39,3 +39,7 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - F3-T06: máquinas sempre liberadas (D3); a habilidade de estações mostra Fundição, Montadora e Refinaria.
 - F3-T07: Forja, Bancada e Estação Química vanilla não são mais fabricáveis nem aparecem no criativo; quests, loot e trader dão as máquinas do mod.
 - F3-T08: checagem final `tools/check_phase3.py` (18/18).
+- F3-T03b: receitas industriais do inventário (mina, ferramentas de ferro, portas de ferro, equipamento de bioma…) vão para as máquinas.
+
+### Fase 4
+- F4-T01: Misturadora de Concreto, Garagem e Oficina de Robótica; Engine fabricável na Garagem; veículos, robôs e concreto saem da Bancada e da Betoneira vanilla (agora ocultas).

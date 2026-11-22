@@ -27,6 +27,7 @@ MODELS = {
     "chem": ("@:Entities/Crafting/chemStationPrefab.prefab", "3,2,1", None, "chemistryStation"),
     "campfire": ("@:Entities/Crafting/campfireCookStationPrefab.prefab", None, None, "campfire"),
     "tablesaw": ("@:Entities/Crafting/table_sawPrefab.prefab", None, None, "tableSaw"),
+    "mixer": ("@:Entities/Crafting/cementMixerPrefab.prefab", None, "0,0,0", "cementMixer"),
 }
 
 # id, block, en, pt, en_desc, pt_desc, model, tint, sortorder2, cost [(item, n)]
@@ -76,6 +77,19 @@ MACHINES = [
      "Cuts wood into planks and beams.", "Corta madeira em tábuas e vigas.",
      "tablesaw", "d0a060", "0500",
      [("resourceForgedIron", 30), ("resourceNail", 40), ("feResourceGear", 10)]),
+    # ---- phase 4 (F4-T01) ----
+    ("M08", "feMixer", "Concrete Mixer", "Misturadora de Concreto",
+     "Mixes cement and concrete.", "Mistura cimento e concreto.",
+     "mixer", "c0c0ff", "0510",
+     [("resourceForgedIron", 25), ("resourceSpring", 4), ("smallEngine", 1), ("resourceMechanicalParts", 10)]),
+    ("M13", "feGarage", "Garage", "Garagem",
+     "Builds engines, vehicles and their parts.", "Constrói motores, veículos e suas peças.",
+     "combine", "ffb040", "0520",
+     [("feResourceIronPlate", 40), ("resourceMechanicalParts", 20), ("feResourceGear", 10), ("resourceSpring", 4)]),
+    ("M15", "feRobotics", "Robotics Workshop", "Oficina de Robótica",
+     "Builds robotic drones, sledges and turrets.", "Constrói drones, marretas e torretas robóticas.",
+     "workbench", "ff60ff", "0530",
+     [("feResourceIronPlate", 30), ("resourceElectricParts", 10), ("feResourceCoil", 5)]),
 ]
 
 # id, item, en, pt, en_desc, pt_desc, icon, tint, material, stack, value
@@ -123,6 +137,10 @@ RECIPES = [
     ("feGunMechanism", 1, "feAssembler", 6,                                                       # I17
      [("resourceMechanicalParts", 4), ("resourceSpring", 2), ("feResourceIronPlate", 1)]),
     ("feGunStock", 1, "feAssembler", 5, [("feResourcePlank", 4), ("resourceLeather", 1)]),       # I18
+    # I12 Engine (vanilla smallEngine, F4-T01): PLANO_MOD.md 6 = 10 MP + 4 Spring + 6 Plate + 2 Lubricant
+    ("smallEngine", 1, "feGarage", 20,
+     [("resourceMechanicalParts", 10), ("resourceSpring", 4), ("feResourceIronPlate", 6),
+      ("feResourceLubricant", 2)]),
 ]
 
 

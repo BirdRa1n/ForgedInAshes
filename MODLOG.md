@@ -283,6 +283,11 @@ aqui fica só o que foi medido/verificado.
   - Usuário testou o menu do inventário: "ficou certo". **Fase 3 concluída** (critério de pronto atingido).
     Extras opcionais ainda abertos: cópias melhoradas das receitas da Fogueira na Cozinha/Laboratório e peças
     novas nas demais receitas (armaduras, mods etc.).
+- Push 4cd4c50 (remoto `ForgedInAshes`). Auditoria de arte: só `feCrank` está no bundle; 6 máquinas prontas
+  em `Art/` esperam entrar no `FeBuild.cs` e ser empacotadas no Unity 2022.3.62f2 (não instalado neste PC).
+  Pedido detalhado em `ART_BRIEF.md` ("Integração pendente").
+- F4-T01 (validado offline): Misturadora, Garagem, Robótica (`gen_phase3.py`), Engine na Garagem, remapeamento
+  da fase 4, Betoneira vanilla oculta. `check_phase3.py` 20/20 (Bancada e Betoneira vanilla vazias).
 
 ## Próximo passo (antigo, mantido para histórico)
 

@@ -305,6 +305,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 ### Fase 4 — Energia avançada (dificuldade 4)
 
 - **F4-T01** M08 Misturadora, M13 Garagem, M15 Robótica, I12 Engine com receita.
+  **Feita (validada offline, falta teste no jogo):** 3 máquinas no `gen_phase3.py` (a Carga, janela da Estação Química); Engine na Garagem (10 MP + 4 Mola + 6 Chapa + 2 Lubrificante); receitas da fase 4 remapeadas (Garagem 17, Robótica 3, Misturadora 5); Bicicleta e Roda da Montadora para a Garagem; Betoneira vanilla oculta como as outras estações (quest/loot/trader/progressão → feMixer). Bancada e Betoneira vanilla vazias; `check_phase3.py` 20/20. Engine continua no loot (decidir se corta).
 - **F4-T02** E04, E05, E06 (vanilla, ajustando receitas/estação). Resolver P06.
 - **F4-T03** Decidir se na fase 3+ "Elét." usa a rede vanilla (rota B obrigatória) ou continua com Carga (rota A). Se rota A, adicionar receitas de Carga nos geradores novos.
 - **F4-T04** E07 e E08 (C#).

@@ -12,7 +12,7 @@ import sys
 import fe_common as fe
 
 KEY_PARTS = {"resourceMechanicalParts", "resourceSpring"}
-VANILLA_STATIONS = {"forge", "workbench", "chemistryStation"}
+VANILLA_STATIONS = {"forge", "workbench", "chemistryStation", "cementMixer"}  # cementMixer since F4-T01
 FORGE_ALLOWED = {"resourceClayLump", "resourceCrushedSand", "resourceRockSmall", "resourceScrapBrass",
                  "resourceScrapIron", "resourceScrapLead"}
 LEGIT_DUPLICATES = {("resourceGlue", "feRefinery")}  # two different vanilla glue recipes (bones / grace corn)
@@ -40,8 +40,9 @@ def main() -> int:
         by_area[r.get("craft_area") or ""].append(r)
 
     # 1. vanilla stations keep only what is allowed
-    rule("workbench keeps only phase-4 recipes",
-         sorted({r.get("name") for r in by_area["workbench"] if not phase4_workbench(r.get("name"))}))
+    # since F4-T01 the phase-4 machines exist: the vanilla workbench and cement mixer must be empty
+    rule("workbench is empty", sorted({r.get("name") for r in by_area["workbench"]}))
+    rule("cement mixer is empty", sorted({r.get("name") for r in by_area["cementMixer"]}))
     rule("forge keeps only its 6 smelting helpers",
          sorted({r.get("name") for r in by_area["forge"] if r.get("name") not in FORGE_ALLOWED}))
     rule("chemistry station is empty", sorted({r.get("name") for r in by_area["chemistryStation"]}))

@@ -27,4 +27,5 @@
 	<set xpath="/lootcontainers/lootgroup/item[@name='forge']/@name">feFoundry</set>
 	<set xpath="/lootcontainers/lootgroup/item[@name='workbench']/@name">feAssembler</set>
 	<set xpath="/lootcontainers/lootgroup/item[@name='chemistryStation']/@name">feRefinery</set>
+	<set xpath="/lootcontainers/lootgroup/item[@name='cementMixer']/@name">feMixer</set>
 </configs>

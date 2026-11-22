@@ -59,8 +59,8 @@ INVENTORY_MOVES = {
     "M05": ["meleeWpnClubT1BaseballBat", "meleeToolRepairT1ClawHammer", "meleeToolAxeT1IronFireaxe",
             "meleeWpnSpearT1IronSpear", "meleeWpnBladeT1HuntingKnife", "meleeToolPickT1IronPickaxe",
             "meleeToolShovelT1IronShovel", "meleeWpnSledgeT1IronSledgehammer", "meleeToolSalvageT1Wrench",
-            "meleeWpnKnucklesT1IronKnuckles", "resourceRepairKit", "thrownAmmoMolotovCocktail",
-            "vehicleBicyclePlaceable", "vehicleWheels"],  # bicycle/wheel: to the Garage in phase 4
+            "meleeWpnKnucklesT1IronKnuckles", "resourceRepairKit", "thrownAmmoMolotovCocktail"],
+    "M13": ["vehicleBicyclePlaceable", "vehicleWheels"],  # Garage exists since F4-T01 (was in the Assembler)
     "M07": ["biomeWeatherItem1", "biomeWeatherItem2", "biomeWeatherItem3", "biomeWeatherItem4",
             "resourceArmorCraftingKit"],
     "M10": ["medicalFirstAidBandage"],

@@ -6,4 +6,5 @@
 	<set xpath="/traders/trader_item_groups/trader_item_group/item[@name='forge']/@name">feFoundry</set>
 	<set xpath="/traders/trader_item_groups/trader_item_group/item[@name='workbench']/@name">feAssembler</set>
 	<set xpath="/traders/trader_item_groups/trader_item_group/item[@name='chemistryStation']/@name">feRefinery</set>
+	<set xpath="/traders/trader_item_groups/trader_item_group/item[@name='cementMixer']/@name">feMixer</set>
 </configs>
