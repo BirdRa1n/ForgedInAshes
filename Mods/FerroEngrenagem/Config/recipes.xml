@@ -225,6 +225,27 @@
 	<set xpath="/recipes/recipe[@name='toolCookingPot'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='trapGlassBusinessCTRSheet1x1'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='trapGlassBusinessSheet1x1'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
+	<!-- -> feKitchen (12) -->
+	<set xpath="/recipes/recipe[@name='cntApiary'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='cntDewCollector'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='drinkJarBeer'][@craft_area='chemistryStation']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolDewGatherer'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolDewTarp'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolDewFilter'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolApiaryBroodBox'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolApiaryExtractor'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolApiarySmoker'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolChickenCoopLamp'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolChickenCoopNestingBox'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<set xpath="/recipes/recipe[@name='toolChickenCoopRun'][@craft_area='workbench']/@craft_area">feKitchen</set>
+	<!-- -> feLab (7) -->
+	<set xpath="/recipes/recipe[@name='drugAntibiotics'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='drugFortBites'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='drugHerbalAntibiotics'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='drugRecog'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='drugSteroids'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='medicalFirstAidKit'][@craft_area='chemistryStation']/@craft_area">feLab</set>
+	<set xpath="/recipes/recipe[@name='medicalPlasterCast'][@craft_area='chemistryStation']/@craft_area">feLab</set>
 	<!-- -> fePress (13) -->
 	<set xpath="/recipes/recipe[@name='ammoDartIron'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='ironBars'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
@@ -239,6 +260,16 @@
 	<set xpath="/recipes/recipe[@name='resourceRocketCasing'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='resourceRocketTip'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='metalFenceRailingTrellisSheetBlockVariantHelper'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
+	<!-- -> feRefinery (9) -->
+	<set xpath="/recipes/recipe[@name='ammoGasCan'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='ammoGasCanBundle'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='carBattery'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourceGlue'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourceGunPowder'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourceGunPowderBundle'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourceOil'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourcePaint'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
+	<set xpath="/recipes/recipe[@name='resourcePaper'][@craft_area='chemistryStation']/@craft_area">feRefinery</set>
 	<!-- forge: use_smelter twins of moved recipes, and recipes already copied to the Foundry -->
 	<remove xpath="/recipes/recipe[@name='ammoDartIron'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='drinkJarEmpty'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
