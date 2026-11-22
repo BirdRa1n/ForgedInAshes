@@ -34,6 +34,7 @@ Cada porta tem um **empty** filho da base da máquina, no centro da abertura, so
 | Prensa `fePress` (2×1×2) | Forged Iron: lado esquerdo (−X); Carga: fundo (+Y) da célula direita | Chapa: lado direito (+X) |
 | Torno `feLathe` (1×1×1) | matéria-prima: lado esquerdo (−X); Carga: fundo (+Y) | peças: lado direito (+X) |
 | Fundição `feFoundry` (2×1×2) | minério/sucata: fundo (+Y) da fornalha; combustível: lado esquerdo (−X) | Forged Iron etc.: lado direito (+X) |
+| Serraria `feSawmill` (2×1, proposta 2×1×2) | madeira: lado esquerdo (−X); Carga: fundo (+Y) da célula esquerda | Tábua/Viga: lado direito (+X) |
 
 O Volante de Inércia (`feFlywheel`) é um item, não tem portas.
 
