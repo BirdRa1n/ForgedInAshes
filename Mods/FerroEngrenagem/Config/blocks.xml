@@ -609,7 +609,6 @@
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Crafting/chemStationPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
 			<property name="MultiBlockDim" value="3,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -660,7 +659,6 @@
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Crafting/chemStationPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
 			<property name="MultiBlockDim" value="3,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -711,7 +709,6 @@
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Crafting/campfireCookStationPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -863,7 +860,6 @@
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Crafting/table_sawPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>

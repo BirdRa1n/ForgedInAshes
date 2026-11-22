@@ -206,6 +206,11 @@ aqui fica só o que foi medido/verificado.
     9 itens (I08, I09, I11, I13–I18), receitas deles e `resourceElectricParts` (I10) na Bancada Eletrônica.
     Modelos vanilla provisórios (bancada, bancada de combinar, estação química, fogueira, mesa de serra).
   - D4 adotada sem confirmação explícita: Carga em todas as máquinas da fase 3 (registrado no plano).
+  - **Bug visto no jogo:** Cozinha (fogueira) e Serraria (mesa de serra) apareciam afundadas no chão.
+    Causa (IL `BlockShapeModelEntity.Init`): `ModelOffset` padrão = `(0, 0.5, 0)`; o gerador escrevia `0,0,0`
+    onde o bloco vanilla não escreve nada → modelo meio bloco para baixo (Refinaria/Laboratório também).
+    Correção: o gerador só escreve `ModelOffset` quando o vanilla escreve (bancada `0,.5,0`, combinar `0,0,0`).
+    **Regra:** ao reaproveitar um modelo vanilla, copiar exatamente o `ModelOffset` do bloco vanilla (ou omitir).
 
 ## Próximo passo (antigo, mantido para histórico)
 
