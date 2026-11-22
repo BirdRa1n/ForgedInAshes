@@ -307,6 +307,16 @@ aqui fica só o que foi medido/verificado.
     de fios no inventário (o Alicate ia para a Montadora com Aço/MP/Bobina = ciclo sem saída).
   - Pendente: Manivela e Gerador a Carvão ainda produzem o item Carga (inútil até as etapas 2–4).
   - `check_phase3.py` 21/21.
+  - **Bug achado no 1º teste:** `<removeattribute xpath="...recipe[...]" name="craft_area"/>` → jogo:
+    "Can only remove Attributes (matched Element), use remove instead" e **o resto do recipes.xml não foi
+    aplicado**. Forma certa: `<removeattribute xpath=".../@craft_area"/>`. `fe_common.py` agora aplica as regras
+    de tipo do jogo (removeattribute só atributo; setattribute/append/insert* só elemento).
+  - 2º teste (19:21–19:30), com diagnóstico: layout antigo → `fePress motors=1 powered=0` (motor achado, mas a
+    energia não chegava pela ligação em série); motor ligado direto ao gerador → `watts=30/30 -> ON`; desligar o
+    gerador → `OFF` e a fabricação pausa (confirmado pelo usuário). **Etapa 1 funciona no jogo.**
+  - Furo achado no diagnóstico: um motor de 30 W ligava Prensa e Torno juntos. Correção: cada motor alimenta só a
+    máquina com `FeMinPower` mais próxima (`OwnerOf`, cache 2 s). Compilado; DLL não gravada (jogo aberto).
+  - Usuário: Manivela (segurar E) também funcionou nesse teste (ainda gera o item Carga).
 
 ## Próximo passo (antigo, mantido para histórico)
 

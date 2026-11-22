@@ -60,7 +60,36 @@ namespace FerroEngrenagem
             return te != null && MinPower(te.blockValue.Block) > 0;
         }
 
-        /// <summary>Sum of RequiredPower of powered motors near the machine &gt;= its FeMinPower.</summary>
+        static readonly Dictionary<Vector3i, KeyValuePair<float, Vector3i>> ownerCache =
+            new Dictionary<Vector3i, KeyValuePair<float, Vector3i>>();
+
+        /// <summary>Position of the power-gated workstation nearest to the motor (ties: lowest x, then z, then y).
+        /// Vector3i.min when none is in range.</summary>
+        public static Vector3i OwnerOf(World world, Vector3i motorPos)
+        {
+            float now = Time.time;
+            KeyValuePair<float, Vector3i> c;
+            if (ownerCache.TryGetValue(motorPos, out c) && now - c.Key < 2f) return c.Value;
+            Vector3i best = Vector3i.min;
+            int bestD = int.MaxValue;
+            for (int dx = -SEARCH; dx <= SEARCH; dx++)
+                for (int dy = -2; dy <= 1; dy++)
+                    for (int dz = -SEARCH; dz <= SEARCH; dz++)
+                    {
+                        Vector3i wp = new Vector3i(motorPos.x + dx, motorPos.y + dy, motorPos.z + dz);
+                        TileEntityWorkstation w = world.GetTileEntity(wp) as TileEntityWorkstation;
+                        if (w == null || !IsGated(w)) continue;
+                        Vector3i tp = w.ToWorldPos();
+                        int d = dx * dx + dy * dy + dz * dz;
+                        bool better = d < bestD || (d == bestD && (tp.x < best.x || (tp.x == best.x &&
+                                      (tp.z < best.z || (tp.z == best.z && tp.y < best.y)))));
+                        if (better) { bestD = d; best = tp; }
+                    }
+            ownerCache[motorPos] = new KeyValuePair<float, Vector3i>(now, best);
+            return best;
+        }
+
+        /// <summary>Sum of RequiredPower of powered motors that belong to this machine &gt;= its FeMinPower.</summary>
         public static bool HasPower(TileEntityWorkstation te)
         {
             int need = te == null ? 0 : MinPower(te.blockValue.Block);
@@ -79,9 +108,12 @@ namespace FerroEngrenagem
                     for (int dy = -1; dy <= 2; dy++)
                         for (int dz = -SEARCH; dz <= SEARCH; dz++)
                         {
-                            TileEntityPowered p = world.GetTileEntity(new Vector3i(pos.x + dx, pos.y + dy, pos.z + dz))
-                                as TileEntityPowered;
+                            Vector3i mpos = new Vector3i(pos.x + dx, pos.y + dy, pos.z + dz);
+                            TileEntityPowered p = world.GetTileEntity(mpos) as TileEntityPowered;
                             if (p == null || !IsMotor(p.blockValue.Block)) continue;
+                            // a motor drives ONE machine: the nearest power-gated workstation (found in D7 test:
+                            // one 30 W motor was running the Press and the Lathe at the same time)
+                            if (OwnerOf(world, mpos) != pos) continue;
                             motors++;
                             if (!p.IsPowered) continue;
                             poweredMotors++;
