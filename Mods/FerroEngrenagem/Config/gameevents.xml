@@ -1,20 +1,4 @@
 <configs>
-	<!-- F2-T04: E01 Crank. Called from buffs.xml (onSelfDamagedBlock on a block tagged feCrank).
-	     Same format as the vanilla "action_give_silver" sequence; the RandomRoll requirement is the same
-	     construct the vanilla "block_tree_stump_bees" sequence uses.
-	     Balance (PLANO_MOD.md section 9, P10): 25% chance of 1 Charge per hit. Stone axe ~1.75 hits/s ->
-	     ~4 Charge per 10 s of cranking = ~40 s of machine time (target 30-60 s). Was 100% (user: too much). -->
-	<append xpath="/gameevents">
-		<action_sequence name="fe_crank_charge">
-			<requirement class="RandomRoll">
-				<property name="min_max" value="0,100"/>
-				<property name="operation" value="LTE"/>
-				<property name="value" value="25"/>
-			</requirement>
-			<action class="AddItems">
-				<property name="added_items" value="feCharge"/>
-				<property name="added_item_counts" value="1"/>
-			</action>
-		</action_sequence>
-	</append>
+	<!-- F2-T04 had the "fe_crank_charge" sequence (25% chance of 1 Charge per hit on the Crank). Replaced by
+	     "hold E" in C# (F2-T04b, src/FerroEngrenagem/Crank.cs); nothing is patched here now. -->
 </configs>

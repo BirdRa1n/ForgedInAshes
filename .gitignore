@@ -32,3 +32,17 @@ Temp/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Unity project in Art/UnityProject (only Assets/Editor, Packages and ProjectSettings are versioned)
+Art/UnityProject/Library/
+Art/UnityProject/Logs/
+Art/UnityProject/UserSettings/
+Art/UnityProject/Temp/
+Art/UnityProject/Build/
+Art/UnityProject/obj/
+Art/UnityProject/*.csproj
+Art/UnityProject/*.sln
+Art/UnityProject/Assets/Models/
+Art/UnityProject/Assets/Models.meta
+Art/UnityProject/Assets/Prefabs/
+Art/UnityProject/Assets/Prefabs.meta
