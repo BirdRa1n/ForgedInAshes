@@ -295,6 +295,35 @@
 	<set xpath="/recipes/recipe[@name='thrownGrenadeContact'][@craft_area='workbench']/@craft_area">feAssembler</set>
 	<set xpath="/recipes/recipe[@name='thrownTimedCharge'][@craft_area='workbench']/@craft_area">feAssembler</set>
 	<set xpath="/recipes/recipe[@name='thrownDynamite'][@craft_area='workbench']/@craft_area">feAssembler</set>
+	<!-- -> feElectronics (28) -->
+	<set xpath="/recipes/recipe[@name='autoTurret'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='batterybank'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='bladeTrap'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='ceilingLight01_player'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='ceilingLight07_player'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='industrialLight01_player'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='industrialLight02_player'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='dartTrap'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='electricfencepost'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='electrictimerrelay'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='electricwirerelay'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='endTableLamp'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='lanternDecorLightBlockVariantHelper'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='lanternOldBlockVariantHelper'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='generatorbank'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='m60Turret'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='mineHubcap'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='mineAirFilter'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='mineCookingPot'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='motionsensor'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='pressureplate'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='pressureplateLong'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='shotgunTurret'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='speaker'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='spotlightPlayer'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='switch'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='tripwirepost'][@craft_area='workbench']/@craft_area">feElectronics</set>
+	<set xpath="/recipes/recipe[@name='tvBlockVariantHelper'][@craft_area='workbench']/@craft_area">feElectronics</set>
 	<!-- -> feFoundry (12) -->
 	<set xpath="/recipes/recipe[@name='drinkJarEmpty'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='glassBulletproofBlockVariantHelper'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
@@ -393,6 +422,36 @@
 	<set xpath="/recipes/recipe[@name='backpackSmall'][@craft_area='workbench']/@craft_area">feLoom</set>
 	<set xpath="/recipes/recipe[@name='backpackMedium'][@craft_area='workbench']/@craft_area">feLoom</set>
 	<set xpath="/recipes/recipe[@name='backpackLarge'][@craft_area='workbench']/@craft_area">feLoom</set>
+	<!-- -> feMetalShop (29) -->
+	<set xpath="/recipes/recipe[@name='burningBarrelPlayer'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cellarDoorDoubleSteel'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='shuttersSteelBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cntCoolerVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cntWallSafe_Player'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cntDeskSafe_Player'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cntGunSafeVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='cntSteelWallCabinetSecure'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='metalFurnitureBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='ironGarageDoorBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='ironGarageDoor_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='woodenGarageDoor3x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='woodenGarageDoor4x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='woodenGarageDoor5x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='steelGarageDoor3x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='steelGarageDoor4x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='steelGarageDoor5x3_PoweredBlockVariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='rollUpDoor3x3VariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='rollUpDoor5x4VariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='rollUpDoor7x4VariantHelper'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='metalReinforcedWoodDrawBridge'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='metalReinforcedWoodDrawBridgePowered'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='ladderSteel'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultDoor01'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultHatch01'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultHatch01_Powered'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultDoor01_Powered'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultDoor01Double'][@craft_area='workbench']/@craft_area">feMetalShop</set>
+	<set xpath="/recipes/recipe[@name='vaultDoor01Double_Powered'][@craft_area='workbench']/@craft_area">feMetalShop</set>
 	<!-- -> feModBench (74) -->
 	<set xpath="/recipes/recipe[@name='modArmorAdvancedMuffledConnectors'][@craft_area='workbench']/@craft_area">feModBench</set>
 	<set xpath="/recipes/recipe[@name='modArmorBandolier'][@craft_area='workbench']/@craft_area">feModBench</set>
