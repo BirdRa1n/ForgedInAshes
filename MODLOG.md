@@ -258,6 +258,17 @@ aqui fica só o que foi medido/verificado.
       Marreta/Torreta robóticos, veículos e chassis); Forja só com as 6 de fundição (Areia triturada, Chumbo,
       Ferro, Latão, Pedra pequena, Solo argiloso). **Remapeamento confirmado no jogo.** Esconder as duas: F3-T07.
     - Manivela com `FeCrankStaminaPerSecond=40`: aprovada pelo usuário.
+- F3-T04..T08 de uma vez (pedido do usuário), validados offline, falta teste no jogo:
+  - T04 `tools/gen_parts.py`: Cano/Mecanismo/Coronha em 17 armas (escala por tier), Eixo/Chapa/Engrenagem/Bobina
+    em 16 ferramentas e armas brancas. Região depois do remapeamento (procura `craft_area='feAssembler'`).
+    Risco a ver no jogo: as peças entram depois de `resourceLegendaryParts x0`.
+  - T05: MP e Mola fora de todo loot (`loot_scale.py 0`, nenhum grupo fica vazio) e do trader `generalResources`;
+    `MsmallEngine` forge_category → `iron` (Engine desmanchado não dá mais MP).
+  - T06: `craftingWorkstations` (listas paralelas icon/name_key/unlock_level) troca forge/workbench/chemistryStation
+    por feFoundry/feAssembler/feRefinery na mesma posição. Gotcha: os `<set>` de `name_key` selecionam pelo item
+    ORIGINAL, então precisam vir antes dos `<set>` que trocam o item.
+  - T07: receitas das 3 estações removidas, `CreativeMode=Dev`, quests/loot/trader `workstations` dão as do mod.
+  - T08: `tools/check_phase3.py` → 18/18.
 
 ## Próximo passo (antigo, mantido para histórico)
 

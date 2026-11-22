@@ -33,4 +33,9 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 ### Fase 3
 - F3-T01: proposta automática de remapeamento das 600 receitas (`tools/remap_proposal.py`, seção 10.1 do plano).
 - F3-T02: 10 máquinas novas (Prensa de Munição, Montadora, Bancada de Mods, Tear, Refinaria, Laboratório, Cozinha, Bancada Eletrônica, Serralheria, Serraria), todas a Carga; 9 itens intermediários (fio de latão, bobina, lubrificante, tábua, viga, rolo de tecido, cano, mecanismo e coronha de arma) e Peças Elétricas fabricáveis; gerador `tools/gen_phase3.py`; patch de combustível ligado por `FeChargeOnly`.
-- F3-T03: 328 receitas vanilla remapeadas para as máquinas (Forja, Estação Química e Bancada esvaziadas, exceto fase 4); gerador `tools/gen_remap.py` com checagem de `craft_tool`.
+- F3-T03: 328 receitas vanilla remapeadas para as máquinas (Forja, Estação Química e Bancada esvaziadas, exceto fase 4); gerador `tools/gen_remap.py` com checagem de `craft_tool`. Bancada vanilla sem as receitas do inventário.
+- F3-T04: armas e ferramentas da Montadora passam a exigir Cano, Mecanismo, Coronha, Eixo, Chapa, Engrenagem ou Bobina (`tools/gen_parts.py`).
+- F3-T05: Mechanical Parts e Spring fora do loot e do trader; Engine desmanchado vira ferro.
+- F3-T06: máquinas sempre liberadas (D3); a habilidade de estações mostra Fundição, Montadora e Refinaria.
+- F3-T07: Forja, Bancada e Estação Química vanilla não são mais fabricáveis nem aparecem no criativo; quests, loot e trader dão as máquinas do mod.
+- F3-T08: checagem final `tools/check_phase3.py` (18/18).
