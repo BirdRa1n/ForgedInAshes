@@ -33,3 +33,4 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 ### Fase 3
 - F3-T01: proposta automática de remapeamento das 600 receitas (`tools/remap_proposal.py`, seção 10.1 do plano).
 - F3-T02: 10 máquinas novas (Prensa de Munição, Montadora, Bancada de Mods, Tear, Refinaria, Laboratório, Cozinha, Bancada Eletrônica, Serralheria, Serraria), todas a Carga; 9 itens intermediários (fio de latão, bobina, lubrificante, tábua, viga, rolo de tecido, cano, mecanismo e coronha de arma) e Peças Elétricas fabricáveis; gerador `tools/gen_phase3.py`; patch de combustível ligado por `FeChargeOnly`.
+- F3-T03: 328 receitas vanilla remapeadas para as máquinas (Forja, Estação Química e Bancada esvaziadas, exceto fase 4); gerador `tools/gen_remap.py` com checagem de `craft_tool`.

@@ -226,6 +226,16 @@ aqui fica só o que foi medido/verificado.
     do relato anterior: tempo de queima restante de uma Carga (`currentBurnTimeLeft` é salvo no save e a estação
     continua fabricando até ele acabar). Log por bloco removido; mantido só o aviso de segurança (uma vez por
     sessão) para máquina fe* que queime sem `FeChargeOnly`. **F3-T02 verificada.**
+- F3-T03 (validado offline, falta teste no jogo): `tools/gen_remap.py` gera região em `recipes.xml` a partir de
+  `remap_proposal.classify`: 328 `<set>` de `craft_area` + 27 `<remove>` (gêmeas `use_smelter` e as 3 receitas da
+  Forja já copiadas na Fundição). 5 lotes, um commit cada. Resultado: Bancada 306 → 19 (2 estações vanilla +
+  17 da fase 4), Forja 60 → 6 (só as receitas internas de fundição), Estação Química 18 → 0.
+  - `craft_tool`: só a Fundição tem slot de ferramenta. A ponta de flecha de aço AP (exige Cadinho) foi
+    redirecionada para a Fundição; `gen_remap.py` agora falha se uma receita com `craft_tool` cair numa estação
+    sem `tools`.
+  - Bug do gerador corrigido: a regra "gêmea use_smelter = remover" precisa vir antes das exceções manuais.
+  - Cola (`resourceGlue`) tem 2 receitas legítimas na Refinaria (ossos e milho-da-graça), como no vanilla.
+  - Fase 4 (Misturador, veículos, robôs) e Fogueira (comida, remédios): sem mudança nesta tarefa.
 
 ## Próximo passo (antigo, mantido para histórico)
 
