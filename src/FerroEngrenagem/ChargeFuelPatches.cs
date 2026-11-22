@@ -34,8 +34,17 @@ namespace FerroEngrenagem
             bool result;
             if (cache.TryGetValue(block.blockID, out result)) return result;
             DynamicProperties p = block.Properties;
-            result = p != null && p.Contains(ChargeOnlyProperty) && p.GetBool(ChargeOnlyProperty);
+            bool has = p != null && p.Contains(ChargeOnlyProperty);
+            result = has && p.GetBool(ChargeOnlyProperty);
             cache[block.blockID] = result;
+            // Diagnostic (F3-T02 bug hunt): one line per block id, only for our blocks or when the flag is set.
+            string name = block.GetBlockName();
+            if (result || (name != null && name.StartsWith("fe")))
+            {
+                Log.Out(FerroEngrenagemMod.LogPrefix + "station '" + name + "' id=" + block.blockID +
+                        " hasProp=" + has + " raw='" + (has ? p.GetString(ChargeOnlyProperty) : "") +
+                        "' chargeOnly=" + result);
+            }
             return result;
         }
 
@@ -114,9 +123,24 @@ namespace FerroEngrenagem
     [HarmonyPatch(typeof(TileEntityWorkstation), "HandleFuel")]
     public static class Patch_TEW_HandleFuel
     {
+        static bool warned;
+
         public static void Prefix(TileEntityWorkstation __instance, ItemStack[] ___fuel)
         {
-            if (ChargeFuel.IsChargeStation(__instance)) ChargeFuel.MoveChargeToFront(___fuel);
+            if (ChargeFuel.IsChargeStation(__instance))
+            {
+                ChargeFuel.MoveChargeToFront(___fuel);
+                return;
+            }
+            // Diagnostic: a block named fe* that is NOT charge-only while burning something.
+            Block b = __instance.blockValue.Block;
+            string n = b == null ? null : b.GetBlockName();
+            if (!warned && n != null && n.StartsWith("fe") && n != "feFoundry" && __instance.IsBurning)
+            {
+                warned = true;
+                Log.Warning(FerroEngrenagemMod.LogPrefix + "HandleFuel on '" + n + "' (id " + b.blockID +
+                            ") is NOT treated as charge-only");
+            }
         }
     }
 
