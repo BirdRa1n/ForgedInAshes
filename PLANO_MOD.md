@@ -10,7 +10,11 @@
 | Instalação | `C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die` (também em `tools/game_path.txt`, fora do git) |
 | Unity do jogo | 2022.3.62f2 (versão do `7DaysToDie.exe`) |
 | Harmony | `Mods/0_TFP_Harmony` v1.1.0.4 (traz `0Harmony.dll`, `TfpHarmony.dll`) |
-| Localização vanilla | `Data/Config/Localization.csv` (CSV, não `.txt`) |
+| Localização vanilla | `Data/Config/Localization.csv` (CSV, não `.txt`). Colunas: `Key,File,Type,UsedInMainMenu,NoTranslate,KeepLoaded,english,Context / Alternate Text,german,spanish,french,italian,japanese,koreana,polish,brazilian,...`. PT-BR = coluna `brazilian` |
+| XUi vanilla | `Data/Config/XUi_InGame/` (`windows.xml`, `xui.xml`, `styles.xml`, `templates.xml`), `XUi_Menu/`, `XUi_Common/` |
+| Comandos de patch | Confirmados no `Assembly-CSharp.dll`: `set`, `setattribute`, `append`, `prepend`, `insertAfter`, `insertBefore`, `remove`, `removeattribute`, `csv`, `conditional` |
+| Salvage | Drops com `tool_category="Disassemble"` em `blocks.xml` (eventos `Harvest` e `Destroy`) |
+| Receitas vanilla | 633 no total: workbench 306, inventário 195, forge 60, campfire 49, chemistryStation 18, cementMixer 5 (`recipe_report.py`) |
 
 ---
 
@@ -358,7 +362,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 
 | ID | Pergunta | Como verificar | Fase | Status |
 |---|---|---|---|---|
-| P01 | Formato exato do `ModInfo.xml` na versão instalada | Copiar de um mod que funcione nessa versão | 0 | Aberta |
+| P01 | Formato exato do `ModInfo.xml` na versão instalada | Copiar de um mod que funcione nessa versão | 0 | **Resolvida:** copiado de `Mods/0_TFP_Harmony/ModInfo.xml` (raiz `<xml>`, campos `Name`, `DisplayName`, `Description`, `Author`, `Version`, `Website`). Confirmar no F0-T06 que carrega |
 | P02 | Alguma workstation vanilla exige energia? | Buscar em `blocks.xml` e no código (workstation × powered) | 2 | Aberta |
 | P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | Aberta |
 | P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | Aberta |
@@ -371,6 +375,8 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Aberta |
 | P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `grep` em `items.xml` + `Localization.txt` | 0 | Aberta |
 | P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | Aberta |
+| P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes do F1-T03 | 1 | Aberta |
+| P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar no F0-T06 com EAC ligado e desligado | 0 | Aberta |
 
 ---
 
