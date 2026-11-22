@@ -288,6 +288,7 @@ aqui fica só o que foi medido/verificado.
   Pedido detalhado em `ART_BRIEF.md` ("Integração pendente").
 - F4-T01 (validado offline): Misturadora, Garagem, Robótica (`gen_phase3.py`), Engine na Garagem, remapeamento
   da fase 4, Betoneira vanilla oculta. `check_phase3.py` 20/20 (Bancada e Betoneira vanilla vazias).
+  Usuário testou no jogo: "tudo certo". **F4-T01 verificada.**
 
 ## Próximo passo (antigo, mantido para histórico)
 
