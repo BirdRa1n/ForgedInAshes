@@ -206,6 +206,19 @@ aqui fica só o que foi medido/verificado.
     9 itens (I08, I09, I11, I13–I18), receitas deles e `resourceElectricParts` (I10) na Bancada Eletrônica.
     Modelos vanilla provisórios (bancada, bancada de combinar, estação química, fogueira, mesa de serra).
   - D4 adotada sem confirmação explícita: Carga em todas as máquinas da fase 3 (registrado no plano).
+  - **Bug visto no jogo:** Cozinha (fogueira) e Serraria (mesa de serra) apareciam afundadas no chão.
+    Causa (IL `BlockShapeModelEntity.Init`): `ModelOffset` padrão = `(0, 0.5, 0)`; o gerador escrevia `0,0,0`
+    onde o bloco vanilla não escreve nada → modelo meio bloco para baixo (Refinaria/Laboratório também).
+    Correção: o gerador só escreve `ModelOffset` quando o vanilla escreve (bancada `0,.5,0`, combinar `0,0,0`).
+    **Regra:** ao reaproveitar um modelo vanilla, copiar exatamente o `ModelOffset` do bloco vanilla (ou omitir).
+  - Teste 16:42–16:46 (após a correção): log limpo do lado do mod (7 patches, nenhuma exceção). O `check_log.py`
+    marcava falsos positivos da EOS ("featured" casava com `fe[A-Z]` sob `re.I`); filtro corrigido.
+    Comportamento no jogo: usuário confirmou modelos e máquinas novas OK, **mas Prensa e Torno antigos
+    continuam funcionando com Madeira** (bug aberto). XML deles idêntico ao das novas (`FeChargeOnly` presente).
+    Descartado pelo IL: módulos vêm do XML a cada carga (`OnSetLocalChunkPosition`), não do save; o save guarda
+    itens, fila, `isBurning` e `currentBurnTimeLeft`. Sem fuel module, `HandleRecipeQueue` fabrica sem queimar.
+    Diagnóstico temporário no DLL: loga a decisão "chargeOnly" por bloco e avisa se um bloco fe* queima sem ser
+    tratado como charge-only.
 
 ## Próximo passo (antigo, mantido para histórico)
 
