@@ -226,6 +226,17 @@ aqui fica só o que foi medido/verificado.
     do relato anterior: tempo de queima restante de uma Carga (`currentBurnTimeLeft` é salvo no save e a estação
     continua fabricando até ele acabar). Log por bloco removido; mantido só o aviso de segurança (uma vez por
     sessão) para máquina fe* que queime sem `FeChargeOnly`. **F3-T02 verificada.**
+- Trabalho do parceiro (Harrison, commit 9618344, integrado por rebase sem conflito):
+  - **F2-T04b: Manivela "segurar E"** em C# (`src/FerroEngrenagem/Crank.cs`, `Class=FerroEngrenagem.FeCrank,
+    FerroEngrenagem`): rotor e polia giram, estamina 25/s (`FeCrankStaminaPerSecond`), 1 Carga a cada 2,5 s
+    (`FeCrankChargeSeconds`), agachar + E recolhe. Substitui o gancho de `buffs.xml` + `gameevents.xml`
+    (esvaziados). Testado por ele no jogo.
+  - **Primeiro modelo próprio integrado:** `Resources/ferroengrenagem.unity3d` (projeto em `Art/UnityProject`,
+    `FeBuild.cs`); `Model="#@modfolder:Resources/ferroengrenagem.unity3d?feCrankPrefab"` (sintaxe lida em
+    `DataLoader.ParseDataPathIdentifier`). Responde em parte à integração pendente do `ART_BRIEF.md`.
+  - `build.ps1` passou a referenciar `InControl.dll` (tecla Activate).
+  - Fetch neste PC: o git do terminal não tem credencial; usar `git -c credential.helper= -c
+    "credential.helper=!gh auth git-credential" fetch origin` (gh autenticado, nada gravado na config).
 - F3-T03 (validado offline, falta teste no jogo): `tools/gen_remap.py` gera região em `recipes.xml` a partir de
   `remap_proposal.classify`: 328 `<set>` de `craft_area` + 27 `<remove>` (gêmeas `use_smelter` e as 3 receitas da
   Forja já copiadas na Fundição). 5 lotes, um commit cada. Resultado: Bancada 306 → 19 (2 estações vanilla +
