@@ -138,6 +138,14 @@ def _apply_cmd(tree, cmd, patch_path, run, apply):
     res = PatchResult(patch_path, line, op, xpath, len(nodes), err)
     if not err and op in MUST_MATCH and not nodes:
         res.problem = "xpath matches 0 nodes"
+    # Node-type rules enforced by the game (XmlPatchMethods, seen in the 3.4.0 log): a violating command throws and
+    # the REST OF THE FILE is not applied.
+    if not res.problem and nodes:
+        attrs = [n for n in nodes if getattr(n, "is_attribute", False)]
+        if op == "removeattribute" and len(attrs) != len(nodes):
+            res.problem = "removeattribute must select attributes (.../@name); game: 'Can only remove Attributes'"
+        elif op in ("setattribute", "append", "prepend", "insertAfter", "insertBefore") and attrs:
+            res.problem = f"{op} must select elements, not attributes"
     run.results.append(res)
     if res.problem or not apply or op == "csv":
         return
@@ -151,8 +159,8 @@ def _apply_cmd(tree, cmd, patch_path, run, apply):
                 n.text = cmd.text or ""
         elif op == "setattribute":
             n.set(cmd.get("name"), cmd.text or "")
-        elif op == "removeattribute":
-            n.attrib.pop(cmd.get("name"), None)
+        elif op == "removeattribute":  # the xpath selects the attribute itself (game semantics)
+            n.getparent().attrib.pop(n.attrname, None)
         elif op == "remove":
             if is_attr:
                 n.getparent().attrib.pop(n.attrname, None)

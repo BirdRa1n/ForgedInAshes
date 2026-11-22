@@ -724,7 +724,9 @@
 			<ingredient name="resourceElectricParts" count="2"/>
 		</recipe>
 	</append>
-	<removeattribute xpath="/recipes/recipe[@name='meleeToolWireTool'][@craft_area='feAssembler']" name="craft_area"/>
+	<!-- the game's removeattribute needs an xpath that selects the ATTRIBUTE (error otherwise: "Can only remove
+	     Attributes (matched Element), use remove instead"); a failing command aborts the rest of the file -->
+	<removeattribute xpath="/recipes/recipe[@name='meleeToolWireTool'][@craft_area='feAssembler']/@craft_area"/>
 	<remove xpath="/recipes/recipe[@name='meleeToolWireTool'][not(@craft_area)]/ingredient[@name='resourceMechanicalParts']"/>
 	<set xpath="/recipes/recipe[@name='meleeToolWireTool'][not(@craft_area)]/ingredient[@name='resourceForgedSteel']/@name">resourceForgedIron</set>
 	<append xpath="/recipes/recipe[@name='meleeToolWireTool'][not(@craft_area)]">

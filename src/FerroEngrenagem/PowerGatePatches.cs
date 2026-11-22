@@ -71,20 +71,32 @@ namespace FerroEngrenagem
             if (poweredCache.TryGetValue(pos, out cached) && now - cached.Key < CacheSeconds) return cached.Value;
 
             bool ok = false;
+            int motors = 0, poweredMotors = 0, watts = 0;
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world != null)
             {
-                int watts = 0;
-                for (int dx = -SEARCH; dx <= SEARCH && !ok; dx++)
-                    for (int dy = -1; dy <= 2 && !ok; dy++)
-                        for (int dz = -SEARCH; dz <= SEARCH && !ok; dz++)
+                for (int dx = -SEARCH; dx <= SEARCH; dx++)
+                    for (int dy = -1; dy <= 2; dy++)
+                        for (int dz = -SEARCH; dz <= SEARCH; dz++)
                         {
                             TileEntityPowered p = world.GetTileEntity(new Vector3i(pos.x + dx, pos.y + dy, pos.z + dz))
                                 as TileEntityPowered;
-                            if (p == null || !IsMotor(p.blockValue.Block) || !p.IsPowered) continue;
+                            if (p == null || !IsMotor(p.blockValue.Block)) continue;
+                            motors++;
+                            if (!p.IsPowered) continue;
+                            poweredMotors++;
                             watts += p.RequiredPower;
-                            ok = watts >= need;
                         }
+                ok = watts >= need;
+            }
+            // Diagnostic (D7 bring-up): one line whenever the result for this machine changes.
+            KeyValuePair<float, bool> prev;
+            bool hadPrev = poweredCache.TryGetValue(pos, out prev);
+            if (!hadPrev || prev.Value != ok)
+            {
+                Log.Out(FerroEngrenagemMod.LogPrefix + "power " + te.blockValue.Block.GetBlockName() + " at " + pos +
+                        ": motors=" + motors + " powered=" + poweredMotors + " watts=" + watts + "/" + need +
+                        " world=" + (world != null) + " -> " + (ok ? "ON" : "OFF"));
             }
             poweredCache[pos] = new KeyValuePair<float, bool>(now, ok);
             return ok;
