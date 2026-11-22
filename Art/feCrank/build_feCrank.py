@@ -52,9 +52,9 @@ AXIS = {
 
 
 def _finish(bm, n_faces, mat, matrix, verts):
+    # Material goes on the faces of the new verts: bm.faces order is not creation order.
     bmesh.ops.transform(bm, matrix=matrix, verts=verts)
-    bm.faces.ensure_lookup_table()
-    for f in bm.faces[n_faces:]:
+    for f in {f for v in verts for f in v.link_faces}:
         f.material_index = mat
 
 
