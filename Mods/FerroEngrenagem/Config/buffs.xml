@@ -1,0 +1,12 @@
+<configs>
+	<!-- F2-T04: E01 Crank hook. buffStatusCheck01 is the always-on player buff that vanilla uses for the church
+	     bell (onSelfDamagedBlock + TriggerHasTags churchbell -> CallGameEvent). We add our OWN effect_group
+	     instead of editing the bell's, to keep the patch isolated from other mods. -->
+	<append xpath="/buffs/buff[@name='buffStatusCheck01']">
+		<effect_group name="FerroEngrenagem Crank">
+			<triggered_effect trigger="onSelfDamagedBlock" action="CallGameEvent" event="fe_crank_charge">
+				<requirement name="TriggerHasTags" tags="feCrank"/>
+			</triggered_effect>
+		</effect_group>
+	</append>
+</configs>

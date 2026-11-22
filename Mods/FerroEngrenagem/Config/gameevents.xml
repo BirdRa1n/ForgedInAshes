@@ -1,0 +1,12 @@
+<configs>
+	<!-- F2-T04: E01 Crank. Called from buffs.xml (onSelfDamagedBlock on a block tagged feCrank).
+	     Same format as the vanilla "action_give_silver" sequence. Charge per hit = PLANO_MOD.md section 9 (P10). -->
+	<append xpath="/gameevents">
+		<action_sequence name="fe_crank_charge">
+			<action class="AddItems">
+				<property name="added_items" value="feCharge"/>
+				<property name="added_item_counts" value="1"/>
+			</action>
+		</action_sequence>
+	</append>
+</configs>

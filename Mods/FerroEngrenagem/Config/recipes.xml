@@ -55,6 +55,16 @@
 		</recipe>
 	</append>
 
+	<!-- F2-T04: E01 Crank, crafted in the inventory (PLANO_MOD.md 5.2: 20 Forged Iron, 20 Wood, 10 Nails).
+	     It must stay buildable without the Lathe/Press: it is the first source of Charge. -->
+	<append xpath="/recipes">
+		<recipe name="feCrank" count="1" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="20"/>
+			<ingredient name="resourceWood" count="20"/>
+			<ingredient name="resourceNail" count="10"/>
+		</recipe>
+	</append>
+
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)
 	     for Forged Iron, Nails and Short Iron Pipe. No use_smelter/unit_* recipes: the game filters those variants
 	     only for craft_area "forge", so both showed up (see blocks.xml). Generated with:
