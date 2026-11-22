@@ -269,6 +269,17 @@ aqui fica só o que foi medido/verificado.
     ORIGINAL, então precisam vir antes dos `<set>` que trocam o item.
   - T07: receitas das 3 estações removidas, `CreativeMode=Dev`, quests/loot/trader `workstations` dão as do mod.
   - T08: `tools/check_phase3.py` → 18/18.
+- Teste F3-T04..T07 (usuário, prints): tudo certo, mas o crafting do inventário ainda tinha itens "de máquina"
+  (Mina Terrestre de Lata, Bicicleta, Roda, equipamentos de bioma, Curativo de Primeiros Socorros).
+  - Nova regra: inventário só faz o primitivo; o que usa Ferro fundido/Aço/Peça mecânica/Peça elétrica/Mola/
+    Pólvora vai para máquina (`INVENTORY_MOVES` em `remap_proposal.py`, ~48 receitas). Bicicleta e Roda vão
+    para a Montadora até a Garagem existir (fase 4).
+  - Receitas de inventário não têm `craft_area`: o gerador usa `<setattribute ... name="craft_area">` (op
+    confirmada no DLL) com xpath `[not(@craft_area) or @craft_area='']`.
+  - Pólvora do inventário (2+2) era gêmea mais cara da da Estação Química (1+1, já na Refinaria): removida
+    (`INVENTORY_REMOVE`), não movida.
+  - Exceção mantida: Cano de ferro pequeno (1 Ferro fundido) segue no inventário para a Fundição ser construível.
+  - `check_phase3.py` ganhou a regra "inventário sem materiais industriais" → 19/19. Inventário: 195 → 161.
 
 ## Próximo passo (antigo, mantido para histórico)
 

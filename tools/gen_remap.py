@@ -51,6 +51,10 @@ def plan(enabled):
                 removes.append((name, area, True))
             continue
         mid = target.split(":")[-1]
+        if target.startswith("REMOVE:"):
+            if mid in enabled:
+                removes.append((name, area, False))
+            continue
         if mid not in enabled or not target.startswith("M"):
             continue
         if area == "forge" and name in ALREADY_IN_FOUNDRY:
@@ -61,6 +65,8 @@ def plan(enabled):
 
 
 def xpath_for(name, area, forge_variant=None):
+    if area == "inventory":  # inventory recipes have no craft_area attribute
+        return f"/recipes/recipe[@name='{name}'][not(@craft_area) or @craft_area='']"
     base = f"/recipes/recipe[@name='{name}'][@craft_area='{area}']"
     if forge_variant == "replace":
         base += "[not(contains(@tags,'use_smelter'))]"
@@ -77,6 +83,9 @@ def render(moves, removes):
     for ca in sorted(by_target):
         lines.append(f"\t<!-- -> {ca} ({len(by_target[ca])}) -->")
         for name, area in by_target[ca]:
+            if area == "inventory":  # attribute does not exist yet: setattribute, not set
+                lines.append(f'\t<setattribute xpath="{xpath_for(name, area)}" name="craft_area">{ca}</setattribute>')
+                continue
             v = "replace" if area == "forge" else None
             lines.append(f'\t<set xpath="{xpath_for(name, area, v)}/@craft_area">{ca}</set>')
     if removes:

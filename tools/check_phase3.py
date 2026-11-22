@@ -108,6 +108,16 @@ def main() -> int:
                         if r.get("name") in KEY_PARTS and "salvageScrap" not in (r.get("tags") or "")})
     rule("key parts are crafted only in the Lathe", [f"{n}@{a}" for a, n in producers if a != "feLathe"])
 
+    # 4b. the inventory only makes primitive things (user feedback after the F3 test)
+    industrial = {"resourceForgedIron", "resourceForgedSteel", "resourceMechanicalParts", "resourceElectricParts",
+                  "resourceSpring", "resourceGunPowder"}
+    inv_ok = {"resourceMetalPipe"}  # needed to build the Foundry (bootstrap)
+    inv_bad = sorted({r.get("name") for r in by_area[""]
+                      if "salvageScrap" not in (r.get("tags") or "")
+                      and not r.get("name", "").startswith("fe") and r.get("name") not in inv_ok
+                      and any(g.get("name") in industrial for g in r.iter("ingredient"))})
+    rule("inventory recipes use no industrial materials (except bootstrap)", inv_bad)
+
     # 5. localization for every mod block/item
     with (fe.MOD_CONFIG / "Localization.csv").open(encoding="utf-8", newline="") as fh:
         keys = {row["Key"] for row in csv.DictReader(fh)}

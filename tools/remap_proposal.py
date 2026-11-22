@@ -50,6 +50,35 @@ OVERRIDES = {  # exact recipe name -> (target, note); checked before the prefix 
 }
 
 
+# Inventory recipes that need a machine (user, after the F3 test: "things still in the menu that should need
+# machines"). Rule: primitive (wood/stone/fiber/cloth/bone/scrap) stays in the inventory; anything made of
+# Forged Iron/Steel, Mechanical/Electrical Parts, Springs or industrial gunpowder goes to a machine.
+INVENTORY_MOVES = {
+    "M04": ["ammoJunkTurretRegular", "ammoJunkTurretShell", "ammoJunkTurretAP", "ammoArrowIron",
+            "ammoBundleArrowIron", "ammoCrossbowBoltIron", "ammoBundleCrossbowBoltIron"],
+    "M05": ["meleeWpnClubT1BaseballBat", "meleeToolRepairT1ClawHammer", "meleeToolAxeT1IronFireaxe",
+            "meleeWpnSpearT1IronSpear", "meleeWpnBladeT1HuntingKnife", "meleeToolPickT1IronPickaxe",
+            "meleeToolShovelT1IronShovel", "meleeWpnSledgeT1IronSledgehammer", "meleeToolSalvageT1Wrench",
+            "meleeWpnKnucklesT1IronKnuckles", "resourceRepairKit", "thrownAmmoMolotovCocktail",
+            "vehicleBicyclePlaceable", "vehicleWheels"],  # bicycle/wheel: to the Garage in phase 4
+    "M07": ["biomeWeatherItem1", "biomeWeatherItem2", "biomeWeatherItem3", "biomeWeatherItem4",
+            "resourceArmorCraftingKit"],
+    "M10": ["medicalFirstAidBandage"],
+    "M12": ["mineCandyTin", "appliancesVariantHelper", "wallClockWorking", "trapSpikesIronDmg0"],
+    "M14": ["cellarDoorDoubleIron", "shuttersIronBlockVariantHelper", "cntIronWritableCrate",
+            "cntSteelWritableCrate", "ironDoorBlockVariantHelper", "ironDoorDoubleBlockVariantHelper",
+            "ladderMetal", "ironHatchBlockVariantHelper", "sinksToiletsBlockVariantHelper",
+            "toiletsBlockVariantHelper", "officeChair01VariantHelper", "bed02BlockVariantHelper",
+            "steelShapes:VariantHelper", "bucketEmpty"],
+    "M01": ["toolBellows"],
+    "M11": ["cntChickenCoop"],
+}
+INVENTORY_TARGET = {n: m for m, names in INVENTORY_MOVES.items() for n in names}
+# Inventory recipes that are a costlier twin of a recipe the machine already gets (moving them would list the
+# same item twice, one always worse): remove instead. resourceGunPowder: inventory 2+2, chemistry station 1+1.
+INVENTORY_REMOVE = {"resourceGunPowder": "M09"}
+
+
 def classify(area: str, name: str, tags: str):
     n = name or ""
     low = n.lower()
@@ -67,7 +96,11 @@ def classify(area: str, name: str, tags: str):
     if area == "workbench" and low.startswith("mine"):
         return "M12", "land mines = traps"
     if area == "inventory":
-        return "KEEP", "inventory recipe: review (P1, no early locks)"
+        if n in INVENTORY_TARGET:
+            return INVENTORY_TARGET[n], "inventory recipe made of industrial materials"
+        if n in INVENTORY_REMOVE:
+            return "REMOVE:" + INVENTORY_REMOVE[n], "costlier twin of a recipe the machine already has"
+        return "KEEP", "inventory recipe: primitive (P1, no early locks)"
     if area == "campfire":
         if low.startswith(("food", "drink")):
             return "KEEP+COPY:M11", "campfire stays early; better copy in Kitchen"
