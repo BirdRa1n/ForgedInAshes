@@ -77,11 +77,12 @@
 		<block name="fePress">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="fePress"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="fePressDesc"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -133,11 +134,12 @@
 		<block name="feLathe">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feLathe"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLatheDesc"/>
 			<property name="CustomIcon" value="tableSaw"/>
@@ -477,6 +479,45 @@
 		</block>
 	</append>
 
+	<!-- D7 step 1: Electric Motor. A vanilla power consumer (Class Powered, like the wire relay) that you place
+	     near a machine and wire to a power source. Machines with FeMinPower craft only while nearby powered motors
+	     add up to that many watts (src/FerroEngrenagem/PowerGatePatches.cs). Placeholder model: vanilla relay. -->
+	<append xpath="/blocks">
+		<block name="feElectricMotor">
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="Powered"/>
+			<property name="RequiredPower" value="30"/>
+			<property name="FeMotor" value="true"/>
+			<property name="DescriptionKey" value="feElectricMotorDesc"/>
+			<property name="CustomIcon" value="electricwirerelay"/>
+			<property name="CustomIconTint" value="ffa040"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Material" value="Mmetal_weak"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Electrical/relayPrefab.prefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="HandleFace" value="Bottom"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="2"/>
+			</property>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="resourceForgedIron" count="2" tag="salvageHarvest"/>
+			<drop event="Destroy" name="resourceScrapIron" count="2,6"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B155"/>
+			<property name="SortOrder2" value="0007"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+			<property name="SoundPickup" value="relay_grab"/>
+			<property name="SoundPlace" value="relay_place"/>
+		</block>
+	</append>
+
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
 	     Order matters: rename the Destroy drops first, then remove the Harvest drops.
 	     Destroy drops are RENAMED to scrap iron instead of removed: XML.txt says a block without any Destroy drop
@@ -490,11 +531,12 @@
 		<block name="feAmmoPress">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feAmmoPress"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feAmmoPressDesc"/>
 			<property name="CustomIcon" value="combineStation"/>
@@ -541,11 +583,12 @@
 		<block name="feAssembler">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feAssembler"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feAssemblerDesc"/>
 			<property name="CustomIcon" value="workbench"/>
@@ -592,11 +635,12 @@
 		<block name="feModBench">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feModBench"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feModBenchDesc"/>
 			<property name="CustomIcon" value="workbench"/>
@@ -643,11 +687,12 @@
 		<block name="feLoom">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feLoom"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLoomDesc"/>
 			<property name="CustomIcon" value="workbench"/>
@@ -694,11 +739,12 @@
 		<block name="feRefinery">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feRefinery"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRefineryDesc"/>
 			<property name="CustomIcon" value="chemistryStation"/>
@@ -744,11 +790,12 @@
 		<block name="feLab">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feLab"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLabDesc"/>
 			<property name="CustomIcon" value="chemistryStation"/>
@@ -794,11 +841,12 @@
 		<block name="feKitchen">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feKitchen"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feKitchenDesc"/>
 			<property name="CustomIcon" value="campfire"/>
@@ -843,11 +891,12 @@
 		<block name="feElectronics">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feElectronics"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feElectronicsDesc"/>
 			<property name="CustomIcon" value="workbench"/>
@@ -894,11 +943,12 @@
 		<block name="feMetalShop">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feMetalShop"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMetalShopDesc"/>
 			<property name="CustomIcon" value="combineStation"/>
@@ -945,11 +995,12 @@
 		<block name="feSawmill">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feSawmill"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feSawmillDesc"/>
 			<property name="CustomIcon" value="tableSaw"/>
@@ -994,11 +1045,12 @@
 		<block name="feMixer">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feMixer"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMixerDesc"/>
 			<property name="CustomIcon" value="cementMixer"/>
@@ -1044,11 +1096,12 @@
 		<block name="feGarage">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feGarage"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 90 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="90"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feGarageDesc"/>
 			<property name="CustomIcon" value="combineStation"/>
@@ -1095,11 +1148,12 @@
 		<block name="feRobotics">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feRobotics"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= 90 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="90"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRoboticsDesc"/>
 			<property name="CustomIcon" value="workbench"/>

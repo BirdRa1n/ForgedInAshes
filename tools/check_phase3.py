@@ -80,8 +80,13 @@ def main() -> int:
           if r.get("craft_tool") and "tools" not in modules.get(r.get("craft_area"), "")])
     rule("every mod craft_area has a station block",
          sorted({r.get("craft_area") for r in fe_recipes if r.get("craft_area") not in areas_with_block}))
-    rule("every fueled mod machine burns only Charge (except the Foundry)",
-         [n for n, (mods, co) in charge_only.items() if "fuel" in mods and n != "feFoundry" and co != "true"])
+    # D7: every mod crafting machine except the Foundry (burns wood) needs watts from Electric Motors
+    min_power = {b.get("name"): {p.get("name"): p.get("value") for p in b.findall("property")}.get("FeMinPower")
+                 for b in blocks if (b.get("name") or "") in charge_only}
+    rule("every mod machine except the Foundry needs power (FeMinPower)",
+         [n for n, w in min_power.items() if n != "feFoundry" and not (w or "").isdigit()])
+    rule("no mod machine still has a fuel slot (except the Foundry)",
+         [n for n, (mods, _) in charge_only.items() if "fuel" in mods and n != "feFoundry"])
 
     # 3. ingredients and outputs exist
     unknown = sorted({(r.get("name"), g.get("name")) for r in recipes.iter("recipe") for g in r.iter("ingredient")
@@ -112,7 +117,8 @@ def main() -> int:
     # 4b. the inventory only makes primitive things (user feedback after the F3 test)
     industrial = {"resourceForgedIron", "resourceForgedSteel", "resourceMechanicalParts", "resourceElectricParts",
                   "resourceSpring", "resourceGunPowder"}
-    inv_ok = {"resourceMetalPipe"}  # needed to build the Foundry (bootstrap)
+    # bootstrap: the pipe builds the Foundry; the wire tool lets the player wire the first motor (D7)
+    inv_ok = {"resourceMetalPipe", "meleeToolWireTool"}
     inv_bad = sorted({r.get("name") for r in by_area[""]
                       if "salvageScrap" not in (r.get("tags") or "")
                       and not r.get("name", "").startswith("fe") and r.get("name") not in inv_ok

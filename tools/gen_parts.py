@@ -58,7 +58,7 @@ PARTS = {
     "meleeToolSalvageT3ImpactDriver": [(GEAR, 2), (COIL, 1)],
     "meleeToolSalvageT2Ratchet": [(GEAR, 3)],
     "meleeWpnBatonT2StunBaton": [(COIL, 1)],
-    "meleeToolWireTool": [(COIL, 1)],
+    # meleeToolWireTool: not here since D7 -- it is crafted in the inventory (bootstrap for wiring), recipes.xml
     "meleeToolFlashlight02": [(COIL, 1)],
 }
 

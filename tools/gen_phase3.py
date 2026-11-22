@@ -144,20 +144,27 @@ RECIPES = [
 ]
 
 
+# D7 (watts): power each machine needs from nearby powered Electric Motors (FeMinPower, watts).
+WATTS = {"M04": 30, "M05": 60, "M06": 30, "M07": 30, "M09": 60, "M10": 30, "M11": 30, "M12": 30, "M14": 60,
+         "M16": 30, "M08": 60, "M13": 90, "M15": 90}
+
+
 def machine_block(m):
     mid, name, en, pt, den, dpt, model, tint, so2, cost = m
     path, dim, offset, icon = MODELS[model]
+    watts = WATTS[mid]
     dim_line = f'\n\t\t\t<property name="MultiBlockDim" value="{dim}"/>' if dim else ""
     offset_line = f'\n\t\t\t<property name="ModelOffset" value="{offset}"/>' if offset else ""
     return f"""		<!-- {mid} {en} -->
 		<block name="{name}">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output,fuel"/>
+				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="{name}"/>
 			</property>
-			<property name="FeChargeOnly" value="true"/>
-			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
+			<!-- D7: crafts only with >= {watts} W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="{watts}"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="{name}Desc"/>
 			<property name="CustomIcon" value="{icon}"/>
@@ -243,7 +250,10 @@ def loc_rows():
     for m in MACHINES:
         _, name, en, pt, den, dpt = m[:6]
         rows.append([name, "blocks", "Block", en, pt])
-        rows.append([name + "Desc", "blocks", "Block", den + "\\nRuns only on Charge.", dpt + "\\nFunciona só com Carga."])
+        w = WATTS[m[0]]
+        rows.append([name + "Desc", "blocks", "Block",
+                     den + f"\\nNeeds {w} W from powered Electric Motors next to it.",
+                     dpt + f"\\nPrecisa de {w} W de Motores elétricos energizados ao lado."])
     for i in ITEMS:
         _, name, en, pt, den, dpt = i[:6]
         rows.append([name, "items", "Item", en, pt])

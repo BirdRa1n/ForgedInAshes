@@ -293,6 +293,20 @@ aqui fica só o que foi medido/verificado.
   Gerador, banco de baterias e painel solar exigem peças do mod na Eletrônica (painel ganhou receita).
   `feGasGenerator`: coletor a Lata de gasolina com catalisador `smallEngine` (`charge=2`, 5 latas por ciclo).
   528 patches, `check_phase3.py` 20/20.
+- Teste F4-T02/T03: funcionou; o galão se chama "Galão de combustível" em PT-BR (textos corrigidos).
+- **D7 aprovada pelo usuário:** energia em watts pela rede elétrica vanilla (fios), sem o item Carga.
+  - Pesquisa (IL): consumidores = `TileEntityPowered` (`RequiredPower`, `IsPowered`), blocos `Class="Powered"`
+    (ex.: relé 1 W). Workstations não são consumidores. Fabricação avança em dois lugares:
+    `TileEntityWorkstation.HandleRecipeQueue(float)` (janela fechada) e `XUiC_RecipeStack.Update` enquanto a fila
+    "IsCrafting" (janela aberta); o vanilla pausa/retoma a fila em `XUiC_WorkstationWindowGroup.Update` (só com
+    grade de combustível).
+  - Etapa 1 (validada offline): `PowerGatePatches.cs` (prefix `HandleRecipeQueue`, postfix
+    `XUiC_WorkstationWindowGroup.Update` com `HaltCrafting`/`ResumeCrafting`); máquina com `FeMinPower` (W) só
+    fabrica se motores `FeMotor` energizados num raio de 3 blocos (dy -1..+2) somam ≥ FeMinPower. Máquinas sem
+    slot de combustível, janela da bancada. `feElectricMotor` (Class Powered, 30 W). Bootstrap: Motor e Alicate
+    de fios no inventário (o Alicate ia para a Montadora com Aço/MP/Bobina = ciclo sem saída).
+  - Pendente: Manivela e Gerador a Carvão ainda produzem o item Carga (inútil até as etapas 2–4).
+  - `check_phase3.py` 21/21.
 
 ## Próximo passo (antigo, mantido para histórico)
 
