@@ -89,6 +89,17 @@ aqui fica só o que foi medido/verificado.
   Visual/janelas confirmados pelo usuário: as 3 aparecem no crafting do inventário, modelos corretos,
   Fundição abre a janela da Forja e Prensa/Torno a da Bancada, listas vazias. **`WorkstationWindow` funciona.**
 
+- F1-T04 (receitas das máquinas):
+  - A fundição da Forja depende de 6 receitas ocultas `craft_area="forge"`, `material_based="true"`,
+    `tags="use_smelter"` (`resourceClayLump`, `resourceCrushedSand`, `resourceRockSmall`, `resourceScrapBrass`,
+    `resourceScrapIron`, `resourceScrapLead` ← `unit_*`). Copiadas para `feFoundry`; **não confirmado** ainda se
+    o código de fundição aceita craft area diferente de `forge` (é o principal ponto do teste).
+  - Receitas de metal vêm em pares: `use_smelter` (unit_*) e `replace_smelter` (sucata direta, quando o
+    servidor desliga a fundição). Ambas copiadas.
+  - `tools/copy_recipes.py` gera cópias exatas de receitas vanilla trocando o craft_area.
+  - `craft_time` explícito nas peças: o Forged Iron tem `CraftingIngredientTime=10`.
+  - Totais: feFoundry 12, feLathe 4 (Eixo, Engrenagem, MP, Spring), fePress 1 (Chapa).
+
 ## Próximo passo
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

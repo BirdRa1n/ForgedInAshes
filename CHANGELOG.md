@@ -15,3 +15,5 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 ### Fase 1
 - F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (ícones vanilla tingidos, material de Forged Iron) + localização EN/PT-BR.
 - F1-T02: blocos `feFoundry` (M01), `fePress` (M02), `feLathe` (M03) com `craft_area` próprio e janelas vanilla via `WorkstationWindow`; receitas de construção no inventário.
+- F1-T03: não necessária na fase 1 (máquinas usam janelas vanilla via `WorkstationWindow`).
+- F1-T04: receitas da Fundição (Forged Iron, Pregos, Cano + 6 receitas de fundição, cópias exatas da Forja), da Prensa (Chapa) e do Torno (Eixo, Engrenagem, Mechanical Parts, Spring); ferramenta `tools/copy_recipes.py`.
