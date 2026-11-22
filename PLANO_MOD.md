@@ -298,7 +298,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F3-T08** `recipe_report.py` sem nenhuma receita esquecida numa estação vanilla que não deveria mais ser usada.
   **Feita:** `python tools/check_phase3.py` → 18/18 regras (estações vanilla, duplicatas, `craft_tool`, ingredientes, máquinas fabricáveis, Carga, localização, e MP/Mola só no Torno). Rodar antes de cada teste.
 
-**Status da fase 3 (2026-11-22):** F3-T01 a F3-T08 feitas e validadas offline; F3-T03 confirmada no jogo. **Falta o teste no jogo de F3-T04 a F3-T07** e a aprovação do usuário. Pendências conhecidas: Fogueira sem cópias melhoradas na Cozinha/Laboratório (seção 10.1, KEEP+COPY) e peças novas só em armas/ferramentas (o resto depois do teste).
+**Status da fase 3 (2026-11-22): CONCLUÍDA.** F3-T01 a F3-T08 feitas e testadas no jogo pelo usuário; inventário restrito ao primitivo (F3-T03b); `check_phase3.py` 19/19. Pendências conhecidas: Fogueira sem cópias melhoradas na Cozinha/Laboratório (seção 10.1, KEEP+COPY) e peças novas só em armas/ferramentas (o resto depois do teste).
 
 **Pronto quando:** todas as receitas estão realocadas e nenhum caminho dispensa as máquinas (receita, loot, salvage, trader, quest).
 

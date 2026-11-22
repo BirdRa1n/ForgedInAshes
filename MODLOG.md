@@ -280,6 +280,9 @@ aqui fica só o que foi medido/verificado.
     (`INVENTORY_REMOVE`), não movida.
   - Exceção mantida: Cano de ferro pequeno (1 Ferro fundido) segue no inventário para a Fundição ser construível.
   - `check_phase3.py` ganhou a regra "inventário sem materiais industriais" → 19/19. Inventário: 195 → 161.
+  - Usuário testou o menu do inventário: "ficou certo". **Fase 3 concluída** (critério de pronto atingido).
+    Extras opcionais ainda abertos: cópias melhoradas das receitas da Fogueira na Cozinha/Laboratório e peças
+    novas nas demais receitas (armaduras, mods etc.).
 
 ## Próximo passo (antigo, mantido para histórico)
 
