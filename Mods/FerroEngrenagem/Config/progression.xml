@@ -1,0 +1,13 @@
+<configs>
+	<!-- F3-T06 (D3: mod machines are always unlocked, no new perk/book locks).
+	     F3-T07 removes the recipes of the vanilla forge, workbench and chemistry station; the Workstations skill
+	     (craftingWorkstations) unlocked those. Its entries now point to the mod equivalents at the SAME position
+	     (icon/name_key/unlock_level are parallel lists): forge -> feFoundry, workbench -> feAssembler,
+	     chemistryStation -> feRefinery. The unlock itself is cosmetic (the recipes are always_unlocked). -->
+	<!-- order matters: name_key sets select the entry by its ORIGINAL item, so they run before the item swaps -->
+	<set xpath="/progression/crafting_skills/crafting_skill[@name='craftingWorkstations']/display_entry[unlock_entry[@item='forge']]/@name_key">feFoundry,workstationsT1-2,workstationsT1-3,feAssembler,workstationsT1-5,workstationsT1-6</set>
+	<set xpath="/progression/crafting_skills/crafting_skill[@name='craftingWorkstations']/display_entry[unlock_entry[@item='chemistryStation']]/@name_key">workstationsT4-1,workstationsT4-3,workstationsT4-5,feRefinery</set>
+	<set xpath="/progression/crafting_skills/crafting_skill[@name='craftingWorkstations']/display_entry[unlock_entry[@item='forge']]/unlock_entry[@item='forge']/@item">feFoundry</set>
+	<set xpath="/progression/crafting_skills/crafting_skill[@name='craftingWorkstations']/display_entry[unlock_entry[@item='workbench']]/unlock_entry[@item='workbench']/@item">feAssembler</set>
+	<set xpath="/progression/crafting_skills/crafting_skill[@name='craftingWorkstations']/display_entry[unlock_entry[@item='chemistryStation']]/unlock_entry[@item='chemistryStation']/@item">feRefinery</set>
+</configs>

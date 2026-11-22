@@ -292,6 +292,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F3-T04** Inserir as peças novas nos ingredientes das receitas remapeadas (ex.: armas passam a exigir Cano, Mecanismo, Coronha). Começar só pelas armas e ferramentas; o resto depois do teste.
 - **F3-T05** Loot, traders e quests: reduzir as peças-chave (P11). Desmanche: decidir se dá 0 peças ou só sucata.
 - **F3-T06** `progression.xml`: decidir se as máquinas dependem de perks/livros (D3).
+  **Feita:** D3 = máquinas sempre liberadas. A habilidade `craftingWorkstations` passa a exibir Fundição, Montadora e Refinaria no lugar de Forja, Bancada e Estação Química (mesma posição; desbloqueio só visual).
 - **F3-T07** Decidir D1 (ocultar a Forja vanilla ou não).
 - **F3-T08** `recipe_report.py` sem nenhuma receita esquecida numa estação vanilla que não deveria mais ser usada.
 
