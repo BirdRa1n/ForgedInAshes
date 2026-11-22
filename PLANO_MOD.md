@@ -328,8 +328,8 @@ Manter todos os números ajustáveis num lugar só, por exemplo comentados no to
 | Custo das máquinas | seção 5.1 | `recipes.xml` |
 | Receitas das peças | seção 6 | `recipes.xml` |
 | Tempo de fabricação das peças | 2–4 s (comparar com o tempo do Forged Iron vanilla) | `recipes.xml` |
-| Carga por Carvão Vegetal | 5 `feCharge` | E03 |
-| Carga por giro de manivela | a definir no F2-T07 | E01 |
+| Carga por Carvão Vegetal | 5 `feCharge` **por Volante instalado** (catalisador) | E03 (`blocks.xml`, `CatalystMultiplier`) |
+| Carga por golpe na manivela | **25% de chance de 1 `feCharge`** por golpe (era 100%; usuário achou demais). ≈ 4 Cargas a cada 10 s com machado de pedra ≈ 40 s de máquina | E01 (`gameevents.xml`, `RandomRoll`) |
 | Duração de 1 `feCharge` como combustível | ~10 s | M02, M03 |
 | Corte de loot das peças | -50% (fase 1), -90% ou 0 (fase 3) | `loot.xml` |
 
