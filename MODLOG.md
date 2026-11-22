@@ -348,6 +348,19 @@ aqui fica só o que foi medido/verificado.
 - Diagnóstico no log: `power <máquina> at <pos> rot=<r> socket=<pos>: motor= watts= -> ON/OFF`.
 - A confirmar no jogo: qual lado é a "traseira" visual de cada modelo (ajustável por `FeMotorSide` no XML).
 
+## 2026-11-22 — Manivela nova mandava 0 W (causa do "motor nunca energiza")
+
+- Teste: motor no encaixe (contorno ciano), fio da manivela ao motor, Prensa continua pausada; log só
+  `motor=False/OFF` inicial.
+- IL 3.4.0 b10: `PowerSource.SetValuesFromBlock` faz `MaxOutput = MaxPower = OutputPerStack * SlotCount`; o
+  `RefreshPowerStats` (onde o postfix punha 30 W) só roda em `SetSlots`/`TryAddItemToSlot` (carregar mundo ou
+  mexer nos slots). Manivela tem `OutputPerStack` 0 → manivela recém-colocada enviava 0 W até recarregar.
+- Também: `PowerSource.HandleSendPower` só redistribui aos filhos quando `hasChangesLocal` (liga/desliga, fio);
+  `PowerItem.HandlePowerReceived` liga o consumidor se recebeu `RequiredPower` inteiro.
+- Correção: postfix também em `PowerSource.SetValuesFromBlock` (PowerPatches.cs).
+- Diagnóstico ampliado: a linha `power ...` agora mostra a cadeia do motor até a fonte (`on=`, `maxOut=`).
+- Encaixe: com rot=0 o `back` (-Z local) ficou na face da bancada de frente para o jogador (print do teste).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

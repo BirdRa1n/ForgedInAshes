@@ -139,6 +139,7 @@ namespace FerroEngrenagem
 
             bool ok = false, motor = false;
             int watts = 0;
+            string chain = "";
             Vector3i socket = Vector3i.zero;
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world != null)
@@ -157,20 +158,47 @@ namespace FerroEngrenagem
                         p.RequiredPower = need;
                     }
                     if (p.IsPowered) watts = need;
+                    chain = Chain(item);
                 }
                 ok = watts >= need;
             }
-            // Diagnostic (D7 bring-up): one line whenever the result for this machine changes.
+            // Diagnostic (D7 bring-up): one line whenever the result or the motor's wiring for this machine changes.
             KeyValuePair<float, bool> prev;
             bool hadPrev = poweredCache.TryGetValue(pos, out prev);
-            if (!hadPrev || prev.Value != ok)
+            string key = ok + "|" + motor + "|" + socket + "|" + chain;
+            string lastKey;
+            if (!lastLog.TryGetValue(pos, out lastKey) || lastKey != key || !hadPrev || prev.Value != ok)
             {
+                lastLog[pos] = key;
                 Log.Out(FerroEngrenagemMod.LogPrefix + "power " + te.blockValue.Block.GetBlockName() + " at " + pos +
                         " rot=" + te.blockValue.rotation + " socket=" + socket + ": motor=" + motor +
-                        " watts=" + watts + "/" + need + " -> " + (ok ? "ON" : "OFF"));
+                        " watts=" + watts + "/" + need + " -> " + (ok ? "ON" : "OFF") +
+                        (chain.Length > 0 ? " | " + chain : ""));
             }
             poweredCache[pos] = new KeyValuePair<float, bool>(now, ok);
             return ok;
+        }
+
+        static readonly Dictionary<Vector3i, string> lastLog = new Dictionary<Vector3i, string>();
+
+        /// <summary>Diagnostic: the motor's power item and its parents up to the root.</summary>
+        static string Chain(PowerItem item)
+        {
+            if (item == null) return "powerItem=none";
+            string s = "motorItem powered=" + item.IsPowered + " req=" + item.RequiredPower;
+            PowerItem par = item.Parent;
+            int guard = 0;
+            while (par != null && guard++ < 8)
+            {
+                string name = par.BlockID < Block.list.Length && Block.list[par.BlockID] != null
+                    ? Block.list[par.BlockID].GetBlockName() : "?";
+                s += " <- " + name;
+                PowerSource src = par as PowerSource;
+                if (src != null) s += "(on=" + src.IsOn + " maxOut=" + src.MaxOutput + ")";
+                par = par.Parent;
+            }
+            if (item.Parent == null) s += " <- (no wire)";
+            return s;
         }
     }
 

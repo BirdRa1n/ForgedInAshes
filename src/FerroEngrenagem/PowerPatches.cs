@@ -17,12 +17,30 @@ namespace FerroEngrenagem
     {
         public static void Postfix(PowerSource __instance)
         {
+            ApplyCrankOutput(__instance);
+        }
+
+        internal static void ApplyCrankOutput(PowerSource __instance)
+        {
             if (__instance.BlockID >= Block.list.Length) return;
             BlockFeCrank crank = Block.list[__instance.BlockID] as BlockFeCrank;
             if (crank == null || crank.BaseOutput <= 0) return;
             // User (2026-11-22): no Flywheels in the crank any more; its slots hold the Battery Bank Module and one
             // battery (CrankSlots.cs), which must not add watts. Output = the fixed base only.
             __instance.MaxOutput = (ushort)System.Math.Min(ushort.MaxValue, crank.BaseOutput);
+        }
+    }
+
+    // A freshly placed power source gets MaxOutput = OutputPerStack * SlotCount in SetValuesFromBlock (IL 3.4.0
+    // b10); RefreshPowerStats only runs from SetSlots / TryAddItemToSlot (world load, slot change). The crank has
+    // OutputPerStack 0, so a NEW crank sent 0 W until the world was reloaded (D7 test 2026-11-22: motor never
+    // powered). Apply the base output here too.
+    [HarmonyPatch(typeof(PowerSource), "SetValuesFromBlock")]
+    public static class Patch_PowerSource_SetValuesFromBlock
+    {
+        public static void Postfix(PowerSource __instance)
+        {
+            Patch_PowerSource_RefreshPowerStats.ApplyCrankOutput(__instance);
         }
     }
 
