@@ -1,0 +1,25 @@
+<configs>
+	<!-- F1-T05: cut Mechanical Parts and Spring loot by half (PLANO_MOD.md section 9: -50% in phase 1, -90%/0 in phase 3).
+	     Generated with: python tools/loot_scale.py 0.5 resourceMechanicalParts resourceSpring
+	     Entries already at count=1 (groupToilet02) cannot be halved by count; handle in phase 3. -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupCraftingUncommon']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupQuestResourcesT1']/item[@name='resourceMechanicalParts']/@count">3</set>  <!-- was 5 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupWorkbenchLoot02']/item[@name='resourceMechanicalParts']/@count">1,3</set>  <!-- was 1,5 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupRollingToolbox02']/item[@name='resourceMechanicalParts']/@count">1,2</set>  <!-- was 1,3 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupMoPowerShelves01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupMoPower01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<!-- lootgroup groupToilet02: resourceMechanicalParts count=1 already minimal, unchanged -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackReg01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackLab01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackUtility01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackStrong01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackPlague01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackBoss01']/item[@name='resourceMechanicalParts']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='twitch_craftresources2']/item[@name='resourceMechanicalParts']/@count">2,4</set>  <!-- was 4,8 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupCraftingUncommon']/item[@name='resourceSpring']/@count">1,1</set>  <!-- was 1,2 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupWorkbenchLoot02']/item[@name='resourceSpring']/@count">1,2</set>  <!-- was 1,4 -->
+	<!-- lootgroup groupToilet02: resourceSpring count=1 already minimal, unchanged -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackLab01']/item[@name='resourceSpring']/@count">1,2</set>  <!-- was 1,4 -->
+	<set xpath="/lootcontainers/lootgroup[@name='groupZpackUtility01']/item[@name='resourceSpring']/@count">1,2</set>  <!-- was 1,4 -->
+	<set xpath="/lootcontainers/lootgroup[@name='twitch_craftresources2']/item[@name='resourceSpring']/@count">1,2</set>  <!-- was 2,4 -->
+</configs>

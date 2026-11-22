@@ -179,4 +179,12 @@
 		</block>
 
 	</append>
+
+	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
+	     Order matters: rename the Destroy drops first, then remove the Harvest drops.
+	     Destroy drops are RENAMED to scrap iron instead of removed: XML.txt says a block without any Destroy drop
+	     "will always drop self", and 12 blocks (safes, ATM, pipe valve) have MP/Spring as their only Destroy drop.
+	     Children using Extends inherit the parent's drops, so patching the parents covers them. -->
+	<set xpath="/blocks/block/drop[@event='Destroy'][@name='resourceMechanicalParts' or @name='resourceSpring']/@name">resourceScrapIron</set>
+	<remove xpath="/blocks/block/drop[@event='Harvest'][@name='resourceMechanicalParts' or @name='resourceSpring']"/>
 </configs>

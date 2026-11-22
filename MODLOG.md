@@ -115,6 +115,15 @@ aqui fica só o que foi medido/verificado.
 - Arte em paralelo: usuário vai rodar outra sessão em outro PC; regras e escopo em `ART_BRIEF.md`
   (só `Art/`, não tocar em `Config/`). Remoto: `origin` = GitHub `BirdRa1n/FerroEngrenagem`.
 
+- F1-T05 (salvage e loot de MP/Spring), validado offline:
+  - `blocks.xml`: `<set>` renomeia 48 drops `Destroy` de MP/Spring para `resourceScrapIron` (mesma contagem);
+    `<remove>` tira 136 drops `Harvest`. Nenhum drop de MP/Spring sobra em blocos; cofres/ATM/válvula mantêm
+    um drop `Destroy` (evita o "drop self" do XML.txt).
+  - `loot.xml`: 18 `<set>` de contagem (metade, arredondando para cima, mínimo 1) gerados por
+    `tools/loot_scale.py 0.5`. `groupToilet02` (count=1) ficou igual.
+  - Fontes restantes de MP/Spring: receita do Torno, loot reduzido, trader `generalResources` (fase 3),
+    sucata de `smallEngine` → MP (fase 3).
+
 ## Próximo passo
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

@@ -19,3 +19,5 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - F1-T04: receitas da Fundição (Forged Iron, Pregos, Cano + 6 receitas de fundição, cópias exatas da Forja), da Prensa (Chapa) e do Torno (Eixo, Engrenagem, Mechanical Parts, Spring); ferramenta `tools/copy_recipes.py`.
 - F1-T04 (correção): Fundição só com receitas de sucata direta e janela sem fundição (o filtro de variantes do jogo só vale para `forge`).
 - `ART_BRIEF.md`: briefing para a sessão de arte em paralelo.
+- F1-T05: desmanche de blocos não dá mais Mechanical Parts nem Spring (drops `Harvest` removidos, drops `Destroy` viram Sucata de ferro); loot de MP e Spring cortado pela metade; ferramenta `tools/loot_scale.py`.
+- F1-T06: roteiro de teste da fatia vertical entregue ao usuário (aguardando resultado).
