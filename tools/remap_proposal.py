@@ -55,6 +55,9 @@ def classify(area: str, name: str, tags: str):
     low = n.lower()
     if n in WORKSTATIONS:
         return "KEEP", "vanilla workstation (D1)"
+    # must come before OVERRIDES: a use_smelter twin is always dropped, whatever its recipe's destination
+    if area == "forge" and "use_smelter" in (tags or ""):
+        return "DROP-VARIANT", "use_smelter twin: drop when the recipe leaves 'forge' (filter only for forge)"
     if area != "inventory" and n in OVERRIDES:
         return OVERRIDES[n]
     if area == "workbench" and low.startswith("gunbot"):

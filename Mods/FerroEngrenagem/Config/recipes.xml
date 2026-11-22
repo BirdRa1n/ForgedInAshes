@@ -561,6 +561,7 @@
 	<remove xpath="/recipes/recipe[@name='ironBarsCNR'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='metalTrussingIBeamBlockVariantHelper'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceArrowHeadIron'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
+	<remove xpath="/recipes/recipe[@name='resourceArrowHeadSteelAP'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBuckshot'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBulletCasing'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBulletTip'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
