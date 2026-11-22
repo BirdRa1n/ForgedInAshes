@@ -352,7 +352,9 @@
 		<block name="feCrank">
 			<property name="Class" value="FerroEngrenagem.FeCrank, FerroEngrenagem"/>
 			<property name="FeCrankChargeSeconds" value="2.5"/>
-			<property name="FeCrankStaminaPerSecond" value="25"/>
+			<!-- was 25; user (2026-11-22): still too little stamina per Charge. Natural stamina regen keeps running
+			     while cranking (Crank.cs), so the net drain is lower than this number. -->
+			<property name="FeCrankStaminaPerSecond" value="40"/>
 			<property name="FeCrankMinStamina" value="5"/>
 			<property name="FeCrankSpinDegPerSecond" value="300"/>
 			<property name="CreativeMode" value="Player"/>
@@ -385,6 +387,12 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
 	</append>
+
+	<!-- F3-T03: the vanilla workbench lists every inventory recipe because CraftingAreaRecipes="player,workbench"
+	     (XUiM_Recipes.FilterRecipesByWorkstation adds craft_area "" recipes for the "player" token). After the
+	     remap that is ~211 inventory recipes the player can already craft by hand. Keep only its own area
+	     (phase-4 leftovers: vehicles, robots, chemistryStation, cementMixer). D1 hides it fully in F3-T07. -->
+	<set xpath="/blocks/block[@name='workbench']/property[@class='Workstation']/property[@name='CraftingAreaRecipes']/@value">workbench</set>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
 	     Order matters: rename the Destroy drops first, then remove the Harvest drops.

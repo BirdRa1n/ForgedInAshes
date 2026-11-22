@@ -248,6 +248,12 @@ aqui fica só o que foi medido/verificado.
   - Bug do gerador corrigido: a regra "gêmea use_smelter = remover" precisa vir antes das exceções manuais.
   - Cola (`resourceGlue`) tem 2 receitas legítimas na Refinaria (ossos e milho-da-graça), como no vanilla.
   - Fase 4 (Misturador, veículos, robôs) e Fogueira (comida, remédios): sem mudança nesta tarefa.
+  - Teste 17:20 (usuário): Manivela segurar-E funciona, mas gasta pouca estamina; Forja e Bancada vanilla
+    "ainda com uma cacetada de craft". Log sem erro de patch.
+    - Bancada: `CraftingAreaRecipes="player,workbench"`; `FilterRecipesByWorkstation` inclui receitas com
+      `craft_area` vazio para o token `player` → ~211 receitas de inventário. Patch: só `workbench`.
+    - Manivela: `FeCrankStaminaPerSecond` 25 → 40 (a regeneração de estamina continua durante o giro).
+    - Forja: pelo filtro, só restam as 6 receitas internas de fundição; pedir print ao usuário.
 
 ## Próximo passo (antigo, mantido para histórico)
 
