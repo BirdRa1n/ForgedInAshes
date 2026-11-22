@@ -194,6 +194,19 @@ aqui fica só o que foi medido/verificado.
     (`gameevents.xml`), ≈ 4 Cargas por 10 s de golpes com machado de pedra. Retestado: usuário aprovou o ritmo.
 - Arte: a sessão do outro PC entregou `Art/feCrank/` (modelo da Manivela, 1 bloco, partes giratórias separadas).
 
+- Usuário: **commits sem `Co-Authored-By: Claude`** a partir de 2026-11-22 (salvo também na memória).
+- F2-T06 (servidor dedicado) adiada pelo usuário; fase 3 iniciada. D1/D3 aprovados: Forja/Bancada ocultas no
+  fim da fase 3; máquinas da fase 3 sempre liberadas.
+- F3-T01: `tools/remap_proposal.py` (600 receitas reais; seção 10.1 do plano).
+- F3-T02 (validado offline, falta teste no jogo):
+  - Patch de combustível agora é ligado por propriedade de bloco `FeChargeOnly` (cache por `blockID`), não
+    por lista de nomes. Build passou a referenciar `MemoryPack.dll` (CS0012 ao usar `DynamicProperties`).
+  - `tools/gen_phase3.py` gera região marcada em blocks/items/recipes.xml + linhas de localização:
+    10 máquinas (M04–M07, M09–M12, M14, M16; todas `output,fuel` + janela da Estação Química + Carga),
+    9 itens (I08, I09, I11, I13–I18), receitas deles e `resourceElectricParts` (I10) na Bancada Eletrônica.
+    Modelos vanilla provisórios (bancada, bancada de combinar, estação química, fogueira, mesa de serra).
+  - D4 adotada sem confirmação explícita: Carga em todas as máquinas da fase 3 (registrado no plano).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

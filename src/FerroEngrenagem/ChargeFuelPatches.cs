@@ -20,17 +20,29 @@ namespace FerroEngrenagem
     public static class ChargeFuel
     {
         public const string ChargeItemName = "feCharge";
+        // Block property that opts a workstation into "Charge only" fuel (blocks.xml):
+        //   <property name="FeChargeOnly" value="true"/>
+        public const string ChargeOnlyProperty = "FeChargeOnly";
 
-        public static bool IsChargeStation(string blockName)
+        // Cache per block id: this runs every tick for every workstation.
+        static readonly System.Collections.Generic.Dictionary<int, bool> cache =
+            new System.Collections.Generic.Dictionary<int, bool>();
+
+        public static bool IsChargeStation(Block block)
         {
-            return blockName == "fePress" || blockName == "feLathe";
+            if (block == null) return false;
+            bool result;
+            if (cache.TryGetValue(block.blockID, out result)) return result;
+            DynamicProperties p = block.Properties;
+            result = p != null && p.Contains(ChargeOnlyProperty) && p.GetBool(ChargeOnlyProperty);
+            cache[block.blockID] = result;
+            return result;
         }
 
         public static bool IsChargeStation(TileEntityWorkstation te)
         {
             if (te == null) return false;
-            Block block = te.blockValue.Block;
-            return block != null && IsChargeStation(block.GetBlockName());
+            return IsChargeStation(te.blockValue.Block);
         }
 
         public static bool IsCharge(ItemStack stack)

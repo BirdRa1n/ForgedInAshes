@@ -29,6 +29,7 @@ $refs = @(
     (Join-Path $managed 'netstandard.dll'),
     (Join-Path $managed 'Assembly-CSharp.dll'),
     (Join-Path $managed 'LogLibrary.dll'),
+    (Join-Path $managed 'MemoryPack.dll'),
     (Join-Path $managed 'UnityEngine.dll'),
     (Join-Path $managed 'UnityEngine.CoreModule.dll'),
     (Join-Path $harmonyDir '0Harmony.dll')

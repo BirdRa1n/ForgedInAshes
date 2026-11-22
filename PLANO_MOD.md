@@ -402,7 +402,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | D1 | Substituir ou manter a Forja vanilla? | Manter na fase 1; decidir na fase 3 |
 | D2 | Volante de Inércia é upgrade da manivela ou ingrediente? | Ingrediente do gerador e do Motor a Vapor; upgrade só se a rota B for usada |
 | D3 | Máquinas novas dependem de perks/livros? | Sim, as da fase 3+ atrás de livros existentes; M01–M03 livres |
-| D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | Decidir depois do teste da fase 2 |
+| D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | **Adotado no F3-T02 (a confirmar com o usuário): Carga como combustível** em todas as máquinas da fase 3, pelo mesmo patch Harmony, ligado pela propriedade de bloco `FeChargeOnly="true"`. Trocar depois é local (bloco + patch) |
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
 | D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | **Decidido (2026-11-22): combustível com Harmony.** EAC não é restrição para o mod (usuário). Prensa/Torno ganham slot de combustível; patch C# faz aceitarem só `feCharge`. Manivela, Carvoeira e Gerador a Carvão continuam em XML |
 
