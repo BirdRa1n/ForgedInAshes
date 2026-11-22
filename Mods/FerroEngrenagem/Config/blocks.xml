@@ -353,7 +353,19 @@
 	<append xpath="/blocks">
 		<block name="feCrank">
 			<property name="Class" value="FerroEngrenagem.FeCrank, FerroEngrenagem"/>
-			<property name="FeCrankChargeSeconds" value="2.5"/>
+			<!-- D7 step 2: the crank is a vanilla-style GENERATOR (BlockFeCrank : BlockGenerator). Each Flywheel in its
+			     slots gives 30 W of output; cranking adds fuel; 1 fuel = 60 energy (PowerManager tick = 0.16 s), so
+			     12.5 fuel/s = 750 energy per second of cranking = ~4 s of a 30 W motor (10 s crank = ~40 s machine,
+			     the balance approved for the Charge version). MaxFuel 400 = ~1 min of 30 W stored in the flywheel. -->
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="30"/>
+			<property name="MaxPower" value="120"/>
+			<property name="MaxFuel" value="400"/>
+			<property name="OutputPerFuel" value="60"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="FeCrankFuelPerSecond" value="12.5"/>
+			<!-- 30 W without any Flywheel (bootstrap: the Flywheel needs the powered Lathe); each Flywheel adds 30 W -->
+			<property name="FeCrankBaseOutput" value="30"/>
 			<!-- was 25; user (2026-11-22): still too little stamina per Charge. Natural stamina regen keeps running
 			     while cranking (Crank.cs), so the net drain is lower than this number. -->
 			<property name="FeCrankStaminaPerSecond" value="40"/>

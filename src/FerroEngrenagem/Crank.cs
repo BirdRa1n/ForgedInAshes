@@ -15,8 +15,18 @@
 //    feCrank_DynamoPulley; CrankSpinner turns them around their local Z (Blender Y after the FBX/Unity
 //    conversion). The spin is only seen by the player who cranks (no network sync yet).
 //
-// Tunables (blocks.xml, optional): FeCrankChargeSeconds, FeCrankStaminaPerSecond, FeCrankMinStamina,
-// FeCrankSpinDegPerSecond.
+// D7 step 2 (watts): the crank is a GENERATOR now (BlockGenerator -> TileEntityPowerSource + PowerGenerator).
+//  - Cranking adds fuel to its PowerGenerator (FeCrankFuelPerSecond per second) and turns it on; the vanilla
+//    generator converts 1 fuel into OutputPerFuel energy per power tick (PowerManager ticks every 0.16 s) and
+//    sends up to MaxOutput watts through the wires. MaxOutput = OutputPerStack x Flywheels in the slots
+//    (SlotItem=feFlywheel): no flywheel, no watts.
+//  - Crouch + E opens the vanilla generator radial (open: insert flywheels; turn on/off; take).
+//  - The vanilla "Refuel" button would pour gas cans into it: blocked in PowerPatches.cs.
+//  - Single player / host only for now: on a pure multiplayer client the PowerItem lives on the server
+//    (needs a net package; F2-T06).
+//
+// Tunables (blocks.xml, optional): FeCrankFuelPerSecond, FeCrankStaminaPerSecond, FeCrankMinStamina,
+// FeCrankSpinDegPerSecond. Generator values: SlotItem, OutputPerStack, MaxPower, MaxFuel, OutputPerFuel.
 //
 // C# 5 only (built with the .NET Framework 4 csc.exe, see tools/build.ps1).
 
@@ -26,9 +36,10 @@ using UnityEngine;
 namespace FerroEngrenagem
 {
     [UnityEngine.Scripting.Preserve]
-    public class BlockFeCrank : Block
+    public class BlockFeCrank : BlockGenerator
     {
-        public float ChargeSeconds = 2.5f;        // seconds of cranking per Charge (old balance: ~4 per 10 s)
+        public float FuelPerSecond = 12.5f;       // generator fuel added per second of cranking
+        public int BaseOutput = 30;               // watts without any Flywheel (PowerPatches.cs)
         public float StaminaPerSecond = 10f;      // drain while turning (regeneration still runs)
         public float MinStamina = 5f;             // below this the player is too tired to turn
         public float SpinDegPerSecond = 300f;     // rotor speed while turning
@@ -36,14 +47,15 @@ namespace FerroEngrenagem
         public override void Init()
         {
             base.Init();
-            ReadFloat("FeCrankChargeSeconds", ref ChargeSeconds);
+            ReadFloat("FeCrankFuelPerSecond", ref FuelPerSecond);
+            if (Properties != null && Properties.Contains("FeCrankBaseOutput")) BaseOutput = Properties.GetInt("FeCrankBaseOutput");
             ReadFloat("FeCrankStaminaPerSecond", ref StaminaPerSecond);
             ReadFloat("FeCrankMinStamina", ref MinStamina);
             ReadFloat("FeCrankSpinDegPerSecond", ref SpinDegPerSecond);
-            if (ChargeSeconds < 0.1f) ChargeSeconds = 0.1f;
+            if (FuelPerSecond < 0.1f) FuelPerSecond = 0.1f;
             CrankController.Ensure();
-            Log.Out(FerroEngrenagemMod.LogPrefix + "BlockFeCrank ready for '" + GetBlockName() + "' (Charge every "
-                    + ChargeSeconds + " s)");
+            Log.Out(FerroEngrenagemMod.LogPrefix + "BlockFeCrank (generator) ready for '" + GetBlockName() + "' ("
+                    + FuelPerSecond + " fuel/s of cranking)");
         }
 
         // Diagnostics while the hold-E crank is being tested in game (throttled).
@@ -163,7 +175,7 @@ namespace FerroEngrenagem
     {
         static GameObject host;
 
-        float progress;          // seconds of cranking toward the next Charge (kept between pushes)
+        float pendingFuel;       // fractional generator fuel not yet added (kept between frames)
         string prompt;
         LocalPlayerUI promptUi;
 
@@ -196,15 +208,25 @@ namespace FerroEngrenagem
             if (player.IsCrouching) return;   // crouch + E is the vanilla radial (Take)
 
             promptUi = ui;
+            TileEntityPowerSource te = gm.World.GetTileEntity(pos) as TileEntityPowerSource;
+            PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
+            if (te == null) return;
+            int pct = gen == null || gen.MaxFuel == 0 ? 0 : Mathf.Clamp(100 * gen.CurrentFuel / gen.MaxFuel, 0, 100);
             Stat stamina = player.Stats.Stamina;
             if (!IsActivateHeld(player))
             {
-                prompt = string.Format(Text("feCrankHold", "Hold {0} to turn the Crank"), KeyName(player));
+                prompt = string.Format(Text("feCrankHold", "Hold {0} to turn the Crank ({1}% stored)"),
+                                       KeyName(player), pct);
                 return;
             }
             if (stamina.Value <= crank.MinStamina)
             {
                 prompt = Text("feCrankTired", "Too tired to turn the Crank");
+                return;
+            }
+            if (gen == null)
+            {
+                BlockFeCrank.Diag("no PowerGenerator on this client (multiplayer client?) at " + pos);
                 return;
             }
 
@@ -213,14 +235,16 @@ namespace FerroEngrenagem
             CrankSpinner spinner = CrankSpinner.At(pos);
             if (spinner != null) spinner.Drive(crank.SpinDegPerSecond);
 
-            progress += dt;
-            if (progress >= crank.ChargeSeconds)
+            pendingFuel += crank.FuelPerSecond * dt;
+            int add = Mathf.FloorToInt(pendingFuel);
+            if (add > 0)
             {
-                progress -= crank.ChargeSeconds;
-                GiveCharge(gm, player);
+                pendingFuel -= add;
+                int fuel = Mathf.Min(gen.MaxFuel, gen.CurrentFuel + add);
+                gen.CurrentFuel = (ushort)fuel;
+                if (!gen.IsOn) gen.IsOn = true;   // vanilla auto-turns it off when the fuel runs out
             }
-            int pct = Mathf.Clamp(Mathf.FloorToInt(100f * progress / crank.ChargeSeconds), 0, 99);
-            prompt = string.Format(Text("feCrankTurning", "Turning the Crank... {0}%"), pct);
+            prompt = string.Format(Text("feCrankTurning", "Turning the Crank... {0}% stored"), pct);
         }
 
         // After the game's own Update, so our prompt is the one shown this frame.
@@ -267,15 +291,5 @@ namespace FerroEngrenagem
             return Localization.TryGet(key, out s) && !string.IsNullOrEmpty(s) ? s : fallback;
         }
 
-        static void GiveCharge(GameManager gm, EntityPlayerLocal player)
-        {
-            ItemValue iv = ItemClass.GetItem(ChargeFuel.ChargeItemName, false);
-            if (iv == null || iv.IsEmpty()) return;
-            ItemStack stack = new ItemStack(iv, 1);
-            XUiM_PlayerInventory inv = player.PlayerUI.xui.PlayerInventory;
-            if (inv != null && inv.AddItem(stack, true)) return;
-            // Inventory full: drop it at the player's feet, like vanilla does with harvested items.
-            gm.ItemDropServer(new ItemStack(iv, 1), player.GetPosition(), Vector3.zero, player.entityId, 60f, false);
-        }
     }
 }

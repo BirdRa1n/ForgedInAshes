@@ -317,6 +317,20 @@ aqui fica só o que foi medido/verificado.
   - Furo achado no diagnóstico: um motor de 30 W ligava Prensa e Torno juntos. Correção: cada motor alimenta só a
     máquina com `FeMinPower` mais próxima (`OwnerOf`, cache 2 s). Compilado; DLL não gravada (jogo aberto).
   - Usuário: Manivela (segurar E) também funcionou nesse teste (ainda gera o item Carga).
+- D7 etapa 2 (validada offline, falta teste no jogo): Manivela = gerador.
+  - IL: `PowerManager` tick a cada 0,16 s; `PowerGenerator.TickPowerGeneration`: se `MaxPower-CurrentPower >=
+    OutputPerFuel` e há combustível → -1 combustível, +`OutputPerFuel` energia; `PowerSource.HandleSendPower`
+    entrega até `MaxOutput` aos filhos (cada consumidor gasta `RequiredPower` por tick); `ShouldAutoTurnOff` =
+    sem combustível. `RefreshPowerStats`: `MaxOutput` = soma dos slots (`OutputPerStack`, interpolado pela
+    qualidade). Propriedades lidas: `SlotItem`, `OutputPerStack`, `MaxPower`, `MaxFuel`, `OutputPerFuel`.
+    Reabastecer (`XUiC_PowerSourceStats.BtnRefuel_OnPress`) usa o primeiro item com tag `gasoline`.
+  - `BlockFeCrank : BlockGenerator`; girar soma `FeCrankFuelPerSecond`=12,5 combustível/s no `PowerGenerator` e
+    o liga. 1 combustível = 60 de energia → 750/s de giro ≈ 4 s de motor de 30 W (mesmo ritmo aprovado).
+    `MaxFuel` 400 (~1 min de 30 W). Saída: 30 W base (`FeCrankBaseOutput`, postfix em `RefreshPowerStats`) +
+    30 W por Volante (`SlotItem=feFlywheel`). A base existe por bootstrap: o Volante sai do Torno, que precisa de
+    energia. Botão Reabastecer bloqueado na Manivela (`PowerPatches.cs`).
+  - Limite conhecido: só funciona no host/single-player (no cliente MP o `PowerItem` está no servidor).
+  - Manivelas colocadas antes da mudança não têm tile entity de gerador: recolher e colocar de novo.
 
 ## Próximo passo (antigo, mantido para histórico)
 
