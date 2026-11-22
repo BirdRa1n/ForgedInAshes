@@ -39,6 +39,22 @@
 		</recipe>
 	</append>
 
+	<!-- F2-T03: E03 Coal Generator (inventory; PLANO_MOD.md 5.2: 15 MP, 10 Plate, 8 Gear, 5 Short Iron Pipe)
+	     and I02 Flywheel (Lathe; PLANO_MOD.md 6: 4 Gear + 2 Plate + 1 Shaft). -->
+	<append xpath="/recipes">
+		<recipe name="feCoalGenerator" count="1" always_unlocked="true">
+			<ingredient name="resourceMechanicalParts" count="15"/>
+			<ingredient name="feResourceIronPlate" count="10"/>
+			<ingredient name="feResourceGear" count="8"/>
+			<ingredient name="resourceMetalPipe" count="5"/>
+		</recipe>
+		<recipe name="feFlywheel" count="1" craft_area="feLathe" craft_time="6" always_unlocked="true">
+			<ingredient name="feResourceGear" count="4"/>
+			<ingredient name="feResourceIronPlate" count="2"/>
+			<ingredient name="feResourceIronShaft" count="1"/>
+		</recipe>
+	</append>
+
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)
 	     for Forged Iron, Nails and Short Iron Pipe. No use_smelter/unit_* recipes: the game filters those variants
 	     only for craft_area "forge", so both showed up (see blocks.xml). Generated with:

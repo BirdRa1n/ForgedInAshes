@@ -90,6 +90,22 @@
 			<property name="SoundPickup" value="parts_grab"/>
 			<property name="SoundPlace" value="parts_place"/>
 		</item>
+		<!-- I02 Flywheel: made in the Lathe. Catalyst of the Coal Generator (D2: ingredient of the generator);
+		     not consumed, each installed flywheel multiplies the Charge output (BlockCollector catalyst system). -->
+		<item name="feFlywheel">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="vehicleWheels"/>
+			<property name="CustomIconTint" value="c0ccd8"/>
+			<property name="DescriptionKey" value="feFlywheelDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
 		<!-- I01 Charcoal: made in the Charcoal Kiln (E02) from Wood; burned by the Coal Generator (E03).
 		     Same FuelValue as vanilla coal, so it also works in forge/campfire. -->
 		<item name="feResourceCharcoal">

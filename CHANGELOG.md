@@ -26,3 +26,4 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - F2-T01: pesquisa de energia (P02, P03, P04 resolvidas no papel); proposta de Rota A 100% XML; ferramenta `tools/il_inspect.ps1`.
 - D6: Carga será combustível com Harmony. Infra C#: `src/FerroEngrenagem` (entrada `IModApi` + Harmony `PatchAll`), `tools/build.ps1`; `check_log.py` mostra as linhas `[FerroEngrenagem]`.
 - F2-T02: itens Carga (`feCharge`) e Carvão Vegetal (`feResourceCharcoal`); Carvoeira (`feCharcoalKiln`, coletor: 5 Madeira → 1 Carvão Vegetal) com receita no inventário.
+- F2-T03: Gerador a Carvão (`feCoalGenerator`, coletor com catalisador: 1 Carvão Vegetal → 5 Cargas por Volante), Volante de Inércia (`feFlywheel`, no Torno); Prensa e Torno passam a ter slot de combustível e, por patch Harmony, queimam só Carga.

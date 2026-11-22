@@ -71,14 +71,16 @@
 			<property name="SoundPlace" value="forge_place"/>
 		</block>
 
-		<!-- M02 Parts Press: workbench-style station (model of vanilla combineStation). -->
+		<!-- M02 Parts Press: workbench-style station (model of vanilla combineStation).
+		     F2-T03: fuel module + vanilla "workstation_chemistryStation" window (fuel + output, no tools).
+		     The Harmony patch (src/FerroEngrenagem/ChargeFuelPatches.cs) makes it burn ONLY feCharge. -->
 		<block name="fePress">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output"/>
+				<property name="Modules" value="output,fuel"/>
 				<property name="CraftingAreaRecipes" value="fePress"/>
 			</property>
-			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="fePressDesc"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -125,14 +127,15 @@
 			<property name="SoundPlace" value="workbench_place"/>
 		</block>
 
-		<!-- M03 Lathe: workbench-style station (model of vanilla dev-only tableSaw, 1x1). -->
+		<!-- M03 Lathe: workbench-style station (model of vanilla dev-only tableSaw, 1x1).
+		     F2-T03: same fuel setup as the Parts Press (only feCharge burns, via Harmony). -->
 		<block name="feLathe">
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
-				<property name="Modules" value="output"/>
+				<property name="Modules" value="output,fuel"/>
 				<property name="CraftingAreaRecipes" value="feLathe"/>
 			</property>
-			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="WorkstationWindow" value="workstation_chemistryStation"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLatheDesc"/>
 			<property name="CustomIcon" value="tableSaw"/>
@@ -254,6 +257,85 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 			<property name="SoundPickup" value="forge_grab"/>
 			<property name="SoundPlace" value="forge_place"/>
+		</block>
+	</append>
+
+	<!-- F2-T03: E03 Coal Generator = Collector with a CATALYST (same system as chickens in the chicken coop).
+	     TileEntityCollector.getCurrentConvertCount: if the block uses catalysts, output per cycle =
+	     (number of catalyst items) x CatalystMultiplier; CatalystRequirements = minimum catalysts to run.
+	     Catalysts are not consumed. Here: 1 Charcoal -> 5 Charge per installed Flywheel (PLANO_MOD.md 9),
+	     at least 1 Flywheel required. Uses the DewCollector sandbox multipliers (same as the Kiln). -->
+	<append xpath="/blocks">
+		<block name="feCoalGenerator">
+			<property name="Class" value="Collector"/>
+			<property name="CollectorType" value="DewCollector"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCoalGeneratorDesc"/>
+			<property name="LootLabelKey" value="feCoalGenerator"/>
+			<property name="CustomIcon" value="generatorBankA"/>
+			<property name="CustomIconTint" value="ffd0a0"/>
+			<property name="ItemIconBackdrop" value="ui_game_symbol_electric_power"/>
+			<property name="ItemBackgroundColor" value="80,200,255,255"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Electrical/generatorBankAPrefab.prefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="RestrictSubmergedPlacement" value="true"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="OpenSound" value="collector_open"/>
+			<property name="CloseSound" value="collector_close"/>
+			<!-- input: Charcoal only -->
+			<property name="FuelTypes" value="{charcoal,feResourceCharcoal}"/>
+			<!-- 1 Charcoal -> 1 x (flywheels x 5) Charge per cycle, 100-150 ticks per cycle -->
+			<property name="OutputTypes" value="{charge,charcoal,1,1,1,feCharge,feCharge,1,1,100,150,forge_item_complete}"/>
+			<property name="Outputs" value="charge,charge,charge,charge,charge,charge"/>
+			<property name="CatalystTypes" value="feFlywheel"/>
+			<property name="CatalystMultiplier" value="charge=5"/>
+			<property name="CatalystRequirements" value="charge=1"/>
+			<property name="CatalystGridHeight" value="1"/>
+			<property name="CatalystTitleText" value="feCoalGeneratorCatalyst"/>
+			<property name="CatalystTitleSprite" value="vehicleWheels"/>
+			<property name="CatalystTitleSpriteAtlas" value="ItemIconAtlasGreyscale"/>
+			<property name="CatalystTypesSprites" value="vehicleWheels,ItemIconAtlasGreyscale"/>
+			<property name="FuelGridHeight" value="1"/>
+			<property name="OutputGridHeight" value="2"/>
+			<property name="FuelTitleText" value="feCoalGeneratorFuel"/>
+			<property name="FuelTitleSprite" value="ui_game_symbol_forge"/>
+			<property name="FuelTitleSpriteAtlas" value="UIAtlas"/>
+			<property name="FuelTypesSprites" value="resourceCoal,ItemIconAtlasGreyscale"/>
+			<property name="EmptyText" value="feCoalGeneratorEmpty"/>
+			<property name="HasItem1Text" value="feCoalGeneratorHasCharge"/>
+			<property name="HasItem2Text" value="feCoalGeneratorHasCharge"/>
+			<property name="RequiredMods" value="feTestItem"/>
+			<property name="RequiredModsOnly" value="true"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="800"/>
+			<property name="MaxDamage" value="600"/>
+			<property name="HeatMapStrength" value="4"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="15"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="4"/>
+				<property name="resourceNail" value="10"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="80" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="4" tag="salvageHarvest"/>
+			<drop event="Harvest" name="feResourceGear" count="3" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0230"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
 		</block>
 	</append>
 
