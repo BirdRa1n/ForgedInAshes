@@ -49,10 +49,15 @@ aqui fica só o que foi medido/verificado.
 ### 2026-11-22
 - F0-T01..T04 concluídas (ver `CHANGELOG.md`). Comandos de patch confirmados no `Assembly-CSharp.dll`.
 - 633 receitas vanilla (workbench 306, inventário 195, forge 60, campfire 49, chemistryStation 18, cementMixer 5).
-- `resourceMechanicalParts` tem receita no inventário **sem ingredientes** listados: investigar no F0-T05
-  (provável receita de sucata/`wildcard_forge_category` ou `material_based`).
+- F0-T05: fontes de MP, Spring e Engine levantadas (tabela em `PLANO_MOD.md` 12.1; nomes em 12.2).
+  - A receita de MP "sem ingredientes" é de **sucata**: `tags="salvageScrap"` + `<wildcard_forge_category/>`.
+    O jogo dá o recurso da `forge_category` do material do item desmanchado (`materials.xml`).
+    `MsmallEngine` → `resourceMechanicalParts`, então desmanchar um Engine dá MP. Há 33 receitas desse tipo.
+  - Salvage de blocos é sobretudo `event="Harvest"` **sem** `tool_category`; o `Disassemble` é minoria.
+  - `RepairItems` dentro de blocos usa nomes de item como `name` de propriedade: é custo de reparo, não fonte.
+  - "Wood Log" não existe; madeira é só `resourceWood`.
 
 ## Próximo passo
 
-F0-T05: `find_sources.py` para `resourceMechanicalParts`, `resourceSpring` e o Engine (confirmar o nome) e
-registrar P05/P11 no plano.
+F0-T06: item de teste `feTestItem` + localização; instalar com `tools/install.ps1` (junction) e o usuário
+abre o jogo com `-noeac` para confirmar que o mod carrega e o log fica limpo.

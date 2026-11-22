@@ -9,3 +9,4 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - F0-T02: estrutura do repositório, `.gitignore`, `CHANGELOG.md`.
 - F0-T03: `ModInfo.xml` no formato do `0_TFP_Harmony` (versão 0.1.0).
 - F0-T04: ferramentas `check_xpath.py`, `recipe_report.py`, `find_sources.py`, `install.ps1` e módulo `fe_common.py`.
+- F0-T05: fontes de Mechanical Parts, Spring e Engine (P05) e nomes vanilla confirmados (P12) no plano.

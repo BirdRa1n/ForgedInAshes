@@ -189,7 +189,7 @@ Só iniciar depois da versão 1.0 lançada e estável.
 | I10 | Placa de Circuito | Verificar se usar Electrical Parts vanilla (P06) | M12 | 2 Fio de Latão + 1 Chapa + 1 Glue → 1 | 3 |
 | I11 | Lubrificante (`feResourceLubricant`) | Não | M09 | 2 Oil → 1 | 3 |
 | I12 | Engine (motor pequeno) | **Sim** (P05) | M13 | 10 Mech. Parts + 4 Spring + 6 Chapa + 2 Lubrificante | 4 |
-| I13 | Tábua de Madeira (`feResourcePlank`) | Não | M16 | 1 Wood Log → 4 (confirmar se "Wood Log" existe como item) | 3 |
+| I13 | Tábua de Madeira (`feResourcePlank`) | Não | M16 | "Wood Log" **não existe**; usar `resourceWood`, ex.: 4 Wood → 1 Tábua (rebalancear) | 3 |
 | I14 | Viga de Madeira (`feResourceBeam`) | Não | M16 | 3 Tábua → 1 | 3 |
 | I15 | Rolo de Tecido (`feResourceClothRoll`) | Não | M07 | 10 Cloth Fragment → 1 | 3 |
 | I16 | Cano de Arma (`feGunBarrel`) | Não | M05 | 1 Short Iron Pipe + 1 Forged Steel → 1 | 3 |
@@ -369,17 +369,59 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | P02 | Alguma workstation vanilla exige energia? | Buscar em `blocks.xml` e no código (workstation × powered) | 2 | Aberta |
 | P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | Aberta |
 | P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | Aberta |
-| P05 | Mechanical Parts, Spring e Engine têm receita? De onde vêm? | `find_sources.py` (receitas, loot, **salvage em `blocks.xml`**, traders, quests) | 0 | Aberta |
+| P05 | Mechanical Parts, Spring e Engine têm receita? De onde vêm? | `find_sources.py` (receitas, loot, **salvage em `blocks.xml`**, traders, quests) | 0 | **Resolvida** (detalhes em 12.1) |
 | P06 | De onde vêm o painel solar e as Electrical Parts? | `find_sources.py` | 4 | Aberta |
 | P07 | Versão da Unity do jogo | Propriedades do executável / documentação de modding | 6 | **Resolvida:** 2022.3.62f2 |
 | P08 | EAC e servidores com DLL | Testar em servidor dedicado com EAC desligado; documentar | 2 | Aberta |
 | P09 | Conflito com overhauls grandes | Testar em pares; documentar incompatibilidades | 7 | Aberta |
 | P10 | Equilíbrio de estamina × carga da manivela | Teste no jogo (F2-T07) | 2 | Aberta |
-| P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Aberta |
-| P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `grep` em `items.xml` + `Localization.txt` | 0 | Aberta |
+| P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Parcial: lista de fontes em 12.1; falta testar no jogo |
+| P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `find_sources.py --search` + `Localization.csv` | 0 | **Resolvida** (tabela em 12.2) |
 | P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | Aberta |
 | P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes do F1-T03 | 1 | Aberta |
 | P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar no F0-T06 com EAC ligado e desligado | 0 | Aberta |
+
+### 12.1 Fontes de Mechanical Parts, Spring e Engine (F0-T05, jogo 3.4.0 B10)
+
+Saída completa: `python tools/find_sources.py <item> --uses` (as cópias em `tools/out/` ficam fora do git).
+
+| Fonte | `resourceMechanicalParts` | `resourceSpring` | `smallEngine` (Engine) |
+|---|---|---|---|
+| Receita normal | **nenhuma** | **nenhuma** | **nenhuma** |
+| Sucata (desmanchar no inventário) | Sim: receita `salvageScrap` com `<wildcard_forge_category/>`. Os materiais `MmechanicalParts` e `MsmallEngine` têm `forge_category=resourceMechanicalParts`, então **desmanchar um Engine dá MP** | não | não |
+| Loot | 14 lootgroups (ex.: `groupCraftingUncommon`, `groupWorkbenchLoot02`, `groupRollingToolbox02`, `groupMoPower01`, zumbis `groupZpack*`, `groupQuestResourcesT1`, `twitch_craftresources2`) | 6 lootgroups (`groupCraftingUncommon`, `groupWorkbenchLoot02`, `groupToilet02`, `groupZpackLab01`, `groupZpackUtility01`, `twitch_craftresources2`) | 9 lootgroups (`groupRareAutomotive`, `minibikeParts`, `motorcycleParts`, `4x4Parts`, `gyroCopterParts`, `groupGenBank`, 3 `twitch_*`) |
+| Salvage em `blocks.xml` | ~150 blocos. Maioria `event="Harvest"` **sem** `tool_category` (carros, eletrodomésticos, canos, a própria `workbench` dá 8); alguns `event="Destroy" tool_category="Disassemble"` (cofres, portas de garagem) | ~60 blocos (carros, portas de garagem, camas, cofres) | ~20 blocos (carros, caminhões, empilhadeiras, `decoCarMotorFlat`) |
+| Traders | `generalResources` (15–80, prob 0.8) | `generalResources` (5–30) | `rareTools`, `groupVehicles` |
+| Quests | Via loot `groupQuestResourcesT1`; objetivo de desafio em `challenges.xml` | — | Pacotes `questRewardGeneratorBankBundle`, `questRewardVehiclePartsBundle`; desafio em `challenges.xml` |
+| Não é fonte | `RepairItems` em blocos (custo de reparo, ex.: `workbench` 20 MP) e `passive_effect tags` em receitas (bônus de perk) | idem | `generatorbank` usa Engine como propriedade (combustível/peça) |
+
+Consequências para o F1-T05:
+- "Desligar o salvage" precisa cobrir **`Harvest` sem `tool_category`**, não só `Disassemble`. Um único patch
+  `<remove xpath="/blocks/block/drop[@name='resourceMechanicalParts']"/>` pega todos; conferir os blocos com
+  `dropextendsoff` e herança `Extends`.
+- A receita de sucata do MP faz um Engine de loot virar MP. Na fase 1 pode ficar; na fase 3, decidir.
+- A `workbench` vanilla custa e dá MP ao ser desmontada: se M02/M03 copiarem a workbench, revisar drops e `RepairItems`.
+
+### 12.2 Nomes vanilla confirmados (P12)
+
+| No plano | Nome real | | No plano | Nome real |
+|---|---|---|---|---|
+| Mechanical Parts | `resourceMechanicalParts` | | Forge | bloco `forge` (`craft_area="forge"`) |
+| Spring | `resourceSpring` | | Workbench | bloco `workbench` |
+| Engine | `smallEngine` | | Chemistry Station | bloco `chemistryStation` |
+| Nails | `resourceNail` | | Cement Mixer | bloco `cementMixer` |
+| Short Iron Pipe | `resourceMetalPipe` | | Campfire | bloco `campfire` |
+| Forged Iron | `resourceForgedIron` | | Generator Bank | bloco `generatorbank` |
+| Forged Steel | `resourceForgedSteel` | | Battery Bank | bloco `batterybank` |
+| Wood | `resourceWood` (não existe "Wood Log") | | Solar Bank / Solar Cell | bloco `solarbank` / item `solarCell` |
+| Cloth Fragment | `resourceCloth` | | Electrical Parts | `resourceElectricParts` (também tem receita de sucata) |
+| Leather | `resourceLeather` | | Beaker | `toolBeaker` |
+| Iron (sucata) | `resourceScrapIron` | | Anvil / Crucible | `toolAnvil` / `toolForgeCrucible` |
+| Brass | `resourceScrapBrass` | | Duct Tape | `resourceDuctTape` |
+| Lead | `resourceScrapLead` | | Glue | `resourceGlue` |
+| Clay Soil | `resourceClayLump` | | Oil | `resourceOil` |
+| Cobblestone Rocks | `resourceCobblestones` | | Gunpowder / Coal | `resourceGunPowder` / `resourceCoal` |
+| Plant Fibers | `resourceYuccaFibers` | | Cement / Concrete Mix | `resourceCement` / `resourceConcreteMix` |
 
 ---
 
