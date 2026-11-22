@@ -179,6 +179,10 @@ aqui fica só o que foi medido/verificado.
     `XUiC_ItemStackGrid.itemControllers`.
   - **Atenção:** sem a Manivela (F2-T04), a sobrevivência fica travada (Carga só sai do Gerador, que precisa
     de peças do Torno). Testar F2-T03 só no criativo.
+  - Teste 15:35–15:44: log limpo; `Harmony: 7 method(s) patched` (os 7 listados), nenhuma exceção de Harmony,
+    workstation ou coletor. Usuário confirmou: Prensa/Torno só queimam Carga (Madeira fica e não some),
+    Forja vanilla normal, Gerador só aceita Carvão Vegetal, parado sem Volante, 5 Cargas por Carvão com 1 Volante.
+    **D6 implementada e verificada.**
 - Arte: a sessão do outro PC entregou `Art/feCrank/` (modelo da Manivela, 1 bloco, partes giratórias separadas).
 
 ## Próximo passo (antigo, mantido para histórico)
