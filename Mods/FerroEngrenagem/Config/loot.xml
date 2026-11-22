@@ -22,4 +22,9 @@
 	<remove xpath="/lootcontainers/lootgroup[@name='groupZpackLab01']/item[@name='resourceSpring']"/>
 	<remove xpath="/lootcontainers/lootgroup[@name='groupZpackUtility01']/item[@name='resourceSpring']"/>
 	<remove xpath="/lootcontainers/lootgroup[@name='twitch_craftresources2']/item[@name='resourceSpring']"/>
+	<!-- F3-T07: quest rewards and the "workstations" loot group gave the vanilla stations; give the mod
+	     equivalents instead (keeps the quests rewarding a workstation). -->
+	<set xpath="/lootcontainers/lootgroup/item[@name='forge']/@name">feFoundry</set>
+	<set xpath="/lootcontainers/lootgroup/item[@name='workbench']/@name">feAssembler</set>
+	<set xpath="/lootcontainers/lootgroup/item[@name='chemistryStation']/@name">feRefinery</set>
 </configs>

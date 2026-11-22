@@ -394,6 +394,12 @@
 	     (phase-4 leftovers: vehicles, robots, chemistryStation, cementMixer). D1 hides it fully in F3-T07. -->
 	<set xpath="/blocks/block[@name='workbench']/property[@class='Workstation']/property[@name='CraftingAreaRecipes']/@value">workbench</set>
 
+	<!-- F3-T07 (D1): hide the vanilla forge, workbench and chemistry station from the player's creative menu
+	     (their recipes are removed in recipes.xml). Blocks already placed in POIs keep working. -->
+	<set xpath="/blocks/block[@name='forge']/property[@name='CreativeMode']/@value">Dev</set>
+	<set xpath="/blocks/block[@name='workbench']/property[@name='CreativeMode']/@value">Dev</set>
+	<set xpath="/blocks/block[@name='chemistryStation']/property[@name='CreativeMode']/@value">Dev</set>
+
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
 	     Order matters: rename the Destroy drops first, then remove the Harvest drops.
 	     Destroy drops are RENAMED to scrap iron instead of removed: XML.txt says a block without any Destroy drop
