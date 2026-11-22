@@ -289,6 +289,10 @@ aqui fica só o que foi medido/verificado.
 - F4-T01 (validado offline): Misturadora, Garagem, Robótica (`gen_phase3.py`), Engine na Garagem, remapeamento
   da fase 4, Betoneira vanilla oculta. `check_phase3.py` 20/20 (Bancada e Betoneira vanilla vazias).
   Usuário testou no jogo: "tudo certo". **F4-T01 verificada.**
+- F4-T02/T03 (validado offline, falta teste no jogo): P06 resolvida (painel/célula solar só loot/trader/quest).
+  Gerador, banco de baterias e painel solar exigem peças do mod na Eletrônica (painel ganhou receita).
+  `feGasGenerator`: coletor a Lata de gasolina com catalisador `smallEngine` (`charge=2`, 5 latas por ciclo).
+  528 patches, `check_phase3.py` 20/20.
 
 ## Próximo passo (antigo, mantido para histórico)
 

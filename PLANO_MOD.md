@@ -307,7 +307,9 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F4-T01** M08 Misturadora, M13 Garagem, M15 Robótica, I12 Engine com receita.
   **Feita e testada no jogo (2026-11-22):** 3 máquinas no `gen_phase3.py` (a Carga, janela da Estação Química); Engine na Garagem (10 MP + 4 Mola + 6 Chapa + 2 Lubrificante); receitas da fase 4 remapeadas (Garagem 17, Robótica 3, Misturadora 5); Bicicleta e Roda da Montadora para a Garagem; Betoneira vanilla oculta como as outras estações (quest/loot/trader/progressão → feMixer). Bancada e Betoneira vanilla vazias; `check_phase3.py` 20/20. Engine continua no loot (decidir se corta).
 - **F4-T02** E04, E05, E06 (vanilla, ajustando receitas/estação). Resolver P06.
+  **Feita (offline):** Gerador (+4 Bobina, +6 Chapa) e Banco de baterias (+2 Bobina, +4 Chapa) na Bancada Eletrônica; Painel solar ganhou receita (10 Chapa, 4 Bobina, 10 Peça Elétrica, 10 Polímero). Células solares seguem loot/trader.
 - **F4-T03** Decidir se na fase 3+ "Elét." usa a rede vanilla (rota B obrigatória) ou continua com Carga (rota A). Se rota A, adicionar receitas de Carga nos geradores novos.
+  **Feita (offline):** D4 = Carga (rota A). Novo `feGasGenerator` (coletor): 5 Latas de gasolina → 2 Cargas por Motor instalado (catalisador `smallEngine`, mínimo 1). Solar/água/vapor gerando Carga: F4-T04 (C#).
 - **F4-T04** E07 e E08 (C#).
 
 **Pronto quando:** cada fonte de energia exige peças e combustíveis da cadeia anterior.
@@ -423,7 +425,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | **Resolvida:** estação não restringe em XML; `Collector` restringe; gerador só aceita tag `gasoline` (F2-T01, itens 2–5) |
 | P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | **Resolvida no papel:** golpe gasta estamina + `onSelfDamagedBlock`/`TriggerHasTags` + `CallGameEvent` → `AddItems` (F2-T01, itens 6–8); falta teste no jogo |
 | P05 | Mechanical Parts, Spring e Engine têm receita? De onde vêm? | `find_sources.py` (receitas, loot, **salvage em `blocks.xml`**, traders, quests) | 0 | **Resolvida** (detalhes em 12.1) |
-| P06 | De onde vêm o painel solar e as Electrical Parts? | `find_sources.py` | 4 | Aberta |
+| P06 | De onde vêm o painel solar e as Electrical Parts? | `find_sources.py` | 4 | **Resolvida:** painel solar e célula solar sem receita (loot `groupRareElectrical`, trader `traderElectrical`/`traderSolarCells`, quest); Peças Elétricas de loot, desmanche e (mod) Bancada Eletrônica. Painel ganhou receita no F4-T02 |
 | P07 | Versão da Unity do jogo | Propriedades do executável / documentação de modding | 6 | **Resolvida:** 2022.3.62f2 |
 | P08 | EAC e servidores com DLL | Testar em servidor dedicado com EAC desligado; documentar | 2 | Aberta |
 | P09 | Conflito com overhauls grandes | Testar em pares; documentar incompatibilidades | 7 | Aberta |

@@ -43,3 +43,5 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 
 ### Fase 4
 - F4-T01: Misturadora de Concreto, Garagem e Oficina de Robótica; Engine fabricável na Garagem; veículos, robôs e concreto saem da Bancada e da Betoneira vanilla (agora ocultas).
+- F4-T02: Gerador, Banco de baterias e Painel solar (agora fabricável) exigem peças do mod na Bancada Eletrônica.
+- F4-T03: Gerador de Carga a Gasolina (latas de gasolina → Carga, com Motores como catalisador).
