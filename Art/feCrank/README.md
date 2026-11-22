@@ -11,9 +11,9 @@ Modelo da Manivela (PLANO_MOD.md, seção 5.2, E01), feito no Blender 5.3 por sc
 
 ## Medidas e orientação
 
-- 1 bloco (1×1×1 m). Caixa ocupada: X −0,47…0,47, Y −0,50…0,46, Z 0…0,905.
+- 1 bloco (1×1×1 m). Caixa ocupada: X −0,47…0,50, Y −0,50…0,46, Z 0…0,905.
 - Origem no centro do chão do bloco. A frente (onde o jogador gira a manivela) aponta para **−Y** no Blender.
-- Triângulos: 2.872 sem bevel; ~7.100 no FBX (bevel de 1 segmento aplicado na exportação). Se ficar pesado,
+- Triângulos: 3.120 sem bevel; ~8.000 no FBX (bevel de 1 segmento aplicado na exportação). Se ficar pesado,
   tirar os modificadores `Bevel` antes de exportar.
 
 ## Peças
@@ -26,6 +26,12 @@ Modelo da Manivela (PLANO_MOD.md, seção 5.2, E01), feito no Blender 5.3 por sc
 
 Rotor e polia do dínamo são filhos da base. Relação das polias: 0,10 / 0,045 ⇒ a polia do dínamo gira
 ~2,2× mais rápido que o rotor.
+
+## Porta de esteira
+
+Segue o padrão de `Art/CONVEYOR_PORTS.md`. Uma **saída** (Carga) no lado direito (+X): caixa coletora de ferro
+sobre o estrado, ligada ao dínamo por um cabo, com a porta na face do bloco. Empty `feCrank_PortOut_1` em
+(0,5; 0; 0,25), +Z para fora. Com a caixa, o modelo vai até X = +0,5 e tem 3.120 triângulos sem bevel.
 
 ## Materiais (provisórios)
 

@@ -27,9 +27,11 @@ MATS = {
     "feCrank_Rust":    ((0.32, 0.14, 0.06), 0.80, 0.35),
     "feCrank_Copper":  ((0.72, 0.36, 0.20), 0.35, 1.0),
     "feCrank_Leather": ((0.10, 0.06, 0.04), 0.70, 0.0),
+    "feCrank_PortIn":  ((0.16, 0.48, 0.16), 0.60, 0.20),
+    "feCrank_PortOut": ((0.85, 0.45, 0.06), 0.60, 0.20),
 }
 MI = {name: i for i, name in enumerate(MATS)}
-WOOD, IRON, RUST, COPPER, LEATHER = (MI[n] for n in MATS)
+WOOD, IRON, RUST, COPPER, LEATHER, PORT_IN, PORT_OUT = (MI[n] for n in MATS)
 
 
 def make_materials():
@@ -164,6 +166,16 @@ def build_base():
     for s in (-1, 1):
         beam(bm, (s * (small_r + 0.005), DYN.y, DYN.z),
              (s * (big_r + 0.005), DYN.y, AXLE_Z), 0.01, 0.03, LEATHER)
+    # Carga collector box on the right side (its face holds the output port).
+    box(bm, (0.20, 0.30, 0.34), (0.34, 0.0, 0.23), IRON)
+    box(bm, (0.22, 0.32, 0.02), (0.34, 0.0, 0.41), RUST)
+    for y in (-0.12, 0.12):
+        cyl(bm, 0.011, 0.012, (0.34, y, 0.425), "Z", IRON, segs=6)
+    cyl(bm, 0.012, 0.03, (0.26, 0.10, 0.30), "X", COPPER, segs=8)
+    beam(bm, (0.0, 0.13, 0.255), (0.0, 0.13, 0.30), 0.02, 0.02, LEATHER)   # cable from the dynamo
+    beam(bm, (0.0, 0.13, 0.30), (0.245, 0.10, 0.30), 0.02, 0.02, LEATHER)
+    for kind, pt, nrm, depth in PORTS:
+        port(bm, pt, nrm, kind, depth)
     return to_object(bm, "feCrank_Base", bevel=0.004)
 
 
@@ -206,6 +218,70 @@ def build_dynamo_pulley():
     return to_object(bm, "feCrank_DynamoPulley", location=DYN, bevel=0.002)
 
 
+# ---------------------------------------------------------------- conveyor ports
+# Standard (Art/CONVEYOR_PORTS.md): opening 0.36 x 0.22 m centered 0.25 m above the
+# floor, on the outer face of one block cell, flush with the block boundary; iron
+# frame with the top bar painted green (input) or orange (output); a duct joins
+# the face to the machine body. Each port also gets an empty <prefix>_Port{In|Out}_<n>
+# on the face, its +Z pointing outward.
+PORT_W, PORT_H, PORT_Z, PORT_FRAME = 0.36, 0.22, 0.25, 0.045
+
+
+def box_m(bm, size, matrix, mat):
+    """Unit cube scaled by size, then placed by a full 4x4 matrix."""
+    r = bmesh.ops.create_cube(bm, size=1.0, calc_uvs=True)
+    _finish(bm, 0, mat, matrix @ Matrix.Diagonal((*size, 1.0)), r["verts"])
+
+
+def _port_frame(pt, normal):
+    """Local frame on the block face: X' along the face, Y' outward, Z' up."""
+    n = Vector(normal).normalized()
+    up = Vector((0, 0, 1))
+    m = Matrix((n.cross(up), n, up)).transposed().to_4x4()
+    m.translation = Vector(pt)
+    return m
+
+
+def port(bm, pt, normal, kind, depth):
+    m = _port_frame(pt, normal)
+    T = Matrix.Translation
+    fw, hw, hh = PORT_FRAME, PORT_W / 2, PORT_H / 2
+    d = max(depth, 0.05)
+    for s in (-1, 1):   # duct from the face back to the machine body
+        box_m(bm, (0.02, d, PORT_H + 0.04), m @ T((s * (hw + 0.01), -d / 2, 0)), IRON)
+        box_m(bm, (PORT_W + 0.04, d, 0.02), m @ T((0, -d / 2, s * (hh + 0.01))), IRON)
+    box_m(bm, (PORT_W, 0.02, PORT_H), m @ T((0, -d + 0.01, 0)), PORT_DARK)
+    for s in (-1, 1):   # frame flush with the block face
+        box_m(bm, (fw, 0.04, PORT_H + 2 * fw), m @ T((s * (hw + fw / 2), -0.02, 0)), IRON)
+    box_m(bm, (PORT_W + 2 * fw, 0.04, fw), m @ T((0, -0.02, -(hh + fw / 2))), IRON)
+    box_m(bm, (PORT_W + 2 * fw, 0.04, fw), m @ T((0, -0.02, hh + fw / 2)),
+          PORT_IN if kind == "In" else PORT_OUT)
+    if kind == "In":    # chute floor sloping down into the machine
+        c = min(d, 0.12)
+        box_m(bm, (PORT_W - 0.01, c, 0.012),
+              m @ T((0, -c / 2, -hh + 0.03)) @ Matrix.Rotation(math.radians(12), 4, "X"), IRON)
+    else:               # hinged flap over the upper part of the opening
+        box_m(bm, (PORT_W - 0.02, 0.01, 0.09), m @ T((0, -0.05, hh - 0.05)), IRON)
+        box_m(bm, (PORT_W - 0.02, 0.016, 0.016), m @ T((0, -0.05, hh - 0.005)), IRON)
+
+
+def add_port_empties(prefix, base, col):
+    count = {"In": 0, "Out": 0}
+    for kind, pt, nrm, _depth in PORTS:
+        count[kind] += 1
+        e = bpy.data.objects.new(f"{prefix}_Port{kind}_{count[kind]}", None)
+        e.empty_display_type = "SINGLE_ARROW"
+        e.empty_display_size = 0.25
+        e.location = pt
+        e.rotation_euler = Vector(nrm).to_track_quat("Z", "Y").to_euler()
+        col.objects.link(e)
+        e.parent = base
+
+# Output only: Carga (feCharge) leaves through a collector box on the right side.
+PORTS = [("Out", (0.5, 0.0, PORT_Z), (1, 0, 0), 0.06)]
+PORT_DARK = LEATHER
+
+
 # ---------------------------------------------------------------- scene
 def main():
     for ob in list(bpy.data.objects):
@@ -229,6 +305,8 @@ def main():
     for child in (rotor, pulley):
         child.parent = base
         child.matrix_parent_inverse = base.matrix_world.inverted()
+
+    add_port_empties("feCrank", base, col)
 
     bpy.context.view_layer.update()
     lo = Vector((1e9,) * 3)
