@@ -15,4 +15,56 @@
 			<property name="CreativeMode" value="Player"/>
 		</item>
 	</append>
+
+	<!-- F1-T01: intermediate parts (I03, I04, I05). Modeled on vanilla resourceForgedIron.
+	     Material MresourceForgedIron: forge_category "iron", so scrapping returns iron, never Mechanical Parts.
+	     Icons are vanilla placeholders (CustomIcon + tint) until phase 6.
+	     Balance: EconomicValue follows Forged Iron = 12 per unit used (see PLANO_MOD.md section 9). -->
+	<append xpath="/items">
+		<!-- I03 Iron Plate: made in fePress (M02), 2 Forged Iron -> 1 -->
+		<item name="feResourceIronPlate">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="24"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="armorParts"/>
+			<property name="CustomIconTint" value="a8bccc"/>
+			<property name="DescriptionKey" value="feResourceIronPlateDesc"/>
+			<property name="SoundPickup" value="forgedmetal_grab"/>
+			<property name="SoundPlace" value="forgedmetal_place"/>
+		</item>
+		<!-- I04 Iron Shaft: made in feLathe (M03), 2 Forged Iron -> 1 -->
+		<item name="feResourceIronShaft">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="24"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMetalPipe"/>
+			<property name="CustomIconTint" value="d8b070"/>
+			<property name="DescriptionKey" value="feResourceIronShaftDesc"/>
+			<property name="SoundPickup" value="ironpipe_grab"/>
+			<property name="SoundPlace" value="ironpipe_place"/>
+		</item>
+		<!-- I05 Gear: made in feLathe (M03), 1 Iron Plate -> 2 -->
+		<item name="feResourceGear">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="12"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMechanicalParts"/>
+			<property name="CustomIconTint" value="ffd060"/>
+			<property name="DescriptionKey" value="feResourceGearDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+	</append>
 </configs>

@@ -1,3 +1,9 @@
 Key,File,Type,UsedInMainMenu,NoTranslate,KeepLoaded,english,Context / Alternate Text,german,spanish,french,italian,japanese,koreana,polish,brazilian,russian,turkish,schinese,tchinese
 feTestItem,items,Item,,,,Ferro & Engrenagem Test Item,,,,,,,,,Item de Teste Ferro & Engrenagem,,,,
 feTestItemDesc,items,Item,,,,"If you can read this, the Ferro & Engrenagem mod loaded.",,,,,,,,,"Se você está lendo isto, o mod Ferro & Engrenagem carregou.",,,,
+feResourceIronPlate,items,Item,,,,Iron Plate,,,,,,,,,Chapa de Ferro,,,,
+feResourceIronPlateDesc,items,Item,,,,"A flat iron plate pressed from Forged Iron.\nMade in the Parts Press.",,,,,,,,,"Uma chapa de ferro prensada a partir de Ferro fundido.\nFeita na Prensa de Peças.",,,,
+feResourceIronShaft,items,Item,,,,Iron Shaft,,,,,,,,,Eixo de Ferro,,,,
+feResourceIronShaftDesc,items,Item,,,,"A turned iron shaft for machines and parts.\nMade in the Lathe.",,,,,,,,,"Um eixo de ferro torneado para máquinas e peças.\nFeito no Torno.",,,,
+feResourceGear,items,Item,,,,Gear,,,,,,,,,Engrenagem,,,,
+feResourceGearDesc,items,Item,,,,"A toothed gear cut from an Iron Plate.\nMade in the Lathe. Used for Mechanical Parts.",,,,,,,,,"Uma engrenagem dentada cortada de uma Chapa de Ferro.\nFeita no Torno. Usada em Peça mecânicas.",,,,
