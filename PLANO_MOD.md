@@ -275,8 +275,12 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F2-T03** Rota A: item `feCharge`; E03 como workstation `Carvão → Carga`; M02 e M03 passam a exigir `feCharge` como combustível.
 - **F2-T04** E01 Manivela pela opção de rota A mais viável (seção 7). Se nenhuma for viável em XML, parar e discutir a rota B com o usuário.
 - **F2-T05** I02 Volante de Inércia (upgrade da manivela, ou ingrediente do gerador, a decidir — D2).
+  **Feita junto com a F2-T03:** Volante = catalisador do Gerador a Carvão (5 Cargas por Carvão por Volante). D2 resolvida.
 - **F2-T06** Teste em servidor dedicado com 2 jogadores (P08).
 - **F2-T07** Balancear P10: girar a manivela não pode virar tarefa chata. Meta inicial: 10 s de manivela ≈ 30–60 s de máquina rodando.
+  **Feita (2026-11-22):** 25% de chance de 1 Carga por golpe (≈ 40 s de máquina por 10 s de golpes); usuário aprovou.
+
+**Status da fase 2 (2026-11-22):** F2-T01 a F2-T05 e F2-T07 concluídas e verificadas no jogo em single-player. Falta **F2-T06** (servidor dedicado + 2 jogadores).
 
 **Pronto quando:** M02 e M03 só funcionam com Carga vinda da manivela ou do gerador, também em servidor dedicado.
 
