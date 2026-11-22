@@ -28,3 +28,7 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - F2-T02: itens Carga (`feCharge`) e Carvão Vegetal (`feResourceCharcoal`); Carvoeira (`feCharcoalKiln`, coletor: 5 Madeira → 1 Carvão Vegetal) com receita no inventário.
 - F2-T03: Gerador a Carvão (`feCoalGenerator`, coletor com catalisador: 1 Carvão Vegetal → 5 Cargas por Volante), Volante de Inércia (`feFlywheel`, no Torno); Prensa e Torno passam a ter slot de combustível e, por patch Harmony, queimam só Carga.
 - F2-T04: Manivela (`feCrank`): cada golpe nela gasta estamina e dá 1 Carga (gancho em `buffStatusCheck01` + GameEvent `fe_crank_charge`); receita no inventário.
+- F2-T07: Manivela com 25% de chance de Carga por golpe (aprovado). F2-T05 resolvida na T03. **F2-T06 (servidor dedicado) adiada** pelo usuário.
+
+### Fase 3
+- F3-T01: proposta automática de remapeamento das 600 receitas (`tools/remap_proposal.py`, seção 10.1 do plano).

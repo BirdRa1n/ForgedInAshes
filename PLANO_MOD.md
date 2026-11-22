@@ -280,7 +280,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F2-T07** Balancear P10: girar a manivela não pode virar tarefa chata. Meta inicial: 10 s de manivela ≈ 30–60 s de máquina rodando.
   **Feita (2026-11-22):** 25% de chance de 1 Carga por golpe (≈ 40 s de máquina por 10 s de golpes); usuário aprovou.
 
-**Status da fase 2 (2026-11-22):** F2-T01 a F2-T05 e F2-T07 concluídas e verificadas no jogo em single-player. Falta **F2-T06** (servidor dedicado + 2 jogadores).
+**Status da fase 2 (2026-11-22):** F2-T01 a F2-T05 e F2-T07 concluídas e verificadas no jogo em single-player. Falta **F2-T06** (servidor dedicado + 2 jogadores). **Decisão do usuário: F2-T06 adiada** para antes do lançamento (fase 7); seguir para a fase 3. Riscos em aberto: Manivela (GameEvent `AddItems`) e patch de combustível em multiplayer.
 
 **Pronto quando:** M02 e M03 só funcionam com Carga vinda da manivela ou do gerador, também em servidor dedicado.
 
@@ -365,6 +365,33 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | Fogueira | Remédios | 5 | M10 | Manter na Fogueira no início |
 | Misturador | Todas | 5 | M08 (fase 4) | Mover na fase 4 |
 | Inventário do jogador | **não contado** | ? | — | Listar no F3-T01 e decidir |
+
+### 10.1 Proposta automática (F3-T01, jogo 3.4.0 B10)
+
+Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (uma linha por receita, com destino e motivo). Contagem real: **600 receitas** (633 menos 33 de sucata): inventário 162, Bancada 306, Forja 60, Fogueira 49, Estação Química 18, Misturador 5.
+
+| Destino | Nº | Origem |
+|---|---|---|
+| KEEP (fica onde está) | 167 | 162 do inventário (tier primitivo/T0-T1: P1) + 5 estações vanilla (D1) |
+| KEEP + cópia na M11 Cozinha | 41 | comida e bebida da Fogueira |
+| KEEP + cópia na M10 Laboratório | 5 | remédios da Fogueira |
+| M01 Fundição | 15 | Forja: metais, vidro, cimento, ferramentas de forja |
+| M02 Prensa | 13 | Forja: peças de munição, barras, vigas |
+| M04 Prensa de Munição | 41 | Bancada: munição |
+| M05 Montadora | 40 | Bancada: armas, ferramentas, explosivos, lockpick |
+| M06 Bancada de Mods | 74 | Bancada: mods |
+| M07 Tear | 63 | Bancada: armaduras, roupas, mochilas |
+| M08 Misturadora (fase 4) | 5 | Misturador |
+| M09 Refinaria | 10 | Estação Química: gasolina, óleo, pólvora, cola, tinta, papel, bateria |
+| M10 Laboratório | 7 | Estação Química: remédios |
+| M11 Cozinha | 12 | cerveja, apiário, coletor de orvalho, galinheiro e seus mods |
+| M12 Eletrônica | 28 | Bancada: luzes, energia, armadilhas, minas, torretas |
+| M13 Garagem (fase 4) | 14 | Bancada: veículos |
+| M14 Serralheria | 29 | Bancada: portas, garagens, cofres, escotilhas |
+| M15 Robótica (fase 4) | 3 | Bancada: Junk Sledge/Turret/Drone |
+| DROP-VARIANT | 33 | Forja: gêmeas `use_smelter` (ver abaixo) |
+
+**Armadilha técnica (descoberta no F1-T04):** o jogo só esconde a variante `use_smelter`/`replace_smelter` errada quando `craft_area == "forge"`. Receitas da Forja que mudarem de estação precisam **perder a gêmea `use_smelter`** (`<remove>`), senão aparecem duplicadas, como aconteceu na Fundição.
 
 ---
 
