@@ -1,0 +1,6 @@
+<configs>
+	<!-- F3-T05 (D5: scrap yes, ready parts no): scrapping an Engine gave Mechanical Parts because its material
+	     MsmallEngine has forge_category=resourceMechanicalParts (salvageScrap recipe + wildcard_forge_category).
+	     Now it scraps to iron like other metal parts. -->
+	<set xpath="/materials/material[@id='MsmallEngine']/property[@name='forge_category']/@value">iron</set>
+</configs>
