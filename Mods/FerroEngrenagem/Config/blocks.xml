@@ -496,9 +496,10 @@
 		</block>
 	</append>
 
-	<!-- D7 step 1: Electric Motor. A vanilla power consumer (Class Powered, like the wire relay) that you place
-	     near a machine and wire to a power source. Machines with FeMinPower craft only while nearby powered motors
-	     add up to that many watts (src/FerroEngrenagem/PowerGatePatches.cs). Placeholder model: vanilla relay. -->
+	<!-- D7: Electric Motor. A vanilla power consumer (Class Powered, like the wire relay) that you place in a
+	     machine's motor socket (the cell behind it, or the side named by FeMotorSide on the machine) and wire to a
+	     power source. It then draws the machine's FeMinPower; the machine crafts only while it is powered
+	     (src/FerroEngrenagem/PowerGatePatches.cs, socket outline: MotorSocketMarker.cs). Placeholder model: relay. -->
 	<append xpath="/blocks">
 		<block name="feElectricMotor">
 			<property name="CreativeMode" value="Player"/>

@@ -54,6 +54,7 @@ namespace FerroEngrenagem
             ReadFloat("FeCrankSpinDegPerSecond", ref SpinDegPerSecond);
             if (FuelPerSecond < 0.1f) FuelPerSecond = 0.1f;
             CrankController.Ensure();
+            MotorSocketMarker.Ensure();
             Log.Out(FerroEngrenagemMod.LogPrefix + "BlockFeCrank (generator) ready for '" + GetBlockName() + "' ("
                     + FuelPerSecond + " fuel/s of cranking)");
         }

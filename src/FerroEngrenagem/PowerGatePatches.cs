@@ -1,16 +1,21 @@
-// D7 step 1: machines run on WATTS from the vanilla power network, through an "Electric Motor" block.
+// D7: machines run on WATTS from the vanilla power network, through an "Electric Motor" block.
 //
-// A machine block opts in with <property name="FeMinPower" value="30"/> (watts). It crafts only while the
-// Electric Motors (blocks with <property name="FeMotor" value="true"/>, vanilla Class="Powered" consumers wired
-// like a light) found near it are powered and their RequiredPower adds up to at least FeMinPower.
+// A machine block opts in with <property name="FeMinPower" value="30"/> (watts). It crafts only while an
+// Electric Motor (a block with <property name="FeMotor" value="true"/>, vanilla Class="Powered" consumer wired
+// like a light) sits in the machine's MOTOR SOCKET and is powered. The motor draws the machine's FeMinPower
+// from the network (its PowerItem.RequiredPower is set to it), so a 30 W crank cannot run a 60 W machine.
+//
+// Motor socket (user, 2026-11-22: "the motor must be in a specific position to plug it into the machine"):
+// the block cell next to the machine's footprint on the side FeMotorSide (back|front|left|right, default back),
+// at the machine's lowest layer, in the middle column (left-of-middle for even widths). Computed in the
+// machine's local space and rotated like vanilla rotates multiblock cells (MultiBlockArray.Get: shape rotation
+// * local pos, rounded). MotorSocketMarker.cs draws it while the player holds a motor.
 //
 // Vanilla crafting runs in two places (IL of 3.4.0 b10):
 //  - window closed: TileEntityWorkstation.HandleRecipeQueue(float) (from UpdateTick) -> Prefix skips it.
 //  - window open:   XUiC_RecipeStack.Update counts down while the queue "IsCrafting"; vanilla halts/resumes the
 //                   queue in XUiC_WorkstationWindowGroup.Update from the fuel state -> Postfix halts/resumes
 //                   it from our power state instead.
-// "Near" = a box around the machine's tile entity position (multiblock machines are up to 3 wide and may be
-// rotated): dx/dz -SEARCH..+SEARCH, dy -1..+2.
 //
 // C# 5 only.
 
@@ -24,11 +29,12 @@ namespace FerroEngrenagem
     {
         public const string MinPowerProperty = "FeMinPower";
         public const string MotorProperty = "FeMotor";
-        const int SEARCH = 3;
+        public const string MotorSideProperty = "FeMotorSide";
         const float CacheSeconds = 0.5f;
 
         static readonly Dictionary<int, int> minPowerByBlock = new Dictionary<int, int>();
         static readonly Dictionary<int, bool> motorByBlock = new Dictionary<int, bool>();
+        static readonly Dictionary<int, Vector3i> sideByBlock = new Dictionary<int, Vector3i>();
         static readonly Dictionary<Vector3i, KeyValuePair<float, bool>> poweredCache =
             new Dictionary<Vector3i, KeyValuePair<float, bool>>();
 
@@ -60,36 +66,68 @@ namespace FerroEngrenagem
             return te != null && MinPower(te.blockValue.Block) > 0;
         }
 
-        static readonly Dictionary<Vector3i, KeyValuePair<float, Vector3i>> ownerCache =
-            new Dictionary<Vector3i, KeyValuePair<float, Vector3i>>();
-
-        /// <summary>Position of the power-gated workstation nearest to the motor (ties: lowest x, then z, then y).
-        /// Vector3i.min when none is in range.</summary>
-        public static Vector3i OwnerOf(World world, Vector3i motorPos)
+        /// <summary>Local direction (machine space) of the side that holds the motor socket.</summary>
+        static Vector3i Side(Block block)
         {
-            float now = Time.time;
-            KeyValuePair<float, Vector3i> c;
-            if (ownerCache.TryGetValue(motorPos, out c) && now - c.Key < 2f) return c.Value;
-            Vector3i best = Vector3i.min;
-            int bestD = int.MaxValue;
-            for (int dx = -SEARCH; dx <= SEARCH; dx++)
-                for (int dy = -2; dy <= 1; dy++)
-                    for (int dz = -SEARCH; dz <= SEARCH; dz++)
-                    {
-                        Vector3i wp = new Vector3i(motorPos.x + dx, motorPos.y + dy, motorPos.z + dz);
-                        TileEntityWorkstation w = world.GetTileEntity(wp) as TileEntityWorkstation;
-                        if (w == null || !IsGated(w)) continue;
-                        Vector3i tp = w.ToWorldPos();
-                        int d = dx * dx + dy * dy + dz * dz;
-                        bool better = d < bestD || (d == bestD && (tp.x < best.x || (tp.x == best.x &&
-                                      (tp.z < best.z || (tp.z == best.z && tp.y < best.y)))));
-                        if (better) { bestD = d; best = tp; }
-                    }
-            ownerCache[motorPos] = new KeyValuePair<float, Vector3i>(now, best);
-            return best;
+            Vector3i v;
+            if (sideByBlock.TryGetValue(block.blockID, out v)) return v;
+            string s = block.Properties != null && block.Properties.Contains(MotorSideProperty)
+                ? block.Properties.GetString(MotorSideProperty).Trim().ToLowerInvariant() : "back";
+            switch (s)
+            {
+                case "front": v = new Vector3i(0, 0, 1); break;
+                case "left": v = new Vector3i(-1, 0, 0); break;
+                case "right": v = new Vector3i(1, 0, 0); break;
+                default: v = new Vector3i(0, 0, -1); break;
+            }
+            sideByBlock[block.blockID] = v;
+            return v;
         }
 
-        /// <summary>Sum of RequiredPower of powered motors that belong to this machine &gt;= its FeMinPower.</summary>
+        /// <summary>World position of the motor socket of the machine whose PARENT block is at parentPos.</summary>
+        public static Vector3i SocketPos(BlockValue machine, Vector3i parentPos)
+        {
+            Block block = machine.Block;
+            Vector3i side = Side(block);
+            // local footprint cells (single block: just the origin)
+            List<Vector3i> cells = new List<Vector3i>();
+            if (block.isMultiBlock && block.multiBlockPos != null)
+                cells.AddRange(block.multiBlockPos.pos);
+            else
+                cells.Add(Vector3i.zero);
+
+            int minY = int.MaxValue;
+            foreach (Vector3i c in cells) if (c.y < minY) minY = c.y;
+            // the outermost cells on the socket side, at the lowest layer
+            bool alongX = side.x != 0;
+            int edge = int.MinValue;
+            foreach (Vector3i c in cells)
+            {
+                if (c.y != minY) continue;
+                int d = alongX ? c.x * side.x : c.z * side.z;
+                if (d > edge) edge = d;
+            }
+            List<int> across = new List<int>();
+            foreach (Vector3i c in cells)
+            {
+                if (c.y != minY) continue;
+                int d = alongX ? c.x * side.x : c.z * side.z;
+                if (d != edge) continue;
+                int a = alongX ? c.z : c.x;
+                if (!across.Contains(a)) across.Add(a);
+            }
+            across.Sort();
+            int mid = across.Count == 0 ? 0 : across[(across.Count - 1) / 2];
+            Vector3i local = alongX
+                ? new Vector3i(edge * side.x + side.x, minY, mid)
+                : new Vector3i(mid, minY, edge * side.z + side.z);
+
+            Vector3 r = block.shape.GetRotation(machine) * local.ToVector3();
+            return new Vector3i(parentPos.x + Mathf.RoundToInt(r.x), parentPos.y + Mathf.RoundToInt(r.y),
+                                parentPos.z + Mathf.RoundToInt(r.z));
+        }
+
+        /// <summary>The motor in this machine's socket is powered and draws the machine's FeMinPower.</summary>
         public static bool HasPower(TileEntityWorkstation te)
         {
             int need = te == null ? 0 : MinPower(te.blockValue.Block);
@@ -99,26 +137,27 @@ namespace FerroEngrenagem
             KeyValuePair<float, bool> cached;
             if (poweredCache.TryGetValue(pos, out cached) && now - cached.Key < CacheSeconds) return cached.Value;
 
-            bool ok = false;
-            int motors = 0, poweredMotors = 0, watts = 0;
+            bool ok = false, motor = false;
+            int watts = 0;
+            Vector3i socket = Vector3i.zero;
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world != null)
             {
-                for (int dx = -SEARCH; dx <= SEARCH; dx++)
-                    for (int dy = -1; dy <= 2; dy++)
-                        for (int dz = -SEARCH; dz <= SEARCH; dz++)
-                        {
-                            Vector3i mpos = new Vector3i(pos.x + dx, pos.y + dy, pos.z + dz);
-                            TileEntityPowered p = world.GetTileEntity(mpos) as TileEntityPowered;
-                            if (p == null || !IsMotor(p.blockValue.Block)) continue;
-                            // a motor drives ONE machine: the nearest power-gated workstation (found in D7 test:
-                            // one 30 W motor was running the Press and the Lathe at the same time)
-                            if (OwnerOf(world, mpos) != pos) continue;
-                            motors++;
-                            if (!p.IsPowered) continue;
-                            poweredMotors++;
-                            watts += p.RequiredPower;
-                        }
+                socket = SocketPos(world.GetBlock(pos), pos);
+                TileEntityPowered p = world.GetTileEntity(socket) as TileEntityPowered;
+                if (p != null && IsMotor(p.blockValue.Block))
+                {
+                    motor = true;
+                    // the motor draws what the machine needs (PowerItem exists only where the network runs:
+                    // SP / host / server)
+                    PowerItem item = p.GetPowerItem();
+                    if (item != null && item.RequiredPower != need)
+                    {
+                        item.RequiredPower = (ushort)Mathf.Min(ushort.MaxValue, need);
+                        p.RequiredPower = need;
+                    }
+                    if (p.IsPowered) watts = need;
+                }
                 ok = watts >= need;
             }
             // Diagnostic (D7 bring-up): one line whenever the result for this machine changes.
@@ -127,8 +166,8 @@ namespace FerroEngrenagem
             if (!hadPrev || prev.Value != ok)
             {
                 Log.Out(FerroEngrenagemMod.LogPrefix + "power " + te.blockValue.Block.GetBlockName() + " at " + pos +
-                        ": motors=" + motors + " powered=" + poweredMotors + " watts=" + watts + "/" + need +
-                        " world=" + (world != null) + " -> " + (ok ? "ON" : "OFF"));
+                        " rot=" + te.blockValue.rotation + " socket=" + socket + ": motor=" + motor +
+                        " watts=" + watts + "/" + need + " -> " + (ok ? "ON" : "OFF"));
             }
             poweredCache[pos] = new KeyValuePair<float, bool>(now, ok);
             return ok;

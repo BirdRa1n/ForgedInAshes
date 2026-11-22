@@ -332,6 +332,22 @@ aqui fica só o que foi medido/verificado.
   - Limite conhecido: só funciona no host/single-player (no cliente MP o `PowerItem` está no servidor).
   - Manivelas colocadas antes da mudança não têm tile entity de gerador: recolher e colocar de novo.
 
+## 2026-11-22 — D7: encaixe fixo do motor (socket) + marcação
+
+- Pedido do usuário: o motor continua ocupando um bloco, mas só "pluga" numa posição específica da máquina, e
+  essa posição aparece destacada quando o motor está na mão.
+- `PowerGate.SocketPos` (PowerGatePatches.cs): célula vizinha à pegada da máquina no lado `FeMotorSide`
+  (back|front|left|right, padrão back = -Z local), na camada mais baixa, coluna do meio (à esquerda do meio em
+  larguras pares). Células da multiblock vêm de `multiBlockPos.pos` (locais); rotação igual ao vanilla
+  (`MultiBlockArray.Get`: `shape.GetRotation(bv) * local`, arredondado).
+- Removidos a busca em caixa (SEARCH=3) e o `OwnerOf`: um encaixe pertence a uma máquina só.
+- O motor no encaixe consome o `FeMinPower` da máquina (`PowerItem.RequiredPower` ajustado), então 30 W da
+  manivela não tocam máquinas de 60/90 W.
+- `MotorSocketMarker.cs`: segurando o motor, contorno pulsante (LineRenderer, shader Sprites/Default) no encaixe
+  das máquinas num raio de 7 blocos: verde livre, ciano motor já plugado, vermelho ocupado.
+- Diagnóstico no log: `power <máquina> at <pos> rot=<r> socket=<pos>: motor= watts= -> ON/OFF`.
+- A confirmar no jogo: qual lado é a "traseira" visual de cada modelo (ajustável por `FeMotorSide` no XML).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
