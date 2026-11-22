@@ -254,6 +254,9 @@ aqui fica só o que foi medido/verificado.
       `craft_area` vazio para o token `player` → ~211 receitas de inventário. Patch: só `workbench`.
     - Manivela: `FeCrankStaminaPerSecond` 25 → 40 (a regeneração de estamina continua durante o giro).
     - Forja: pelo filtro, só restam as 6 receitas internas de fundição; pedir print ao usuário.
+    - Prints do usuário (após o patch): Bancada só com as 19 da fase 4 (Betoneira, Estação Química, Drone/
+      Marreta/Torreta robóticos, veículos e chassis); Forja só com as 6 de fundição (Areia triturada, Chumbo,
+      Ferro, Latão, Pedra pequena, Solo argiloso). **Remapeamento confirmado no jogo.** Esconder as duas: F3-T07.
 
 ## Próximo passo (antigo, mantido para histórico)
 
