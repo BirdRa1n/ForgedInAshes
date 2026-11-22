@@ -83,6 +83,26 @@ namespace FerroEngrenagem
             return result;
         }
 
+        // Crouch radial (user, 2026-11-22): only "open" (Flywheel slots) and "take". No on/off: cranking turns it
+        // on and the generator turns itself off when the cranked fuel runs out.
+        // Vanilla BlockPowerSource enables "take" only inside the player's OWN land claim (IsMyLandProtectedBlock,
+        // IL 3.4.0 b10) and with TakeDelay > 0; the crank can be taken anywhere the player could build
+        // (CanPlaceBlockAt: not inside someone else's claim).
+        public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue,
+                                                                           Vector3i _blockPos,
+                                                                           EntityAlive _entityFocusing)
+        {
+            BlockActivationCommand[] vanilla = base.GetBlockActivationCommands(_world, _blockValue, _blockPos,
+                                                                              _entityFocusing);
+            if (vanilla == null || vanilla.Length < 3) return vanilla;   // no tile entity: Empty
+            TileEntityPowerSource te = _world.GetTileEntity(_blockPos) as TileEntityPowerSource;
+            bool canBuild = _world.CanPlaceBlockAt(_blockPos, _world.GetGameManager().GetPersistentLocalPlayer(), false);
+            BlockActivationCommand open = vanilla[0];
+            BlockActivationCommand take = vanilla[2];
+            take.enabled = te != null && te.IsPlayerPlaced && canBuild && TakeDelay > 0f;
+            return new BlockActivationCommand[] { open, take };
+        }
+
         public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
                                                                   BlockValue _blockValue, BlockEntityData _ebcd)
         {
@@ -226,7 +246,14 @@ namespace FerroEngrenagem
             }
             if (gen == null)
             {
-                BlockFeCrank.Diag("no PowerGenerator on this client (multiplayer client?) at " + pos);
+                // Either a multiplayer client (the PowerItem lives on the server) or a crank placed by an older
+                // build whose saved power item is not a generator (e.g. the battery-bank test version).
+                PowerItem item = te.GetPowerItem();
+                BlockFeCrank.Diag("no PowerGenerator at " + pos + " (power item: "
+                                  + (item == null ? "none" : item.GetType().Name) + ")");
+                prompt = item == null
+                    ? Text("feCrankClientOnly", "Turning the Crank works only for the host for now")
+                    : Text("feCrankReplace", "Old Crank: pick it up (crouch + E) and place it again");
                 return;
             }
 

@@ -34,6 +34,7 @@ feCrankDesc,blocks,Block,,,,"Hold your Activate key on it to turn it: it stores 
 feCrankHold,blocks,Block,,,,Hold {0} to turn the Crank ({1}% stored),,,,,,,,,Segure {0} para girar a Manivela ({1}% guardado),,,,
 feCrankTurning,blocks,Block,,,,Turning the Crank... {0}% stored,,,,,,,,,Girando a Manivela... {0}% guardado,,,,
 feCrankTired,blocks,Block,,,,Too tired to turn the Crank,,,,,,,,,Cansado demais para girar a Manivela,,,,
+feCrankReplace,blocks,Block,,,,"Old Crank: pick it up (crouch + E) and place it again",,,,,,,,,"Manivela antiga: pegue-a (agache + E) e coloque de novo",,,,
 feResourceGearDesc,items,Item,,,,A toothed gear cut from an Iron Plate.\nMade in the Lathe. Used for Mechanical Parts.,,,,,,,,,Uma engrenagem dentada cortada de uma Chapa de Ferro.\nFeita no Torno. Usada em Peça mecânicas.,,,,
 feGasGenerator,blocks,Block,,,,Gas Charge Generator,,,,,,,,,Gerador de Carga a Gasolina,,,,
 feGasGeneratorDesc,blocks,Block,,,,Burns Gas Cans to make Charge.\nNeeds at least one Engine installed: each makes 2 Charge per 5 Gas Cans.,,,,,,,,,Queima Galões de combustível para fazer Carga.\nPrecisa de pelo menos um Motor instalado: cada um faz 2 Cargas a cada 5 galões.,,,,

@@ -24,6 +24,25 @@ namespace FerroEngrenagem
         }
     }
 
+    // The crank's "fuel" is cranked energy, not gasoline: hide the stats row that shows it with the gas-can icon
+    // ("{fueltitle}: {fuel}/{maxfuel}") and the Refuel button; both are visible="{showfuel}" in windows.xml
+    // (windowPowerSourceStats). The stored energy is shown in the crank's own prompt (Crank.cs).
+    [HarmonyPatch(typeof(XUiC_PowerSourceStats), "GetBindingValueInternal")]
+    public static class Patch_PowerSourceStats_HideCrankFuel
+    {
+        public static void Postfix(XUiC_PowerSourceStats __instance, ref string value, string bindingName,
+                                   ref bool __result)
+        {
+            if (bindingName != "showfuel") return;
+            TileEntityPowerSource te = __instance.TileEntity;
+            if (te != null && te.blockValue.Block is BlockFeCrank)
+            {
+                value = "false";
+                __result = true;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(XUiC_PowerSourceStats), "BtnRefuel_OnPress")]
     public static class Patch_PowerSourceStats_Refuel
     {

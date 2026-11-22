@@ -17,6 +17,8 @@ import bpy
 from mathutils import Matrix, Vector
 
 AXLE_Z = 0.62          # crank axle height
+BAT_POS = Vector((0.35, 0.0, 0.0))         # battery compartment center (x, y)
+INS_POS = Vector((0.35, -0.10, 0.64))      # insulator tip; WireOffset (wire anchor) sits just above
 DYN = Vector((0.0, 0.42, 0.17))   # dynamo pulley center
 FRONT_Y, BACK_Y = -0.30, 0.30     # A-frames
 
@@ -29,9 +31,12 @@ MATS = {
     "feCrank_Leather": ((0.10, 0.06, 0.04), 0.70, 0.0),
     "feCrank_PortIn":  ((0.16, 0.48, 0.16), 0.60, 0.20),
     "feCrank_PortOut": ((0.85, 0.45, 0.06), 0.60, 0.20),
+    "feCrank_Battery": ((0.05, 0.05, 0.06), 0.50, 0.00),
+    "feCrank_Porcelain": ((0.88, 0.87, 0.82), 0.25, 0.00),
+    "feCrank_Red": ((0.65, 0.06, 0.05), 0.50, 0.00),
 }
 MI = {name: i for i, name in enumerate(MATS)}
-WOOD, IRON, RUST, COPPER, LEATHER, PORT_IN, PORT_OUT = (MI[n] for n in MATS)
+WOOD, IRON, RUST, COPPER, LEATHER, PORT_IN, PORT_OUT, BATTERY, PORCELAIN, RED = (MI[n] for n in MATS)
 
 
 def make_materials():
@@ -166,14 +171,35 @@ def build_base():
     for s in (-1, 1):
         beam(bm, (s * (small_r + 0.005), DYN.y, DYN.z),
              (s * (big_r + 0.005), DYN.y, AXLE_Z), 0.01, 0.03, LEATHER)
-    # Carga collector box on the right side (its face holds the output port).
-    box(bm, (0.20, 0.30, 0.34), (0.34, 0.0, 0.23), IRON)
-    box(bm, (0.22, 0.32, 0.02), (0.34, 0.0, 0.41), RUST)
-    for y in (-0.12, 0.12):
-        cyl(bm, 0.011, 0.012, (0.34, y, 0.425), "Z", IRON, segs=6)
-    cyl(bm, 0.012, 0.03, (0.26, 0.10, 0.30), "X", COPPER, segs=8)
-    beam(bm, (0.0, 0.13, 0.255), (0.0, 0.13, 0.30), 0.02, 0.02, LEATHER)   # cable from the dynamo
-    beam(bm, (0.0, 0.13, 0.30), (0.245, 0.10, 0.30), 0.02, 0.02, LEATHER)
+    # Battery compartment on the right side (D7: the crank charges car batteries, user 2026-11-22).
+    bx, by = BAT_POS.x, BAT_POS.y
+    box(bm, (0.24, 0.30, 0.02), (bx, by, 0.07), RUST)                       # floor plate
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(bm, (0.02, 0.02, 0.30), (bx + sx * 0.11, by + sy * 0.14, 0.22), IRON)   # corner posts
+    for z in (0.20, 0.36):
+        for sy in (-1, 1):
+            box(bm, (0.24, 0.015, 0.02), (bx, by + sy * 0.14, z), IRON)
+        for sx in (-1, 1):
+            box(bm, (0.015, 0.30, 0.02), (bx + sx * 0.11, by, z), IRON)
+    box(bm, (0.18, 0.24, 0.16), (bx, by, 0.16), BATTERY)                    # the car battery
+    box(bm, (0.17, 0.23, 0.01), (bx, by, 0.245), RUST)                      # label band
+    for sy, mat in ((-0.08, RED), (0.08, BATTERY)):
+        cyl(bm, 0.015, 0.03, (bx, by + sy, 0.255), "Z", mat, segs=8)       # terminals
+        cyl(bm, 0.011, 0.012, (bx, by + sy, 0.276), "Z", COPPER, segs=8)
+    # Cables: dynamo -> battery (+), battery (-) -> frame.
+    beam(bm, (0.0, 0.13, 0.255), (0.0, 0.13, 0.30), 0.02, 0.02, LEATHER)
+    beam(bm, (0.0, 0.13, 0.30), (bx, by + 0.08, 0.29), 0.018, 0.018, RED)
+    beam(bm, (bx, by - 0.08, 0.28), (bx - 0.11, by - 0.14, 0.36), 0.016, 0.016, LEATHER)
+    # Transmitter: insulator post on the compartment's top frame; the wire attaches at its tip.
+    tx, ty = INS_POS.x, INS_POS.y
+    box(bm, (0.10, 0.06, 0.02), (tx, ty, 0.37), IRON)                       # bracket
+    cyl(bm, 0.012, INS_POS.z - 0.37, (tx, ty, (INS_POS.z + 0.37) / 2), "Z", IRON, segs=8)
+    for k in range(3):
+        cyl(bm, 0.038, 0.02, (tx, ty, 0.45 + k * 0.05), "Z", PORCELAIN, segs=14, r2=0.026)
+    cyl(bm, 0.022, 0.03, (tx, ty, INS_POS.z - 0.01), "Z", PORCELAIN, segs=12)
+    cyl(bm, 0.014, 0.02, (tx, ty, INS_POS.z + 0.012), "Z", COPPER, segs=8)   # wire clamp
+    beam(bm, (bx, by + 0.08, 0.28), (tx, ty, 0.40), 0.014, 0.014, RED)        # battery (+) -> insulator
     for kind, pt, nrm, depth in PORTS:
         port(bm, pt, nrm, kind, depth)
     return to_object(bm, "feCrank_Base", bevel=0.004)
@@ -278,14 +304,15 @@ def add_port_empties(prefix, base, col):
         e.parent = base
 
 # Output only: Carga (feCharge) leaves through a collector box on the right side.
-PORTS = [("Out", (0.5, 0.0, PORT_Z), (1, 0, 0), 0.06)]
+# No conveyor port: the crank's output is electricity (wire from the insulator), not items.
+PORTS = []
 PORT_DARK = LEATHER
 
 
 # ---------------------------------------------------------------- scene
 def main():
     for ob in list(bpy.data.objects):
-        if ob.name.startswith("feCrank") or ob.name == "Cube":
+        if ob.name.startswith("feCrank") or ob.name.startswith("WireOffset") or ob.name == "Cube":
             bpy.data.objects.remove(ob, do_unlink=True)
     for me in list(bpy.data.meshes):
         if me.users == 0:
@@ -307,6 +334,12 @@ def main():
         child.matrix_parent_inverse = base.matrix_world.inverted()
 
     add_port_empties("feCrank", base, col)
+    wire = bpy.data.objects.new("WireOffset", None)   # name read by TileEntityPowered.set_BlockTransform
+    wire.empty_display_type = "SPHERE"
+    wire.empty_display_size = 0.03
+    wire.location = INS_POS + Vector((0, 0, 0.03))
+    col.objects.link(wire)
+    wire.parent = base
 
     bpy.context.view_layer.update()
     lo = Vector((1e9,) * 3)

@@ -70,6 +70,11 @@ public static class FeBuild
             inst.transform.SetParent(root.transform, false);
             inst.transform.localPosition = new Vector3(0f, -0.5f, 0f);
 
+            // Powered blocks: TileEntityPowered.set_BlockTransform uses blockTransform.Find("WireOffset"),
+            // i.e. a DIRECT child of the prefab root, as the wire anchor. Move it up there.
+            var wire = FindDeep(inst.transform, "WireOffset");
+            if (wire != null) wire.SetParent(root.transform, true);
+
             // One solid box around everything that renders, in root space.
             var rends = root.GetComponentsInChildren<Renderer>();
             if (rends.Length > 0)
@@ -89,6 +94,17 @@ public static class FeBuild
             Debug.Log($"[FE] prefab {path}");
         }
         AssetDatabase.SaveAssets();
+    }
+
+    static Transform FindDeep(Transform t, string name)
+    {
+        if (t.name == name) return t;
+        for (int i = 0; i < t.childCount; i++)
+        {
+            var r = FindDeep(t.GetChild(i), name);
+            if (r != null) return r;
+        }
+        return null;
     }
 
     [MenuItem("FerroEngrenagem/3. Build Bundle")]

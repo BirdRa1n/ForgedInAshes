@@ -6,7 +6,7 @@ import result in the game's Unity 2022.3.62f2 project is NOT verified yet.
 import bpy
 
 DIR = r"E:\ModGameDev\ForgedInAshes\Art\feCrank"
-objs = [o for o in bpy.data.objects if o.name.startswith("feCrank_")]
+objs = [o for o in bpy.data.objects if o.name.startswith("feCrank_") or o.name == "WireOffset"]
 
 bpy.ops.wm.save_as_mainfile(filepath=DIR + r"\feCrank.blend")
 
