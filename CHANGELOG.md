@@ -21,3 +21,6 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 - `ART_BRIEF.md`: briefing para a sessão de arte em paralelo.
 - F1-T05: desmanche de blocos não dá mais Mechanical Parts nem Spring (drops `Harvest` removidos, drops `Destroy` viram Sucata de ferro); loot de MP e Spring cortado pela metade; ferramenta `tools/loot_scale.py`.
 - F1-T06: fatia vertical testada em sobrevivência e aprovada pelo usuário. **Fase 1 concluída.**
+
+### Fase 2
+- F2-T01: pesquisa de energia (P02, P03, P04 resolvidas no papel); proposta de Rota A 100% XML; ferramenta `tools/il_inspect.ps1`.

@@ -261,6 +261,16 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 ### Fase 2 — Energia inicial (dificuldade 2 na rota A, 4 na rota B)
 
 - **F2-T01** Resolver P02, P03, P04 lendo `blocks.xml`, `items.xml`, `buffs.xml` e (se preciso) o código decompilado. Escrever um resumo curto das descobertas aqui.
+  **Concluída (2026-11-22). Resumo** (fonte: XMLs vanilla + IL via `tools/il_inspect.ps1`):
+  1. **P02:** nenhuma estação (`Workstation`/`Forge`/`Campfire`) tem propriedade de energia. A rede elétrica só existe em classes próprias (`Generator`, `BatteryBank`, `SolarPanel`, `Powered*`). Ligar máquina à rede = C#.
+  2. **P03 — combustível de estação:** qualquer item/bloco com `FuelValue` serve (`ItemClass.GetFuelValue`, `XUiC_WorkstationFuelGrid`, `TileEntityWorkstation.GetFuelTime`); **não há filtro por estação em XML**. Restringir a `feCharge` exige Harmony.
+  3. **P03 — alternativa em XML:** `feCharge` como **ingrediente** das receitas da Prensa/Torno (ex.: Chapa = 2 Ferro fundido + 1 Carga). Força o uso de energia sem filtro de combustível.
+  4. **P03 — conversores por XML:** a classe `Collector` (coletor de orvalho, galinheiro) aceita **só** os itens de `FuelTypes="{nome,item,…}"` e converte em `OutputTypes` ao longo do tempo (1000 ticks = 1 h de jogo). Serve para **E02 Carvoeira** (Madeira → Carvão Vegetal) e **E03 Gerador a Carvão** (Carvão → Carga). Limite: `CollectorType` é enum (`DewCollector`, `Apiary`, `ChickenCoop`), então a máquina herda os multiplicadores de sandbox desse tipo.
+  5. **P03 — Generator Bank:** reabastece com o primeiro item de tag `gasoline` (`XUiC_PowerSourceStats`, `ItemClass.GetItemWithTag`). Não queima Carvão Vegetal sem C#.
+  6. **P04 — estamina:** golpe corpo a corpo gasta estamina via `passive_effect name="StaminaLoss" tags="primary"` (machado de pedra: 8).
+  7. **P04 — dar item:** não existe `MinEventAction` de item, mas `triggered_effect action="CallGameEvent"` chama uma `action_sequence` do `gameevents.xml` com `<action class="AddItems">` (vanilla: `action_give_silver`).
+  8. **P04 — Manivela como bloco:** o vanilla faz o sino da igreja reagir a golpes: buff sempre ativo `buffStatusCheck01` + `trigger="onSelfDamagedBlock"` + `requirement name="TriggerHasTags" tags="churchbell"`. Mesmo padrão: bloco `feCrank` com tag própria; cada golpe gasta estamina e chama um GameEvent que dá `feCharge`. Cuidado: o golpe também causa dano ao bloco (usar `MaxDamage` alto). Multiplayer não verificado (F2-T06).
+  **Proposta de Rota A 100% XML:** `feCharge`; E01 = bloco Manivela (golpe → Carga); E02 e E03 = `Collector`; Prensa/Torno exigem Carga como ingrediente. Decisão D6 com o usuário.
 - **F2-T02** E02 Carvoeira + I01 Carvão Vegetal.
 - **F2-T03** Rota A: item `feCharge`; E03 como workstation `Carvão → Carga`; M02 e M03 passam a exigir `feCharge` como combustível.
 - **F2-T04** E01 Manivela pela opção de rota A mais viável (seção 7). Se nenhuma for viável em XML, parar e discutir a rota B com o usuário.
@@ -363,6 +373,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | D3 | Máquinas novas dependem de perks/livros? | Sim, as da fase 3+ atrás de livros existentes; M01–M03 livres |
 | D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | Decidir depois do teste da fase 2 |
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
+| D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | Ingrediente (rota A pura, sem DLL, sem EAC desligado) |
 
 ---
 
@@ -371,9 +382,9 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | ID | Pergunta | Como verificar | Fase | Status |
 |---|---|---|---|---|
 | P01 | Formato exato do `ModInfo.xml` na versão instalada | Copiar de um mod que funcione nessa versão | 0 | **Resolvida:** copiado de `Mods/0_TFP_Harmony/ModInfo.xml` (raiz `<xml>`, campos `Name`, `DisplayName`, `Description`, `Author`, `Version`, `Website`). Confirmado no jogo no F0-T06 |
-| P02 | Alguma workstation vanilla exige energia? | Buscar em `blocks.xml` e no código (workstation × powered) | 2 | Aberta |
-| P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | Aberta |
-| P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | Aberta |
+| P02 | Alguma workstation vanilla exige energia? | Buscar em `blocks.xml` e no código (workstation × powered) | 2 | **Resolvida:** não (F2-T01, item 1) |
+| P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | **Resolvida:** estação não restringe em XML; `Collector` restringe; gerador só aceita tag `gasoline` (F2-T01, itens 2–5) |
+| P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | **Resolvida no papel:** golpe gasta estamina + `onSelfDamagedBlock`/`TriggerHasTags` + `CallGameEvent` → `AddItems` (F2-T01, itens 6–8); falta teste no jogo |
 | P05 | Mechanical Parts, Spring e Engine têm receita? De onde vêm? | `find_sources.py` (receitas, loot, **salvage em `blocks.xml`**, traders, quests) | 0 | **Resolvida** (detalhes em 12.1) |
 | P06 | De onde vêm o painel solar e as Electrical Parts? | `find_sources.py` | 4 | Aberta |
 | P07 | Versão da Unity do jogo | Propriedades do executável / documentação de modding | 6 | **Resolvida:** 2022.3.62f2 |
