@@ -324,10 +324,11 @@
 	<set xpath="/recipes/recipe[@name='switch'][@craft_area='workbench']/@craft_area">feElectronics</set>
 	<set xpath="/recipes/recipe[@name='tripwirepost'][@craft_area='workbench']/@craft_area">feElectronics</set>
 	<set xpath="/recipes/recipe[@name='tvBlockVariantHelper'][@craft_area='workbench']/@craft_area">feElectronics</set>
-	<!-- -> feFoundry (12) -->
+	<!-- -> feFoundry (13) -->
 	<set xpath="/recipes/recipe[@name='drinkJarEmpty'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='glassBulletproofBlockVariantHelper'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='glassBlockVariantHelper'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
+	<set xpath="/recipes/recipe[@name='resourceArrowHeadSteelAP'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='resourceCement'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='resourceForgedSteel'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
 	<set xpath="/recipes/recipe[@name='resourceScopeLens'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">feFoundry</set>
@@ -527,14 +528,13 @@
 	<set xpath="/recipes/recipe[@name='modVehiclePlow'][@craft_area='workbench']/@craft_area">feModBench</set>
 	<set xpath="/recipes/recipe[@name='modVehicleArmor'][@craft_area='workbench']/@craft_area">feModBench</set>
 	<set xpath="/recipes/recipe[@name='modVehicleStorage'][@craft_area='workbench']/@craft_area">feModBench</set>
-	<!-- -> fePress (13) -->
+	<!-- -> fePress (12) -->
 	<set xpath="/recipes/recipe[@name='ammoDartIron'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='ironBars'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='ironBarsCentered'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='ironBarsCNR'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='metalTrussingIBeamBlockVariantHelper'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='resourceArrowHeadIron'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
-	<set xpath="/recipes/recipe[@name='resourceArrowHeadSteelAP'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='resourceBuckshot'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='resourceBulletCasing'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
 	<set xpath="/recipes/recipe[@name='resourceBulletTip'][@craft_area='forge'][not(contains(@tags,'use_smelter'))]/@craft_area">fePress</set>
@@ -561,7 +561,6 @@
 	<remove xpath="/recipes/recipe[@name='ironBarsCNR'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='metalTrussingIBeamBlockVariantHelper'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceArrowHeadIron'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
-	<remove xpath="/recipes/recipe[@name='resourceArrowHeadSteelAP'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBuckshot'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBulletCasing'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>
 	<remove xpath="/recipes/recipe[@name='resourceBulletTip'][@craft_area='forge'][contains(@tags,'use_smelter')]"/>

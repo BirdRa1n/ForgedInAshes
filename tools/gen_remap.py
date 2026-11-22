@@ -104,7 +104,26 @@ def main() -> int:
         s = s.replace("</configs>", block + "\n</configs>")
     p.write_text(s, encoding="utf-8")
     print(f"enabled {enabled}: {len(moves)} <set>, {len(removes)} <remove>")
-    return 0
+    return check_tools()
+
+
+def check_tools() -> int:
+    """Every recipe with craft_tool must land in a station whose Workstation/Modules has 'tools'."""
+    recipes, _ = fe.patched("recipes.xml")
+    blocks, _ = fe.patched("blocks.xml")
+    modules = {}
+    for bl in blocks.getroot().iter("block"):
+        for cls in bl.findall("property"):
+            if cls.get("class") == "Workstation":
+                m = {x.get("name"): x.get("value") for x in cls.findall("property")}
+                for area in (m.get("CraftingAreaRecipes") or "").split(","):
+                    modules[area.strip()] = m.get("Modules", "")
+    bad = [(r.get("name"), r.get("craft_area"), r.get("craft_tool")) for r in recipes.getroot().iter("recipe")
+           if r.get("craft_tool") and (r.get("craft_area") or "").startswith("fe")
+           and "tools" not in modules.get(r.get("craft_area"), "")]
+    for b in bad:
+        print("ERROR: recipe needs a tool but its station has no tool slots:", b)
+    return 1 if bad else 0
 
 
 if __name__ == "__main__":

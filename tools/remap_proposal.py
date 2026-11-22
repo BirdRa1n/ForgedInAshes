@@ -43,6 +43,8 @@ OVERRIDES = {  # exact recipe name -> (target, note); checked before the prefix 
     "m60Turret": ("M12", "turret"),
     "tvBlockVariantHelper": ("M12", "electrical decor"),
     "toolForgeCrucible": ("M01", "forge tool"),
+    # needs craft_tool=toolForgeCrucible: only the Foundry has tool slots (F3-T03 check)
+    "resourceArrowHeadSteelAP": ("M01", "needs the crucible (craft_tool)"),
     "cntApiary": ("M11", "section 10: apiary/dew collector -> Kitchen"),
     "cntDewCollector": ("M11", "section 10: apiary/dew collector -> Kitchen"),
 }
