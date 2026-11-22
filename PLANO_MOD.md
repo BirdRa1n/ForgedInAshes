@@ -8,7 +8,10 @@
 |---|---|
 | Versão do jogo | 3.4.0 (B10), build Steam `26309840` |
 | Instalação | `C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die` (também em `tools/game_path.txt`, fora do git) |
-| Unity do jogo | 2022.3.62f2 (versão do `7DaysToDie.exe`) |
+| Unity do jogo | 2022.3.62f2 (versão do `7DaysToDie.exe`), backend Mono |
+| Log do jogo | `%APPDATA%\7DaysToDie\logs\output_log_client__<data>.txt` |
+| Saves | `%APPDATA%\7DaysToDie\Saves` (backup: `um backup create ... --name 7dtd-saves`) |
+| Sem EAC | Opção oficial `-noeac` (o launcher já usa); ver `MODLOG.md` |
 | Harmony | `Mods/0_TFP_Harmony` v1.1.0.4 (traz `0Harmony.dll`, `TfpHarmony.dll`) |
 | Localização vanilla | `Data/Config/Localization.csv` (CSV, não `.txt`). Colunas: `Key,File,Type,UsedInMainMenu,NoTranslate,KeepLoaded,english,Context / Alternate Text,german,spanish,french,italian,japanese,koreana,polish,brazilian,...`. PT-BR = coluna `brazilian` |
 | XUi vanilla | `Data/Config/XUi_InGame/` (`windows.xml`, `xui.xml`, `styles.xml`, `templates.xml`), `XUi_Menu/`, `XUi_Common/` |
