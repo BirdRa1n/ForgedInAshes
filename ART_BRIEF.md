@@ -49,6 +49,33 @@ e das máquinas acima. 160×160 RGBA, nome do arquivo = nome do item (`feResourc
 ### 3. Depois (fases 2–4): `E01` Manivela, `E02` Carvoeira, `E03` Gerador a Carvão, `I01` Carvão Vegetal,
 `I02` Volante de Inércia — ver tabelas em `PLANO_MOD.md`.
 
+## Integração pendente (auditoria de 2026-11-22, sessão de XML)
+
+Já no jogo: **feCrank** (Manivela), via `Resources/ferroengrenagem.unity3d` + `FeBuild.cs`.
+
+Prontos em `Art/` mas **fora do bundle** (o `FeBuild.cs` só tem `Blocks = { "feCrank" }`):
+
+| Bloco | Ocupa (`MultiBlockDim`) | Modelo usado hoje no jogo |
+|---|---|---|
+| `feFoundry` | 2×2×1 | forja vanilla |
+| `fePress` | 2×2×1 | bancada de combinar vanilla |
+| `feLathe` | 1×1×1 | mesa de serra vanilla |
+| `feSawmill` | 1×1×1 | mesa de serra vanilla |
+| `feCharcoalKiln` | 2×2×1 | forja quebrada vanilla |
+| `feCoalGenerator` | 1×1×1 | gerador vanilla |
+
+Pedido para quem tem o Unity 2022.3.62f2:
+1. Acrescentar esses nomes ao array `Blocks` do `Art/UnityProject/Assets/Editor/FeBuild.cs` e rodar **FerroEngrenagem > Build All**.
+2. Commitar o `Mods/FerroEngrenagem/Resources/ferroengrenagem.unity3d` novo.
+3. Avisar a sessão de XML, que troca em `blocks.xml`, para cada bloco:
+   `<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?<bloco>Prefab"/>`
+   **e** ajusta o `ModelOffset` ao pivô do prefab novo. O padrão do jogo é `(0, 0.5, 0)` quando a propriedade
+   não existe; os blocos que hoje copiam um modelo vanilla podem ter `0,0,0` ou nada (ver MODLOG, bug da
+   Cozinha/Serraria afundadas). Dizer qual pivô o prefab usa (base no chão ou centro).
+
+Outros: `feFlywheel` é **item** (precisa de `Meshfile`, não de `Model`; formato ainda não verificado);
+`feConveyor` é da logística (fase 5), sem bloco no XML ainda. As 10 máquinas da fase 3 ainda não têm modelo.
+
 ## Integração no jogo (ainda NÃO verificada — fazer junto com a sessão de XML)
 
 - Modelos de mod entram como **asset bundle** do Unity 2022.3.62f2 e o bloco aponta `Model` para o bundle.
