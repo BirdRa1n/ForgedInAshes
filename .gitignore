@@ -17,6 +17,9 @@ src/**/obj/
 *.user
 *.suo
 
+# DLL do mod: gerada por tools/build.ps1 (vai no pacote de release, não no git)
+Mods/FerroEngrenagem/*.dll
+
 # DLLs do jogo nunca vão para o repositório (não redistribuir)
 src/**/GameRefs/
 

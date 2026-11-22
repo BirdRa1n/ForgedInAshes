@@ -373,7 +373,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | D3 | Máquinas novas dependem de perks/livros? | Sim, as da fase 3+ atrás de livros existentes; M01–M03 livres |
 | D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | Decidir depois do teste da fase 2 |
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
-| D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | Ingrediente (rota A pura, sem DLL, sem EAC desligado) |
+| D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | **Decidido (2026-11-22): combustível com Harmony.** EAC não é restrição para o mod (usuário). Prensa/Torno ganham slot de combustível; patch C# faz aceitarem só `feCharge`. Manivela, Carvoeira e Gerador a Carvão continuam em XML |
 
 ---
 
@@ -393,7 +393,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | P10 | Equilíbrio de estamina × carga da manivela | Teste no jogo (F2-T07) | 2 | Aberta |
 | P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Parcial: lista de fontes em 12.1; falta testar no jogo |
 | P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `find_sources.py --search` + `Localization.csv` | 0 | **Resolvida** (tabela em 12.2) |
-| P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | Aberta |
+| P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | **Resolvida no código:** `Mod.LoadAssemblies` carrega todo `*.dll` da **raiz** da pasta do mod; `Mod.InitModCode` instancia a classe que implementa `IModApi` e chama `InitMod(Mod)`. Com EAC ligado: aviso "AntiCheat needs to be disabled", ou mod pulado se `SkipWithAntiCheat=true`. Build: `tools/build.ps1` (csc .NET 4 / C# 5, refs da instalação). Falta confirmar no jogo |
 | P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes de criar a primeira XUi própria | 2 | Adiada (F1 não precisa de XUi; ver F1-T03) |
 | P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar com EAC ligado | 0 | Parcial: funciona com `-noeac` (F0-T06); com EAC ligado ainda não testado |
 

@@ -38,6 +38,8 @@ def main() -> int:
             print(f"  {n}: {line.strip()}")
             if "Loaded Mod" in line and MOD in line:
                 mod_loaded = True
+        elif f"[{MOD}]" in line or ("[MODS]" in line and "code in mod" in line and MOD in line):
+            print(f"  {n}: {line.strip()[:300]}")
         elif any(b in line for b in BASELINE):
             continue
         elif " ERR " in line or " EXC " in line or (" WRN " in line and KEYWORDS.search(line)):
