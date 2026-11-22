@@ -257,6 +257,7 @@ aqui fica só o que foi medido/verificado.
     - Prints do usuário (após o patch): Bancada só com as 19 da fase 4 (Betoneira, Estação Química, Drone/
       Marreta/Torreta robóticos, veículos e chassis); Forja só com as 6 de fundição (Areia triturada, Chumbo,
       Ferro, Latão, Pedra pequena, Solo argiloso). **Remapeamento confirmado no jogo.** Esconder as duas: F3-T07.
+    - Manivela com `FeCrankStaminaPerSecond=40`: aprovada pelo usuário.
 
 ## Próximo passo (antigo, mantido para histórico)
 
