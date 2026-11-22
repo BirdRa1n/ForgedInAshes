@@ -240,6 +240,8 @@ Cada tarefa tem ID `F<fase>-T<n>`. Ao terminar uma tarefa: rodar `check_xpath.py
 
 **Pronto quando:** o mod carrega sem erros e o item de teste aparece; P01 e P05 resolvidas.
 
+**Status: CONCLUÍDA em 2026-11-22.** Log: `Loaded Mod: FerroEngrenagem (0.1.0)` e `Loading localization from mod: FerroEngrenagem`, sem erros do mod. No jogo (criativo, idioma brazilian), `feTestItem` aparece como "Item de Teste Ferro & Engrenagem" (ID 1435), com o ícone do Mechanical Parts tingido de laranja.
+
 ### Fase 1 — Fatia vertical em XML, sem energia (dificuldade 2)
 
 Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo de conteúdo.
@@ -365,7 +367,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 
 | ID | Pergunta | Como verificar | Fase | Status |
 |---|---|---|---|---|
-| P01 | Formato exato do `ModInfo.xml` na versão instalada | Copiar de um mod que funcione nessa versão | 0 | **Resolvida:** copiado de `Mods/0_TFP_Harmony/ModInfo.xml` (raiz `<xml>`, campos `Name`, `DisplayName`, `Description`, `Author`, `Version`, `Website`). Confirmar no F0-T06 que carrega |
+| P01 | Formato exato do `ModInfo.xml` na versão instalada | Copiar de um mod que funcione nessa versão | 0 | **Resolvida:** copiado de `Mods/0_TFP_Harmony/ModInfo.xml` (raiz `<xml>`, campos `Name`, `DisplayName`, `Description`, `Author`, `Version`, `Website`). Confirmado no jogo no F0-T06 |
 | P02 | Alguma workstation vanilla exige energia? | Buscar em `blocks.xml` e no código (workstation × powered) | 2 | Aberta |
 | P03 | Dá para criar combustível novo e restringir o combustível aceito por uma workstation? E pelo Generator Bank? | Propriedades de combustível da Forja e do gerador em `blocks.xml` + código | 2 | Aberta |
 | P04 | Como fazer uma ação contínua que gasta estamina? | Ações de item com custo de estamina em `items.xml`, `buffs.xml`; mods de referência | 2 | Aberta |
@@ -379,7 +381,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `find_sources.py --search` + `Localization.csv` | 0 | **Resolvida** (tabela em 12.2) |
 | P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | Aberta |
 | P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes do F1-T03 | 1 | Aberta |
-| P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar no F0-T06 com EAC ligado e desligado | 0 | Aberta |
+| P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar com EAC ligado | 0 | Parcial: funciona com `-noeac` (F0-T06); com EAC ligado ainda não testado |
 
 ### 12.1 Fontes de Mechanical Parts, Spring e Engine (F0-T05, jogo 3.4.0 B10)
 

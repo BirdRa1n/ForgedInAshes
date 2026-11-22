@@ -57,7 +57,19 @@ aqui fica só o que foi medido/verificado.
   - `RepairItems` dentro de blocos usa nomes de item como `name` de propriedade: é custo de reparo, não fonte.
   - "Wood Log" não existe; madeira é só `resourceWood`.
 
+- F0-T06 **verificado no jogo** (13:04, `-noeac`, mundo criativo):
+  - log: `[MODS] Trying to load from folder: 'FerroEngrenagem'` → `Loaded Mod: FerroEngrenagem (0.1.0)` →
+    `[MODS] Loading localization from mod: FerroEngrenagem`; nenhum ERR/WRN do mod.
+  - tela: menu criativo, busca "test" → "Item de Teste Ferro & Engrenagem (1435) feTestItem", ícone laranja.
+  - Fatos confirmados: mod XML-only carrega por junction; `Config/Localization.csv` com o cabeçalho completo
+    vanilla funciona; a coluna `brazilian` é usada quando o idioma da plataforma é brazilian; `CustomIcon` +
+    `CustomIconTint` reaproveitam ícones vanilla.
+  - Ruído vanilla do log (ignorado por `check_log.py`): notícias remotas, Xbox Live, Discord SDK 403, Twitch 404.
+- Gotcha: no PowerShell 5.1, `Get-Content -Raw` lê UTF-8 sem BOM como ANSI e corrompe acentos ao regravar.
+  Editar arquivos com acento só pelas ferramentas de edição ou por Python.
+- **Fase 0 concluída.**
+
 ## Próximo passo
 
-F0-T06: item de teste `feTestItem` + localização; instalar com `tools/install.ps1` (junction) e o usuário
-abre o jogo com `-noeac` para confirmar que o mod carrega e o log fica limpo.
+Fase 1 — F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
+ícones vanilla). Antes do F1-T03 resolver P14 (pasta XUi do mod).

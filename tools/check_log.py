@@ -14,7 +14,8 @@ LOG_DIR = Path(os.environ.get("APPDATA", "")) / "7DaysToDie" / "logs"
 MOD = "FerroEngrenagem"
 KEYWORDS = re.compile(r"xml|xpath|locali|feTest|fe[A-Z]\w+|" + MOD, re.I)
 # Seen in a vanilla run (3.4.0 b10, no mods besides TFP_Harmony): not ours.
-BASELINE = ("Retrieving remote news file", "E_XBL_NOT_INITIALIZED")
+BASELINE = ("Retrieving remote news file", "E_XBL_NOT_INITIALIZED",
+            "[Discord][Log]", "Failed to fetch Twitch entitlements")
 
 
 def latest_log() -> Path:
