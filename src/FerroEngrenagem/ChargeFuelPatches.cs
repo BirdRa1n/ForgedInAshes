@@ -37,14 +37,6 @@ namespace FerroEngrenagem
             bool has = p != null && p.Contains(ChargeOnlyProperty);
             result = has && p.GetBool(ChargeOnlyProperty);
             cache[block.blockID] = result;
-            // Diagnostic (F3-T02 bug hunt): one line per block id, only for our blocks or when the flag is set.
-            string name = block.GetBlockName();
-            if (result || (name != null && name.StartsWith("fe")))
-            {
-                Log.Out(FerroEngrenagemMod.LogPrefix + "station '" + name + "' id=" + block.blockID +
-                        " hasProp=" + has + " raw='" + (has ? p.GetString(ChargeOnlyProperty) : "") +
-                        "' chargeOnly=" + result);
-            }
             return result;
         }
 
@@ -132,7 +124,8 @@ namespace FerroEngrenagem
                 ChargeFuel.MoveChargeToFront(___fuel);
                 return;
             }
-            // Diagnostic: a block named fe* that is NOT charge-only while burning something.
+            // Safety net (kept after the F3-T02 bug hunt): warn once if a mod station other than the Foundry
+            // burns fuel without being charge-only (e.g. a new machine missing FeChargeOnly in blocks.xml).
             Block b = __instance.blockValue.Block;
             string n = b == null ? null : b.GetBlockName();
             if (!warned && n != null && n.StartsWith("fe") && n != "feFoundry" && __instance.IsBurning)

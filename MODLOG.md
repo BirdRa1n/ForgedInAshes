@@ -219,6 +219,13 @@ aqui fica só o que foi medido/verificado.
     itens, fila, `isBurning` e `currentBurnTimeLeft`. Sem fuel module, `HandleRecipeQueue` fabrica sem queimar.
     Diagnóstico temporário no DLL: loga a decisão "chargeOnly" por bloco e avisa se um bloco fe* queima sem ser
     tratado como charge-only.
+  - Diagnóstico 16:53–16:58: `fePress` id 25033 e `feLathe` id 25034 → `hasProp=True raw='true' chargeOnly=True`
+    (igual às 10 novas); `feFoundry` → False (correto). O aviso de "fe* queimando sem charge-only" não disparou.
+    Ou seja, o patch reconhece Prensa/Torno. Falta o relato visual dos passos do teste para fechar a causa.
+  - Relato do usuário: no teste de diagnóstico a Prensa/Torno **não** fabricaram com Madeira. Causa mais provável
+    do relato anterior: tempo de queima restante de uma Carga (`currentBurnTimeLeft` é salvo no save e a estação
+    continua fabricando até ele acabar). Log por bloco removido; mantido só o aviso de segurança (uma vez por
+    sessão) para máquina fe* que queime sem `FeChargeOnly`. **F3-T02 verificada.**
 
 ## Próximo passo (antigo, mantido para histórico)
 
