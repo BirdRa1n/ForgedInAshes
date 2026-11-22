@@ -13,10 +13,10 @@ Queima Carvão Vegetal numa fornalha; o calor move um motor de ar quente que gir
 ## Medidas e orientação
 
 - **2 × 1 × 2 blocos** (largura X × profundidade Y × altura Z; proposta: `MultiBlockDim="2,2,1"` no formato X,Y,Z
-  do jogo = largura, altura, profundidade — confirmar). Caixa ocupada: X −0,99…0,99, Y −0,47…0,46, Z 0…1,96.
+  do jogo = largura, altura, profundidade — confirmar). Caixa ocupada: X −1,0…0,99, Y −0,50…0,46, Z 0…1,96.
 - Origem no centro do chão da área ocupada. A frente (porta da fornalha, mostrador) aponta para **−Y**.
-- Triângulos: 4.876 sem bevel; ~12.200 no FBX (bevel de 1 segmento aplicado na exportação). É bastante para
-  uma estação: tirar os `Bevel` antes de exportar corta para ~4.900.
+- Triângulos: 5.128 sem bevel; ~13.100 no FBX (bevel de 1 segmento aplicado na exportação). É bastante para
+  uma estação: tirar os `Bevel` antes de exportar corta para ~5.100.
 
 ## Peças
 
@@ -28,6 +28,17 @@ Queima Carvão Vegetal numa fornalha; o calor move um motor de ar quente que gir
 
 Os dois giram juntos: o pinhão gira **2× mais rápido e no sentido contrário** do virabrequim. Na fase 2, o
 volante, as engrenagens e as frestas (material `Glow`) podem servir de indicação de "ligado".
+
+## Portas de esteira
+
+Seguem o padrão de `Art/CONVEYOR_PORTS.md`:
+
+| Empty | Tipo | Posição | Onde |
+|---|---|---|---|
+| `feCoalGen_PortIn_1` | entrada (Carvão Vegetal) | (−1,0; 0; 0,25), para −X | lado esquerdo, na fornalha |
+| `feCoalGen_PortOut_1` | saída (Carga) | (0,5; −0,5; 0,25), para −Y | frente da célula direita, duto até o pedestal do dínamo |
+
+O caixote de carvão foi afastado (centro X = 0,85) para o duto de saída caber. 5.128 triângulos sem bevel.
 
 ## Materiais (provisórios)
 

@@ -13,9 +13,9 @@ por script. Forno de alvenaria em abóbada (pedra + argila, como o custo: Cobble
 ## Medidas e orientação
 
 - **2 × 1 × 2 blocos** (largura X × profundidade Y × altura Z), como o Gerador a Carvão. Caixa ocupada:
-  X −0,99…0,97, Y −0,48…0,48, Z 0…1,945.
+  X −1,0…0,97, Y −0,48…0,50, Z 0…1,945.
 - Origem no centro do chão da área ocupada. A frente (porta) aponta para **−Y**.
-- Triângulos: 3.096 sem bevel; ~10.500 no FBX (bevel de 1 segmento aplicado na exportação).
+- Triângulos: 3.348 sem bevel; ~11.400 no FBX (bevel de 1 segmento aplicado na exportação).
 
 ## Objetos
 
@@ -25,6 +25,17 @@ por script. Forno de alvenaria em abóbada (pedra + argila, como o custo: Cobble
 | `feKiln_SmokePoint` | empty (filho da base) na boca da chaminé, em (−0,35; 0,24; 1,805), seta para +Z: ponto para um efeito de fumaça |
 
 Para "ligado/desligado": as partes com o material `feKiln_Glow` (emissivo) podem ser trocadas ou apagadas.
+
+## Portas de esteira
+
+Seguem o padrão de `Art/CONVEYOR_PORTS.md`:
+
+| Empty | Tipo | Posição | Onde |
+|---|---|---|---|
+| `feKiln_PortIn_1` | entrada (Wood) | (−0,5; 0,5; 0,25), para +Y | fundo da célula do forno |
+| `feKiln_PortOut_1` | saída (Carvão Vegetal) | (−1,0; 0; 0,25), para −X | lado esquerdo |
+
+Os tirantes de ferro subiram para 0,45 m para não cruzar a moldura da saída. 3.348 triângulos sem bevel.
 
 ## Materiais (provisórios)
 

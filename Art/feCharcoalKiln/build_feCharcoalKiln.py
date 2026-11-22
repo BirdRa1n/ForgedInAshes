@@ -40,9 +40,11 @@ MATS = {
     "feKiln_Glow":      ((1.00, 0.35, 0.05), 0.50, 0.00, 6.0),
     "feKiln_Bark":      ((0.22, 0.14, 0.08), 0.90, 0.00, 0.0),
     "feKiln_WoodCut":   ((0.62, 0.45, 0.28), 0.80, 0.00, 0.0),
+    "feKiln_PortIn":  ((0.16, 0.48, 0.16), 0.60, 0.20, 0.0),
+    "feKiln_PortOut": ((0.85, 0.45, 0.06), 0.60, 0.20, 0.0),
 }
 MI = {name: i for i, name in enumerate(MATS)}
-STONE, STONE2, CLAY, IRON, SOOT, GLOW, BARK, WOODCUT = (MI[n] for n in MATS)
+STONE, STONE2, CLAY, IRON, SOOT, GLOW, BARK, WOODCUT, PORT_IN, PORT_OUT = (MI[n] for n in MATS)
 
 
 def make_materials():
@@ -219,13 +221,14 @@ def build_base():
         box(bm, (0.09, 0.02, 0.07), (KX + s * 0.42, yf - 0.005, Z0 + 0.10), SOOT)
         box(bm, (0.06, 0.01, 0.04), (KX + s * 0.42, yf - 0.012, Z0 + 0.10), GLOW)
 
-    # Iron tie rods across the front and back with anchor plates.
+    # Iron tie rods across the front and back with anchor plates (above the ports).
+    ROD_Z = SPRING + 0.05
     for y in (Y_FRONT - WALL - 0.025, Y_BACK + WALL + 0.025):
-        cyl(bm, 0.012, 1.26, (KX, y, SPRING), "X", IRON, segs=8)
+        cyl(bm, 0.012, 1.26, (KX, y, ROD_Z), "X", IRON, segs=8)
         for s in (-1, 1):
-            box(bm, (0.02, 0.05, 0.12), (KX + s * 0.62, y, SPRING), IRON)
+            box(bm, (0.02, 0.05, 0.12), (KX + s * 0.62, y, ROD_Z), IRON)
     for s in (-1, 1):
-        cyl(bm, 0.012, Y_BACK - Y_FRONT + 2 * WALL + 0.05, (KX + s * 0.62, 0, SPRING), "Y", IRON, segs=8)
+        cyl(bm, 0.012, Y_BACK - Y_FRONT + 2 * WALL + 0.05, (KX + s * 0.62, 0, ROD_Z), "Y", IRON, segs=8)
 
     # Brick chimney at the back of the crest, with iron cap.
     z = SPRING + R_OUT - 0.08
@@ -260,7 +263,68 @@ def build_base():
             cyl(bm, r - 0.008, 0.008, (x, yc + s * (length / 2 + 0.002), zc), "Y", WOODCUT, segs=8)
     for x in (0.31, 0.95):
         beam(bm, (x, 0.0, 0.01), (x + (0.03 if x < 0.5 else -0.03), 0.0, 0.52), 0.04, 0.04, BARK)
+    for kind, pt, nrm, depth in PORTS:
+        port(bm, pt, nrm, kind, depth)
     return to_object(bm, "feKiln_Base", bevel=0.004), top
+
+
+# ---------------------------------------------------------------- conveyor ports
+# Standard (Art/CONVEYOR_PORTS.md): opening 0.36 x 0.22 m centered 0.25 m above the
+# floor, on the outer face of one block cell, flush with the block boundary; iron
+# frame with the top bar painted green (input) or orange (output); a duct joins
+# the face to the machine body. Each port also gets an empty <prefix>_Port{In|Out}_<n>
+# on the face, its +Z pointing outward.
+PORT_W, PORT_H, PORT_Z, PORT_FRAME = 0.36, 0.22, 0.25, 0.045
+
+
+def _port_frame(pt, normal):
+    """Local frame on the block face: X' along the face, Y' outward, Z' up."""
+    n = Vector(normal).normalized()
+    up = Vector((0, 0, 1))
+    m = Matrix((n.cross(up), n, up)).transposed().to_4x4()
+    m.translation = Vector(pt)
+    return m
+
+
+def port(bm, pt, normal, kind, depth):
+    m = _port_frame(pt, normal)
+    T = Matrix.Translation
+    fw, hw, hh = PORT_FRAME, PORT_W / 2, PORT_H / 2
+    d = max(depth, 0.05)
+    for s in (-1, 1):   # duct from the face back to the machine body
+        box_m(bm, (0.02, d, PORT_H + 0.04), m @ T((s * (hw + 0.01), -d / 2, 0)), IRON)
+        box_m(bm, (PORT_W + 0.04, d, 0.02), m @ T((0, -d / 2, s * (hh + 0.01))), IRON)
+    box_m(bm, (PORT_W, 0.02, PORT_H), m @ T((0, -d + 0.01, 0)), PORT_DARK)
+    for s in (-1, 1):   # frame flush with the block face
+        box_m(bm, (fw, 0.04, PORT_H + 2 * fw), m @ T((s * (hw + fw / 2), -0.02, 0)), IRON)
+    box_m(bm, (PORT_W + 2 * fw, 0.04, fw), m @ T((0, -0.02, -(hh + fw / 2))), IRON)
+    box_m(bm, (PORT_W + 2 * fw, 0.04, fw), m @ T((0, -0.02, hh + fw / 2)),
+          PORT_IN if kind == "In" else PORT_OUT)
+    if kind == "In":    # chute floor sloping down into the machine
+        c = min(d, 0.12)
+        box_m(bm, (PORT_W - 0.01, c, 0.012),
+              m @ T((0, -c / 2, -hh + 0.03)) @ Matrix.Rotation(math.radians(12), 4, "X"), IRON)
+    else:               # hinged flap over the upper part of the opening
+        box_m(bm, (PORT_W - 0.02, 0.01, 0.09), m @ T((0, -0.05, hh - 0.05)), IRON)
+        box_m(bm, (PORT_W - 0.02, 0.016, 0.016), m @ T((0, -0.05, hh - 0.005)), IRON)
+
+
+def add_port_empties(prefix, base, col):
+    count = {"In": 0, "Out": 0}
+    for kind, pt, nrm, _depth in PORTS:
+        count[kind] += 1
+        e = bpy.data.objects.new(f"{prefix}_Port{kind}_{count[kind]}", None)
+        e.empty_display_type = "SINGLE_ARROW"
+        e.empty_display_size = 0.25
+        e.location = pt
+        e.rotation_euler = Vector(nrm).to_track_quat("Z", "Y").to_euler()
+        col.objects.link(e)
+        e.parent = base
+
+# Wood in at the back of the kiln cell, charcoal out on the left side.
+PORTS = [("In", (-0.5, 0.5, PORT_Z), (0, 1, 0), 0.10),
+         ("Out", (-1.0, 0.0, PORT_Z), (-1, 0, 0), 0.07)]
+PORT_DARK = SOOT
 
 
 # ---------------------------------------------------------------- scene
@@ -293,6 +357,8 @@ def main():
     smoke.location = (CHIMNEY.x, CHIMNEY.y, chimney_top + 0.05)
     col.objects.link(smoke)
     smoke.parent = base
+
+    add_port_empties("feKiln", base, col)
 
     bpy.context.view_layer.update()
     lo, hi = Vector((1e9,) * 3), Vector((-1e9,) * 3)
