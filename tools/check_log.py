@@ -12,7 +12,19 @@ from pathlib import Path
 
 LOG_DIR = Path(os.environ.get("APPDATA", "")) / "7DaysToDie" / "logs"
 MOD = "FerroEngrenagem"
-KEYWORDS = re.compile(r"xml|xpath|locali|feTest|fe[A-Z]\w+|" + MOD, re.I)
+# Case-insensitive words, plus our id prefix "fe" + Uppercase matched case-SENSITIVELY
+# (with re.I, "fe[A-Z]" also matched "featured" in EOS news warnings).
+KEYWORDS_I = re.compile(r"xml|xpath|locali|" + MOD, re.I)
+KEYWORDS_ID = re.compile(r"\bfe[A-Z]\w+")
+
+
+class _Keywords:
+    @staticmethod
+    def search(line):
+        return KEYWORDS_I.search(line) or KEYWORDS_ID.search(line)
+
+
+KEYWORDS = _Keywords()
 # Seen in a vanilla run (3.4.0 b10, no mods besides TFP_Harmony): not ours.
 BASELINE = ("Retrieving remote news file", "E_XBL_NOT_INITIALIZED",
             "[Discord][Log]", "Failed to fetch Twitch entitlements")

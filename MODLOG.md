@@ -211,6 +211,9 @@ aqui fica só o que foi medido/verificado.
     onde o bloco vanilla não escreve nada → modelo meio bloco para baixo (Refinaria/Laboratório também).
     Correção: o gerador só escreve `ModelOffset` quando o vanilla escreve (bancada `0,.5,0`, combinar `0,0,0`).
     **Regra:** ao reaproveitar um modelo vanilla, copiar exatamente o `ModelOffset` do bloco vanilla (ou omitir).
+  - Teste 16:42–16:46 (após a correção): log limpo do lado do mod (7 patches, nenhuma exceção). O `check_log.py`
+    marcava falsos positivos da EOS ("featured" casava com `fe[A-Z]` sob `re.I`); filtro corrigido.
+    Comportamento no jogo: aguardando relato do usuário.
 
 ## Próximo passo (antigo, mantido para histórico)
 
