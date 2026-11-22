@@ -34,6 +34,13 @@ Cada porta tem um **empty** filho da base da máquina, no centro da abertura, so
 
 O Volante de Inércia (`feFlywheel`) é um item, não tem portas.
 
+## A esteira
+
+`Art/feConveyor`: reta (`feConveyor`) e curva de 90° (`feConveyorCorner`), 1 bloco cada, lona com topo a
+0,175 m e 0,32 m de largura, entrando na abertura das portas. As pontas da esteira têm os mesmos empties
+`*_PortIn_1` / `*_PortOut_1`: uma esteira encaixa numa máquina (ou em outra esteira) quando um `PortOut`
+fica na mesma face que um `PortIn`, apontando em sentidos opostos. Ver `feConveyor/preview_line.png`.
+
 ## Ao modelar uma máquina nova
 
 O código das portas está em cada `build_*.py` (função `port()` e lista `PORTS`); copie o bloco
