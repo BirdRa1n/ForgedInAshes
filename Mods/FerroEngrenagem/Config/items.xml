@@ -106,6 +106,23 @@
 			<property name="SoundPickup" value="parts_grab"/>
 			<property name="SoundPlace" value="parts_place"/>
 		</item>
+
+		<!-- Battery Bank Module (user, 2026-11-22): goes in the Crank's module slot (like the forge's crucible) and
+		     unlocks its battery slot (src/FerroEngrenagem/CrankSlots.cs). Made in the Electronics Bench. -->
+		<item name="feBatteryModule">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MelectricParts"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="300"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="batterybank"/>
+			<property name="CustomIconTint" value="f0c060"/>
+			<property name="DescriptionKey" value="feBatteryModuleDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
 		<!-- I01 Charcoal: made in the Charcoal Kiln (E02) from Wood; burned by the Coal Generator (E03).
 		     Same FuelValue as vanilla coal, so it also works in forge/campfire. -->
 		<item name="feResourceCharcoal">

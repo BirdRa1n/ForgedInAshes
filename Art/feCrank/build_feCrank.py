@@ -18,7 +18,7 @@ from mathutils import Matrix, Vector
 
 AXLE_Z = 0.62          # crank axle height
 BAT_POS = Vector((0.35, 0.0, 0.0))         # battery compartment center (x, y)
-INS_POS = Vector((0.35, -0.10, 0.64))      # insulator tip; WireOffset (wire anchor) sits just above
+INS_POS = Vector((0.35, -0.22, 0.64))      # insulator tip; WireOffset (wire anchor) sits just above
 DYN = Vector((0.0, 0.42, 0.17))   # dynamo pulley center
 FRONT_Y, BACK_Y = -0.30, 0.30     # A-frames
 
@@ -171,7 +171,27 @@ def build_base():
     for s in (-1, 1):
         beam(bm, (s * (small_r + 0.005), DYN.y, DYN.z),
              (s * (big_r + 0.005), DYN.y, AXLE_Z), 0.01, 0.03, LEATHER)
-    # Battery compartment on the right side (D7: the crank charges car batteries, user 2026-11-22).
+    # Transmitter: insulator on its own post from the deck (in front of the battery compartment); the wire
+    # attaches at its tip (WireOffset). The dynamo's cable goes straight to it.
+    tx, ty = INS_POS.x, INS_POS.y
+    box(bm, (0.08, 0.08, 0.012), (tx, ty, 0.066), IRON)                     # foot plate
+    beam(bm, (tx, ty, 0.06), (tx, ty, 0.37), 0.035, 0.035, WOOD)            # post
+    box(bm, (0.06, 0.06, 0.02), (tx, ty, 0.37), IRON)                       # cap
+    cyl(bm, 0.012, INS_POS.z - 0.37, (tx, ty, (INS_POS.z + 0.37) / 2), "Z", IRON, segs=8)
+    for k in range(3):
+        cyl(bm, 0.038, 0.02, (tx, ty, 0.45 + k * 0.05), "Z", PORCELAIN, segs=14, r2=0.026)
+    cyl(bm, 0.022, 0.03, (tx, ty, INS_POS.z - 0.01), "Z", PORCELAIN, segs=12)
+    cyl(bm, 0.014, 0.02, (tx, ty, INS_POS.z + 0.012), "Z", COPPER, segs=8)   # wire clamp
+    beam(bm, (0.0, 0.13, 0.255), (0.0, 0.13, 0.30), 0.02, 0.02, LEATHER)     # dynamo terminal riser
+    beam(bm, (0.0, 0.13, 0.30), (tx - 0.02, ty, 0.30), 0.018, 0.018, RED)    # dynamo -> insulator post
+    for kind, pt, nrm, depth in PORTS:
+        port(bm, pt, nrm, kind, depth)
+    return to_object(bm, "feCrank_Base", bevel=0.004)
+
+
+def build_module():
+    """Battery Bank Module: the compartment frame. Shown only when the module is in the crank (CrankSpinner)."""
+    bm = bmesh.new()
     bx, by = BAT_POS.x, BAT_POS.y
     box(bm, (0.24, 0.30, 0.02), (bx, by, 0.07), RUST)                       # floor plate
     for sx in (-1, 1):
@@ -182,27 +202,22 @@ def build_base():
             box(bm, (0.24, 0.015, 0.02), (bx, by + sy * 0.14, z), IRON)
         for sx in (-1, 1):
             box(bm, (0.015, 0.30, 0.02), (bx + sx * 0.11, by, z), IRON)
+    box(bm, (0.06, 0.03, 0.05), (bx - 0.08, by - 0.155, 0.30), COPPER)       # terminal block
+    return to_object(bm, "feCrank_Module", bevel=0.003)
+
+
+def build_battery():
+    """The car battery with its cables. Shown only when a battery is in the crank's battery slot."""
+    bm = bmesh.new()
+    bx, by = BAT_POS.x, BAT_POS.y
     box(bm, (0.18, 0.24, 0.16), (bx, by, 0.16), BATTERY)                    # the car battery
     box(bm, (0.17, 0.23, 0.01), (bx, by, 0.245), RUST)                      # label band
     for sy, mat in ((-0.08, RED), (0.08, BATTERY)):
         cyl(bm, 0.015, 0.03, (bx, by + sy, 0.255), "Z", mat, segs=8)       # terminals
         cyl(bm, 0.011, 0.012, (bx, by + sy, 0.276), "Z", COPPER, segs=8)
-    # Cables: dynamo -> battery (+), battery (-) -> frame.
-    beam(bm, (0.0, 0.13, 0.255), (0.0, 0.13, 0.30), 0.02, 0.02, LEATHER)
-    beam(bm, (0.0, 0.13, 0.30), (bx, by + 0.08, 0.29), 0.018, 0.018, RED)
-    beam(bm, (bx, by - 0.08, 0.28), (bx - 0.11, by - 0.14, 0.36), 0.016, 0.016, LEATHER)
-    # Transmitter: insulator post on the compartment's top frame; the wire attaches at its tip.
-    tx, ty = INS_POS.x, INS_POS.y
-    box(bm, (0.10, 0.06, 0.02), (tx, ty, 0.37), IRON)                       # bracket
-    cyl(bm, 0.012, INS_POS.z - 0.37, (tx, ty, (INS_POS.z + 0.37) / 2), "Z", IRON, segs=8)
-    for k in range(3):
-        cyl(bm, 0.038, 0.02, (tx, ty, 0.45 + k * 0.05), "Z", PORCELAIN, segs=14, r2=0.026)
-    cyl(bm, 0.022, 0.03, (tx, ty, INS_POS.z - 0.01), "Z", PORCELAIN, segs=12)
-    cyl(bm, 0.014, 0.02, (tx, ty, INS_POS.z + 0.012), "Z", COPPER, segs=8)   # wire clamp
-    beam(bm, (bx, by + 0.08, 0.28), (tx, ty, 0.40), 0.014, 0.014, RED)        # battery (+) -> insulator
-    for kind, pt, nrm, depth in PORTS:
-        port(bm, pt, nrm, kind, depth)
-    return to_object(bm, "feCrank_Base", bevel=0.004)
+    beam(bm, (bx, by - 0.08, 0.28), (bx - 0.08, by - 0.155, 0.30), 0.014, 0.014, RED)   # (+) -> terminal block
+    beam(bm, (bx, by + 0.08, 0.28), (bx + 0.11, by + 0.14, 0.36), 0.014, 0.014, LEATHER)  # (-) -> frame
+    return to_object(bm, "feCrank_Battery", bevel=0.003)
 
 
 def build_rotor():
@@ -327,9 +342,11 @@ def main():
     base = build_base()
     rotor = build_rotor()
     pulley = build_dynamo_pulley()
-    for ob in (base, rotor, pulley):
+    module = build_module()
+    battery = build_battery()
+    for ob in (base, rotor, pulley, module, battery):
         col.objects.link(ob)
-    for child in (rotor, pulley):
+    for child in (rotor, pulley, module, battery):
         child.parent = base
         child.matrix_parent_inverse = base.matrix_world.inverted()
 
@@ -345,7 +362,7 @@ def main():
     lo = Vector((1e9,) * 3)
     hi = Vector((-1e9,) * 3)
     tris = 0
-    for ob in (base, rotor, pulley):
+    for ob in (base, rotor, pulley, module, battery):
         for v in ob.data.vertices:
             w = ob.matrix_world @ v.co
             lo = Vector(map(min, lo, w))

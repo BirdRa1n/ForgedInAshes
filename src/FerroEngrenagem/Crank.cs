@@ -125,10 +125,13 @@ namespace FerroEngrenagem
 
         static readonly Dictionary<Vector3i, CrankSpinner> byPos = new Dictionary<Vector3i, CrankSpinner>();
 
+        const string ModuleName = "feCrank_Module";     // battery compartment: shown when the module is in slot 1
+        const string BatteryName = "feCrank_Battery";   // the car battery: shown when a battery is in slot 2
+
         Vector3i pos;
         bool registered;
-        Transform rotor, pulley;
-        float speed, target, drivenUntil;
+        Transform rotor, pulley, moduleObj, batteryObj;
+        float speed, target, drivenUntil, nextSlotCheck;
 
         public static CrankSpinner At(Vector3i pos)
         {
@@ -147,7 +150,24 @@ namespace FerroEngrenagem
             target = 0f;
             rotor = FindDeep(transform, RotorName);
             pulley = FindDeep(transform, PulleyName);
+            moduleObj = FindDeep(transform, ModuleName);
+            batteryObj = FindDeep(transform, BatteryName);
+            nextSlotCheck = 0f;
+            UpdateSlotParts();
             if (rotor == null) Log.Warning(FerroEngrenagemMod.LogPrefix + "crank model has no " + RotorName);
+        }
+
+        // Shows the compartment / battery only when they are in the crank's slots (CrankSlots.cs). Reads the
+        // client copy of the slots (TileEntityPowerSource.ItemSlots), so every player sees the same.
+        void UpdateSlotParts()
+        {
+            if (moduleObj == null && batteryObj == null) return;
+            GameManager gm = GameManager.Instance;
+            TileEntityPowerSource te = gm == null || gm.World == null ? null
+                : gm.World.GetTileEntity(pos) as TileEntityPowerSource;
+            ItemStack[] slots = te == null ? null : te.ItemSlots;
+            if (moduleObj != null) moduleObj.gameObject.SetActive(CrankSlots.HasModule(slots));
+            if (batteryObj != null) batteryObj.gameObject.SetActive(CrankSlots.HasBatteryItem(slots));
         }
 
         public void Drive(float degPerSecond)
@@ -158,6 +178,11 @@ namespace FerroEngrenagem
 
         void Update()
         {
+            if (Time.time >= nextSlotCheck)
+            {
+                nextSlotCheck = Time.time + 0.5f;
+                UpdateSlotParts();
+            }
             float goal = Time.time < drivenUntil ? target : 0f;
             speed = Mathf.MoveTowards(speed, goal, (goal > speed ? SpinUp : SpinDown) * Time.deltaTime);
             if (speed <= 0.01f) return;
@@ -232,11 +257,16 @@ namespace FerroEngrenagem
             PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
             if (te == null) return;
             int pct = gen == null || gen.MaxFuel == 0 ? 0 : Mathf.Clamp(100 * gen.CurrentFuel / gen.MaxFuel, 0, 100);
+            ItemStack battery = CrankSlots.ActiveBattery(te.ItemSlots);
+            int batPct = battery == null || battery.itemValue.MaxUseTimes <= 0 ? -1
+                : Mathf.Clamp(100 * CrankSlots.Charge(battery) / battery.itemValue.MaxUseTimes, 0, 100);
             Stat stamina = player.Stats.Stamina;
             if (!IsActivateHeld(player))
             {
-                prompt = string.Format(Text("feCrankHold", "Hold {0} to turn the Crank ({1}% stored)"),
-                                       KeyName(player), pct);
+                prompt = batPct < 0
+                    ? string.Format(Text("feCrankHold", "Hold {0} to turn the Crank ({1}% stored)"), KeyName(player), pct)
+                    : string.Format(Text("feCrankHoldBattery", "Hold {0} to turn the Crank ({1}% stored, battery {2}%)"),
+                                    KeyName(player), pct, batPct);
                 return;
             }
             if (stamina.Value <= crank.MinStamina)
@@ -268,10 +298,22 @@ namespace FerroEngrenagem
             {
                 pendingFuel -= add;
                 int fuel = Mathf.Min(gen.MaxFuel, gen.CurrentFuel + add);
+                int overflow = gen.CurrentFuel + add - fuel;
                 gen.CurrentFuel = (ushort)fuel;
                 if (!gen.IsOn) gen.IsOn = true;   // vanilla auto-turns it off when the fuel runs out
+                // With the Battery Bank Module, what does not fit in the generator charges the battery
+                // (1 fuel = 1 charge unit; CrankSlots.cs feeds it back when the fuel runs out).
+                int room = CrankSlots.Room(battery);
+                if (overflow > 0 && room > 0)
+                {
+                    battery.itemValue.UseTimes -= Mathf.Min(overflow, room);
+                    te.SetModified();
+                }
             }
-            prompt = string.Format(Text("feCrankTurning", "Turning the Crank... {0}% stored"), pct);
+            prompt = batPct < 0
+                ? string.Format(Text("feCrankTurning", "Turning the Crank... {0}% stored"), pct)
+                : string.Format(Text("feCrankTurningBattery", "Turning the Crank... {0}% stored, battery {1}%"),
+                                pct, batPct);
         }
 
         // After the game's own Update, so our prompt is the one shown this frame.

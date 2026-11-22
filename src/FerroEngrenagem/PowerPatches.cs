@@ -20,7 +20,9 @@ namespace FerroEngrenagem
             if (__instance.BlockID >= Block.list.Length) return;
             BlockFeCrank crank = Block.list[__instance.BlockID] as BlockFeCrank;
             if (crank == null || crank.BaseOutput <= 0) return;
-            __instance.MaxOutput = (ushort)System.Math.Min(ushort.MaxValue, __instance.MaxOutput + crank.BaseOutput);
+            // User (2026-11-22): no Flywheels in the crank any more; its slots hold the Battery Bank Module and one
+            // battery (CrankSlots.cs), which must not add watts. Output = the fixed base only.
+            __instance.MaxOutput = (ushort)System.Math.Min(ushort.MaxValue, crank.BaseOutput);
         }
     }
 

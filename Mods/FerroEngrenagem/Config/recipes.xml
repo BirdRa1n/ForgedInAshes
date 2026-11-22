@@ -192,6 +192,11 @@
 		<recipe name="feResourceBrassWire" count="3" craft_area="fePress" craft_time="2" always_unlocked="true">
 			<ingredient name="resourceScrapBrass" count="1"/>
 		</recipe>
+		<recipe name="feBatteryModule" count="1" craft_area="feElectronics" craft_time="20" always_unlocked="true">
+			<ingredient name="resourceElectricParts" count="4"/>
+			<ingredient name="feResourceIronPlate" count="2"/>
+			<ingredient name="feResourceCoil" count="1"/>
+		</recipe>
 		<recipe name="feResourceCoil" count="1" craft_area="feElectronics" craft_time="4" always_unlocked="true">
 			<ingredient name="feResourceBrassWire" count="3"/>
 			<ingredient name="feResourceIronShaft" count="1"/>
