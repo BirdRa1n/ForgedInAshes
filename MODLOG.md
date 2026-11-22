@@ -69,7 +69,10 @@ aqui fica só o que foi medido/verificado.
   Editar arquivos com acento só pelas ferramentas de edição ou por Python.
 - **Fase 0 concluída.**
 
+- F1-T01 testado (13:13): log limpo (`Loaded Mod: FerroEngrenagem (0.1.0)`, 0 linhas marcadas). Visual dos
+  3 itens confirmado pelo usuário (nomes PT-BR, ícones tingidos, descrições).
+
 ## Próximo passo
 
-Fase 1 — F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
+Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
 ícones vanilla). Antes do F1-T03 resolver P14 (pasta XUi do mod).
