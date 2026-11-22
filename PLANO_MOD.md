@@ -412,6 +412,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | D3 | Máquinas novas dependem de perks/livros? | Sim, as da fase 3+ atrás de livros existentes; M01–M03 livres |
 | D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | **Adotado no F3-T02 (a confirmar com o usuário): Carga como combustível** em todas as máquinas da fase 3, pelo mesmo patch Harmony, ligado pela propriedade de bloco `FeChargeOnly="true"`. Trocar depois é local (bloco + patch) |
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
+| D7 | (Pedido do usuário após a F4-T03) Energia como **watts pela rede elétrica vanilla** (fios ligando Manivela/geradores às máquinas e esteiras), em vez do item Carga? | **Proposta:** bloco "Motor elétrico" encostado na máquina = consumidor vanilla (`RequiredPower` em W); patch Harmony: máquina `fe*` só fabrica com o motor vizinho energizado. Manivela vira gerador (giro soma `CurrentFuel`), Gerador a Carvão vira `PowerGenerator` a Carvão Vegetal, gerador/bateria/solar vanilla ligam direto. Remove item Carga, slot de combustível e `ChargeFuelPatches`. Aguardando confirmação |
 | D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | **Decidido (2026-11-22): combustível com Harmony.** EAC não é restrição para o mod (usuário). Prensa/Torno ganham slot de combustível; patch C# faz aceitarem só `feCharge`. Manivela, Carvoeira e Gerador a Carvão continuam em XML |
 
 ---
