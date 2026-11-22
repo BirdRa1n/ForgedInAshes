@@ -1,0 +1,18 @@
+<configs>
+	<!-- F0-T06: test item, only to prove the mod loads. Remove before release. -->
+	<append xpath="/items">
+		<item name="feTestItem">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Weight" value="1"/>
+			<property name="Stacknumber" value="100"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMechanicalParts"/>
+			<property name="CustomIconTint" value="ff8000"/>
+			<property name="DescriptionKey" value="feTestItemDesc"/>
+			<property name="CreativeMode" value="Player"/>
+		</item>
+	</append>
+</configs>
