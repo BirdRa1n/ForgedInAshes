@@ -9,16 +9,19 @@
 	     Salvage drops and RepairItems avoid Mechanical Parts / Spring on purpose (see PLANO_MOD.md 12.1). -->
 	<append xpath="/blocks">
 
-		<!-- M01 Foundry: copy of vanilla forge with its own craft area. Smelts like the forge. -->
+		<!-- M01 Foundry: copy of vanilla forge with its own craft area, WITHOUT the smelter input.
+		     XUiM_Recipes.FilterRecipesByWorkstation only hides use_smelter/replace_smelter variants when
+		     craftingArea == "forge" (hard-coded), so a smelting copy showed every recipe twice.
+		     Phase 1: direct-scrap recipes only (works in both SmeltingType modes); vanilla
+		     "workstation_forge_nosmelting" window = tools + fuel + output, no input grid. -->
 		<block name="feFoundry">
 			<property name="Class" value="Forge"/>
 			<property class="Workstation">
 				<property name="CraftingAreaRecipes" value="feFoundry"/>
-				<property name="Modules" value="tools,output,fuel,material_input"/>
-				<property name="InputMaterials" value="iron,brass,lead,glass,stone,clay"/>
+				<property name="Modules" value="tools,output,fuel"/>
 				<property name="ToolNames" value="1,2,3"/>
 			</property>
-			<property name="WorkstationWindow" value="workstation_forge"/>
+			<property name="WorkstationWindow" value="workstation_forge_nosmelting"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feFoundryDesc"/>
 			<property name="CustomIcon" value="forge"/>
