@@ -113,7 +113,8 @@ aqui fica só o que foi medido/verificado.
   sem `material_input`, janela `workstation_forge_nosmelting`. Fundir em massa: Forja vanilla (D1).
   Alternativa futura: patch Harmony estendendo o filtro (fase 2+).
 - Arte em paralelo: usuário vai rodar outra sessão em outro PC; regras e escopo em `ART_BRIEF.md`
-  (só `Art/`, não tocar em `Config/`). Remoto: `origin` = GitHub `BirdRa1n/FerroEngrenagem`.
+  (só `Art/`, não tocar em `Config/`). Remoto: `origin` = GitHub `BirdRa1n/ForgedInAshes` (repositório
+  renomeado de `FerroEngrenagem` em 2026-11-22; URL local atualizada).
 
 - F1-T05 (salvage e loot de MP/Spring), validado offline:
   - `blocks.xml`: `<set>` renomeia 48 drops `Destroy` de MP/Spring para `resourceScrapIron` (mesma contagem);
