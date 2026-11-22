@@ -25,3 +25,4 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 ### Fase 2
 - F2-T01: pesquisa de energia (P02, P03, P04 resolvidas no papel); proposta de Rota A 100% XML; ferramenta `tools/il_inspect.ps1`.
 - D6: Carga será combustível com Harmony. Infra C#: `src/FerroEngrenagem` (entrada `IModApi` + Harmony `PatchAll`), `tools/build.ps1`; `check_log.py` mostra as linhas `[FerroEngrenagem]`.
+- F2-T02: itens Carga (`feCharge`) e Carvão Vegetal (`feResourceCharcoal`); Carvoeira (`feCharcoalKiln`, coletor: 5 Madeira → 1 Carvão Vegetal) com receita no inventário.

@@ -67,4 +67,46 @@
 			<property name="SoundPlace" value="parts_place"/>
 		</item>
 	</append>
+
+	<!-- F2-T02: energy items (route A). FuelValue is burn time in SECONDS (TileEntityWorkstation.getFuelTime).
+	     Both use materials WITHOUT forge_category, so they cannot be scrapped into iron (the crank makes
+	     Charge from stamina alone; a scrappable Charge would be an infinite iron source). -->
+	<append xpath="/items">
+		<!-- I19 Charge: the "energy" item. Fuel for the Parts Press and the Lathe (D6: Harmony will make
+		     those stations accept only this). 1 Charge = 10 s of machine time (PLANO_MOD.md section 9). -->
+		<item name="feCharge">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MFuelBarrelMetal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="FuelValue" value="10"/>
+			<property name="EconomicValue" value="2"/>
+			<property name="SellableToTrader" value="false"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="carBattery"/>
+			<property name="CustomIconTint" value="80e0ff"/>
+			<property name="DescriptionKey" value="feChargeDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<!-- I01 Charcoal: made in the Charcoal Kiln (E02) from Wood; burned by the Coal Generator (E03).
+		     Same FuelValue as vanilla coal, so it also works in forge/campfire. -->
+		<item name="feResourceCharcoal">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="FuelValue" value="100"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="EconomicBundleSize" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceCoal"/>
+			<property name="CustomIconTint" value="d0a070"/>
+			<property name="DescriptionKey" value="feResourceCharcoalDesc"/>
+			<property name="SoundPickup" value="coal_grab"/>
+			<property name="SoundPlace" value="coal_place"/>
+		</item>
+	</append>
 </configs>

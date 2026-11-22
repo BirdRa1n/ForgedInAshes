@@ -180,6 +180,83 @@
 
 	</append>
 
+	<!-- F2-T02: E02 Charcoal Kiln = a Collector block (same class as the dew collector), XML only.
+	     How BlockCollector works (IL of BlockCollector.Init / TileEntityCollector, 3.4.0 b10):
+	       - FuelTypes and OutputTypes are REQUIRED (parsed without null check -> NRE if missing).
+	       - FuelTypes {name,item,...}: only these items are accepted as input.
+	       - OutputTypes {name,fuel,fuelCost,additionalCost,discountCost,convertTo,moddedConvertTo,
+	         moddedConvertSpeed,moddedConvertCount,minTicks,maxTicks,sound}; 1000 ticks = 1 game hour.
+	       - CollectorType is an enum (DewCollector/Apiary/ChickenCoop): it picks which sandbox
+	         input/time/output multipliers apply. DewCollector chosen here.
+	       - Every collector opens the vanilla "dewcollector" window group.
+	       - RequiredMods is optional; mod slots are locked to feTestItem (unobtainable outside creative)
+	         so dew collector mods cannot be inserted. Revisit when the test item is removed. -->
+	<append xpath="/blocks">
+		<block name="feCharcoalKiln">
+			<property name="Class" value="Collector"/>
+			<property name="CollectorType" value="DewCollector"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCharcoalKilnDesc"/>
+			<property name="LootLabelKey" value="feCharcoalKiln"/>
+			<property name="CustomIcon" value="cntForgeWorkstationBroken"/>
+			<property name="CustomIconTint" value="e0c0a0"/>
+			<property name="ItemIconBackdrop" value="ui_game_symbol_forge"/>
+			<property name="ItemBackgroundColor" value="160,110,60,255"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mstone_scrap"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Crafting/forgeWorkstationBrokenPrefab.prefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="RestrictSubmergedPlacement" value="true"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="OpenSound" value="forge_open"/>
+			<property name="CloseSound" value="forge_close"/>
+			<!-- input: Wood only -->
+			<property name="FuelTypes" value="{wood,resourceWood}"/>
+			<!-- 5 Wood -> 1 Charcoal per cycle (= 10 -> 2, PLANO_MOD.md I01), 250-350 ticks per cycle -->
+			<property name="OutputTypes" value="{charcoal,wood,5,5,5,feResourceCharcoal,feResourceCharcoal,1,1,250,350,forge_item_complete}"/>
+			<property name="Outputs" value="charcoal,charcoal,charcoal,charcoal,charcoal,charcoal"/>
+			<property name="FuelGridHeight" value="1"/>
+			<property name="OutputGridHeight" value="2"/>
+			<property name="FuelTitleText" value="feCharcoalKilnFuel"/>
+			<property name="FuelTitleSprite" value="ui_game_symbol_forge"/>
+			<property name="FuelTitleSpriteAtlas" value="UIAtlas"/>
+			<property name="FuelTypesSprites" value="resourceWood,ItemIconAtlasGreyscale"/>
+			<property name="EmptyText" value="feCharcoalKilnEmpty"/>
+			<property name="HasItem1Text" value="feCharcoalKilnHasCharcoal"/>
+			<property name="HasItem2Text" value="feCharcoalKilnHasCharcoal"/>
+			<property name="RequiredMods" value="feTestItem"/>
+			<property name="RequiredModsOnly" value="true"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="300"/>
+			<property name="MaxDamage" value="600"/>
+			<property name="HeatMapStrength" value="2"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="15"/>
+			<property class="RepairItems">
+				<property name="resourceCobblestones" value="15"/>
+			</property>
+			<drop event="Harvest" name="resourceRockSmall" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="resourceClayLump" count="5" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="terrDestroyedStone" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0220"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="forge_grab"/>
+			<property name="SoundPlace" value="forge_place"/>
+		</block>
+	</append>
+
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
 	     Order matters: rename the Destroy drops first, then remove the Harvest drops.
 	     Destroy drops are RENAMED to scrap iron instead of removed: XML.txt says a block without any Destroy drop
