@@ -31,6 +31,7 @@ Cada porta tem um **empty** filho da base da máquina, no centro da abertura, so
 | Manivela `feCrank` (1×1×1) | — | Carga: lado direito (+X), caixa coletora ligada ao dínamo |
 | Gerador a Carvão `feCoalGenerator` (2×1×2) | Carvão Vegetal: lado esquerdo (−X), na fornalha | Carga: frente (−Y) da célula direita |
 | Carvoeira `feCharcoalKiln` (2×1×2) | Wood: fundo (+Y) da célula do forno | Carvão Vegetal: lado esquerdo (−X) |
+| Prensa `fePress` (2×1×2) | Forged Iron: lado esquerdo (−X); Carga: fundo (+Y) da célula direita | Chapa: lado direito (+X) |
 
 O Volante de Inércia (`feFlywheel`) é um item, não tem portas.
 
