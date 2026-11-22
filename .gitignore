@@ -1,0 +1,31 @@
+# Caminho pessoal da instalação do jogo
+tools/game_path.txt
+
+# Saídas das ferramentas
+tools/out/
+*.csv.tmp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# C# / Visual Studio (fase 2+)
+src/**/bin/
+src/**/obj/
+.vs/
+*.user
+*.suo
+
+# DLLs do jogo nunca vão para o repositório (não redistribuir)
+src/**/GameRefs/
+
+# Unity / assets (fase 6)
+Library/
+Temp/
+*.blend1
+
+# SO
+Thumbs.db
+desktop.ini
+.DS_Store
