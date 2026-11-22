@@ -72,6 +72,19 @@ aqui fica só o que foi medido/verificado.
 - F1-T01 testado (13:13): log limpo (`Loaded Mod: FerroEngrenagem (0.1.0)`, 0 linhas marcadas). Visual dos
   3 itens confirmado pelo usuário (nomes PT-BR, ícones tingidos, descrições).
 
+- F1-T02 (blocos M01/M02/M03 + receitas de construção). Fatos lidos no IL do `Assembly-CSharp.dll`
+  (Mono.Cecil do `0_TFP_Harmony`, carregado no PowerShell com `Add-Type`):
+  - `WorkstationData(string blockName, DynamicProperties props)` lê do bloco `WorkstationName`,
+    `WorkstationIcon`, `CraftIcon`, `CraftActionName`, `WorkstationWindow`, sons.
+  - `TileEntityWorkstation.OnLockResponseLocal`: janela = `WorkstationWindow` se não vazio, senão
+    `string.Format("workstation_{0}", blockName)`; se o bloco se chama `forge` e `XUiM_Recipes.DisableSmelter`,
+    acrescenta `_nosmelting`.
+  - O `tableSaw` vanilla (CreativeMode Dev) já usa craft area própria + `WorkstationWindow="workstation_workbench"`.
+  - A Bancada vanilla custa 20 MP e a Forja é `learnable`: as máquinas do mod são feitas no inventário com
+    `always_unlocked="true"`.
+  - Gotcha: buscar strings UTF-16 no DLL exige testar os dois alinhamentos (offset 0 e 1); com só um, metade
+    das strings some.
+
 ## Próximo passo
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

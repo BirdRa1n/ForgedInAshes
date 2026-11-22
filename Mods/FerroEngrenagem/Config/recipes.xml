@@ -1,0 +1,31 @@
+<configs>
+	<!-- F1-T02: build recipes for the phase-1 machines.
+	     Crafted in the player's inventory (no craft_area): the vanilla workbench costs 20 Mechanical Parts,
+	     so requiring it would break "from zero, without loot" (PLANO_MOD.md P1).
+	     always_unlocked: D3 says M01-M03 are not behind perks/books.
+	     Costs = PLANO_MOD.md section 5.1 (balance values, adjust there first). -->
+	<append xpath="/recipes">
+		<!-- M01 Foundry: same ingredients as the vanilla forge recipe -->
+		<recipe name="feFoundry" count="1" always_unlocked="true">
+			<ingredient name="resourceCobblestones" count="50"/>
+			<ingredient name="woodLogPillar100" count="1"/>
+			<ingredient name="resourceLeather" count="10"/>
+			<ingredient name="resourceDuctTape" count="3"/>
+			<ingredient name="resourceMetalPipe" count="3"/>
+		</recipe>
+		<!-- M02 Parts Press: 30 Forged Iron, 60 Nails, 40 Wood, 4 Short Iron Pipe -->
+		<recipe name="fePress" count="1" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="30"/>
+			<ingredient name="resourceNail" count="60"/>
+			<ingredient name="resourceWood" count="40"/>
+			<ingredient name="resourceMetalPipe" count="4"/>
+		</recipe>
+		<!-- M03 Lathe: 40 Forged Iron, 80 Nails, 30 Wood, 6 Short Iron Pipe -->
+		<recipe name="feLathe" count="1" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="40"/>
+			<ingredient name="resourceNail" count="80"/>
+			<ingredient name="resourceWood" count="30"/>
+			<ingredient name="resourceMetalPipe" count="6"/>
+		</recipe>
+	</append>
+</configs>

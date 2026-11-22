@@ -189,7 +189,7 @@ Só iniciar depois da versão 1.0 lançada e estável.
 | I10 | Placa de Circuito | Verificar se usar Electrical Parts vanilla (P06) | M12 | 2 Fio de Latão + 1 Chapa + 1 Glue → 1 | 3 |
 | I11 | Lubrificante (`feResourceLubricant`) | Não | M09 | 2 Oil → 1 | 3 |
 | I12 | Engine (motor pequeno) | **Sim** (P05) | M13 | 10 Mech. Parts + 4 Spring + 6 Chapa + 2 Lubrificante | 4 |
-| I13 | Tábua de Madeira (`feResourcePlank`) | Não | M16 | "Wood Log" **não existe**; usar `resourceWood`, ex.: 4 Wood → 1 Tábua (rebalancear) | 3 |
+| I13 | Tábua de Madeira (`feResourcePlank`) | Não | M16 | Não há item "Wood Log"; existe o **bloco** `woodLogPillar100` ("Tronco de madeira", ingrediente da Forja). Opções: 1 `woodLogPillar100` → 4 Tábuas, ou 4 `resourceWood` → 1 Tábua (decidir na fase 3) | 3 |
 | I14 | Viga de Madeira (`feResourceBeam`) | Não | M16 | 3 Tábua → 1 | 3 |
 | I15 | Rolo de Tecido (`feResourceClothRoll`) | Não | M07 | 10 Cloth Fragment → 1 | 3 |
 | I16 | Cano de Arma (`feGunBarrel`) | Não | M05 | 1 Short Iron Pipe + 1 Forged Steel → 1 | 3 |
@@ -249,6 +249,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 - **F1-T01** Itens I03, I04, I05 em `items.xml` (+ localização, ícones vanilla).
 - **F1-T02** Blocos M01, M02, M03 em `blocks.xml`, copiando a definição da Forja (M01) e da Bancada (M02, M03): `craft_area` próprio, custos da seção 5.1. Receitas para fabricar as três máquinas no inventário do jogador ou na Bancada vanilla.
 - **F1-T03** Janelas XUi das três workstations, copiando as da Forja/Bancada e renomeando (confirmar nomes das janelas vanilla).
+  **Atualização (F1-T02):** desnecessária na fase 1. O código do jogo abre a janela indicada pela propriedade de bloco `WorkstationWindow` (senão `workstation_<nomeDoBloco>`); M01 usa `workstation_forge` e M02/M03 usam `workstation_workbench`, como o `tableSaw` vanilla. XUi própria só quando a máquina precisar de slots diferentes (ex.: combustível `feCharge` na fase 2).
 - **F1-T04** Receitas novas: I03 na M02; I04, I05, I06, I07 na M03; Forged Iron, Nails e Short Iron Pipe na M01 (com os mesmos ingredientes da Forja vanilla).
 - **F1-T05** Desligar as fontes de Mechanical Parts e Spring **só no salvage** (drops dos blocos desmontáveis em `blocks.xml`) e reduzir pela metade no loot. Traders e quests ficam para a fase 3.
 - **F1-T06** Roteiro de teste para o usuário: mundo novo, sem loot de peças, Iron + Clay + Wood → construir M01 → M02 → M03 → fabricar 10 Mechanical Parts. Medir quanto tempo levou e se foi divertido.
@@ -380,7 +381,7 @@ Contagem da planilha original (fonte: pindrop.gg); reconferir com `recipe_report
 | P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Parcial: lista de fontes em 12.1; falta testar no jogo |
 | P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `find_sources.py --search` + `Localization.csv` | 0 | **Resolvida** (tabela em 12.2) |
 | P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | Aberta |
-| P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes do F1-T03 | 1 | Aberta |
+| P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes de criar a primeira XUi própria | 2 | Adiada (F1 não precisa de XUi; ver F1-T03) |
 | P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar com EAC ligado | 0 | Parcial: funciona com `-noeac` (F0-T06); com EAC ligado ainda não testado |
 
 ### 12.1 Fontes de Mechanical Parts, Spring e Engine (F0-T05, jogo 3.4.0 B10)
