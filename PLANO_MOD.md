@@ -256,6 +256,8 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
 
 **Pronto quando:** do zero e sem loot, o jogador fabrica Mechanical Parts e Spring; nenhum erro no log; o usuário aprovou a sensação. **Se não for divertido, rebalancear antes de seguir.**
 
+**Status: CONCLUÍDA em 2026-11-22.** Teste em sobrevivência (14:11–14:57, log limpo): Fundição → Prensa → Torno → Mechanical Parts e Spring, sem peças de loot/desmanche; usuário aprovou ("foi bem legal e está de acordo"; tempo exato não medido, sessão ≤ 45 min). Desvios do plano: F1-T03 dispensada (`WorkstationWindow`); Fundição sem fundição/slot de entrada (filtro de variantes do jogo só vale para `forge`).
+
 ### Fase 2 — Energia inicial (dificuldade 2 na rota A, 4 na rota B)
 
 - **F2-T01** Resolver P02, P03, P04 lendo `blocks.xml`, `items.xml`, `buffs.xml` e (se preciso) o código decompilado. Escrever um resumo curto das descobertas aqui.

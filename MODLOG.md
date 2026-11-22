@@ -124,7 +124,12 @@ aqui fica só o que foi medido/verificado.
   - Fontes restantes de MP/Spring: receita do Torno, loot reduzido, trader `generalResources` (fase 3),
     sucata de `smallEngine` → MP (fase 3).
 
-## Próximo passo
+- F1-T06 (14:11–14:57, sobrevivência, mundos ModTester/ModTester2, `SmeltingType=Receitas`): log limpo.
+  Usuário confirmou: Fundição mostra só 3 receitas; carro desmanchado com chave inglesa não dá MP/Mola;
+  cadeia completa feita em sobrevivência; "foi bem legal e está de acordo". **Fase 1 concluída.**
+  Não testado: desmontar cofre (Destroy → sucata).
+
+## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
 ícones vanilla). Antes do F1-T03 resolver P14 (pasta XUi do mod).
