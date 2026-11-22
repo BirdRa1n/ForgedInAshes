@@ -190,7 +190,8 @@ aqui fica só o que foi medido/verificado.
   fundido, 20 Madeira, 10 Pregos). Destrava a sobrevivência (primeira fonte de Carga sem Torno).
   Balanceamento (P10, F2-T07) ainda não feito: 1 Carga (10 s) por golpe.
   - Teste 15:47–16:04: log limpo; `gameevents` carregou (`Loaded (local): gameevents`), nenhuma exceção.
-    Comportamento (Carga por golpe, estamina, não quebra, outros blocos não dão Carga): aguardando relato.
+    Usuário: "funcionou normalmente", mas 1 Carga por golpe é demais. Ajuste: `RandomRoll` 25% na sequência
+    (`gameevents.xml`), ≈ 4 Cargas por 10 s de golpes com machado de pedra. Retestar a sensação.
 - Arte: a sessão do outro PC entregou `Art/feCrank/` (modelo da Manivela, 1 bloco, partes giratórias separadas).
 
 ## Próximo passo (antigo, mantido para histórico)
