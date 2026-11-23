@@ -535,6 +535,43 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorRampPrefab"/>
 			<property name="SortOrder2" value="0031"/>
 		</block>
+		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
+		     sides (stacks first, then empty slots); while a player has it open or it is full, the items wait. -->
+		<block name="feBeltCrate">
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="CompositeTileEntity"/>
+			<property class="CompositeFeatures">
+				<property class="TEFeatureStorage">
+					<property name="LootList" value="playerIronWritableStorage"/>
+				</property>
+				<property class="TEFeatureLockable"/>
+			</property>
+			<property name="FeBeltInput" value="true"/>
+			<property name="DescriptionKey" value="feBeltCrateDesc"/>
+			<property name="CustomIcon" value="cntIronWritableCrate"/>
+			<property name="CustomIconTint" value="ffb060"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/LootContainers/ironWritableCratePrefab.prefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Path" value="solid"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="AllowedRotations" value="Basic90"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="MaxDamage" value="2500"/>
+			<property name="SoundPickup" value="crateiron_grab"/>
+			<property name="SoundPlace" value="crateiron_place"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="10"/>
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="10,30"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0032"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
 		<block name="feGearbox">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="gearbox"/>

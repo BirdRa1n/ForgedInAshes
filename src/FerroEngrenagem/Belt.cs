@@ -140,6 +140,7 @@ namespace FerroEngrenagem
             Vector3i f = Front(bv);
             Vector3i c = Add(pos, f);
             BlockValue cb = world.GetBlock(c);
+            if (BeltMachines.IsStorage(cb.Block)) { cell = c; parent = c; return true; }   // any side
             if (Fluids.Kind(cb.Block) == FluidKind.None) return false;
             Vector3i par = Fluids.ParentOf(world, c, cb);
             foreach (FluidPort port in Fluids.ConveyorPorts(world, par))
@@ -592,9 +593,66 @@ namespace FerroEngrenagem
         /// <summary>Put as much of the stack as the machine takes; true when nothing is left. Steam Engine (and any
         /// torque engine with conveyor ports): its fuel item (Charcoal) goes to the fuel, its lubricant to the slots.
         /// Other items are refused and wait on the belt.</summary>
+        static readonly Dictionary<Vector3i, float> lastLog = new Dictionary<Vector3i, float>();
+
+        static void Note(World world, Vector3i p, string what)
+        {
+            float t;
+            if (lastLog.TryGetValue(p, out t) && Time.time - t < 15f) return;   // one line per machine per 15 s
+            lastLog[p] = Time.time;
+            Log.Out(FerroEngrenagemMod.LogPrefix + "belt -> " + world.GetBlock(p).Block.GetBlockName() + " at " + p + ": " + what);
+        }
+
+        public static bool IsStorage(Block b)
+        {
+            return b != null && b.Properties != null && b.Properties.Contains("FeBeltInput") && b.Properties.GetBool("FeBeltInput");
+        }
+
+        /// <summary>Belt Storage: fill stacks of the same item first, then empty slots. Waits while a player has
+        /// it open (changing an open inventory desyncs it).</summary>
+        static bool InsertStorage(World world, Vector3i p, ItemStack st)
+        {
+            TileEntityComposite te = world.GetTileEntity(p) as TileEntityComposite;
+            if (te == null) return false;
+            if (te.IsUserAccessing()) { Note(world, p, "open by a player, waiting"); return false; }
+            TEFeatureStorage store = te.GetFeature<TEFeatureStorage>();
+            if (store == null || store.ItemGrid == null) return false;
+            ItemStackGrid grid = store.ItemGrid;
+            ItemClass ic = st.itemValue.ItemClass;
+            int max = ic == null ? 1 : Mathf.Max(1, ic.Stacknumber.Value);
+            int left = st.count;
+            for (int i = 0; i < grid.Length && left > 0; i++)
+            {
+                ItemStack slot = grid[i];
+                if (slot == null || slot.IsEmpty() || slot.itemValue.type != st.itemValue.type || max <= 1) continue;
+                if (slot.count >= max) continue;
+                int n = Mathf.Min(left, max - slot.count);
+                ItemStack ns = slot.Clone();
+                ns.count += n;
+                store.UpdateSlot(i, ns);
+                left -= n;
+            }
+            for (int i = 0; i < grid.Length && left > 0; i++)
+            {
+                ItemStack slot = grid[i];
+                if (slot != null && !slot.IsEmpty()) continue;
+                int n = Mathf.Min(left, max);
+                store.UpdateSlot(i, new ItemStack(st.itemValue.Clone(), n));
+                left -= n;
+            }
+            int took = st.count - left;
+            if (took <= 0) { Note(world, p, "full, " + st.itemValue.ItemClass.GetItemName() + " waits on the belt"); return false; }
+            st.count = left;
+            te.SetModified();
+            BeltStore.MarkDirty();
+            Note(world, p, "stored " + took + "x " + st.itemValue.ItemClass.GetItemName());
+            return left <= 0;
+        }
+
         public static bool Insert(World world, Vector3i parent, ItemStack st)
         {
             if (st == null || st.IsEmpty()) return true;
+            if (IsStorage(world.GetBlock(parent).Block)) return InsertStorage(world, parent, st);
             TileEntityPowerSource te = world.GetTileEntity(parent) as TileEntityPowerSource;
             PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
             if (gen == null) return false;
@@ -639,10 +697,18 @@ namespace FerroEngrenagem
                     if (took > 0) te.SetSendSlots();
                 }
             }
-            if (took <= 0) return false;
+            string name = st.itemValue.ItemClass == null ? "?" : st.itemValue.ItemClass.GetItemName();
+            if (took <= 0)
+            {
+                Note(world, parent, (fuel != null && st.itemValue.type == fuel.Id)
+                    ? "fuel full (" + gen.CurrentFuel + "/" + gen.MaxFuel + "), " + name + " waits on the belt"
+                    : name + " is not taken here (fuel: " + (fuel == null ? "none" : fuel.GetItemName()) + "), it waits");
+                return false;
+            }
             st.count -= took;
             te.SetModified();
             BeltStore.MarkDirty();
+            Note(world, parent, "took " + took + "x " + name + " (fuel " + gen.CurrentFuel + "/" + gen.MaxFuel + ")");
             return st.count <= 0;
         }
     }

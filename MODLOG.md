@@ -725,6 +725,13 @@ aqui fica só o que foi medido/verificado.
   `Belt.Exits` = saídas de esteira + a máquina; entra no rodízio das divisões.
 - Condensadora: o cano 669,62,868 nem chegou a registrar vizinho → o mundo não devolve a Condensadora na célula de
   cima. `HasPortAt` agora cai para as portas dos aparelhos registrados; log do bloco na própria célula da porta.
+- Teste: log sem erros. A célula de cima da Condensadora é AR (ela foi colocada quando ainda era de 1 bloco): pegar e
+  recolocar; o fallback de portas já mostra o braço do cano. Carvão pela esteira: já entra no combustível do Motor a
+  Vapor e recusa quando está cheio; agora loga (no máx. 1 linha por máquina a cada 15 s: "took", "fuel full", "not
+  taken here").
+- `feBeltCrate` (Armazém de Esteira): bloco completo (sem Extends, sem upgrade/downgrade) com TEFeatureStorage +
+  Lockable e `FeBeltInput`. Esteira apontando para qualquer lado entrega (empilha, depois slots vazios via
+  `UpdateSlot`); espera se cheio ou se um jogador está com ela aberta (`IsUserAccessing`). Receita na Montadora.
 
 ## Próximo passo (antigo, mantido para histórico)
 
