@@ -681,6 +681,11 @@
 			<property name="FeFluidRate" value="120"/>
 			<property name="FeCondenseRatio" value="0.9"/>
 			<property name="FeFluidBuffer" value="200"/>
+			<!-- 2 wide x 2 high (CondenserVisual.cs): steam in at the back of the upper cell above the parent,
+			     water out at the front of the parent cell -->
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="StabilitySupport" value="true"/>
 			<property name="DescriptionKey" value="feCondenserDesc"/>
 			<property name="CustomIconTint" value="c0e0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCondenserPrefab"/>

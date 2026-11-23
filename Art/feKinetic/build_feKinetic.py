@@ -49,9 +49,11 @@ MATS = {
     "feKin_Out":     ((0.85, 0.45, 0.06), 0.60, 0.20),
     "feKin_Red":     ((0.65, 0.06, 0.05), 0.50, 0.00),
     "feKin_Glass":   ((0.85, 0.88, 0.85), 0.10, 0.00),
+    "feKin_Water":   ((0.10, 0.35, 0.85), 0.05, 0.00),
+    "feKin_Gas":     ((0.92, 0.94, 0.96), 0.60, 0.00),
 }
 MI = {name: i for i, name in enumerate(MATS)}
-WOOD, IRON, STEEL, RUST, BRASS, PAINT, IN, OUT, RED, GLASS = (MI[n] for n in MATS)
+WOOD, IRON, STEEL, RUST, BRASS, PAINT, IN, OUT, RED, GLASS, WATERC, GASC = (MI[n] for n in MATS)
 
 AXIS = {
     "Z": Matrix.Identity(4),
@@ -566,27 +568,57 @@ def model_elec_pump(col):
 
 
 def model_condenser(col):
+    """Condenser, 2 wide x 2 high (Unity cells x -1..0 = Blender x 0..+1; parent = Blender x 0). Upper glass
+    chamber = gas (steam fill FeLevelGas), lower glass chamber = liquid (water level FeLevelLiquid, blue), a copper
+    condensing coil between them and a fan on top (FeFan). Steam in at the back of the upper parent cell, water out
+    at the front of the lower parent cell."""
+    X0, X1 = -0.45, 1.45
+    cx, w = (X0 + X1) / 2, X1 - X0
     base = bmesh.new()
-    box(base, (0.80, 0.70, 0.62), (0, 0, 0.40), PAINT)
-    for k in range(9):                                               # radiator fins on both sides
-        x = -0.32 + k * 0.08
-        box(base, (0.02, 0.74, 0.50), (x, 0, 0.40), IRON)
-    cyl(base, 0.26, 0.06, (0, 0, 0.74), "Z", IRON, segs=24)          # fan shroud on top
-    for k in range(5):
-        a = k * 2 * math.pi / 5
-        box(base, (0.22, 0.05, 0.012), (0.11 * math.cos(a), 0.11 * math.sin(a), 0.77), STEEL, Matrix.Rotation(a, 4, "Z"))
-    # steam in at the back (Blender +Y), water out at the front (Blender -Y), on the axis height
-    cyl(base, PIPE_R, 0.16, (0, 0.42, C), "Y", STEEL, segs=14)
-    cyl(base, PIPE_R + 0.03, 0.03, (0, 0.485, C), "Y", IRON, segs=14)
-    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, 0.485, C), "Y", GLASS, segs=14)
-    cyl(base, PIPE_R, 0.16, (0, -0.42, C), "Y", STEEL, segs=14)
-    cyl(base, PIPE_R + 0.03, 0.03, (0, -0.485, C), "Y", IRON, segs=14)
-    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, -0.485, C), "Y", IN, segs=14)
-    box(base, (0.84, 0.74, 0.04), (0, 0, 0.07), IRON)
+    box(base, (w, 0.90, 0.12), (cx, 0, 0.06), IRON)                            # plinth
+    for x in (X0 + 0.03, X1 - 0.03):
+        for y in (-0.42, 0.42):
+            box(base, (0.06, 0.06, 1.88), (x, y, 1.0), IRON)                     # corner posts
+    def chamber(z0, z1):
+        h = z1 - z0
+        zc = (z0 + z1) / 2
+        box(base, (w - 0.12, 0.04, h), (cx, 0.40, zc), PAINT)                    # back wall
+        for x in (X0 + 0.06, X1 - 0.06):
+            box(base, (0.04, 0.80, h), (x, 0, zc), PAINT)                         # side walls
+        for z in (z0, z1):
+            box(base, (w - 0.08, 0.84, 0.05), (cx, 0, z), IRON)                  # floor / lid
+        for x in (cx - 0.48, cx, cx + 0.48):                                      # window bars (front, open glass)
+            box(base, (0.03, 0.03, h), (x, -0.41, zc), IRON)
+        box(base, (w - 0.08, 0.03, 0.03), (cx, -0.41, zc), IRON)
+    chamber(0.15, 0.95)     # liquid
+    chamber(1.05, 1.82)     # gas
+    for k in range(7):                                                            # condensing coil
+        ring(base, 0.16, 0.13, 0.025, (cx, 0, 0.985 + (k - 3) * 0.006), "Z", BRASS, segs=18)
+    for x in (cx - 0.55, cx + 0.55):
+        cyl(base, 0.03, 0.10, (x, 0, 1.0), "Z", BRASS, segs=8)
+    # fan shroud on top
+    ring(base, 0.36, 0.33, 0.10, (cx, 0, 1.90), "Z", IRON, segs=28)
+    cyl(base, 0.05, 0.10, (cx, 0, 1.90), "Z", IRON, segs=12)
+    # ports: steam in at the back of the upper parent cell (white), water out at the front of the lower parent cell
+    inlet_stub(base, (0, 0.5, 1.45), "Y", 1, GASC)
+    inlet_stub(base, (0, -0.5, 0.55), "Y", -1, WATERC)
     objs = [to_object(base, "feCondenser_Base", bevel=0.004)]
-    wire_anchor(col, objs, (0.30, -0.30, 0.80))
+    # liquid level: pivot at the chamber floor, height grows with local Z (Unity Y)
+    liq = bmesh.new()
+    box(liq, (w - 0.20, 0.72, 0.74), (0, 0, 0.37), WATERC)
+    objs.append(to_object(liq, "FeLevelLiquid", location=(cx, 0, 0.18)))
+    gas = bmesh.new()
+    box(gas, (w - 0.20, 0.72, 0.70), (0, 0, 0.35), GASC)
+    objs.append(to_object(gas, "FeLevelGas", location=(cx, 0, 1.08)))
+    fan = bmesh.new()                                                             # blades in the local XZ plane
+    for k in range(5):
+        a_ = k * 2 * math.pi / 5
+        m = Matrix.Rotation(a_, 4, "Y") @ Matrix.Translation((0.16, 0, 0))
+        r = bmesh.ops.create_cube(fan, size=1.0, calc_uvs=True)
+        _finish(fan, STEEL, m @ Matrix.Rotation(math.radians(20), 4, "X") @ Matrix.Diagonal((0.28, 0.02, 0.10, 1.0)), r["verts"])
+    objs.append(to_object(fan, "FeFan_Condenser", location=(cx, 0, 1.92), rotation=(math.pi / 2, 0, 0)))
+    wire_anchor(col, objs, (X1 - 0.15, 0.30, 1.98))
     return objs
-
 
 def inlet_stub(bm, face_pt, axis, sign, ring_mat):
     """Pipe stub ending flush with a block face (face_pt), along axis X/Y/Z, pointing outward by sign."""

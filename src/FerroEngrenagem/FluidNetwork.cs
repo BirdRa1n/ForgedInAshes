@@ -149,7 +149,9 @@ namespace FerroEngrenagem
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = Water });
                     break;
                 case FluidKind.Condenser:
-                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = Steam });
+                    // 2 wide x 2 high (parent = bottom cell of its own column): steam in at the back of the upper
+                    // cell (gas chamber), water out at the front of the lower cell (liquid chamber)
+                    l.Add(new FluidPort { Owner = pos, Cell = Add(pos, new Vector3i(0, 1, 0)), Dir = Rot(bv, Vector3.back), Out = false, Fluid = Steam });
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = Water });
                     break;
                 case FluidKind.SteamEngine:

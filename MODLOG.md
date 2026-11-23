@@ -644,6 +644,19 @@ aqui fica só o que foi medido/verificado.
   saída e guarda os watts em `Dynamo.Contribution`; o Barramento soma as contribuições dos filhos e põe no próprio
   `MaxOutput` (PowerManager.Update atualiza todas as fontes, inclusive filhas). Leitura: "Juntando N fonte(s): W".
   Geradores vanilla, solar e baterias não entram. Modelos e bundle (1,6 MB). Não testado.
+- Usuário testou Dínamo, Dínamo Industrial e Barramento: "deu certo".
+
+## 2026-11-23 — Condensadora 2×2 com câmaras de vidro
+
+- `feCondenser` agora é multibloco `MultiBlockDim 2,2,1` (células Unity x −1..0, y 0..1; o pai é a de baixo onde se
+  mira). Portas (FluidNetwork.cs): vapor entra ATRÁS da célula de cima do pai (`pos+(0,1,0)`), água sai na FRENTE do
+  pai.
+- Modelo: câmara de gás em cima e de líquido embaixo, frente aberta com grade (janela), serpentina de cobre entre as
+  duas, ventoinha no topo. Partes animadas (CondenserVisual.cs, postfix em
+  `BlockPowered.OnBlockEntityTransformAfterActivated`): `FeFan*` gira no Z local (240°/s energizada, 900°/s
+  condensando); `FeLevelGas` escala Y = vazão de vapor / `FeFluidRate`; `FeLevelLiquid` (azul, material novo
+  `feKin_Water`) escala Y = água no buffer / `FeFluidBuffer`. Pivôs no fundo de cada câmara. Collider 1,90×1,95.
+  Não testado.
 
 ## Próximo passo (antigo, mantido para histórico)
 

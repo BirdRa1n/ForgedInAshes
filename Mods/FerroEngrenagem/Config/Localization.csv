@@ -84,7 +84,7 @@ feMechPumpDesc,blocks,Block,,,,Pulls water from a river or lake behind it and pu
 feElecPump,blocks,Block,,,,Electric Pump,,,,,,,,,Bomba Elétrica,,,,
 feElecPumpDesc,blocks,Block,,,,Pulls water from a river or lake behind it and pushes it out of its front into a pipe: 150 L/min. Wire it to a power source (60 W).,,,,,,,,,Puxa água de um rio ou lago atrás dela e empurra pela frente para um cano: 150 L/min. Ligue por fio a uma fonte de energia (60 W).,,,,
 feCondenser,blocks,Block,,,,Condenser,,,,,,,,,Condensadora,,,,
-feCondenserDesc,blocks,Block,,,,Takes steam at its back and gives water at its front: condenses up to 120 L/min and gives back 90 % as water. Needs electricity (120 W).,,,,,,,,,Recebe vapor por trás e devolve água pela frente: condensa até 120 L/min e devolve 90 % como água. Precisa de energia elétrica (120 W).,,,,
+feCondenserDesc,blocks,Block,,,,2 wide and 2 high. Takes steam at the back of its top and gives water at the front of its bottom (the cells above and at the block you placed): condenses up to 120 L/min and gives back 90 % as water. Needs electricity (120 W).,,,,,,,,,2 de largura e 2 de altura. Recebe vapor atrás em cima e devolve água na frente embaixo (no bloco onde você mirou ao colocar e no de cima dele): condensa até 120 L/min e devolve 90 % como água. Precisa de energia elétrica (120 W).,,,,
 feFluidWater,blocks,Block,,,,Water,,,,,,,,,Água,,,,
 feFluidSteam,blocks,Block,,,,Steam,,,,,,,,,Vapor,,,,
 feFluidNone,blocks,Block,,,,empty,,,,,,,,,vazio,,,,
