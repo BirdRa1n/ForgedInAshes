@@ -215,7 +215,7 @@ passa a ser o conversor watts → torque.
 **Etapas (cada uma testada no jogo antes da próxima)**
 1. T1 [feita e testada] — Núcleo: Eixo, Caixa de Transmissão, rede (BFS), Motor Elétrico e Manivela de Torque como fontes,
    máquina no encaixe como consumidor em UT, sobrecarga, leitura ao olhar.
-2. T2 — Caixa de Velocidade + velocidade de fabricação com custo ao quadrado.
+2. T2 [feita, falta teste] — Caixa de Velocidade + velocidade de fabricação com custo ao quadrado.
 3. T3 — Embreagem, Regulador de Torque e Medidor.
 4. T4 — Motor a Carvão, Motor a Gasolina e Bobinas no Motor Elétrico.
 5. T5 — Modelos 3D com peças que giram (colega/arte) e sincronização visual em multiplayer.

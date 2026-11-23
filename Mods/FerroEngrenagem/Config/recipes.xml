@@ -79,6 +79,11 @@
 			<ingredient name="feResourceIronPlate" count="2"/>
 			<ingredient name="feResourceIronShaft" count="2"/>
 		</recipe>
+		<recipe name="feSpeedBox" count="1" craft_area="feAssembler" craft_time="15" always_unlocked="true">
+			<ingredient name="feResourceGear" count="8"/>
+			<ingredient name="feResourceIronPlate" count="3"/>
+			<ingredient name="feResourceIronShaft" count="2"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)

@@ -142,6 +142,7 @@ namespace FerroEngrenagem
             if (poweredCache.TryGetValue(pos, out cached) && now - cached.Key < CacheSeconds) return cached.Value;
 
             bool ok = false;
+            float speed = 1f;
             Vector3i socket = Vector3i.zero;
             string info = "no world";
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
@@ -150,12 +151,15 @@ namespace FerroEngrenagem
                 socket = SocketPos(world.GetBlock(pos), pos);
                 TorqueNet net = Kinetic.Get(world, socket);
                 if (net == null) info = "socket empty";
-                else if (!net.Machines.Contains(pos)) info = "socket block does not face the machine";
+                else if (!net.Machines.ContainsKey(pos)) info = "socket block does not face the machine";
                 else
                 {
                     ok = net.Running;
+                    float rpm = net.MachineRpm(pos);
+                    speed = rpm / Kinetic.BaseRpm;
                     info = "net nodes=" + net.Nodes.Count + " sources=" + net.Sources + " machines=" + net.Machines.Count
-                           + " " + net.Usage + "/" + net.Capacity + " UT" + (net.Overloaded ? " OVERLOAD" : "");
+                           + " " + net.Usage + "/" + net.Capacity + " UT rpm=" + Mathf.RoundToInt(rpm) + " speed=x" +
+                           speed.ToString("0.##") + (net.Overloaded ? " OVERLOAD" : "") + (net.Locked ? " LOCKED" : "");
                 }
             }
             // Diagnostic: one line whenever the result or the network summary for this machine changes.
@@ -169,35 +173,67 @@ namespace FerroEngrenagem
                         Kinetic.MachineCost(te.blockValue.Block) + " UT: " + info + " -> " + (ok ? "ON" : "OFF"));
             }
             poweredCache[pos] = new KeyValuePair<float, bool>(now, ok);
+            speedCache[pos] = speed;
             return ok;
+        }
+
+        static readonly Dictionary<Vector3i, float> speedCache = new Dictionary<Vector3i, float>();
+
+        /// <summary>D8 T2: crafting speed multiplier of a powered machine (its RPM / 32). 1 when not gated.</summary>
+        public static float Speed(TileEntityWorkstation te)
+        {
+            if (!IsGated(te) || !HasPower(te)) return 1f;
+            float v;
+            return speedCache.TryGetValue(te.ToWorldPos(), out v) ? v : 1f;
         }
 
         static readonly Dictionary<Vector3i, string> lastLog = new Dictionary<Vector3i, string>();
     }
 
-    // window closed: the tile entity does not advance its queue without power
+    // window closed: the tile entity does not advance its queue without power; with power, time runs x Speed
     [HarmonyPatch(typeof(TileEntityWorkstation), "HandleRecipeQueue")]
     public static class Patch_TEW_HandleRecipeQueue
     {
-        public static bool Prefix(TileEntityWorkstation __instance)
+        public static bool Prefix(TileEntityWorkstation __instance, ref float _timePassed)
         {
-            return !PowerGate.IsGated(__instance) || PowerGate.HasPower(__instance);
+            if (!PowerGate.IsGated(__instance)) return true;
+            if (!PowerGate.HasPower(__instance)) return false;
+            _timePassed *= PowerGate.Speed(__instance);
+            return true;
         }
     }
 
-    // window open: halt / resume the UI queue like vanilla does for fuel
+    // window open: halt / resume the UI queue like vanilla does for fuel, and remember which queue is the
+    // open machine's (its recipe stacks count down x Speed)
     [HarmonyPatch(typeof(XUiC_WorkstationWindowGroup), "Update")]
     public static class Patch_WorkstationWindow_Update
     {
+        internal static XUiC_CraftingQueue OpenQueue;
+        internal static TileEntityWorkstation OpenTe;
+
         public static void Postfix(XUiC_WorkstationWindowGroup __instance, XUiC_CraftingQueue ___craftingQueue)
         {
             XUiM_Workstation data = __instance.WorkstationData;
             TileEntityWorkstation te = data == null ? null : data.TileEntity;
             if (___craftingQueue == null || !PowerGate.IsGated(te)) return;
+            OpenQueue = ___craftingQueue;
+            OpenTe = te;
             bool powered = PowerGate.HasPower(te);
             bool crafting = ___craftingQueue.IsCrafting();
             if (!powered && crafting) ___craftingQueue.HaltCrafting();
             else if (powered && !crafting) ___craftingQueue.ResumeCrafting();
+        }
+    }
+
+    // window open: XUiC_RecipeStack.Update(float _dt) counts the craft down by _dt (IL 3.4.0 b10)
+    [HarmonyPatch(typeof(XUiC_RecipeStack), "Update")]
+    public static class Patch_RecipeStack_Update_Speed
+    {
+        public static void Prefix(XUiC_RecipeStack __instance, ref float _dt, XUiC_CraftingQueue ___Owner)
+        {
+            TileEntityWorkstation te = Patch_WorkstationWindow_Update.OpenTe;
+            if (te == null || ___Owner == null || ___Owner != Patch_WorkstationWindow_Update.OpenQueue) return;
+            _dt *= PowerGate.Speed(te);
         }
     }
 }

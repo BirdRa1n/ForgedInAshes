@@ -593,6 +593,18 @@
 			<property name="EconomicValue" value="80"/>
 			<property name="SortOrder2" value="0011"/>
 		</block>
+		<!-- D8 T2: Speed Box. Input at the back end, output at the front end (along the same axis as the Shaft);
+		     output RPM = input x2 / x4 / x1/2 (E cycles, stored in the block meta). Faster machines craft faster but
+		     cost (rpm/32)^2 times their torque. Placeholder model: vanilla pipe flange. -->
+		<block name="feSpeedBox">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="speedbox"/>
+			<property name="DescriptionKey" value="feSpeedBoxDesc"/>
+			<property name="CustomIcon" value="metalPipeFlange"/>
+			<property name="Model" value="@:Shapes/pipe_flange.fbx"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="SortOrder2" value="0012"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

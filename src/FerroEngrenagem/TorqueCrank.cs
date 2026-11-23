@@ -131,7 +131,7 @@ namespace FerroEngrenagem
             if (!IsActivateHeld(player))
             {
                 prompt = string.Format(Text("feTorqueHold", "Hold {0} to turn the Torque Crank"), KeyName(player)) +
-                         "\n" + KineticLookController.Status(Kinetic.Get(gm.World, pos));
+                         "\n" + KineticLookController.Status(Kinetic.Get(gm.World, pos), pos);
                 return;
             }
             Stat stamina = player.Stats.Stamina;
@@ -145,7 +145,7 @@ namespace FerroEngrenagem
             CrankSpinner spinner = CrankSpinner.At(pos);
             if (spinner != null) spinner.Drive(crank.SpinDegPerSecond);
             prompt = Text("feTorqueTurning", "Turning the Torque Crank...") + "\n" +
-                     KineticLookController.Status(Kinetic.Get(gm.World, pos));
+                     KineticLookController.Status(Kinetic.Get(gm.World, pos), pos);
         }
 
         void LateUpdate()

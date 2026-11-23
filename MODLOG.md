@@ -412,6 +412,20 @@ aqui fica só o que foi medido/verificado.
 - Blocos: `feShaft` (modelo `@:Shapes/pipe_straight.fbx`, eixo local assumido Y — confirmar no jogo) e
   `feGearbox` (`pipe_joint.fbx`). Receitas: Eixo ×2 no Torno, Caixa na Montadora.
 
+## 2026-11-22 — D8 T2: Caixa de Velocidade e velocidade de fabricação
+
+- `feSpeedBox` (FeKinetic=speedbox, modelo `pipe_flange.fbx`, mesmo eixo do Eixo): entrada em -eixo, saída em
+  +eixo; razão no `meta` do bloco (0=x2, 1=x4, 2=x1/2), E alterna (`KineticLookController`, `WasPressed`,
+  `SetBlockRPC` + `Kinetic.Invalidate`).
+- Rede: cada nó tem um fator de velocidade relativo; atravessar a caixa pela saída multiplica, pela entrada ao
+  contrário divide. Cada fonte fixa a RPM de referência (fonte = 32 RPM no nó dela); fontes que exigiriam RPMs
+  diferentes, ou laços que discordam, = TRAVADO. RPM limitada a 4..256.
+- Custo: máquina = custo base × (rpm/32)², arredondado para cima. Velocidade de fabricação = rpm/32.
+- Fabricação acelerada (IL 3.4.0 b10): `TileEntityWorkstation.HandleRecipeQueue(float _timePassed)` (janela
+  fechada) e `XUiC_RecipeStack.Update(float _dt)` (janela aberta; só a fila da máquina aberta, guardada no
+  postfix do `XUiC_WorkstationWindowGroup.Update`) têm o tempo multiplicado.
+- Log `power ...` agora inclui `rpm=` e `speed=x`.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
