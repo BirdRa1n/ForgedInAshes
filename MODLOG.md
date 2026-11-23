@@ -480,6 +480,20 @@ aqui fica só o que foi medido/verificado.
   `feElectricMotor2` (256 UT, 60 W) e `feElectricMotor3` (512 UT, 120 W).
 - Spinner também nos motores a combustível (postfix `BlockPowerSource.OnBlockEntityTransformAfterActivated`).
 
+## 2026-11-22 — Indicador de conexão e recolher máquinas/peças
+
+- Teste da T4: o usuário não achava onde ligar o eixo no Motor a Gasolina (o motor só liga pelas pontas do eixo
+  dele) e pediu um indicador como o do encaixe; e que máquinas, motores e eixos se recolham como a manivela.
+- `MotorSocketMarker.cs`: segurando qualquer peça de torque, além dos encaixes das máquinas, placas finas nas
+  faces que levam torque de cada peça num raio de 7: verde = ponta livre, ciano = ligada (ou movendo a máquina do
+  encaixe), laranja = peça vizinha desalinhada (ou máquina com giro ao contrário).
+- `Pickup.cs`: o "take" vanilla de `BlockWorkstation`/`BlockPowerSource` só vale dentro do PRÓPRIO land claim
+  (IL 3.4.0 b10). Para blocos "fe*": vale onde o jogador pode construir (`CanPlaceBlockAt`), mantendo as outras
+  condições (colocado por jogador, `TakeDelay` > 0, entrada vazia nas bancadas). `TakeDelay` das máquinas e
+  geradores 15 → 5 s (blocks.xml e `gen_phase3.py`).
+- Peças da rede: `CanPickup` + `TakeDelay` 2 no `feShaft` (herdado pelas outras); agachado + E abre o radial com
+  "pegar" (em pé, E continua trocando ajustes).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

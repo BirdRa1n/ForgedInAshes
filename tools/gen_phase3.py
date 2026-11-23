@@ -187,7 +187,7 @@ def machine_block(m):
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>

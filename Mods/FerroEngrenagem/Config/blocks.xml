@@ -53,7 +53,7 @@
 			<property name="CloseSound" value="forge_close"/>
 			<property name="CraftSound" value="forge_smelt_click"/>
 			<property name="CraftCompleteSound" value="forge_item_complete"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="resourceCobblestones" value="50"/>
 			</property>
@@ -109,7 +109,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="resourceForgedIron" value="15"/>
 				<property name="resourceNail" value="30"/>
@@ -165,7 +165,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="resourceForgedIron" value="20"/>
 				<property name="resourceNail" value="40"/>
@@ -246,7 +246,7 @@
 			<property name="HeatMapStrength" value="2"/>
 			<property name="HeatMapTime" value="5000"/>
 			<property name="HeatMapFrequency" value="1000"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="resourceCobblestones" value="15"/>
 			</property>
@@ -306,7 +306,7 @@
 			<property name="HeatMapStrength" value="4"/>
 			<property name="HeatMapTime" value="5000"/>
 			<property name="HeatMapFrequency" value="1000"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="4"/>
 				<property name="resourceNail" value="10"/>
@@ -459,7 +459,7 @@
 			<property name="HeatMapStrength" value="6"/>
 			<property name="HeatMapTime" value="5000"/>
 			<property name="HeatMapFrequency" value="1000"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="4"/>
 				<property name="resourceNail" value="10"/>
@@ -565,6 +565,8 @@
 			<property name="Class" value="FerroEngrenagem.FeKinetic, FerroEngrenagem"/>
 			<property name="FeKinetic" value="shaft"/>
 			<property name="FeShaftAxis" value="z"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="2"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feShaftDesc"/>
 			<property name="CustomIcon" value="metalPipeStraight"/>
@@ -704,7 +706,7 @@
 			<property name="HeatMapStrength" value="4"/>
 			<property name="HeatMapTime" value="5000"/>
 			<property name="HeatMapFrequency" value="1000"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property name="EconomicValue" value="600"/>
 			<property name="MaxDamage" value="600"/>
 			<property class="RepairItems">
@@ -779,7 +781,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -831,7 +833,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -883,7 +885,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -935,7 +937,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -986,7 +988,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1037,7 +1039,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1087,7 +1089,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1139,7 +1141,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1191,7 +1193,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1241,7 +1243,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1292,7 +1294,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1344,7 +1346,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>
@@ -1396,7 +1398,7 @@
 			<property name="HeatMapFrequency" value="1000"/>
 			<property name="OpenSound" value="open_workbench"/>
 			<property name="CloseSound" value="close_workbench"/>
-			<property name="TakeDelay" value="15"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="feResourceIronPlate" value="5"/>
 				<property name="resourceNail" value="20"/>

@@ -111,11 +111,13 @@ namespace FerroEngrenagem
             KineticSpinner.Attach(_ebcd, _blockPos, this);
         }
 
-        // E on a speed box / clutch / regulator changes its setting (KineticLookController); no radial.
+        // Standing, E on a speed box / clutch / regulator changes its setting (KineticLookController); crouching,
+        // E opens the vanilla radial with "take" (CanPickup in XML), like the Crank.
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                         EntityAlive _entityFocusing)
         {
-            return false;
+            bool crouch = _entityFocusing != null && _entityFocusing.IsCrouching;
+            return crouch && base.HasBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
         }
     }
 
@@ -701,7 +703,7 @@ namespace FerroEngrenagem
 
             // E on a speed box / clutch / regulator: next setting (every frame, so the key press is not missed)
             int settings = looking ? BlockFeKinetic.Settings(Kinetic.Kind(bv.Block)) : 0;
-            if (settings > 0 && WasActivatePressed(player))
+            if (settings > 0 && !player.IsCrouching && WasActivatePressed(player))
             {
                 BlockValue nbv = bv;
                 nbv.meta = (byte)((bv.meta + 1) % settings);
@@ -715,7 +717,7 @@ namespace FerroEngrenagem
             nextUpdate = UnityEngine.Time.time + 0.2f;
             prompt = null;
             promptUi = null;
-            if (!looking) return;
+            if (!looking || player.IsCrouching) return;   // crouching: the vanilla "take" prompt
             bv = world.GetBlock(pos);
             KineticKind kind = Kinetic.Kind(bv.Block);
             if (kind == KineticKind.None || kind == KineticKind.TorqueCrank) return;   // the crank has its own prompt
