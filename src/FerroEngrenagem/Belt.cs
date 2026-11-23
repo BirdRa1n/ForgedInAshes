@@ -140,7 +140,12 @@ namespace FerroEngrenagem
             Vector3i f = Front(bv);
             Vector3i c = Add(pos, f);
             BlockValue cb = world.GetBlock(c);
-            if (BeltMachines.IsStorage(cb.Block)) { cell = c; parent = c; return true; }   // any side
+            if (BeltMachines.AnySide(cb.Block))                                               // any side
+            {
+                cell = c;
+                parent = Fluids.ParentOf(world, c, cb);
+                return true;
+            }
             if (Fluids.Kind(cb.Block) == FluidKind.None) return false;
             Vector3i par = Fluids.ParentOf(world, c, cb);
             foreach (FluidPort port in Fluids.ConveyorPorts(world, par))
@@ -283,6 +288,7 @@ namespace FerroEngrenagem
         static bool dirty;
         static int nextId = 1;
         static readonly Dictionary<Vector3i, List<BeltItem>> belts = new Dictionary<Vector3i, List<BeltItem>>();
+        public static readonly HashSet<Vector3i> Funnels = new HashSet<Vector3i>();
 
         public static ICollection<Vector3i> Belts { get { return belts.Keys; } }
 
@@ -298,6 +304,7 @@ namespace FerroEngrenagem
             if (f == null || f == loadedFor) return;
             loadedFor = f;
             belts.Clear();
+            Funnels.Clear();
             dirty = false;
             if (!File.Exists(f)) return;
             try
@@ -305,6 +312,11 @@ namespace FerroEngrenagem
                 foreach (string line in File.ReadAllLines(f))
                 {
                     string[] t = line.Split(';');
+                    if (t.Length == 4 && t[0] == "F")
+                    {
+                        Funnels.Add(new Vector3i(int.Parse(t[1]), int.Parse(t[2]), int.Parse(t[3])));
+                        continue;
+                    }
                     if (t.Length < 6) continue;
                     Vector3i p = new Vector3i(int.Parse(t[0]), int.Parse(t[1]), int.Parse(t[2]));
                     ItemValue iv = ReadItem(t[5]);
@@ -333,6 +345,8 @@ namespace FerroEngrenagem
             try
             {
                 StringBuilder sb = new StringBuilder();
+                foreach (Vector3i fp in Funnels)
+                    sb.Append("F;").Append(fp.x).Append(';').Append(fp.y).Append(';').Append(fp.z).Append('\n');
                 foreach (KeyValuePair<Vector3i, List<BeltItem>> kv in belts)
                     foreach (BeltItem it in kv.Value)
                     {
@@ -458,7 +472,7 @@ namespace FerroEngrenagem
             next = Time.time + Step;
             BeltStore.EnsureLoaded();
             tick++;
-            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); }
+            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); Funnel.TickAll(world); AutoCraft.TickAll(world); }
             Move(world, Step);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
         }
@@ -595,7 +609,7 @@ namespace FerroEngrenagem
         /// Other items are refused and wait on the belt.</summary>
         static readonly Dictionary<Vector3i, float> lastLog = new Dictionary<Vector3i, float>();
 
-        static void Note(World world, Vector3i p, string what)
+        internal static void Note(World world, Vector3i p, string what)
         {
             float t;
             if (lastLog.TryGetValue(p, out t) && Time.time - t < 15f) return;   // one line per machine per 15 s
@@ -606,6 +620,74 @@ namespace FerroEngrenagem
         public static bool IsStorage(Block b)
         {
             return b != null && b.Properties != null && b.Properties.Contains("FeBeltInput") && b.Properties.GetBool("FeBeltInput");
+        }
+
+        /// <summary>Takes items from a belt pointing into any of its sides: the Belt Storage (FeBeltInput), the mod's
+        /// workstations, and generators that burn an item (Coal Generator, Coal Engine; the Steam Engine only takes
+        /// them at its conveyor ports).</summary>
+        public static bool AnySide(Block b)
+        {
+            if (b == null) return false;
+            if (IsStorage(b)) return true;
+            if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
+            return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
+        }
+
+        static int Fill(ItemStack[] slots, int count, ItemStack st, int from, int to)
+        {
+            ItemClass ic = st.itemValue.ItemClass;
+            int max = ic == null ? 1 : Mathf.Max(1, ic.Stacknumber.Value);
+            int left = count;
+            for (int i = from; i < to && left > 0; i++)
+            {
+                ItemStack slot = slots[i];
+                if (slot == null || slot.IsEmpty() || slot.itemValue.type != st.itemValue.type || max <= 1 || slot.count >= max) continue;
+                int n = Mathf.Min(left, max - slot.count);
+                slot.count += n;
+                left -= n;
+            }
+            for (int i = from; i < to && left > 0; i++)
+            {
+                if (slots[i] != null && !slots[i].IsEmpty()) continue;
+                int n = Mathf.Min(left, max);
+                slots[i] = new ItemStack(st.itemValue.Clone(), n);
+                left -= n;
+            }
+            return count - left;
+        }
+
+        /// <summary>A workstation: fuel (items with a fuel value) to its fuel slots, smeltable material (forge
+        /// category) to its input slots (the Foundry); anything else to the fixed-recipe store (AutoCraft).</summary>
+        static bool InsertWorkstation(World world, Vector3i p, TileEntityWorkstation te, ItemStack st)
+        {
+            if (te.IsUserAccessing()) { Note(world, p, "open by a player, waiting"); return false; }
+            ItemClass ic = st.itemValue.ItemClass;
+            if (ic == null) return false;
+            string name = ic.GetItemName();
+            int took = 0;
+            ItemStack[] fuel = te.Fuel;
+            ItemStack[] input = te.Input;
+            if (fuel != null && fuel.Length > 0 && ItemClass.GetFuelValue(st.itemValue) > 0)
+            {
+                took = Fill(fuel, st.count, st, 0, fuel.Length);
+                if (took > 0) te.Fuel = fuel;
+            }
+            else if (input != null && te.InputSlotCount > 0 && ic.MadeOfMaterial != null &&
+                     !string.IsNullOrEmpty(ic.MadeOfMaterial.ForgeCategory))
+            {
+                took = Fill(input, st.count, st, 0, Mathf.Min(te.InputSlotCount, input.Length));
+                if (took > 0) te.Input = input;
+            }
+            else
+            {
+                took = AutoCraft.Store(world, p, st);
+            }
+            if (took <= 0) { Note(world, p, name + " not taken (full or not used here), it waits"); return false; }
+            st.count -= took;
+            te.SetModified();
+            BeltStore.MarkDirty();
+            Note(world, p, "took " + took + "x " + name);
+            return st.count <= 0;
         }
 
         /// <summary>Belt Storage: fill stacks of the same item first, then empty slots. Waits while a player has
@@ -653,6 +735,8 @@ namespace FerroEngrenagem
         {
             if (st == null || st.IsEmpty()) return true;
             if (IsStorage(world.GetBlock(parent).Block)) return InsertStorage(world, parent, st);
+            TileEntityWorkstation ws = world.GetTileEntity(parent) as TileEntityWorkstation;
+            if (ws != null) return InsertWorkstation(world, parent, ws, st);
             TileEntityPowerSource te = world.GetTileEntity(parent) as TileEntityPowerSource;
             PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
             if (gen == null) return false;
@@ -1016,6 +1100,151 @@ namespace FerroEngrenagem
         public static void Prefix()
         {
             BeltStore.Save();
+        }
+    }
+
+    // ------------------------------------------------------------------ D10 T2: Funnel
+    // Its BACK touches a crate (any storage, vanilla too) or a machine; its FRONT a belt. Every 0.5 s it takes one
+    // stack (up to FeFunnelAmount items) from the crate, or from the machine's OUTPUT slots, and puts it at the start
+    // of the belt (when that has room). It waits while a player has the source open.
+    public static class Funnel
+    {
+        public static Vector3i Front(BlockValue bv)
+        {
+            return Fluids.Rot(bv, Vector3.forward);
+        }
+
+        /// <summary>The source behind the funnel: a tile entity with storage or with output slots.</summary>
+        public static TileEntity Source(World world, Vector3i pos, BlockValue bv)
+        {
+            Vector3i f = Front(bv);
+            Vector3i c = new Vector3i(pos.x - f.x, pos.y - f.y, pos.z - f.z);
+            BlockValue cb = world.GetBlock(c);
+            Vector3i par = Fluids.ParentOf(world, c, cb);
+            TileEntity te = world.GetTileEntity(par);
+            if (te is TileEntityWorkstation) return te;
+            TileEntityComposite tc = te as TileEntityComposite;
+            if (tc != null && tc.GetFeature<TEFeatureStorage>() != null) return te;
+            return null;
+        }
+
+        static ItemStack Take(TileEntity te, int amount)
+        {
+            if (te.IsUserAccessing()) return null;
+            TileEntityWorkstation ws = te as TileEntityWorkstation;
+            if (ws != null)
+            {
+                ItemStack[] outp = ws.Output;
+                if (outp == null) return null;
+                for (int i = 0; i < outp.Length; i++)
+                {
+                    if (outp[i] == null || outp[i].IsEmpty()) continue;
+                    int n = Mathf.Min(amount, outp[i].count);
+                    ItemStack got = new ItemStack(outp[i].itemValue.Clone(), n);
+                    outp[i].count -= n;
+                    if (outp[i].count <= 0) outp[i] = ItemStack.Empty.Clone();
+                    ws.Output = outp;
+                    ws.SetModified();
+                    return got;
+                }
+                return null;
+            }
+            TileEntityComposite tc = te as TileEntityComposite;
+            TEFeatureStorage store = tc == null ? null : tc.GetFeature<TEFeatureStorage>();
+            if (store == null || store.ItemGrid == null) return null;
+            ItemStackGrid grid = store.ItemGrid;
+            for (int i = 0; i < grid.Length; i++)
+            {
+                ItemStack slot = grid[i];
+                if (slot == null || slot.IsEmpty()) continue;
+                int n = Mathf.Min(amount, slot.count);
+                ItemStack got = new ItemStack(slot.itemValue.Clone(), n);
+                ItemStack rest = slot.Clone();
+                rest.count -= n;
+                store.UpdateSlot(i, rest.count > 0 ? rest : ItemStack.Empty.Clone());
+                tc.SetModified();
+                return got;
+            }
+            return null;
+        }
+
+        public static void TickAll(World world)
+        {
+            List<Vector3i> gone = new List<Vector3i>();
+            foreach (Vector3i pos in BeltStore.Funnels)
+            {
+                if (world.GetChunkFromWorldPos(pos) == null) continue;
+                BlockValue bv = world.GetBlock(pos);
+                if (!(bv.Block is BlockFeFunnel)) { gone.Add(pos); continue; }
+                Vector3i f = Front(bv);
+                Vector3i dst = new Vector3i(pos.x + f.x, pos.y + f.y, pos.z + f.z);
+                if (!Belt.Accepts(world, dst, f)) continue;
+                float entry = Belt.EntryP(world, dst, f);
+                List<BeltItem> items = BeltStore.Items(dst, false);
+                if (!Belt.Room(items, entry)) continue;
+                if (items != null && entry == 0f)
+                {
+                    bool blocked = false;
+                    foreach (BeltItem o in items) if (o.P < entry + Belt.Gap) blocked = true;
+                    if (blocked) continue;
+                }
+                TileEntity src = Source(world, pos, bv);
+                if (src == null) continue;
+                int amount = (int)Fluids.Prop(bv.Block, "FeFunnelAmount", 16f);
+                ItemStack got = Take(src, amount);
+                if (got == null || got.IsEmpty()) continue;
+                BeltItem it = BeltStore.Add(dst, got, entry);
+                Belt.ChooseExit(world, dst, world.GetBlock(dst), it);
+            }
+            foreach (Vector3i p in gone) BeltStore.Funnels.Remove(p);
+            if (gone.Count > 0) BeltStore.MarkDirty();
+        }
+
+        public static string Describe(World world, Vector3i pos, BlockValue bv)
+        {
+            Vector3i f = Front(bv);
+            Vector3i dst = new Vector3i(pos.x + f.x, pos.y + f.y, pos.z + f.z);
+            TileEntity src = Source(world, pos, bv);
+            string t;
+            if (src == null) t = Kinetic.Text("feFunnelNoSource", "Nothing to take from: put a crate or a machine behind it");
+            else t = string.Format(Kinetic.Text("feFunnelFrom", "Takes from: {0}"), src.blockValue.Block.GetLocalizedBlockName());
+            if (!Belt.Accepts(world, dst, f)) t += "\n" + Kinetic.Text("feFunnelNoBelt", "No belt in front taking items from it");
+            return t;
+        }
+    }
+
+    [UnityEngine.Scripting.Preserve]
+    public class BlockFeFunnel : Block
+    {
+        public override void Init()
+        {
+            base.Init();
+            BeltTicker.Ensure();
+        }
+
+        public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue,
+                                          PlatformUserIdentifierAbs _addedByPlayer)
+        {
+            base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue, _addedByPlayer);
+            if (_blockValue.ischild) return;
+            BeltStore.EnsureLoaded();
+            if (BeltStore.Funnels.Add(_blockPos)) BeltStore.MarkDirty();
+        }
+
+        public override void OnBlockRemoved(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
+        {
+            base.OnBlockRemoved(_world, _chunk, _blockPos, _blockValue);
+            if (BeltStore.Funnels.Remove(_blockPos)) BeltStore.MarkDirty();
+        }
+
+        public override string GetActivationText(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
+                                                 EntityAlive _entityFocusing)
+        {
+            World w = _world as World;
+            string baseText = base.GetActivationText(_world, _blockValue, _blockPos, _entityFocusing);
+            if (w == null) return baseText;
+            string line = KineticLookController.Escape(GetLocalizedBlockName() + "\n" + Funnel.Describe(w, _blockPos, _blockValue));
+            return string.IsNullOrEmpty(baseText) ? line : line + "\n" + baseText;
         }
     }
 }

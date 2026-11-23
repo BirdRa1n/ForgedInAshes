@@ -733,6 +733,22 @@ aqui fica só o que foi medido/verificado.
   Lockable e `FeBeltInput`. Esteira apontando para qualquer lado entrega (empilha, depois slots vazios via
   `UpdateSlot`); espera se cheio ou se um jogador está com ela aberta (`IsUserAccessing`). Receita na Montadora.
 
+## 2026-11-23 — D10: Funil, entradas das máquinas e receita fixa
+
+- Usuário: fazer tudo o que falta (multiplayer por último), testar no fim e depois conversar sobre balanceamento.
+- Funil (`feFunnel`, `BlockFeFunnel`, Belt.cs `Funnel`): costas num baú (qualquer `TEFeatureStorage`, vanilla também) ou
+  máquina (`TileEntityWorkstation`, só a SAÍDA), frente numa esteira; a cada 0,5 s põe até `FeFunnelAmount` (16) itens
+  no início da esteira. Espera baú aberto (`IsUserAccessing`) e esteira cheia. Lista de funis salva no arquivo das
+  esteiras (linhas "F;x;y;z").
+- Entradas por qualquer lado (`BeltMachines.AnySide`): Armazém, as máquinas do mod (workstations "fe*") e geradores que
+  queimam item (Gerador a Carvão, Motor a Carvão). Workstation: combustível (`ItemClass.GetFuelValue` > 0) → slots de
+  combustível; material fundível (`MadeOfMaterial.ForgeCategory`) → entrada (Fundição); o resto → receita fixa.
+- Receita fixa (AutoCraft.cs): comando radial "Receita fixa liga/desliga" nas máquinas fe* (postfix em
+  `BlockWorkstation.GetBlockActivationCommands`, prefixo no `OnBlockActivated(string,...)`). Liga com a receita da fila;
+  ingredientes que chegam pela esteira vão para um estoque interno (até 5 vezes a receita); com a fila vazia e tudo no
+  estoque, põe 1 `RecipeQueueItem` na última posição. Desligar ou remover a máquina solta o estoque. Leitura mostra a
+  receita e os ingredientes. Salvo em `FerroEngrenagem_autocraft.txt`.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

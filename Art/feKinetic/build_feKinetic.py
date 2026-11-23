@@ -1042,6 +1042,25 @@ def model_conveyor_ramp(col):
     return objs
 
 
+def model_funnel(col):
+    """Funnel (D10 T2): its back (Blender +Y = Unity -Z) touches a crate or a machine, its front (Blender -Y) drops
+    the items onto the belt in front at belt height (0.62). A hopper narrowing to a chute; arrows point out."""
+    base = bmesh.new()
+    box(base, (0.86, 0.06, 0.86), (0, 0.46, 0.50), IRON)                          # back plate on the source
+    for k, (w, h, y) in enumerate(((0.74, 0.74, 0.36), (0.58, 0.58, 0.24), (0.42, 0.44, 0.12), (0.30, 0.30, 0.0))):
+        box(base, (w, 0.12, h), (0, y, 0.55 + k * 0.01), PAINT)                      # stepped hopper
+    box(base, (0.30, 0.42, 0.06), (0, -0.25, 0.66), STEEL)                          # chute floor
+    for sx in (-1, 1):
+        box(base, (0.03, 0.42, 0.12), (sx * 0.165, -0.25, 0.71), STEEL)
+    for k, h in enumerate((0.10, 0.07, 0.04)):                                       # arrows toward the front
+        box(base, (0.012, 0.04, h), (0.38, 0.30 - k * 0.04, 0.55), OUT)
+        box(base, (0.012, 0.04, h), (-0.38, 0.30 - k * 0.04, 0.55), OUT)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(base, (0.05, 0.05, 0.40), (sx * 0.38, 0.30 + sy * 0.10, 0.20), IRON)   # feet
+    return [to_object(base, "feFunnel_Base", bevel=0.003)]
+
+
 AXLE_Z = C
 
 
@@ -1120,6 +1139,7 @@ MODELS = {
     "feBus": model_bus,
     "feConveyor": model_conveyor,
     "feConveyorRamp": model_conveyor_ramp,
+    "feFunnel": model_funnel,
 }
 
 
