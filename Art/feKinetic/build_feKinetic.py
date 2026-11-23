@@ -171,7 +171,12 @@ def model_shaft(col):
     shaft_end(bm, 0.0, 0.5)
     for y in (-0.22, 0.22):   # collars
         cyl(bm, SHAFT_R + 0.012, 0.035, (0, y, 0), "Y", IRON, segs=16)
-    return [to_object(bm, "FeSpin_Shaft", location=(0, 0, C), bevel=0.003)]
+    # a static empty as the root: with a single object, Unity's FBX import makes the spinning part itself the
+    # model root and FeBuild's -0.5 m offset would then drop it to the floor (bundle build, 2026-11-23)
+    root = bpy.data.objects.new("feShaft_Base", None)
+    root.empty_display_type = "PLAIN_AXES"
+    root.empty_display_size = 0.2
+    return [root, to_object(bm, "FeSpin_Shaft", location=(0, 0, C), bevel=0.003)]
 
 
 def housing(bm, w, d, h, mat=PAINT):
@@ -407,11 +412,13 @@ def main():
         hi = Vector((-1e9,) * 3)
         tris = 0
         for ob in objs:
+            if ob.data is None:
+                continue
             for v in ob.data.vertices:
                 w = ob.matrix_world @ v.co
                 lo = Vector(map(min, lo, w))
                 hi = Vector(map(max, hi, w))
-            tris += sum(len(p.vertices) - 2 for p in ob.data.polygons)
+            tris += sum(len(p.vertices) - 2 for p in ob.data.polygons) if ob.data else 0
         report[name] = {"objects": [o.name for o in objs], "tris": tris,
                         "min": [round(c, 3) for c in lo], "max": [round(c, 3) for c in hi]}
     return report

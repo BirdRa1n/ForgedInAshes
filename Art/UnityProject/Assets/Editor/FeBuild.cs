@@ -92,6 +92,16 @@ public static class FeBuild
                 Debug.Log($"[FE] {b}: collider center {col.center} size {col.size}");
             }
 
+            // Spinning parts (KineticSpinner turns them around their local +Z): log where they sit and where their
+            // +Z points in prefab-root space, to check the Blender -> FBX -> Unity axis conversion.
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (!t.name.StartsWith("FeSpin") && !t.name.EndsWith("_Rotor")) continue;
+                var p = root.transform.InverseTransformPoint(t.position);
+                var z = root.transform.InverseTransformDirection(t.forward);
+                Debug.Log($"[FE] {b}: spin part {t.name} at ({p.x:0.00}, {p.y:0.00}, {p.z:0.00}) +Z -> ({z.x:0.00}, {z.y:0.00}, {z.z:0.00})");
+            }
+
             var path = $"{PrefabDir}/{root.name}.prefab";
             PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);

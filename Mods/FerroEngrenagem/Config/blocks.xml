@@ -461,7 +461,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrankPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueCrankPrefab"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -481,8 +481,8 @@
 			<property name="Group" value="Building,TCScience,advBuilding"/>
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
-		<!-- D8 T1: torque network (src/FerroEngrenagem/TorqueNetwork.cs, PLANO_MOD.md 5.4). Placeholder models: vanilla
-		     pipes. Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
+		<!-- D8 T1: torque network (src/FerroEngrenagem/TorqueNetwork.cs, PLANO_MOD.md 5.4). Models: Art/feKinetic (bundle
+		     prefabs with FeSpin parts); the Clutch and the Gauge are still vanilla placeholders. Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
 		     rotate it with the rotation key to lay it flat or vertical. Gearbox: joins all six faces. -->
 		<block name="feShaft">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
@@ -494,9 +494,8 @@
 			<property name="DescriptionKey" value="feShaftDesc"/>
 			<property name="CustomIcon" value="metalPipeStraight"/>
 			<property name="CustomIconTint" value="ffc060"/>
-			<property name="Shape" value="New"/>
-			<property name="Model" value="@:Shapes/pipe_straight.fbx"/>
-			<property name="Texture" value="597"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feShaftPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="LightOpacity" value="4"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -515,7 +514,7 @@
 			<property name="FeKinetic" value="gearbox"/>
 			<property name="DescriptionKey" value="feGearboxDesc"/>
 			<property name="CustomIcon" value="metalPipeJoint"/>
-			<property name="Model" value="@:Shapes/pipe_joint.fbx"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feGearboxPrefab"/>
 			<property name="EconomicValue" value="80"/>
 			<property name="SortOrder2" value="0011"/>
 		</block>
@@ -527,7 +526,7 @@
 			<property name="FeKinetic" value="speedbox"/>
 			<property name="DescriptionKey" value="feSpeedBoxDesc"/>
 			<property name="CustomIcon" value="metalPipeFlange"/>
-			<property name="Model" value="@:Shapes/pipe_flange.fbx"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
 			<property name="EconomicValue" value="150"/>
 			<property name="SortOrder2" value="0012"/>
 		</block>
@@ -550,15 +549,15 @@
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="regulator"/>
 			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
-			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="metalPipeValve"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Plumbing/pipe_valvePrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueRegulatorPrefab"/>
 			<property name="EconomicValue" value="200"/>
 			<property name="SortOrder2" value="0014"/>
 		</block>
 		<block name="feTorqueGauge">
 			<property name="Extends" value="feShaft"/>
+			<property name="Shape" value="New"/>
 			<property name="FeKinetic" value="gauge"/>
 			<property name="DescriptionKey" value="feTorqueGaugeDesc"/>
 			<property name="CustomIcon" value="metalPipeCap"/>
@@ -573,10 +572,9 @@
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="inverter"/>
 			<property name="DescriptionKey" value="feSpinInverterDesc"/>
-			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="pipeSmallJoint"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Industrial/pipeSmallJointPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpinInverterPrefab"/>
 			<property name="EconomicValue" value="120"/>
 			<property name="SortOrder2" value="0016"/>
 		</block>
