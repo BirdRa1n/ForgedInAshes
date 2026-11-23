@@ -828,6 +828,7 @@ namespace FerroEngrenagem
         Vector3i pos;
         readonly Transform[] arms = new Transform[6];
         float next;
+        bool reported;
 
         public static void Attach(BlockEntityData ebcd, Vector3i pos)
         {
@@ -836,6 +837,7 @@ namespace FerroEngrenagem
             if (a == null) a = ebcd.transform.gameObject.AddComponent<PipeArms>();
             a.pos = pos;
             a.next = 0f;
+            a.reported = false;
             for (int i = 0; i < 6; i++) a.arms[i] = Find(ebcd.transform, Names[i]);
         }
 
@@ -856,14 +858,27 @@ namespace FerroEngrenagem
             next = Time.time + 0.5f;
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world == null) return;
+            bool first = !reported;
+            reported = true;
             for (int i = 0; i < 6; i++)
             {
-                if (arms[i] == null) continue;
                 // the arm's direction in the world (the model may be rotated)
                 Vector3 w = transform.TransformDirection(Local[i]);
                 Vector3i d = new Vector3i(Mathf.RoundToInt(w.x), Mathf.RoundToInt(w.y), Mathf.RoundToInt(w.z));
                 Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 bool on = Fluids.HasPortAt(world, n, new Vector3i(-d.x, -d.y, -d.z));
+                if (first)
+                {
+                    // diagnostic, once per pipe: every arm that faces a device (not a pipe)
+                    BlockValue nbv = world.GetBlock(n);
+                    FluidKind nk = Fluids.Kind(nbv.Block);
+                    if (nk != FluidKind.None && nk != FluidKind.Pipe)
+                        Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " faces " + nbv.Block.GetBlockName()
+                                + (nbv.ischild ? " (child)" : "") + " at " + n + " via " + Names[i] + " dir " + d
+                                + ": port=" + on + " arm=" + (arms[i] == null ? "MISSING" : (arms[i].gameObject.activeSelf ? "shown" : "hidden"))
+                                + " modelRot=" + transform.rotation.eulerAngles.ToString("F0"));
+                }
+                if (arms[i] == null) continue;
                 if (arms[i].gameObject.activeSelf != on)
                 {
                     arms[i].gameObject.SetActive(on);
