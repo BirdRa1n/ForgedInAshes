@@ -57,7 +57,7 @@ Torque e as máquinas com encaixe de motor. O mod lê a rede a cada 0,25 s e ani
 seguir os nomes abaixo (nenhum script dentro do bundle).
 
 **Peças que giram (por nome do objeto no prefab)**
-- Qualquer objeto cujo nome começa com `FeSpin` gira em torno do **+Z local dele** (Unity; no Blender é o +Y
+- Qualquer objeto cujo nome começa com `FeSpin` (exatamente assim, com F e S maiúsculos) gira em torno do **+Z local dele** (Unity; no Blender é o +Y
   antes de exportar, como o rotor da Manivela), na RPM da peça, no sentido real da rede (1 RPM = 6°/s; a rede vai
   de 4 a 256 RPM). Gire o pivô do objeto para o centro do eixo.
 - `FeSpinIn` / `FeSpinOut`: lados de entrada e saída (Caixa de Velocidade: a saída usa a relação ×2/×4/×½;

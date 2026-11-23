@@ -553,6 +553,9 @@ aqui fica só o que foi medido/verificado.
   `ModelEntity` (o Medidor ficou com `Shape=New` próprio); `FeSpinWhole` saiu do Inversor e do Regulador.
 - Teste: modelos aparecem e a rede roda (1024/1024 UT). Um Inversor ficou "rolado" de lado (24 rotações do
   bloco): Caixa de Velocidade, Inversor e Regulador agora com `OnlySimpleRotations` (só as 4 de pé).
+- Na verdade o Inversor girava INTEIRO: o FeBuild chama o modelo de `feSpinInverter` e o KineticSpinner
+  comparava "FeSpin" sem diferenciar maiúsculas. Agora a comparação é exata (Ordinal). O `OnlySimpleRotations`
+  fica (peças com pés não devem rolar).
 
 ## Próximo passo (antigo, mantido para histórico)
 

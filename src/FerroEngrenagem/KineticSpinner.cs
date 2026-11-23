@@ -110,7 +110,8 @@ namespace FerroEngrenagem
             for (int i = 0; i < t.childCount; i++)
             {
                 Transform c = t.GetChild(i);
-                if (c.name.StartsWith("FeSpin", System.StringComparison.OrdinalIgnoreCase)) parts.Add(Parse(c));
+                // case-sensitive: the Spin Inverter model itself is named "feSpinInverter" and must not spin as a whole
+                if (c.name.StartsWith("FeSpin", System.StringComparison.Ordinal)) parts.Add(Parse(c));
                 Collect(c);
             }
         }
