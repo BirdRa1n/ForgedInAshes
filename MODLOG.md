@@ -715,6 +715,16 @@ aqui fica só o que foi medido/verificado.
   L: −ângulo em Unity). Divisões continuam no modo reto com laterais abertas.
 - Condensadora: o log mostrou o cano 669,62,868 existindo e conectado, mas o PipeArms dele nunca rodou. Log novo
   no Attach dos canos vizinhos a equipamentos (ativo, componente, braços encontrados).
+- Teste: funcionou, sem erros no log; curvas "horrorosas" (anel feito de caixas sobrepostas, base quadrada aparecendo).
+  Modelo refeito com `arc_solid` (setor de anel sólido de verdade): piso, trilho externo em arco, filete interno e
+  ripas em cunha. Divisões (2 ou 3 saídas) viram uma MESA DE TRANSFERÊNCIA (`FeJunction`: chapa com esferas,
+  `FeJunctionPosts` nos cantos, `FeJunctionWedge` em V quando divide só para os lados). Cama da reta separada
+  (`FeBeltBed`). BeltShape: 4 visuais (reta, curva E, curva D, junção); a mesa não anima.
+- D10 T3 (parcial): esteira apontando para a entrada de itens do Motor a Vapor (laterais da camada de cima,
+  `Fluids.ConveyorPorts`) entrega: Carvão → combustível (`FeFuelPerItem`), Lubrificante → slots. Outros itens esperam.
+  `Belt.Exits` = saídas de esteira + a máquina; entra no rodízio das divisões.
+- Condensadora: o cano 669,62,868 nem chegou a registrar vizinho → o mundo não devolve a Condensadora na célula de
+  cima. `HasPortAt` agora cai para as portas dos aparelhos registrados; log do bloco na própria célula da porta.
 
 ## Próximo passo (antigo, mantido para histórico)
 

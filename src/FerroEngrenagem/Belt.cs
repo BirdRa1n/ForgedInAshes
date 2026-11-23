@@ -130,6 +130,32 @@ namespace FerroEngrenagem
             return l;
         }
 
+        /// <summary>D10 T3: the machine input this (flat) belt points into, if any: a conveyor port of a device (the
+        /// Steam Engine's upper side cells, Fluids.ConveyorPorts) whose cell is in front and faces this belt.</summary>
+        public static bool MachineAt(World world, Vector3i pos, BlockValue bv, out Vector3i cell, out Vector3i parent)
+        {
+            cell = Vector3i.zero;
+            parent = Vector3i.zero;
+            if (IsRamp(bv.Block)) return false;
+            Vector3i f = Front(bv);
+            Vector3i c = Add(pos, f);
+            BlockValue cb = world.GetBlock(c);
+            if (Fluids.Kind(cb.Block) == FluidKind.None) return false;
+            Vector3i par = Fluids.ParentOf(world, c, cb);
+            foreach (FluidPort port in Fluids.ConveyorPorts(world, par))
+                if (port.Cell == c && port.Dir == Neg(f)) { cell = c; parent = par; return true; }
+            return false;
+        }
+
+        /// <summary>Every place the items of this belt can go: the belt outputs, then a machine input.</summary>
+        public static List<Vector3i> Exits(World world, Vector3i pos, BlockValue bv)
+        {
+            List<Vector3i> l = Outputs(world, pos, bv);
+            Vector3i cell, parent;
+            if (MachineAt(world, pos, bv, out cell, out parent)) l.Add(cell);
+            return l;
+        }
+
         /// <summary>Belts joined to this one either way (they give to it or take from it): one torque line.</summary>
         public static List<Vector3i> Links(World world, Vector3i pos, BlockValue bv)
         {
@@ -166,7 +192,7 @@ namespace FerroEngrenagem
         /// <summary>Give the item its exit: the next output in turn (round robin per belt).</summary>
         public static void ChooseExit(World world, Vector3i pos, BlockValue bv, BeltItem it)
         {
-            List<Vector3i> outs = Outputs(world, pos, bv);
+            List<Vector3i> outs = Exits(world, pos, bv);
             if (outs.Count == 0) { it.HasExit = false; return; }
             int k;
             turn.TryGetValue(pos, out k);
@@ -520,14 +546,21 @@ namespace FerroEngrenagem
         // split never stalls on one blocked branch
         bool Pass(World world, Vector3i from, BlockValue bv, BeltItem it, float over)
         {
-            List<Vector3i> outs = Belt.Outputs(world, from, bv);
+            List<Vector3i> outs = Belt.Exits(world, from, bv);
             if (outs.Count == 0) return false;
+            Vector3i mcell, mparent;
+            bool machine = Belt.MachineAt(world, from, bv, out mcell, out mparent);
             Vector3i first = it.HasExit ? new Vector3i(from.x + it.Exit.x, from.y + it.Exit.y, from.z + it.Exit.z) : outs[0];
             int start = outs.IndexOf(first);
             if (start < 0) start = 0;
             for (int k = 0; k < outs.Count; k++)
             {
                 Vector3i to = outs[(start + k) % outs.Count];
+                if (machine && to == mcell)
+                {
+                    if (BeltMachines.Insert(world, mparent, it.Stack)) return true;   // all of it went in
+                    continue;                                                         // the rest waits at the end
+                }
                 if (TryPass(world, from, to, it, over)) return true;
             }
             return false;
@@ -550,6 +583,67 @@ namespace FerroEngrenagem
             Belt.ChooseExit(world, to, tbv, it);
             next.Add(it);
             return true;
+        }
+    }
+
+    // ------------------------------------------------------------------ machine inputs (D10 T3)
+    public static class BeltMachines
+    {
+        /// <summary>Put as much of the stack as the machine takes; true when nothing is left. Steam Engine (and any
+        /// torque engine with conveyor ports): its fuel item (Charcoal) goes to the fuel, its lubricant to the slots.
+        /// Other items are refused and wait on the belt.</summary>
+        public static bool Insert(World world, Vector3i parent, ItemStack st)
+        {
+            if (st == null || st.IsEmpty()) return true;
+            TileEntityPowerSource te = world.GetTileEntity(parent) as TileEntityPowerSource;
+            PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
+            if (gen == null) return false;
+            Block b = world.GetBlock(parent).Block;
+            int took = 0;
+            ItemClass fuel = FuelGenerator.FuelItem(b);
+            if (fuel != null && st.itemValue.type == fuel.Id)
+            {
+                int per = Mathf.Max(1, FuelGenerator.FuelPerItem(b));
+                int room = (gen.MaxFuel - gen.CurrentFuel) / per;
+                took = Mathf.Min(room, st.count);
+                if (took > 0) gen.CurrentFuel = (ushort)Mathf.Min(gen.MaxFuel, gen.CurrentFuel + took * per);
+            }
+            else
+            {
+                string lube = TorqueEngine.LubeItem(b);
+                ItemClass ic = st.itemValue.ItemClass;
+                if (lube != null && ic != null && ic.GetItemName() == lube && gen.Stacks != null)
+                {
+                    int max = Mathf.Max(1, ic.Stacknumber.Value);
+                    int left = st.count;
+                    for (int i = 0; i < gen.Stacks.Length && left > 0; i++)
+                    {
+                        ItemStack slot = gen.Stacks[i];
+                        if (slot != null && !slot.IsEmpty() && slot.itemValue.type == st.itemValue.type && slot.count < max)
+                        {
+                            int n = Mathf.Min(left, max - slot.count);
+                            slot.count += n;
+                            left -= n;
+                        }
+                    }
+                    for (int i = 0; i < gen.Stacks.Length && left > 0; i++)
+                    {
+                        if (gen.Stacks[i] == null || gen.Stacks[i].IsEmpty())
+                        {
+                            int n = Mathf.Min(left, max);
+                            gen.Stacks[i] = new ItemStack(st.itemValue.Clone(), n);
+                            left -= n;
+                        }
+                    }
+                    took = st.count - left;
+                    if (took > 0) te.SetSendSlots();
+                }
+            }
+            if (took <= 0) return false;
+            st.count -= took;
+            te.SetModified();
+            BeltStore.MarkDirty();
+            return st.count <= 0;
         }
     }
 
@@ -681,11 +775,11 @@ namespace FerroEngrenagem
         const float Spacing = 0.125f;
         const float CurveStep = 10f;   // degrees between the slats of a curve
         Vector3i pos;
-        Transform slats, railL, railR, end, curveL, curveR, setL, setR, cslL, cslR, rollF, rollB;
+        Transform slats, bed, railL, railR, end, setL, setR, cslL, cslR, rollF, rollB, junction, posts, wedge;
         Vector3 basePos, slide;
         Quaternion baseL, baseR;
         float speed, offset, angle, next;
-        int mode;   // 0 straight, 1 curve left, 2 curve right
+        int mode;   // 0 straight, 1 curve left, 2 curve right, 3 junction (2 or 3 outputs)
 
         public static void Attach(BlockEntityData ebcd, Vector3i pos, Block block)
         {
@@ -695,33 +789,52 @@ namespace FerroEngrenagem
             Transform t = ebcd.transform;
             s.pos = pos;
             s.slats = Find(t, "FeBeltSlats");
+            s.bed = Find(t, "FeBeltBed");
             s.railL = Find(t, "FeRail_L");
             s.railR = Find(t, "FeRail_R");
             s.end = Find(t, "FeBeltEnd");
-            s.curveL = Find(t, "FeCurve_L");
-            s.curveR = Find(t, "FeCurve_R");
             s.setL = Find(t, "FeCurveSet_L");
             s.setR = Find(t, "FeCurveSet_R");
             s.cslL = Find(t, "FeCurveSlats_L");
             s.cslR = Find(t, "FeCurveSlats_R");
             s.rollF = Find(t, "FeSpin_BeltRollerFront");
             s.rollB = Find(t, "FeSpin_BeltRollerBack");
+            s.junction = Find(t, "FeJunction");
+            s.posts = Find(t, "FeJunctionPosts");
+            s.wedge = Find(t, "FeJunctionWedge");
             if (s.slats != null) s.basePos = s.slats.localPosition;
             if (s.cslL != null) s.baseL = s.cslL.localRotation;
             if (s.cslR != null) s.baseR = s.cslR.localRotation;
             s.slide = Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
-            s.mode = -1;
             s.next = 0f;
-            s.Apply(0, new List<Vector3i>(), new List<Vector3i>(), Vector3i.zero, Vector3i.zero, Vector3i.zero);
+            if (!Belt.IsRamp(block)) s.Apply(0, false, false, false, false, false);
         }
 
         static Transform Find(Transform t, string n)
         {
-            // prefix: Blender renames a second "FeBeltSlats" in the same .blend to "FeBeltSlats.001"
-            if (t.name.StartsWith(n, System.StringComparison.Ordinal)) return t;
+            // prefix: Blender renames a second "FeBeltSlats" in the same .blend to "FeBeltSlats.001"; exact names
+            // first so "FeJunction" does not pick "FeJunctionPosts"
+            Transform r = FindExact(t, n);
+            return r != null ? r : FindPrefix(t, n);
+        }
+
+        static Transform FindExact(Transform t, string n)
+        {
+            if (t.name == n) return t;
             for (int i = 0; i < t.childCount; i++)
             {
-                Transform r = Find(t.GetChild(i), n);
+                Transform r = FindExact(t.GetChild(i), n);
+                if (r != null) return r;
+            }
+            return null;
+        }
+
+        static Transform FindPrefix(Transform t, string n)
+        {
+            if (t.name.StartsWith(n + ".", System.StringComparison.Ordinal)) return t;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                Transform r = FindPrefix(t.GetChild(i), n);
                 if (r != null) return r;
             }
             return null;
@@ -732,22 +845,26 @@ namespace FerroEngrenagem
             if (t != null && t.gameObject.activeSelf != on) t.gameObject.SetActive(on);
         }
 
-        void Apply(int m, List<Vector3i> links, List<Vector3i> outs, Vector3i pl, Vector3i pr, Vector3i pf)
+        // openL / openR: another belt joins on that side; front: something takes the items in front;
+        // both: it splits to both sides only (the V divider)
+        void Apply(int m, bool openL, bool openR, bool front, bool both, bool unused)
         {
             mode = m;
-            bool straight = m == 0;
+            bool straight = m == 0, junc = m == 3;
             Show(slats, straight);
+            Show(bed, straight);
             Show(rollF, straight);
             Show(rollB, straight);
             Show(setL, m == 1);
             Show(cslL, m == 1);
             Show(setR, m == 2);
             Show(cslR, m == 2);
-            Show(railL, straight && !links.Contains(pl));
-            Show(railR, straight && !links.Contains(pr));
-            Show(curveL, straight && outs.Contains(pl));
-            Show(curveR, straight && outs.Contains(pr));
-            Show(end, straight && !outs.Contains(pf));
+            Show(junction, junc);
+            Show(posts, junc);
+            Show(wedge, junc && both);
+            Show(railL, (straight || junc) && !openL);
+            Show(railR, (straight || junc) && !openR);
+            Show(end, (straight || junc) && !front);
         }
 
         void Update()
@@ -763,16 +880,17 @@ namespace FerroEngrenagem
                     if (!Belt.IsRamp(bv.Block))
                     {
                         List<Vector3i> links = Belt.Links(world, pos, bv);
-                        List<Vector3i> outs = Belt.Outputs(world, pos, bv);
+                        List<Vector3i> exits = Belt.Exits(world, pos, bv);
                         Vector3i l = Belt.Left(bv), f = Belt.Front(bv);
                         Vector3i pl = new Vector3i(pos.x + l.x, pos.y, pos.z + l.z);
                         Vector3i pr = new Vector3i(pos.x - l.x, pos.y, pos.z - l.z);
                         Vector3i pf = new Vector3i(pos.x + f.x, pos.y, pos.z + f.z);
-                        // a pure curve: one side output only (no front, no other side)
+                        bool outL = exits.Contains(pl), outR = exits.Contains(pr), outF = exits.Contains(pf);
                         int m = 0;
-                        if (outs.Count == 1 && outs[0] == pl) m = 1;
-                        else if (outs.Count == 1 && outs[0] == pr) m = 2;
-                        Apply(m, links, outs, pl, pr, pf);
+                        if (exits.Count >= 2) m = 3;
+                        else if (outL) m = 1;
+                        else if (outR) m = 2;
+                        Apply(m, links.Contains(pl), links.Contains(pr), outF, outL && outR && !outF, false);
                     }
                 }
             }
@@ -785,7 +903,7 @@ namespace FerroEngrenagem
                 if (mode == 2 && cslR != null) cslR.localRotation = baseR * Quaternion.Euler(0f, angle, 0f);
                 return;
             }
-            if (slats == null) return;
+            if (mode == 3 || slats == null) return;   // the junction table does not move
             offset = Mathf.Repeat(offset + speed * Time.deltaTime, Spacing);
             slats.localPosition = basePos + slide * offset;
         }

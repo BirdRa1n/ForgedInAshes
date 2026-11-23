@@ -51,7 +51,9 @@ namespace FerroEngrenagem
                     Vector3i n = new Vector3i(port.Cell.x + port.Dir.x, port.Cell.y + port.Dir.y, port.Cell.z + port.Dir.z);
                     Log.Out(FerroEngrenagemMod.LogPrefix + "condenser port " + (port.Out ? "out " : "in ") + port.Fluid
                             + " cell " + port.Cell + " dir " + port.Dir + " -> " + n + " = " + world.GetBlock(n).Block.GetBlockName()
-                            + " connected=" + Fluids.PortConnected(world, port));
+                            + " connected=" + Fluids.PortConnected(world, port)
+                            + " | cell itself = " + world.GetBlock(port.Cell).Block.GetBlockName()
+                            + (world.GetBlock(port.Cell).ischild ? " (child)" : ""));
                 }
         }
 

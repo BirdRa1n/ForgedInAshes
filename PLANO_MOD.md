@@ -306,7 +306,7 @@ como as máquinas). Sem torque, a linha para e os itens ficam parados em cima de
    (itens, velocidade), devolver itens ao pegar. Teste: jogar item em cima da esteira com a mão (E com item na
    mão) até existir o Funil.
 2. D10 T2 — Funil: tirar e colocar em baús e na saída das estações.
-3. D10 T3 — Entradas das máquinas: Motor a Vapor (laterais), Fundição (entrada e combustível), Gerador a Carvão.
+3. D10 T3 [Motor a Vapor feito, falta teste] — Entradas das máquinas: Motor a Vapor (laterais), Fundição (entrada e combustível), Gerador a Carvão.
 4. Depois — receita fixa nas máquinas (a Prensa repete uma receita sozinha enquanto houver ingredientes chegando),
    divisor/filtro, rampas e multiplayer dedicado.
 

@@ -197,7 +197,19 @@ namespace FerroEngrenagem
         {
             BlockValue bv = world.GetBlock(cell);
             FluidKind k = Kind(bv.Block);
-            if (k == FluidKind.None) return false;
+            if (k == FluidKind.None)
+            {
+                // a multiblock cell the world does not report as the device (seen on the Condenser's upper cell):
+                // ask the registered devices whose ports sit on that cell
+                FluidStore.EnsureLoaded();
+                foreach (Vector3i dev in FluidStore.Devices)
+                {
+                    if (Mathf.Abs(dev.x - cell.x) > 2 || Mathf.Abs(dev.y - cell.y) > 2 || Mathf.Abs(dev.z - cell.z) > 2) continue;
+                    foreach (FluidPort p in Ports(world, dev))
+                        if (p.Cell == cell && p.Dir == dir) return true;
+                }
+                return false;
+            }
             if (k == FluidKind.Pipe) return true;
             Vector3i owner = ParentOf(world, cell, bv);
             foreach (FluidPort p in Ports(world, owner))

@@ -901,22 +901,50 @@ def _belt_rollers(objs, back_z, front_z):
         objs.append(to_object(r, name, location=(0, y, z), rotation=(0, 0, math.pi / 2)))
 
 
+def arc_solid(bm, pt, r0, r1, a0, a1, z0, z1, n, mat):
+    """A solid ring sector: radii r0..r1, angles a0..a1 (pt(r, th) -> (x, y)), heights z0..z1, n segments."""
+    rings = []
+    for k in range(n + 1):
+        th = a0 + (a1 - a0) * k / n
+        ring_v = []
+        for r, z in ((r0, z0), (r0, z1), (r1, z1), (r1, z0)):
+            x, y = pt(r, th)
+            ring_v.append(bm.verts.new((x, y, z)))
+        rings.append(ring_v)
+    faces = []
+    for k in range(n):
+        A, B = rings[k], rings[k + 1]
+        for i in range(4):
+            j = (i + 1) % 4
+            faces.append(bm.faces.new((A[i], A[j], B[j], B[i])))
+    faces.append(bm.faces.new(tuple(rings[0])))
+    faces.append(bm.faces.new(tuple(reversed(rings[-1]))))
+    for f in faces:
+        f.material_index = mat
+
+
 def model_conveyor(col):
     """Conveyor belt (D10). Travel = the block front = Unity +Z = Blender -Y. Unity left (-X) = Blender +X.
-    Parts switched by BeltShape (Belt.cs): FeRail_L / FeRail_R (hidden where another belt joins on that side),
-    FeBeltEnd (end stop, shown when nothing is in front), FeCurve_L / FeCurve_R (curve guide at the back corner of a
-    side the items turn to), FeBeltSlats (slides along the travel)."""
+    BeltShape (Belt.cs) shows one of three looks:
+      straight: FeBeltBed + FeBeltSlats (slide along the travel) + rollers, FeRail_L/R (hidden where another belt
+                joins), FeBeltEnd (end stop when nothing is in front);
+      curve:    FeCurveSet_L/R (quarter-ring floor around the back corner of that side, arched outer rail, inner
+                fillet) + FeCurveSlats_L/R (wedges turning about the vertical axis at the corner; radius 0.5 = the
+                items' arc);
+      junction (2 or 3 outputs): FeJunction (transfer table with ball casters), FeJunctionPosts (corner posts),
+                FeJunctionWedge (V divider when it splits to both sides only), rails / end stop as straight."""
     base = bmesh.new()
     for sx in (-1, 1):
         for sy in (-1, 1):
             box(base, (0.06, 0.06, 0.53), (sx * 0.44, sy * 0.42, 0.265), IRON)  # legs
         box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)               # lower stringer
+        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)              # bearing plates
     box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)                          # cross braces
     box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
-    box(base, (0.80, 0.98, 0.02), (0, 0, 0.565), IRON)                            # belt bed (under the slats)
-    for sx in (-1, 1):
-        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)              # bearing plates
     objs = [to_object(base, "feConveyor_Base", bevel=0.003)]
+    bed = bmesh.new()
+    box(bed, (0.80, 0.98, 0.02), (0, 0, 0.565), IRON)
+    objs.append(to_object(bed, "FeBeltBed"))
     for name, sx in (("FeRail_L", 1), ("FeRail_R", -1)):
         r = bmesh.new()
         box(r, (0.06, 1.0, 0.10), (sx * 0.44, 0, 0.58), PAINT)
@@ -928,56 +956,56 @@ def model_conveyor(col):
     box(end, (0.82, 0.04, 0.12), (0, -0.47, 0.64), PAINT)
     box(end, (0.82, 0.045, 0.03), (0, -0.47, 0.69), OUT)
     objs.append(to_object(end, "FeBeltEnd", bevel=0.002))
-    for name, sx in (("FeCurve_L", 1), ("FeCurve_R", -1)):
-        cv = bmesh.new()
-        cx, cy, rad = sx * 0.5, 0.5, 0.22                                           # back corner of that side
-        n = 6
-        for k in range(n):
-            t0, t1 = k * (math.pi / 2) / n, (k + 1) * (math.pi / 2) / n
-            tm = (t0 + t1) / 2
-            px = cx - sx * rad * math.cos(tm)
-            py = cy - rad * math.sin(tm)
-            seg = rad * (t1 - t0) + 0.01
-            ang = math.atan2(-math.cos(tm), sx * math.sin(tm))                      # tangent of the arc
-            box(cv, (seg, 0.04, 0.10), (px, py, 0.62), PAINT, Matrix.Rotation(ang, 4, "Z"))
-        box(cv, (0.05, 0.05, 0.12), (cx - sx * 0.025, cy - 0.025, 0.62), OUT)        # corner post
-        objs.append(to_object(cv, name, bevel=0.002))
     sl = bmesh.new()
     for k in range(7):
         box(sl, (0.78, 0.075, 0.03), (0, -0.375 + k * 0.125, 0.592), RUST)
     objs.append(to_object(sl, "FeBeltSlats"))
-    # curve mode (BeltShape: a belt that only turns to one side): a quarter-ring belt around the back corner of that
-    # side (radius 0.5 = the items' arc), an outer rail and slats turning around the corner (FeCurveSlats_*: origin
-    # at the corner, they turn about the vertical axis)
+    # ---- curve look
+    Q = math.pi / 2
     for side, sx in (("L", 1), ("R", -1)):
-        cx, cy = sx * 0.5, 0.5
-        def at(r, th):
+        cx, cy = sx * 0.5, 0.5                                                      # back corner of that side
+        def world_pt(r, th, cx=cx, cy=cy, sx=sx):
             return (cx - sx * r * math.cos(th), cy - r * math.sin(th))
+        def local_pt(r, th, sx=sx):
+            return (-sx * r * math.cos(th), -r * math.sin(th))
         st = bmesh.new()
+        arc_solid(st, world_pt, 0.10, 0.90, 0, Q, 0.555, 0.575, 18, IRON)          # floor
+        arc_solid(st, world_pt, 0.90, 0.96, 0, Q, 0.53, 0.63, 18, PAINT)           # outer rail
+        arc_solid(st, world_pt, 0.04, 0.10, 0, Q, 0.53, 0.63, 6, PAINT)            # inner fillet
+        for th in (Q * 0.3, Q * 0.7):                                                # arrows along the turn
+            for k, h in enumerate((0.07, 0.045, 0.02)):
+                arc_solid(st, world_pt, 0.96, 0.972, th + k * 0.06, th + k * 0.06 + 0.05, 0.58 - h / 2,
+                          0.58 + h / 2, 1, OUT)
+        objs.append(to_object(st, "FeCurveSet_" + side, bevel=0.0))
+        cs = bmesh.new()
         n = 9
         for k in range(n):
-            th = (k + 0.5) * (math.pi / 2) / n
-            x, y = at(0.5, th)
-            rot = Matrix.Rotation(-sx * th, 4, "Z")
-            box(st, (0.80, 0.17, 0.02), (x, y, 0.565), IRON, rot)                    # bed
-        m = 14
-        for k in range(m):
-            th = (k + 0.5) * (math.pi / 2) / m
-            x, y = at(0.94, th)
-            box(st, (0.06, 0.94 * (math.pi / 2) / m + 0.02, 0.10), (x, y, 0.58), PAINT, Matrix.Rotation(-sx * th, 4, "Z"))
-            if k in (4, 9):                                                             # arrows along the turn
-                x2, y2 = at(0.975, th)
-                box(st, (0.012, 0.05, 0.06), (x2, y2, 0.58), OUT, Matrix.Rotation(-sx * th, 4, "Z"))
-        ix, iy = at(0.07, math.pi / 4)
-        cyl(st, 0.07, 0.12, (ix, iy, 0.60), "Z", PAINT, segs=12)                        # inner post
-        objs.append(to_object(st, "FeCurveSet_" + side, bevel=0.002))
-        cs = bmesh.new()
-        for k in range(9):
-            th = (k + 0.5) * (math.pi / 2) / 9
-            # built around the corner at the origin (the object sits at the corner)
-            x, y = -sx * 0.5 * math.cos(th), -0.5 * math.sin(th)
-            box(cs, (0.76, 0.06, 0.03), (x, y, 0.592), RUST, Matrix.Rotation(-sx * th, 4, "Z"))
+            th = (k + 0.5) * Q / n
+            arc_solid(cs, local_pt, 0.12, 0.88, th - 0.035, th + 0.035, 0.577, 0.607, 2, RUST)
         objs.append(to_object(cs, "FeCurveSlats_" + side, location=(cx, cy, 0)))
+    # ---- junction look
+    jn = bmesh.new()
+    box(jn, (0.84, 0.92, 0.02), (0, 0, 0.565), IRON)
+    for ix in range(4):
+        for iy in range(4):
+            x, y = -0.30 + ix * 0.2, -0.30 + iy * 0.2
+            cyl(jn, 0.045, 0.012, (x, y, 0.580), "Z", IRON, segs=10)
+            cyl(jn, 0.030, 0.030, (x, y, 0.596), "Z", STEEL, segs=10, r2=0.012)     # ball casters
+    objs.append(to_object(jn, "FeJunction"))
+    po = bmesh.new()
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            cyl(po, 0.05, 0.14, (sx * 0.45, sy * 0.45, 0.61), "Z", PAINT, segs=12)
+            cyl(po, 0.052, 0.025, (sx * 0.45, sy * 0.45, 0.69), "Z", OUT, segs=12)
+    objs.append(to_object(po, "FeJunctionPosts"))
+    wd = bmesh.new()
+    for sx in (-1, 1):
+        x0, y0, x1, y1 = 0.0, -0.10, sx * 0.42, -0.46
+        L = math.hypot(x1 - x0, y1 - y0)
+        ang = math.atan2(y1 - y0, x1 - x0)
+        box(wd, (L, 0.04, 0.10), ((x0 + x1) / 2, (y0 + y1) / 2, 0.62), PAINT, Matrix.Rotation(ang, 4, "Z"))
+    cyl(wd, 0.035, 0.12, (0, -0.10, 0.62), "Z", OUT, segs=12)
+    objs.append(to_object(wd, "FeJunctionWedge"))
     _belt_rollers(objs, 0.56, 0.56)
     return objs
 
