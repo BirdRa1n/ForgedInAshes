@@ -680,6 +680,25 @@
 			<property name="EconomicValue" value="1200"/>
 			<property name="SortOrder2" value="0021"/>
 		</block>
+		<!-- E08 / F4-T04 Steam Engine (TorqueEngine.cs): the late-game torque source. 1024 UT at 32 RPM while it is on,
+		     has Charcoal (1 per 20 s), water next to it or below it (the boiler) and Lubricant in its slots (1 per
+		     5 min). Missing any of them, it stands still and burns nothing. -->
+		<block name="feSteamEngine">
+			<property name="Extends" value="feCoalEngine"/>
+			<property name="FeTorqueOutput" value="1024"/>
+			<property name="FeFuelSecondsPerUnit" value="20"/>
+			<property name="FeNeedsWater" value="true"/>
+			<property name="FeLubeItem" value="feResourceLubricant"/>
+			<property name="FeLubeSecondsPerUnit" value="300"/>
+			<property name="SlotItem" value="feResourceLubricant"/>
+			<property name="DescriptionKey" value="feSteamEngineDesc"/>
+			<property name="CustomIcon" value="generatorBankA"/>
+			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSteamEnginePrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="2500"/>
+			<property name="SortOrder2" value="0023"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

@@ -378,7 +378,7 @@ Objetivo: provar que a cadeia de peças funciona e é divertida, com o mínimo d
   **Feita (offline):** Gerador (+4 Bobina, +6 Chapa) e Banco de baterias (+2 Bobina, +4 Chapa) na Bancada Eletrônica; Painel solar ganhou receita (10 Chapa, 4 Bobina, 10 Peça Elétrica, 10 Polímero). Células solares seguem loot/trader.
 - **F4-T03** Decidir se na fase 3+ "Elét." usa a rede vanilla (rota B obrigatória) ou continua com Carga (rota A). Se rota A, adicionar receitas de Carga nos geradores novos.
   **Feita (offline):** D4 = Carga (rota A). Novo `feGasGenerator` (coletor): 5 Latas de gasolina → 2 Cargas por Motor instalado (catalisador `smallEngine`, mínimo 1). Solar/água/vapor gerando Carga: F4-T04 (C#).
-- **F4-T04** E07 e E08 (C#). **E07 Roda d'Água feita e testada (2026-11-23)** como fonte de torque (D8). E08 pendente.
+- **F4-T04** E07 e E08 (C#). **E07 Roda d'Água feita e testada (2026-11-23)** como fonte de torque (D8). **E08 Motor a Vapor feito (2026-11-23)**, falta teste.
 
 **Pronto quando:** cada fonte de energia exige peças e combustíveis da cadeia anterior.
 

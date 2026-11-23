@@ -576,6 +576,15 @@ aqui fica só o que foi medido/verificado.
 - Testado (usuário, log 2026-11-23 09:05): sucesso; sem erros. Rede de 86 nós e 16 fontes movendo a Prensa a
   256 RPM (x8) com `4096/4096 UT -> ON`. F4-T04 (Roda d'Água) concluída.
 
+## 2026-11-23 — E08 Motor a Vapor (fonte de torque de fim de jogo)
+
+- `feSteamEngine` (estende `feCoalEngine`): 1024 UT a 32 RPM; Carvão Vegetal 1/20 s; `FeNeedsWater` (água na
+  célula, embaixo ou nas 4 laterais, `World.IsWater`); `FeLubeItem=feResourceLubricant` nos slots
+  (`SlotItem` = Lubrificante), 1 a cada `FeLubeSecondsPerUnit`=300 s rodando. Faltando algo, não roda nem queima
+  (`TorqueEngine.Missing` → leitura "Sem água" / "Sem Lubrificante"). Slots visíveis só nesse motor.
+- Receita na Garagem: 2 `smallEngine`, 6 Volantes, 30 Chapas, 10 Engrenagens, 6 Lubrificantes, 6 canos.
+- Modelo (Blender background): caldeira, chaminé, cilindro, volante `FeSpin_SteamFlywheel`; bundle 944 KB.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

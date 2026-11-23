@@ -430,6 +430,42 @@ def model_waterwheel(col):
     return out
 
 
+def model_steam_engine(col):
+    """Steam Engine: vertical boiler with a chimney on the -X side, a horizontal cylinder on the +X side driving a
+    flywheel; the flywheel, crank disc and the axle through the whole block (with its two flanges) spin."""
+    base = bmesh.new()
+    box(base, (0.96, 0.96, 0.05), (0, 0, 0.025), IRON)                          # bed plate
+    cyl(base, 0.20, 0.62, (-0.24, 0.10, 0.36), "Z", RUST, segs=24)              # boiler
+    cyl(base, 0.21, 0.04, (-0.24, 0.10, 0.68), "Z", IRON, segs=24)
+    cyl(base, 0.21, 0.04, (-0.24, 0.10, 0.08), "Z", IRON, segs=24)
+    cyl(base, 0.05, 0.30, (-0.24, 0.10, 0.85), "Z", IRON, segs=12)              # chimney
+    cyl(base, 0.07, 0.03, (-0.24, 0.10, 1.0 - 0.015), "Z", IRON, segs=12)
+    box(base, (0.10, 0.03, 0.08), (-0.24, -0.11, 0.30), BRASS)                  # firebox door
+    cyl(base, 0.035, 0.05, (-0.10, 0.10, 0.62), "X", BRASS, segs=10)            # gauge
+    cyl(base, 0.09, 0.30, (0.26, 0.10, 0.22), "X", STEEL, segs=16)              # cylinder
+    box(base, (0.10, 0.20, 0.10), (0.26, 0.10, 0.10), IRON)
+    beam(base, (-0.04, 0.10, 0.30), (0.12, 0.10, 0.24), 0.04, 0.04, BRASS)      # steam pipe
+    for y in (-0.36, 0.36):                                                     # axle bearings
+        box(base, (0.12, 0.08, C - 0.04), (0, y, (C - 0.04) / 2 + 0.03), IRON)
+        box(base, (0.14, 0.09, 0.08), (0, y, C), RUST)
+    beam(base, (0.12, 0.10, 0.22), (0.02, -0.20, C - 0.12), 0.025, 0.025, STEEL)  # connecting rod (static)
+    out = [to_object(base, "feSteamEngine_Base", bevel=0.003)]
+    w = bmesh.new()
+    shaft_end(w, 0.0, -0.5)
+    shaft_end(w, 0.0, 0.5)
+    ring(w, 0.34, 0.29, 0.07, (0, -0.22, 0), "Y", IRON, segs=36)               # flywheel
+    cyl(w, 0.07, 0.10, (0, -0.22, 0), "Y", IRON, segs=16)
+    for k in range(6):
+        a = k * math.pi / 3
+        m = Matrix.Rotation(a, 4, "Y") @ Matrix.Translation((0.18, -0.22, 0))
+        r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+        _finish(w, IRON, m @ Matrix.Diagonal((0.23, 0.03, 0.04, 1.0)), r["verts"])
+    cyl(w, 0.12, 0.03, (0, 0.20, 0), "Y", RUST, segs=20)                       # crank disc
+    cyl(w, 0.02, 0.06, (0.08, 0.20, 0), "Y", STEEL, segs=8)
+    out.append(to_object(w, "FeSpin_SteamFlywheel", location=(0, 0, C), bevel=0.002))
+    return out
+
+
 AXLE_Z = C
 
 
@@ -494,6 +530,7 @@ MODELS = {
     "feClutch": model_clutch,
     "feTorqueGauge": model_gauge,
     "feWaterWheel": model_waterwheel,
+    "feSteamEngine": model_steam_engine,
 }
 
 

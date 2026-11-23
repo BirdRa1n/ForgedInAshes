@@ -816,6 +816,15 @@ namespace FerroEngrenagem
                              "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
                              net.Sources, net.Machines.Count, net.Regulators.Count, pct);
             }
+            if (kind == KineticKind.Engine)
+            {
+                TileEntityPowerSource te = world.GetTileEntity(pos) as TileEntityPowerSource;
+                string miss = te == null ? null : TorqueEngine.Missing(world, pos, te);
+                if (miss == "water")
+                    extra += "\n" + Kinetic.Text("feEngineNoWater", "No water: the boiler needs water next to it or below it");
+                else if (miss == "lube")
+                    extra += "\n" + Kinetic.Text("feEngineNoLube", "No Lubricant: put Lubricant in its slots");
+            }
             if (kind == KineticKind.WaterWheel)
                 extra += "\n" + (Kinetic.WaterTouching(world, pos, bv) > 0
                     ? Kinetic.Text("feWheelWater", "In the water")

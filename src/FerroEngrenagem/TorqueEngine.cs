@@ -46,11 +46,72 @@ namespace FerroEngrenagem
             return v;
         }
 
-        /// <summary>On and fuelled (works on the server and, through the synced client data, on clients).</summary>
+        // E08 Steam Engine (D8): optional needs on top of fuel.
+        //   <property name="FeNeedsWater" value="true"/>                 water next to it or below (the boiler)
+        //   <property name="FeLubeItem" value="feResourceLubricant"/>    this item in its slots (SlotItem = the same)
+        //   <property name="FeLubeSecondsPerUnit" value="300"/>          one unit used up per this many seconds running
+        public static bool NeedsWater(Block b)
+        {
+            return b.Properties != null && b.Properties.Contains("FeNeedsWater") && b.Properties.GetBool("FeNeedsWater");
+        }
+
+        public static string LubeItem(Block b)
+        {
+            if (b.Properties == null || !b.Properties.Contains("FeLubeItem")) return null;
+            string n = b.Properties.GetString("FeLubeItem").Trim();
+            return n.Length == 0 ? null : n;
+        }
+
+        public static float LubeSeconds(Block b)
+        {
+            float v = b.Properties != null && b.Properties.Contains("FeLubeSecondsPerUnit")
+                ? b.Properties.GetFloat("FeLubeSecondsPerUnit") : 300f;
+            return v < 1f ? 1f : v;
+        }
+
+        /// <summary>Water in the engine's cell, below it, or in one of its four side cells (or below those).</summary>
+        public static bool HasWater(World world, Vector3i pos)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    if (dx != 0 && dz != 0) continue;
+                    for (int dy = -1; dy <= 0; dy++)
+                        if (world.IsWater(pos.x + dx, pos.y + dy, pos.z + dz)) return true;
+                }
+            return false;
+        }
+
+        /// <summary>Index of a slot holding the lubricant, or -1.</summary>
+        public static int LubeSlot(ItemStack[] slots, string item)
+        {
+            if (slots == null || item == null) return -1;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                ItemStack st = slots[i];
+                if (st == null || st.IsEmpty() || st.itemValue == null || st.itemValue.ItemClass == null) continue;
+                if (st.itemValue.ItemClass.GetItemName() == item) return i;
+            }
+            return -1;
+        }
+
+        /// <summary>What stops the engine, or null when it can run (fuel and on/off are checked by IsRunning).
+        /// "water" or "lube".</summary>
+        public static string Missing(World world, Vector3i pos, TileEntityPowerSource te)
+        {
+            Block b = te.blockValue.Block;
+            if (NeedsWater(b) && !HasWater(world, pos)) return "water";
+            string lube = LubeItem(b);
+            if (lube != null && LubeSlot(te.ItemSlots, lube) < 0) return "lube";
+            return null;
+        }
+
+        /// <summary>On, fuelled and with what it needs (works on the server and, through the synced client data,
+        /// on clients).</summary>
         public static bool IsRunning(World world, Vector3i pos)
         {
             TileEntityPowerSource te = world.GetTileEntity(pos) as TileEntityPowerSource;
-            return te != null && te.IsOn && te.CurrentFuel > 0;
+            return te != null && te.IsOn && te.CurrentFuel > 0 && Missing(world, pos, te) == null;
         }
     }
 
@@ -72,6 +133,11 @@ namespace FerroEngrenagem
             float dt = lastTime.TryGetValue(pos, out last) ? Mathf.Clamp(now - last, 0f, 1f) : 0f;
             lastTime[pos] = now;
             if (!gen.IsOn || gen.CurrentFuel == 0) { burnt[pos] = 0f; return; }
+            // a steam engine without water or lubricant stands still and burns nothing
+            World world = GameManager.Instance == null ? null : GameManager.Instance.World;
+            TileEntityPowerSource te = gen.TileEntity as TileEntityPowerSource;
+            if (world != null && te != null && TorqueEngine.Missing(world, pos, te) != null) return;
+            UseLube(gen, b, pos, dt);
             float acc;
             burnt.TryGetValue(pos, out acc);
             acc += dt;
@@ -83,6 +149,36 @@ namespace FerroEngrenagem
                 if (gen.TileEntity != null) gen.TileEntity.SetModified();
             }
             burnt[pos] = acc;
+        }
+
+        static readonly Dictionary<Vector3i, float> lubed = new Dictionary<Vector3i, float>();
+
+        static void UseLube(PowerGenerator gen, Block b, Vector3i pos, float dt)
+        {
+            string lube = TorqueEngine.LubeItem(b);
+            if (lube == null) return;
+            float acc;
+            lubed.TryGetValue(pos, out acc);
+            acc += dt;
+            float per = TorqueEngine.LubeSeconds(b);
+            if (acc >= per)
+            {
+                acc -= per;
+                int i = TorqueEngine.LubeSlot(gen.Stacks, lube);
+                if (i >= 0)
+                {
+                    ItemStack st = gen.Stacks[i];
+                    st.count--;
+                    if (st.count <= 0) gen.Stacks[i] = ItemStack.Empty.Clone();
+                    if (gen.TileEntity != null)
+                    {
+                        TileEntityPowerSource te = gen.TileEntity as TileEntityPowerSource;
+                        if (te != null) te.SetSendSlots();
+                        gen.TileEntity.SetModified();
+                    }
+                }
+            }
+            lubed[pos] = acc;
         }
     }
 
@@ -111,6 +207,7 @@ namespace FerroEngrenagem
         public static void Hide(XUiC_PowerSourceSlots grid)
         {
             if (grid == null || !IsEngine(grid.TileEntity) || grid.itemControllers == null) return;
+            if (TorqueEngine.LubeItem(grid.TileEntity.blockValue.Block) != null) return;   // Steam Engine: lubricant slots
             foreach (XUiC_ItemStack slot in grid.itemControllers)
             {
                 if (slot == null) continue;
@@ -145,6 +242,7 @@ namespace FerroEngrenagem
         public static bool Prefix(XUiC_PowerSourceSlots __instance, ref bool __result)
         {
             if (!EngineSlots.IsEngine(__instance.TileEntity)) return true;
+            if (TorqueEngine.LubeItem(__instance.TileEntity.blockValue.Block) != null) return true;
             __result = false;
             return false;
         }

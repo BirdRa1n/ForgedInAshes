@@ -135,6 +135,14 @@
 			<ingredient name="feResourceGear" count="6"/>
 			<ingredient name="feResourceIronShaft" count="4"/>
 		</recipe>
+		<recipe name="feSteamEngine" count="1" craft_area="feGarage" craft_time="90" always_unlocked="true">
+			<ingredient name="smallEngine" count="2"/>
+			<ingredient name="feFlywheel" count="6"/>
+			<ingredient name="feResourceIronPlate" count="30"/>
+			<ingredient name="feResourceGear" count="10"/>
+			<ingredient name="feResourceLubricant" count="6"/>
+			<ingredient name="resourceMetalPipe" count="6"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)
