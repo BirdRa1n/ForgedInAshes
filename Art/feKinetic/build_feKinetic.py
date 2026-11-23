@@ -1093,6 +1093,38 @@ def model_conveyor_down(col):
     return objs
 
 
+def model_fluid_filler(col):
+    """Filler (D9): a drum with a hopper on top (items in by hand or belt) and an outlet stub at its front (Blender -Y)
+    that pours the fluid into a pipe. Orange band = items in."""
+    base = bmesh.new()
+    box(base, (0.84, 0.84, 0.06), (0, 0, 0.03), IRON)
+    cyl(base, 0.36, 0.62, (0, 0.04, 0.38), "Z", PAINT, segs=28)                    # drum
+    for z in (0.12, 0.38, 0.64):
+        ring(base, 0.375, 0.355, 0.035, (0, 0.04, z), "Z", IRON, segs=28)
+    for k, (w, h) in enumerate(((0.56, 0.10), (0.44, 0.08), (0.32, 0.06))):         # hopper
+        box(base, (w, w, h), (0, 0.04, 0.74 + k * 0.08), STEEL)
+    box(base, (0.58, 0.58, 0.03), (0, 0.04, 0.70), OUT)
+    inlet_stub(base, (0, -0.5, C), "Y", -1, IN)
+    return [to_object(base, "feFluidFiller_Base", bevel=0.003)]
+
+
+def model_fluid_bottler(col):
+    """Bottler (D9): an inlet stub at its back (Blender +Y) takes the fluid; a tank with a gauge window, a filling
+    nozzle and a chute at its front (Blender -Y) that drops the items on the belt in front (height 0.62)."""
+    base = bmesh.new()
+    box(base, (0.84, 0.84, 0.06), (0, 0, 0.03), IRON)
+    box(base, (0.70, 0.46, 0.80), (0, 0.16, 0.46), PAINT)                          # tank body
+    box(base, (0.12, 0.02, 0.50), (0.22, -0.08, 0.46), GLASS)                      # level window
+    box(base, (0.74, 0.50, 0.04), (0, 0.16, 0.88), IRON)
+    cyl(base, 0.03, 0.22, (0, -0.16, 0.80), "Z", STEEL, segs=10)                   # nozzle
+    box(base, (0.34, 0.40, 0.05), (0, -0.28, 0.66), STEEL)                          # chute to the belt
+    for sx in (-1, 1):
+        box(base, (0.03, 0.40, 0.10), (sx * 0.185, -0.28, 0.70), STEEL)
+    box(base, (0.36, 0.03, 0.03), (0, -0.47, 0.72), OUT)
+    inlet_stub(base, (0, 0.5, C), "Y", 1, IN)
+    return [to_object(base, "feFluidBottler_Base", bevel=0.003)]
+
+
 AXLE_Z = C
 
 
@@ -1173,6 +1205,8 @@ MODELS = {
     "feConveyorRamp": model_conveyor_ramp,
     "feFunnel": model_funnel,
     "feConveyorDown": model_conveyor_down,
+    "feFluidFiller": model_fluid_filler,
+    "feFluidBottler": model_fluid_bottler,
 }
 
 

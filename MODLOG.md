@@ -756,6 +756,18 @@ aqui fica só o que foi medido/verificado.
   caminho dele não existe (`Belt.ExitsFor`). O item do filtro flutua girando sobre a esteira (host). Filtros salvos no
   arquivo das esteiras ("Q;x;y;z;item"). Licença do Unity expirou de novo: `unity license activate` resolveu.
 
+## 2026-11-23 — D9: Óleo, Gasolina e Lubrificante nos canos
+
+- Fluidos novos `oil`, `gasoline`, `lubricant` (FluidNetwork.cs, `Fluids.FluidOfItem/ItemOfFluid`): Óleo `resourceOil`
+  10 L, Lata de Gasolina `ammoGasCan` 1 L, Lubrificante `feResourceLubricant` 10 L.
+- Despejador (`feFluidFiller`, FluidKind.Filler): recebe itens por esteira (qualquer lado), funil ou mão (radial
+  "Despejar o item da mão") e oferece o fluido pela porta da frente (1000 L).
+- Envasadora (`feFluidBottler`, FluidKind.Bottler): demanda pela porta de trás qualquer fluido envasável (porta com
+  fluido "" = coringa só para fluidos com item); a cada 0,5 s põe até 16 itens na esteira da frente; E dá os itens.
+- Refinaria (`feRefinery` ganhou `FeFluid=refinery`): fluido por trás vira itens entregues à própria máquina
+  (`BeltMachines.Insert` → estoque da receita fixa). Registro de aparelhos de fluido agora vale para qualquer bloco
+  (postfix em `Block.OnBlockAdded`); refinarias já colocadas precisam ser recolocadas.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

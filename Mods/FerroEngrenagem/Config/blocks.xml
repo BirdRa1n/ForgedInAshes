@@ -732,6 +732,29 @@
 			<property name="EconomicValue" value="200"/>
 			<property name="SortOrder2" value="0002"/>
 		</block>
+		<!-- D9: Filler and Bottler (FluidNetwork.cs, FluidDevices): items <-> fluid. Oil 10 L, Gas Can 1 L, Lubricant 10 L. -->
+		<block name="feFluidFiller">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="filler"/>
+			<property name="FeFluidBuffer" value="1000"/>
+			<property name="DescriptionKey" value="feFluidFillerDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="ffc080"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidFillerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="120"/>
+		</block>
+		<block name="feFluidBottler">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="bottler"/>
+			<property name="FeFluidBuffer" value="100"/>
+			<property name="DescriptionKey" value="feFluidBottlerDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidBottlerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="120"/>
+		</block>
 		<block name="feMechPump">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="pump"/>
@@ -1221,6 +1244,9 @@
 		<!-- M09 Refinery -->
 		<block name="feRefinery">
 			<property name="Class" value="Workstation"/>
+			<!-- D9: fluid in at its back (oil, gasoline, lubricant) = ingredients of its fixed recipe (AutoCraft.cs) -->
+			<property name="FeFluid" value="refinery"/>
+			<property name="FeFluidBuffer" value="100"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="feRefinery"/>

@@ -36,7 +36,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine }
+    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery }
 
     public class FluidPort
     {
@@ -69,6 +69,44 @@ namespace FerroEngrenagem
     {
         public const string Water = "water";
         public const string Steam = "steam";
+        public const string Oil = "oil";
+        public const string Gasoline = "gasoline";
+        public const string Lubricant = "lubricant";
+
+        // D9: fluids that are also items (the Filler pours the items in, the Bottler and the Refinery turn the fluid
+        // back into items): fluid, item, litres per item
+        static readonly string[,] ItemFluids =
+        {
+            { Oil, "resourceOil", "10" },
+            { Gasoline, "ammoGasCan", "1" },
+            { Lubricant, "feResourceLubricant", "10" },
+        };
+
+        /// <summary>The fluid an item becomes, with its litres per item; null when it is not a fluid item.</summary>
+        public static string FluidOfItem(string item, out float litres)
+        {
+            litres = 0f;
+            for (int i = 0; i < ItemFluids.GetLength(0); i++)
+                if (ItemFluids[i, 1] == item)
+                {
+                    litres = float.Parse(ItemFluids[i, 2], CultureInfo.InvariantCulture);
+                    return ItemFluids[i, 0];
+                }
+            return null;
+        }
+
+        /// <summary>The item a fluid is bottled into, with its litres per item; null when it cannot be bottled.</summary>
+        public static string ItemOfFluid(string fluid, out float litres)
+        {
+            litres = 0f;
+            for (int i = 0; i < ItemFluids.GetLength(0); i++)
+                if (ItemFluids[i, 0] == fluid)
+                {
+                    litres = float.Parse(ItemFluids[i, 2], CultureInfo.InvariantCulture);
+                    return ItemFluids[i, 1];
+                }
+            return null;
+        }
         public const float TickSeconds = 0.5f;
 
         static readonly Vector3i[] Dirs =
@@ -95,6 +133,9 @@ namespace FerroEngrenagem
                     case "elecpump": k = FluidKind.ElecPump; break;
                     case "condenser": k = FluidKind.Condenser; break;
                     case "steamengine": k = FluidKind.SteamEngine; break;
+                    case "filler": k = FluidKind.Filler; break;
+                    case "bottler": k = FluidKind.Bottler; break;
+                    case "refinery": k = FluidKind.Refinery; break;
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -147,6 +188,15 @@ namespace FerroEngrenagem
                 case FluidKind.MechPump:
                 case FluidKind.ElecPump:
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = Water });
+                    break;
+                case FluidKind.Filler:
+                    // pours what it holds out of its front
+                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = FluidStore.Get(pos).Fluid });
+                    break;
+                case FluidKind.Bottler:
+                case FluidKind.Refinery:
+                    // takes in at its back: the fluid it holds, or (empty) any fluid that can be bottled
+                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = FluidStore.Get(pos).Fluid });
                     break;
                 case FluidKind.Condenser:
                     // 2 wide x 2 high (parent = bottom cell of its own column): steam in at the back of the upper
@@ -285,6 +335,9 @@ namespace FerroEngrenagem
         {
             if (f == Water) return Text("feFluidWater", "Water");
             if (f == Steam) return Text("feFluidSteam", "Steam");
+            if (f == Oil) return Text("feFluidOil", "Oil");
+            if (f == Gasoline) return Text("feFluidGasoline", "Gasoline");
+            if (f == Lubricant) return Text("feFluidLubricant", "Lubricant");
             return Text("feFluidNone", "empty");
         }
     }
@@ -461,6 +514,13 @@ namespace FerroEngrenagem
                         case FluidKind.Tank:
                             tankPorts.Add(port);
                             break;
+                        case FluidKind.Filler:
+                            if (s.Amount > 0.01f && s.Fluid.Length > 0) offer[port] = s.Amount;
+                            break;
+                        case FluidKind.Bottler:
+                        case FluidKind.Refinery:
+                            demand[port] = Mathf.Max(0f, Fluids.Prop(bv.Block, "FeFluidBuffer", 100f) - s.Amount);
+                            break;
                     }
                 }
             }
@@ -561,7 +621,10 @@ namespace FerroEngrenagem
             float O = 0f, D = 0f;
             foreach (FluidPort o in offers) if (o.Fluid == fluid || fluid.Length == 0) O += offer[o];
             List<FluidPort> wanted = new List<FluidPort>();
-            foreach (FluidPort d in demands) if (d.Fluid == fluid || fluid.Length == 0) { D += demand[d]; wanted.Add(d); }
+            float bl;
+            foreach (FluidPort d in demands)
+                if (d.Fluid == fluid || fluid.Length == 0 || (d.Fluid.Length == 0 && Fluids.ItemOfFluid(fluid, out bl) != null))
+                { D += demand[d]; wanted.Add(d); }
 
             float direct = Mathf.Min(O, D);
             float spareOffer = O - direct, missing = D - direct;
@@ -602,7 +665,7 @@ namespace FerroEngrenagem
             {
                 if (D <= 0f) break;
                 float share = demand[d] / D * received;
-                Got(world, d, share, dt);
+                Got(world, d, share, dt, fluid);
             }
             net.FlowPerMin = Mathf.Max(given, received) / dt * 60f;
         }
@@ -613,16 +676,25 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(o.Owner);
             FluidKind k = Fluids.Kind(world.GetBlock(o.Owner).Block);
             if (k == FluidKind.Condenser || k == FluidKind.SteamEngine) s.Steam = Mathf.Max(0f, s.Steam - amount);
+            else if (k == FluidKind.Filler)
+            {
+                s.Amount = Mathf.Max(0f, s.Amount - amount);
+                if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
+            }
             s.LastFlow += amount / dt * 60f;
         }
 
         // A demand port received `amount` litres.
-        static void Got(World world, FluidPort d, float amount, float dt)
+        static void Got(World world, FluidPort d, float amount, float dt, string fluid)
         {
             BlockValue bv = world.GetBlock(d.Owner);
             FluidState s = FluidStore.Get(d.Owner);
             FluidKind k = Fluids.Kind(bv.Block);
             if (k == FluidKind.SteamEngine) { s.Amount += amount; s.Fluid = Fluids.Water; }
+            else if (k == FluidKind.Bottler || k == FluidKind.Refinery)
+            {
+                if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
+            }
             else if (k == FluidKind.Condenser)
             {
                 // condense now: water waits in the buffer (s.Steam) to leave through the outlet next tick
@@ -673,15 +745,45 @@ namespace FerroEngrenagem
                                                                            Vector3i _blockPos,
                                                                            EntityAlive _entityFocusing)
         {
-            return new BlockActivationCommand[]
-            {
-                new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null)
-            };
+            BlockActivationCommand take = new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null);
+            FluidKind k = Fluids.Kind(this);
+            if (k == FluidKind.Filler)
+                return new BlockActivationCommand[] { new BlockActivationCommand("fe_pour", "loot_sort", true, false, null), take };
+            if (k == FluidKind.Bottler)
+                return new BlockActivationCommand[] { new BlockActivationCommand("fe_bottle", "loot_sort", true, false, null), take };
+            return new BlockActivationCommand[] { take };
         }
 
         public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
                                               BlockValue _blockValue, EntityPlayerLocal _player)
         {
+            World w = _world as World;
+            if (_commandName == "fe_pour" && w != null)
+            {
+                ItemStack held = _player.inventory.holdingItemStack;
+                if (held == null || held.IsEmpty()) return true;
+                ItemStack copy = held.Clone();
+                int before = copy.count;
+                FluidDevices.Pour(w, _blockPos, copy);
+                int used = before - copy.count;
+                if (used > 0)
+                {
+                    ItemStack left = held.Clone();
+                    left.count -= used;
+                    _player.inventory.SetItem(_player.inventory.holdingItemIdx, left.count > 0 ? left : ItemStack.Empty.Clone());
+                }
+                GameManager.ShowTooltip(_player, used > 0 ? string.Format(Kinetic.Text("fePoured", "Poured {0}"), used)
+                                                          : Kinetic.Text("fePourNo", "It does not take this (or it is full)"), false, false, 0f);
+                return true;
+            }
+            if (_commandName == "fe_bottle" && w != null)
+            {
+                ItemStack st = FluidDevices.Bottle(w, _blockPos, 1000);
+                if (st != null && !st.IsEmpty() && !_player.bag.AddItem(st)) GameManager.Instance.ItemDropServer(st, _player.GetPosition(), Vector3.zero, -1, 60f, false);
+                GameManager.ShowTooltip(_player, st == null ? Kinetic.Text("feBottleNo", "Not enough fluid for one item yet")
+                    : string.Format(Kinetic.Text("feBottled", "Took {0}x {1}"), st.count, st.itemValue.ItemClass.GetLocalizedItemName()), false, false, 0f);
+                return true;
+            }
             if (_commandName != "take") return false;
             float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 2f;
             takeItemWithTimer(_blockPos, _blockValue, _player, delay);
@@ -691,8 +793,11 @@ namespace FerroEngrenagem
         public override string GetActivationText(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                  EntityAlive _entityFocusing)
         {
-            return KineticLookController.Escape(FluidText.Describe(_blockPos, _blockValue, true)) + "\n" +
-                   Kinetic.Text("feHintTake", "Hold {0} to take");
+            FluidKind k = Fluids.Kind(this);
+            string hint = k == FluidKind.Filler ? Kinetic.Text("feHintPour", "{0} pour the item in your hand - hold {0}: take")
+                        : k == FluidKind.Bottler ? Kinetic.Text("feHintBottle", "{0} take the bottled items - hold {0}: take")
+                        : Kinetic.Text("feHintTake", "Hold {0} to take");
+            return KineticLookController.Escape(FluidText.Describe(_blockPos, _blockValue, true)) + "\n" + hint;
         }
     }
 
@@ -719,6 +824,18 @@ namespace FerroEngrenagem
                         return (name + "\n" + Fluids.Text("feFluidBlocked", "BLOCKED: two different fluids in this pipe")).Trim();
                     return (name + "\n" + string.Format(Fluids.Text("feFluidFlow", "{0}: {1} L/min"),
                         Fluids.FluidName(net.Fluid), Mathf.RoundToInt(net.FlowPerMin))).Trim();
+                }
+                case FluidKind.Filler:
+                case FluidKind.Bottler:
+                case FluidKind.Refinery:
+                {
+                    string t = name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
+                        Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),
+                        Mathf.RoundToInt(Fluids.Prop(bv.Block, "FeFluidBuffer", k == FluidKind.Filler ? 1000f : 100f)));
+                    if (k == FluidKind.Filler) t += "\n" + Fluids.Text("feFillerInfo", "Takes Oil, Gas Cans and Lubricant (belt, funnel or hand) and pours them out of its front");
+                    else if (k == FluidKind.Bottler) t += "\n" + Fluids.Text("feBottlerInfo", "Takes fluid at its back and gives items: on the belt in front, or in your hand");
+                    else t += "\n" + Fluids.Text("feRefineryFluidInfo", "Fluid in at its back: used as ingredients of its fixed recipe");
+                    return t.Trim();
                 }
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
@@ -762,7 +879,7 @@ namespace FerroEngrenagem
     {
         public static void Postfix(Block __instance, Vector3i _blockPos, BlockValue _blockValue)
         {
-            if (!(__instance is BlockPowered) || _blockValue.ischild) return;
+            if (_blockValue.ischild || __instance is BlockFeFluid || __instance is BlockPowerSource) return;
             if (Fluids.Kind(__instance) != FluidKind.None) FluidStore.Register(_blockPos);
         }
     }
@@ -925,6 +1042,97 @@ namespace FerroEngrenagem
                         Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " arm " + Names[i] + " -> " + n + " ("
                                 + nb.GetBlockName() + ") " + (on ? "ON" : "OFF") + " arm world pos "
                                 + arms[i].position.ToString("F2"));
+                }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ D9: Filler, Bottler, Refinery inlet
+    public static class FluidDevices
+    {
+        /// <summary>Filler: pour fluid items in (oil, gas cans, lubricant). Takes what fits; changes st.count.</summary>
+        public static void Pour(World world, Vector3i p, ItemStack st)
+        {
+            if (st == null || st.IsEmpty() || st.itemValue.ItemClass == null) return;
+            FluidStore.EnsureLoaded();
+            float per;
+            string fluid = Fluids.FluidOfItem(st.itemValue.ItemClass.GetItemName(), out per);
+            if (fluid == null) return;
+            FluidState s = FluidStore.Get(p);
+            if (s.Amount > 0.01f && s.Fluid.Length > 0 && s.Fluid != fluid) return;   // holds another fluid
+            float cap = Fluids.Prop(world.GetBlock(p).Block, "FeFluidBuffer", 1000f);
+            int n = Mathf.Min(st.count, Mathf.FloorToInt((cap - s.Amount) / per));
+            if (n <= 0) return;
+            s.Amount += n * per;
+            s.Fluid = fluid;
+            st.count -= n;
+            FluidStore.MarkDirty();
+        }
+
+        /// <summary>Bottler: up to max items from what it holds (null when not enough for one).</summary>
+        public static ItemStack Bottle(World world, Vector3i p, int max)
+        {
+            FluidStore.EnsureLoaded();
+            FluidState s = FluidStore.Get(p);
+            float per;
+            string item = Fluids.ItemOfFluid(s.Fluid, out per);
+            if (item == null || per <= 0f) return null;
+            int n = Mathf.Min(max, Mathf.FloorToInt(s.Amount / per + 0.001f));
+            if (n <= 0) return null;
+            ItemValue iv = ItemClass.GetItem(item, false);
+            if (iv == null || iv.IsEmpty()) return null;
+            s.Amount -= n * per;
+            if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
+            FluidStore.MarkDirty();
+            return new ItemStack(iv, n);
+        }
+
+        /// <summary>Every 0.5 s (BeltTicker): Bottlers put items on the belt in front; Refineries turn what they hold
+        /// into ingredients for their fixed recipe.</summary>
+        public static void TickAll(World world)
+        {
+            FluidStore.EnsureLoaded();
+            foreach (Vector3i p in FluidStore.Devices)
+            {
+                if (world.GetChunkFromWorldPos(p) == null) continue;
+                BlockValue bv = world.GetBlock(p);
+                FluidKind k = Fluids.Kind(bv.Block);
+                if (k == FluidKind.Bottler)
+                {
+                    Vector3i f = Fluids.Rot(bv, Vector3.forward);
+                    Vector3i dst = new Vector3i(p.x + f.x, p.y + f.y, p.z + f.z);
+                    if (!Belt.Accepts(world, dst, f)) continue;
+                    float entry = Belt.EntryP(world, dst, f);
+                    List<BeltItem> items = BeltStore.Items(dst, false);
+                    if (!Belt.Room(items, entry)) continue;
+                    if (items != null && entry == 0f)
+                    {
+                        bool blocked = false;
+                        foreach (BeltItem o in items) if (o.P < entry + Belt.Gap) blocked = true;
+                        if (blocked) continue;
+                    }
+                    ItemStack st = Bottle(world, p, 16);
+                    if (st == null) continue;
+                    BeltItem it = BeltStore.Add(dst, st, entry);
+                    Belt.ChooseExit(world, dst, world.GetBlock(dst), it);
+                }
+                else if (k == FluidKind.Refinery)
+                {
+                    FluidState s = FluidStore.Get(p);
+                    float per;
+                    string item = Fluids.ItemOfFluid(s.Fluid, out per);
+                    if (item == null) continue;
+                    int n = Mathf.FloorToInt(s.Amount / per + 0.001f);
+                    if (n <= 0) continue;
+                    ItemValue iv = ItemClass.GetItem(item, false);
+                    if (iv == null || iv.IsEmpty()) continue;
+                    ItemStack st = new ItemStack(iv, n);
+                    BeltMachines.Insert(world, p, st);
+                    int used = n - st.count;
+                    if (used <= 0) continue;
+                    s.Amount -= used * per;
+                    if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
+                    FluidStore.MarkDirty();
                 }
             }
         }

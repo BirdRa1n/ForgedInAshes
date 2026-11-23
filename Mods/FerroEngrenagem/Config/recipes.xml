@@ -138,6 +138,16 @@
 			<ingredient name="resourceMetalPipe" count="1"/>
 			<ingredient name="feResourceIronPlate" count="1"/>
 		</recipe>
+		<recipe name="feFluidFiller" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="6"/>
+			<ingredient name="fePipe" count="2"/>
+			<ingredient name="feResourceGear" count="2"/>
+		</recipe>
+		<recipe name="feFluidBottler" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="6"/>
+			<ingredient name="fePipe" count="2"/>
+			<ingredient name="resourceBrokenGlass" count="2"/>
+		</recipe>
 		<recipe name="feWaterTank" count="1" craft_area="feMetalShop" craft_time="20" always_unlocked="true">
 			<ingredient name="feResourceIronPlate" count="12"/>
 			<ingredient name="resourceMetalPipe" count="4"/>

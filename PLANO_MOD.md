@@ -267,7 +267,7 @@ volta) e trata isso como fonte infinita — mexer no volume de água do 7DTD é 
 1. D9 T1 — Canos, Bomba Mecânica, Bomba Elétrica e Caixa d'Água; leitura ao olhar (fluido, L/min, cheio/vazio).
 2. D9 T2 — Motor a Vapor 3×3×2 com as portas acima e consumo por carga (substitui o feSteamEngine de 1 bloco).
 3. D9 T3 — Condensadora elétrica fechando o ciclo da água.
-4. Depois — entrada de itens pelas laterais com as esteiras (fase 5) e outros fluidos.
+4. [feito, falta teste] Entrada de itens pelas laterais com as esteiras (D10) e Óleo/Gasolina/Lubrificante com Despejador, Envasadora e Refinaria ligada aos canos.
 
 ### 5.6 Esteiras e Funis (proposta D10, pedido do usuário 2026-11-23 — antecipa a fase 5)
 

@@ -549,7 +549,7 @@ namespace FerroEngrenagem
             next = Time.time + Step;
             BeltStore.EnsureLoaded();
             tick++;
-            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); Funnel.TickAll(world); AutoCraft.TickAll(world); }
+            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); Funnel.TickAll(world); AutoCraft.TickAll(world); FluidDevices.TickAll(world); }
             Move(world, Step);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
         }
@@ -706,6 +706,7 @@ namespace FerroEngrenagem
         {
             if (b == null) return false;
             if (IsStorage(b)) return true;
+            if (Fluids.Kind(b) == FluidKind.Filler) return true;
             if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
             return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
         }
@@ -812,6 +813,13 @@ namespace FerroEngrenagem
         {
             if (st == null || st.IsEmpty()) return true;
             if (IsStorage(world.GetBlock(parent).Block)) return InsertStorage(world, parent, st);
+            if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Filler)
+            {
+                int before = st.count;
+                FluidDevices.Pour(world, parent, st);
+                if (st.count < before) { BeltStore.MarkDirty(); Note(world, parent, "poured " + (before - st.count) + " items"); }
+                return st.count <= 0;
+            }
             TileEntityWorkstation ws = world.GetTileEntity(parent) as TileEntityWorkstation;
             if (ws != null) return InsertWorkstation(world, parent, ws, st);
             TileEntityPowerSource te = world.GetTileEntity(parent) as TileEntityPowerSource;
