@@ -12,6 +12,8 @@
 //   Regulator  (FeKinetic="regulator")                axial pass-through; caps what is behind its output end
 //                                                     (ComputeUsage: zones, limit = 100/75/50/25 % of capacity)
 //   Gauge      (FeKinetic="gauge")                    all six faces; detailed look-at readout
+//   WaterWheel (FeKinetic="waterwheel")               axial source: FeTorqueOutput UT at FeSourceRpm while water
+//                                                     touches its paddles (Kinetic.WaterTouching)
 //   Motor      (FeMotor=true, Electric Motor)         all six faces; source: FeTorqueOutput UT while powered
 //   TorqueCrank(BlockFeTorqueCrank)                   all six faces; source: FeTorqueOutput UT while turned
 // A power-gated machine (FeMinPower) is a CONSUMER of the node in its motor socket (PowerGate.SocketPos), if that
@@ -35,7 +37,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -59,6 +61,7 @@ namespace FerroEngrenagem
                 case "regulator": Kind = KineticKind.Regulator; break;
                 case "gauge": Kind = KineticKind.Gauge; break;
                 case "inverter": Kind = KineticKind.Inverter; break;
+                case "waterwheel": Kind = KineticKind.WaterWheel; break;
                 default: Kind = KineticKind.Gearbox; break;
             }
             if (Properties != null && Properties.Contains("FeShaftAxis"))
@@ -277,6 +280,7 @@ namespace FerroEngrenagem
                 case KineticKind.Clutch:
                 case KineticKind.Regulator:
                 case KineticKind.Inverter:
+                case KineticKind.WaterWheel:
                     local = ((BlockFeKinetic)bv.Block).ShaftAxis.ToVector3();
                     break;
                 case KineticKind.Motor:
@@ -293,7 +297,8 @@ namespace FerroEngrenagem
 
         public static bool IsSource(KineticKind k)
         {
-            return k == KineticKind.Motor || k == KineticKind.TorqueCrank || k == KineticKind.Engine;
+            return k == KineticKind.Motor || k == KineticKind.TorqueCrank || k == KineticKind.Engine ||
+                   k == KineticKind.WaterWheel;
         }
 
         static int Dot(Vector3i a, Vector3i b)
@@ -374,6 +379,35 @@ namespace FerroEngrenagem
             return DirName(new Vector3i(0, 0, 1)) + "-" + DirName(new Vector3i(0, 0, -1));
         }
 
+        static readonly Dictionary<int, float> rpmByBlock = new Dictionary<int, float>();
+
+        /// <summary>RPM a source turns at (FeSourceRpm, default BaseRpm = 32; the Water Wheel 16).</summary>
+        public static float SourceRpm(Block b)
+        {
+            float v;
+            if (rpmByBlock.TryGetValue(b.blockID, out v)) return v;
+            v = b.Properties != null && b.Properties.Contains("FeSourceRpm") ? b.Properties.GetFloat("FeSourceRpm") : BaseRpm;
+            if (v < MinRpm) v = MinRpm;
+            rpmByBlock[b.blockID] = v;
+            return v;
+        }
+
+        /// <summary>Water Wheel (D8 / F4-T04): water cells its paddles touch. The wheel's own cell, the cell below
+        /// it and, on the two sides that are not its axle, the side cells and the ones below them.</summary>
+        public static int WaterTouching(World world, Vector3i pos, BlockValue bv)
+        {
+            Vector3i a = Axis(bv);
+            Vector3i side = a.x != 0 ? new Vector3i(0, 0, 1) : new Vector3i(1, 0, 0);
+            int n = 0;
+            for (int s = -1; s <= 1; s++)
+                for (int dy = -1; dy <= 0; dy++)
+                {
+                    int x = pos.x + s * side.x, y = pos.y + dy, z = pos.z + s * side.z;
+                    if (world.IsWater(x, y, z)) n++;
+                }
+            return n;
+        }
+
         /// <summary>UT a source gives (FeTorqueOutput).</summary>
         public static int SourceOutput(Block b)
         {
@@ -424,6 +458,8 @@ namespace FerroEngrenagem
                     return TorqueState.IsSpinning(pos) ? SourceOutput(bv.Block) : 0;
                 case KineticKind.Engine:
                     return TorqueEngine.IsRunning(world, pos) ? SourceOutput(bv.Block) : 0;
+                case KineticKind.WaterWheel:
+                    return WaterTouching(world, pos, bv) > 0 ? SourceOutput(bv.Block) : 0;
                 default:
                     return 0;
             }
@@ -488,7 +524,7 @@ namespace FerroEngrenagem
                     {
                         net.Capacity += cap;
                         net.Sources++;
-                        float rr = BaseRpm / f;   // this source turns at BaseRpm
+                        float rr = SourceRpm(bv.Block) / f;   // this source turns at its own RPM
                         if (!haveRef) { net.RefRpm = rr; haveRef = true; }
                         else if (!Same(net.RefRpm, rr)) net.Lock("speed");
                     }
@@ -733,6 +769,7 @@ namespace FerroEngrenagem
             string name = withName ? bv.Block.GetLocalizedBlockName() : "";
             string extra = "";
             if (kind == KineticKind.Shaft || kind == KineticKind.Motor || kind == KineticKind.Engine ||
+                kind == KineticKind.WaterWheel ||
                 kind == KineticKind.Clutch || kind == KineticKind.Inverter)
                 name += " (" + Kinetic.AxisName(bv) + ")";
             if (kind == KineticKind.SpeedBox)
@@ -779,6 +816,10 @@ namespace FerroEngrenagem
                              "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
                              net.Sources, net.Machines.Count, net.Regulators.Count, pct);
             }
+            if (kind == KineticKind.WaterWheel)
+                extra += "\n" + (Kinetic.WaterTouching(world, pos, bv) > 0
+                    ? Kinetic.Text("feWheelWater", "In the water")
+                    : Kinetic.Text("feWheelDry", "No water at the paddles: place it in a river or a water channel"));
             string text = name.Trim() + extra + "\n" + Status(net, pos);
             if (net != null)
                 foreach (KeyValuePair<Vector3i, Vector3i> w in net.WrongSpin)

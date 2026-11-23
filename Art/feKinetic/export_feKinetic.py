@@ -9,7 +9,7 @@ import bpy
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
     r"F:\Github\FerroEngrenagem\Art"
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
-         "feClutch", "feTorqueGauge"]
+         "feClutch", "feTorqueGauge", "feWaterWheel"]
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ART, "feKinetic", "feKinetic.blend"))
 exported = {}

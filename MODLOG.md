@@ -561,6 +561,17 @@ aqui fica só o que foi medido/verificado.
   Blender com MCP tinha fechado), bundle de 789 KB, XML apontando para os prefabs (Embreagem só de pé).
 - Testado (usuário, 2026-11-23): Embreagem e Medidor certos no jogo. Os 8 blocos da rede de torque têm modelo.
 
+## 2026-11-23 — F4-T04: Roda d'Água (fonte de torque)
+
+- `feWaterWheel` (BlockFeKinetic, `FeKinetic=waterwheel`): fonte axial, 128 UT a `FeSourceRpm`=16 enquanto há água
+  tocando as pás (`Kinetic.WaterTouching`: a célula dela, a de baixo e as laterais fora do eixo, via
+  `World.IsWater`). Nova propriedade `FeSourceRpm` (padrão 32) — a referência de RPM da rede usa a RPM de cada
+  fonte; misturar com motores de 32 RPM exige Caixa de Velocidade (senão TRAVADO por velocidade).
+- Leitura: "Na água" / "Sem água nas pás". Receita na Serraria (30 madeira, 4 chapas, 2 barras, 2 engrenagens).
+- Modelo (Blender em background): roda de pás com aros de ferro e eixo de ponta a ponta, `FeSpin_WaterWheel`.
+- Bundle NÃO gerado ainda: a licença Personal caiu (sessão OAuth "stale", `unity license activate` pede
+  `unity auth login`, que exige o usuário no navegador). Até gerar, o bloco aponta para um prefab que não existe.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

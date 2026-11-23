@@ -8,6 +8,7 @@
   feTorqueRegulator  Torque Regulator (input end + output end, flyball governor, handwheel)
   feClutch           Clutch (two halves in a bell housing, release lever)
   feTorqueGauge      Torque Gauge (six hubs, two dials on top, a pointer that turns)
+  feWaterWheel       Water Wheel (paddle wheel on two A-frame posts; free torque from water)
 
 Run inside Blender (Scripting tab, or through the Blender MCP server):
   exec(open(r"<repo>/Art/feKinetic/build_feKinetic.py").read())
@@ -397,6 +398,38 @@ def model_gauge(col):
     return out
 
 
+def model_waterwheel(col):
+    """Water Wheel: a wooden paddle wheel (radius 0.44) on an axle through the whole block, carried by two A-frame
+    posts. The wheel, its iron rims and the axle with its two flanges spin as one part (slowly: 16 RPM)."""
+    base = bmesh.new()
+    for y in (-0.34, 0.34):
+        for s_ in (-1, 1):
+            beam(base, (s_ * 0.30, y, 0.0), (s_ * 0.04, y, C - 0.03), 0.06, 0.06, WOOD)
+        box(base, (0.14, 0.08, 0.09), (0, y, C), IRON)                     # bearing block
+        box(base, (0.16, 0.09, 0.015), (0, y, C + 0.05), RUST)
+        box(base, (0.66, 0.10, 0.04), (0, y, 0.02), WOOD)                  # sill on the river bed
+    out = [to_object(base, "feWaterWheel_Base", bevel=0.004)]
+    w = bmesh.new()
+    shaft_end(w, 0.0, -0.5)
+    shaft_end(w, 0.0, 0.5)
+    cyl(w, 0.07, 0.26, (0, 0, 0), "Y", WOOD, segs=16)                        # hub
+    for y in (-0.11, 0.11):
+        ring(w, 0.44, 0.40, 0.035, (0, y, 0), "Y", WOOD, segs=32)           # wooden rims
+        ring(w, 0.445, 0.435, 0.04, (0, y, 0), "Y", IRON, segs=32)          # iron tyres
+        for k in range(8):                                                   # spokes
+            a = k * math.pi / 4
+            m = Matrix.Rotation(a, 4, "Y") @ Matrix.Translation((0.24, y, 0))
+            r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+            _finish(w, WOOD, m @ Matrix.Diagonal((0.34, 0.03, 0.035, 1.0)), r["verts"])
+    for k in range(12):                                                      # paddles between the rims
+        a = k * math.pi / 6
+        m = Matrix.Rotation(a, 4, "Y") @ Matrix.Translation((0.40, 0, 0))
+        r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+        _finish(w, WOOD, m @ Matrix.Diagonal((0.10, 0.25, 0.02, 1.0)), r["verts"])
+    out.append(to_object(w, "FeSpin_WaterWheel", location=(0, 0, C), bevel=0.002))
+    return out
+
+
 AXLE_Z = C
 
 
@@ -460,6 +493,7 @@ MODELS = {
     "feTorqueRegulator": model_regulator,
     "feClutch": model_clutch,
     "feTorqueGauge": model_gauge,
+    "feWaterWheel": model_waterwheel,
 }
 
 

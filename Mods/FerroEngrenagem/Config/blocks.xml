@@ -570,6 +570,23 @@
 			<property name="EconomicValue" value="60"/>
 			<property name="SortOrder2" value="0015"/>
 		</block>
+		<!-- F4-T04 / D8: Water Wheel. A free, slow torque source: FeTorqueOutput UT at FeSourceRpm (16) while water touches
+		     its paddles (its cell, the cell below, and the side cells off its axle; Kinetic.WaterTouching). Its axle is
+		     the model's local Z like the Shaft; both ends connect. Mixing it with 32 RPM sources needs a Speed Box. -->
+		<block name="feWaterWheel">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="waterwheel"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="FeTorqueOutput" value="128"/>
+			<property name="FeSourceRpm" value="16"/>
+			<property name="DescriptionKey" value="feWaterWheelDesc"/>
+			<property name="CustomIcon" value="decoWildWestWagonWheelFront"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterWheelPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="250"/>
+			<property name="SortOrder2" value="0022"/>
+		</block>
 		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
 		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->
 		<block name="feSpinInverter">

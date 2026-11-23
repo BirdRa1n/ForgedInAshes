@@ -10,7 +10,7 @@ from mathutils import Vector
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
     r"F:\Github\FerroEngrenagem\Art"
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
-         "feClutch", "feTorqueGauge"]
+         "feClutch", "feTorqueGauge", "feWaterWheel"]
 
 scene = bpy.context.scene
 for engine in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):

@@ -100,6 +100,12 @@
 			<ingredient name="feResourceIronPlate" count="1"/>
 			<ingredient name="resourceForgedIron" count="2"/>
 		</recipe>
+		<recipe name="feWaterWheel" count="1" craft_area="feSawmill" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceWood" count="30"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+			<ingredient name="feResourceIronShaft" count="2"/>
+			<ingredient name="feResourceGear" count="2"/>
+		</recipe>
 		<recipe name="feSpinInverter" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
 			<ingredient name="feResourceGear" count="3"/>
 			<ingredient name="feResourceIronPlate" count="1"/>
