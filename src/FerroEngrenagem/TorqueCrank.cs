@@ -37,7 +37,7 @@ namespace FerroEngrenagem
             TorqueCrankController.Ensure();
             MotorSocketMarker.Ensure();
             Log.Out(FerroEngrenagemMod.LogPrefix + "BlockFeTorqueCrank ready for '" + GetBlockName() + "' (" + Output
-                    + " W while turning)");
+                    + " UT while turning)");
         }
 
         void ReadFloat(string name, ref float value)

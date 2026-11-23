@@ -536,6 +536,8 @@ aqui fica só o que foi medido/verificado.
   `power` só quando a máquina liga/desliga; sem `spin`, sem diagnóstico da manivela, sem a lista de patches.
 - Manivela de Torque tinha `CanPickup`: E em pé pegava a manivela em vez de girar. Trocado por radial próprio
   (agachar + E → pegar), como as peças da rede.
+- Testado (usuário, log 2026-11-23 00:01): sem erros; log enxuto (10 linhas do mod no teste inteiro); rede de 18
+  nós segue ON a x4. Limpeza concluída.
 
 ## Próximo passo (antigo, mantido para histórico)
 
