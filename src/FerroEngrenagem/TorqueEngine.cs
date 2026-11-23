@@ -208,7 +208,7 @@ namespace FerroEngrenagem
     {
         public static bool IsEngine(TileEntityPowerSource te)
         {
-            return te != null && (TorqueEngine.IsEngine(te.blockValue.Block) || Dynamo.Is(te.blockValue.Block));
+            return te != null && (TorqueEngine.IsEngine(te.blockValue.Block) || Dynamo.IsInternal(te));
         }
 
         public static void Hide(XUiC_PowerSourceSlots grid)

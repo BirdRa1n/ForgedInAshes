@@ -632,6 +632,19 @@ aqui fica só o que foi medido/verificado.
 - Reabastecer, linha de combustível e slots escondidos (como Manivela/motores). Receita na Eletrônica. Modelo com
   enrolamentos de cobre, comutador, isolador e `FeSpin_DynamoArmature`. Bundle 1,5 MB. Não testado ainda.
 
+## 2026-11-23 — Dínamo Industrial e Barramento
+
+- Usuário: ao ligar fio de um Dínamo em outro (ou no Motor a Vapor) o jogo diz "esta fonte de energia não pode ter
+  uma conexão ao principal". Vanilla: `TileEntityPowerSource.CanHaveParent` só aceita pai se `PowerItemType == 7`
+  (banco de baterias); `PowerSource.CanParent` devolve false. O Motor a Vapor não é elétrico (dá torque).
+- `feDynamo2` (Dínamo Industrial, multibloco 3×2×3): 1024 UT → 500 W a 32 RPM; eixo na frente da camada de baixo
+  (`Kinetic.IsMultiEngine` inclui dínamos; `Dynamo.Watts` usa `NodeOf`).
+- `feBus` (Barramento): gerador com combustível interno. Puxa-se fio DO Barramento PARA cada Dínamo (ou outro
+  Barramento): postfix em `CanHaveParent`/`CanParent` libera esse caso; um Dínamo com pai Barramento zera a própria
+  saída e guarda os watts em `Dynamo.Contribution`; o Barramento soma as contribuições dos filhos e põe no próprio
+  `MaxOutput` (PowerManager.Update atualiza todas as fontes, inclusive filhas). Leitura: "Juntando N fonte(s): W".
+  Geradores vanilla, solar e baterias não entram. Modelos e bundle (1,6 MB). Não testado.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

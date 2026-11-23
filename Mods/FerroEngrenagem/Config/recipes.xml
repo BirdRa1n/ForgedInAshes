@@ -182,6 +182,17 @@
 			<ingredient name="feResourceIronShaft" count="2"/>
 			<ingredient name="resourceElectricParts" count="2"/>
 		</recipe>
+		<recipe name="feDynamo2" count="1" craft_area="feElectronics" craft_time="90" always_unlocked="true">
+			<ingredient name="feDynamo" count="3"/>
+			<ingredient name="feResourceCoil" count="12"/>
+			<ingredient name="feResourceIronPlate" count="20"/>
+			<ingredient name="feResourceGear" count="8"/>
+		</recipe>
+		<recipe name="feBus" count="1" craft_area="feElectronics" craft_time="20" always_unlocked="true">
+			<ingredient name="feResourceCoil" count="2"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+			<ingredient name="resourceElectricParts" count="4"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)

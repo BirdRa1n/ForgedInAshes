@@ -29,7 +29,8 @@ public static class FeBuild
         "feClutch", "feTorqueGauge", "feWaterWheel", "feSteamEngine",
         // D9 fluid network
         "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
-        "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo"
+        "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
+        "feDynamo2", "feBus"
     };
 
     const string ModelsDir = "Assets/Models";

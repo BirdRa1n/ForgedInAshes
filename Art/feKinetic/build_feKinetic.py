@@ -789,6 +789,63 @@ def model_dynamo(col):
     return objs
 
 
+def model_dynamo2(col):
+    """Industrial Dynamo, 3x3 base, 2 high: a big generator drum on top (axis z = 1.05), a gear case at the front
+    down to the input shaft (front centre of the bottom layer, z = 0.5), cooling grilles, insulators on top."""
+    base = bmesh.new()
+    box(base, (2.96, 2.96, 0.10), (0, 0, 0.05), IRON)
+    cyl(base, 0.80, 2.0, (0, 0.35, 1.05), "Y", PAINT, segs=36)
+    for y in (-0.45, -0.1, 0.25, 0.6, 0.95):
+        ring(base, 0.85, 0.80, 0.10, (0, y, 1.05), "Y", BRASS, segs=36)         # windings
+    for s_ in (-1, 1):
+        cyl(base, 0.70, 0.08, (0, 0.35 + s_ * 1.04, 1.05), "Y", IRON, segs=36)
+    for x in (-0.6, 0.6):
+        for y in (-0.3, 1.0):
+            box(base, (0.20, 0.30, 0.40), (x, y, 0.30), IRON)
+    box(base, (0.70, 0.40, 1.10), (0, -0.95, 0.65), IRON)                     # gear case (front)
+    for sx in (-1, 1):
+        box(base, (0.24, 1.6, 0.70), (sx * 1.20, 0.35, 0.55), PAINT)            # rectifier cabinets
+        for k in range(6):
+            box(base, (0.02, 1.4, 0.04), (sx * 1.33, 0.35, 0.30 + k * 0.10), IRON)
+    for x in (-0.3, 0.0, 0.3):                                                  # insulators on top
+        for k in range(3):
+            cyl(base, 0.06, 0.03, (x, 0.35, 1.90 + k * 0.06), "Z", GLASS, segs=12, r2=0.04)
+    objs = [to_object(base, "feDynamo2_Base", bevel=0.005)]
+    inp = bmesh.new()
+    shaft_end(inp, -1.10, -1.5)
+    objs.append(to_object(inp, "FeSpin_Dynamo2In", location=(0, 0, C), bevel=0.002))
+    rotor = bmesh.new()                                                        # visible rotor end at the back
+    cyl(rotor, 0.12, 0.10, (0, 0, 0), "Y", STEEL, segs=16)
+    for k in range(4):
+        a_ = k * math.pi / 2
+        m = Matrix.Rotation(a_, 4, "Y") @ Matrix.Translation((0.30, 0, 0))
+        r = bmesh.ops.create_cube(rotor, size=1.0, calc_uvs=True)
+        _finish(rotor, BRASS, m @ Matrix.Diagonal((0.45, 0.03, 0.10, 1.0)), r["verts"])
+    objs.append(to_object(rotor, "FeSpin_Dynamo2Rotor", location=(0, 1.44, 1.05), bevel=0.0))
+    wire_anchor(col, objs, (0, 0.35, 2.12))
+    return objs
+
+
+def model_bus(col):
+    """Power Bus: a cabinet with three copper bus bars across the top and a row of insulators (one per incoming
+    dynamo wire, purely visual) plus the outgoing insulator."""
+    base = bmesh.new()
+    box(base, (0.70, 0.50, 0.70), (0, 0, 0.40), PAINT)
+    box(base, (0.74, 0.54, 0.04), (0, 0, 0.77), IRON)
+    box(base, (0.74, 0.54, 0.05), (0, 0, 0.05), IRON)
+    for y in (-0.15, 0.0, 0.15):
+        box(base, (0.66, 0.03, 0.03), (0, y, 0.81), BRASS)                      # copper bus bars
+    for x in (-0.25, -0.08, 0.08):
+        for k in range(2):
+            cyl(base, 0.03, 0.02, (x, 0.18, 0.84 + k * 0.035), "Z", GLASS, segs=10, r2=0.02)
+    for k in range(3):
+        cyl(base, 0.045, 0.025, (0.25, -0.15, 0.84 + k * 0.045), "Z", GLASS, segs=12, r2=0.03)
+    box(base, (0.30, 0.02, 0.30), (0, -0.26, 0.45), GLASS)                     # inspection window
+    objs = [to_object(base, "feBus_Base", bevel=0.004)]
+    wire_anchor(col, objs, (0.25, -0.15, 1.0))
+    return objs
+
+
 AXLE_Z = C
 
 
@@ -863,6 +920,8 @@ MODELS = {
     "feElectricMotor2": model_electric_motor2,
     "feElectricMotor3": model_electric_motor3,
     "feDynamo": model_dynamo,
+    "feDynamo2": model_dynamo2,
+    "feBus": model_bus,
 }
 
 

@@ -316,7 +316,7 @@ namespace FerroEngrenagem
         // layer, facing out along the model's local +Z (EnginePort). The other cells are not nodes.
         public static bool IsMultiEngine(Block b)
         {
-            return b != null && b.isMultiBlock && (TorqueEngine.IsEngine(b) || PowerGate.IsMotor(b));
+            return b != null && b.isMultiBlock && (TorqueEngine.IsEngine(b) || PowerGate.IsMotor(b) || Dynamo.Is(b));
         }
 
         public static bool EnginePort(World world, Vector3i cell, BlockValue bv, out Vector3i parent, out Vector3i dir)
