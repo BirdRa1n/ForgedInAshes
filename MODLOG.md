@@ -534,6 +534,8 @@ aqui fica só o que foi medido/verificado.
 - Motores a combustível: slots escondidos e shift-click recusado (`EngineSlots`, mesmo mecanismo do CrankSlots).
 - Log: `FerroEngrenagemMod.Verbose` só com `Mods/FerroEngrenagem/debug.txt` (no .gitignore). Sem ele: a linha
   `power` só quando a máquina liga/desliga; sem `spin`, sem diagnóstico da manivela, sem a lista de patches.
+- Manivela de Torque tinha `CanPickup`: E em pé pegava a manivela em vez de girar. Trocado por radial próprio
+  (agachar + E → pegar), como as peças da rede.
 
 ## Próximo passo (antigo, mantido para histórico)
 

@@ -46,11 +46,31 @@ namespace FerroEngrenagem
         }
 
         // Standing: no commands (E is "hold to turn"). Crouching: vanilla commands (pick up).
+        // Not the vanilla CanPickup: with it a plain E press picks the crank up and its "press E to pick up"
+        // prompt hides ours (user test, 2026-11-23). Crouch + E opens an own radial with "take".
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                         EntityAlive _entityFocusing)
         {
-            bool crouch = _entityFocusing != null && _entityFocusing.IsCrouching;
-            return crouch && base.HasBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
+            return _entityFocusing != null && _entityFocusing.IsCrouching;
+        }
+
+        public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue,
+                                                                           Vector3i _blockPos,
+                                                                           EntityAlive _entityFocusing)
+        {
+            return new BlockActivationCommand[]
+            {
+                new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null)
+            };
+        }
+
+        public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
+                                              BlockValue _blockValue, EntityPlayerLocal _player)
+        {
+            if (_commandName != "take") return false;
+            float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 3f;
+            takeItemWithTimer(_blockPos, _blockValue, _player, delay);
+            return true;
         }
 
         public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
