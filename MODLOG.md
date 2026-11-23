@@ -556,6 +556,7 @@ aqui fica só o que foi medido/verificado.
 - Na verdade o Inversor girava INTEIRO: o FeBuild chama o modelo de `feSpinInverter` e o KineticSpinner
   comparava "FeSpin" sem diferenciar maiúsculas. Agora a comparação é exata (Ordinal). O `OnlySimpleRotations`
   fica (peças com pés não devem rolar).
+- Testado (usuário): Inversor gira só os eixos internos. Modelos da rede de torque integrados e funcionando.
 
 ## Próximo passo (antigo, mantido para histórico)
 
