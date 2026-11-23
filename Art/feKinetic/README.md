@@ -29,10 +29,20 @@ Seis modelos feitos no Blender 5.3 por script, no mesmo estilo da Manivela (`Art
 - Manivela de Torque: o volante fica no centro, a manivela na frente (Blender −Y) e o eixo de saída passa pelo
   cavalete de trás até o flange da face traseira (Blender +Y).
 
-## Integração (falta: bundle no Unity 2022.3.62f2)
+## Integração (feita em 2026-11-23)
 
-`FeBuild.cs` já lista os seis blocos. Depois de `FerroEngrenagem > Build All` no Unity **2022.3.62f2** (a versão
-do jogo; esta máquina só tem o 6000.6), trocar no `blocks.xml`:
+Bundle gerado nesta máquina com o Unity 2022.3.62f2 (instalado pelo Unity CLI em `E:\UnityEditors\2022.3.62f2`):
+
+```
+E:\UnityEditors\2022.3.62f2\Editor\Unity.exe -batchmode -quit -projectPath Art\UnityProject -executeMethod FeBuild.BuildAll -logFile Art\UnityProject\Logs\febuild.log
+```
+
+O `FeBuild` agora registra cada peça que gira (`[FE] <bloco>: spin part ... +Z -> (...)`): todas no centro do
+bloco e com o +Z no eixo do bloco (os 6 flanges da Caixa de Transmissão cada um no seu eixo; o regulador
+centrífugo na vertical). O Eixo ganhou uma raiz vazia (`feShaft_Base`): com um objeto só, o Unity fazia da peça
+que gira a raiz do modelo e o deslocamento de −0,5 m do FeBuild a derrubava no chão.
+
+Passos aplicados no `blocks.xml`:
 
 - `feTorqueCrank`: `Model` → `#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueCrankPrefab`.
 - `feShaft`: `Shape` → `ModelEntity`, `Model` → `...?feShaftPrefab` (tirar `Texture`). Os blocos que estendem o

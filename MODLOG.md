@@ -539,6 +539,19 @@ aqui fica só o que foi medido/verificado.
 - Testado (usuário, log 2026-11-23 00:01): sem erros; log enxuto (10 linhas do mod no teste inteiro); rede de 18
   nós segue ON a x4. Limpeza concluída.
 
+## 2026-11-23 — Modelos 3D da rede de torque no jogo
+
+- Blender 5.3 via MCP: `Art/feKinetic/build_feKinetic.py` gera Manivela de Torque, Eixo, Caixa de Velocidade,
+  Caixa de Transmissão, Inversor de Giro e Regulador de Torque (peças `FeSpin*` com pivô no eixo), exporta um FBX
+  por bloco (`export_feKinetic.py`) e prévias (`render_previews.py`).
+- Unity CLI 1.0.1 instalado (com autorização do usuário; o instalador também instala skills de agente). Licença
+  Personal já ativa na conta. Editor 2022.3.62f2 instalado sem elevação em `E:\UnityEditors` (`--no-elevate
+  --download-directory`; o helper UAC falhou sem console).
+- `FeBuild.BuildAll` em batch: 7 prefabs (inclui `feCrank`), bundle de 636 KB. O log novo confirma pivôs e +Z de
+  cada peça. O Eixo precisou de raiz vazia (ver README do feKinetic).
+- `blocks.xml`: os 6 blocos usam `#@modfolder:Resources/ferroengrenagem.unity3d?<bloco>Prefab`; `feShaft` virou
+  `ModelEntity` (o Medidor ficou com `Shape=New` próprio); `FeSpinWhole` saiu do Inversor e do Regulador.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
