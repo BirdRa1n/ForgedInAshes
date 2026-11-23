@@ -313,6 +313,8 @@ como as máquinas). Sem torque, a linha para e os itens ficam parados em cima de
 Limite conhecido: como os fluidos, funciona no single player e para quem hospeda; servidor dedicado fica para a
 F2-T06.
 
+> Craft em cadeia ("modo Create"): ver [PLANO_CRAFT.md](PLANO_CRAFT.md) (D11).
+
 ### 5.3 Logística (opcional — "versão 2.0")
 
 | ID | Bloco | Função | Implementação |
