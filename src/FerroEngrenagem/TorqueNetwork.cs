@@ -111,31 +111,57 @@ namespace FerroEngrenagem
             KineticSpinner.Attach(_ebcd, _blockPos, this);
         }
 
-        // Standing, E on a speed box / clutch / regulator changes its setting and looking shows the network
-        // (KineticLookController); crouching, E opens a radial with "take" (TakeDelay seconds), like the Crank.
-        // NOT the vanilla CanPickup: that one writes its own "press E to pick up" prompt over the readout and
-        // picks the block up on a plain E press (D8 T4 test).
+        // Vanilla radial (user, 2026-11-22: "hold and select to take"): tap E = the first command, hold E = the
+        // radial. Speed box / clutch / regulator: "change setting" first, then "take"; the others: "take".
+        // The prompt is the network readout (GetActivationText).
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                         EntityAlive _entityFocusing)
         {
-            return _entityFocusing != null && _entityFocusing.IsCrouching;
+            return true;
         }
 
         public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue,
                                                                            Vector3i _blockPos,
                                                                            EntityAlive _entityFocusing)
         {
-            bool ok = Pickup.CanBuildHere(_world, _blockPos);
-            return new BlockActivationCommand[] { new BlockActivationCommand("take", "hand", ok, false, null) };
+            bool canTake = Pickup.CanBuildHere(_world, _blockPos);
+            BlockActivationCommand take = new BlockActivationCommand("take", "hand", canTake, false, null);
+            if (Settings(Kind) > 0)
+                return new BlockActivationCommand[]
+                {
+                    new BlockActivationCommand("fe_setting", "electric_switch", true, false, null), take
+                };
+            return new BlockActivationCommand[] { take };
         }
 
         public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
                                               BlockValue _blockValue, EntityPlayerLocal _player)
         {
+            if (_commandName == "fe_setting")
+            {
+                int n = Settings(Kind);
+                if (n <= 0) return false;
+                BlockValue nbv = _blockValue;
+                nbv.meta = (byte)((_blockValue.meta + 1) % n);
+                _world.SetBlockRPC(_blockPos, nbv);
+                Kinetic.Invalidate();
+                Log.Out(FerroEngrenagemMod.LogPrefix + GetBlockName() + " at " + _blockPos + " -> setting " + nbv.meta);
+                return true;
+            }
             if (_commandName != "take") return false;
             float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 2f;
             takeItemWithTimer(_blockPos, _blockValue, _player, delay);
             return true;
+        }
+
+        public override string GetActivationText(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
+                                                 EntityAlive _entityFocusing)
+        {
+            string text = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, true));
+            string hint = Settings(Kind) > 0
+                ? Kinetic.Text("feHintSetting", "{0} change setting - hold {0}: take")
+                : Kinetic.Text("feHintTake", "Hold {0} to take");
+            return text + "\n" + hint;
         }
     }
 
@@ -662,22 +688,16 @@ namespace FerroEngrenagem
         }
     }
 
-    // Look at a shaft / gearbox / speed box / motor: show the network (RPM here, UT used / available, overload).
-    // E on a speed box cycles its ratio.
+    // The network readout of a torque block. Shown through the vanilla interaction prompt: BlockFeKinetic.
+    // GetActivationText and postfixes on the Electric Motor (BlockPowered) and the engines (BlockPowerSource)
+    // GetActivationText (PlayerMoveController.TryHandleBlock formats it with the Activate key as {0}, IL 3.4.0 b10).
+    // An own MonoBehaviour writing XUiC_InteractionPrompt every frame lost the race against the vanilla prompt
+    // once the blocks got activation commands (D8 T4 test).
     public class KineticLookController : MonoBehaviour
     {
-        static GameObject host;
-        string prompt;
-        LocalPlayerUI promptUi;
-        float nextUpdate;
-        string lastShaftLog;
-
+        // kept for the old call sites (Init of the blocks); nothing to run per frame any more
         public static void Ensure()
         {
-            if (host != null || GameManager.IsDedicatedServer) return;
-            host = new GameObject("FerroEngrenagem.KineticLookController");
-            Object.DontDestroyOnLoad(host);
-            host.AddComponent<KineticLookController>();
         }
 
         public static string Status(TorqueNet net, Vector3i node)
@@ -692,152 +712,104 @@ namespace FerroEngrenagem
                                  Mathf.RoundToInt(net.RpmAt(node)), net.Usage, net.Capacity);
         }
 
-        bool Looking(out World world, out EntityPlayerLocal player, out LocalPlayerUI ui, out Vector3i pos,
-                     out BlockValue bv)
+        /// <summary>Readout lines for the torque block at pos (no braces escaping, no key hints).</summary>
+        public static string Describe(Vector3i pos, BlockValue bv, bool withName)
         {
-            world = null; player = null; ui = null; pos = Vector3i.zero; bv = BlockValue.Air;
-            GameManager gm = GameManager.Instance;
-            world = gm == null ? null : gm.World;
-            player = world == null ? null : world.GetPrimaryPlayer();
-            if (player == null || player.IsDead()) return false;
-            WorldRayHitInfo hit = player.HitInfo;
-            if (hit == null || !hit.bHitValid || !GameUtils.IsBlockOrTerrain(hit.tag)) return false;
-            if (hit.hit.distanceSq > 25f) return false;
-            bv = hit.hit.blockValue;
-            pos = hit.hit.blockPos;
-            ui = player.PlayerUI;
-            if (ui == null || ui.windowManager == null) return false;
-            if (ui.windowManager.IsModalWindowOpen() || ui.windowManager.IsCursorWindowOpen()) return false;
-            return true;
-        }
-
-        void Update()
-        {
-            World world;
-            EntityPlayerLocal player;
-            LocalPlayerUI ui;
-            Vector3i pos;
-            BlockValue bv;
-            bool looking = Looking(out world, out player, out ui, out pos, out bv);
-
-            // E on a speed box / clutch / regulator: next setting (every frame, so the key press is not missed)
-            int settings = looking ? BlockFeKinetic.Settings(Kinetic.Kind(bv.Block)) : 0;
-            if (settings > 0 && !player.IsCrouching && WasActivatePressed(player))
-            {
-                BlockValue nbv = bv;
-                nbv.meta = (byte)((bv.meta + 1) % settings);
-                world.SetBlockRPC(pos, nbv);
-                Kinetic.Invalidate();
-                nextUpdate = 0f;
-                Log.Out(FerroEngrenagemMod.LogPrefix + bv.Block.GetBlockName() + " at " + pos + " -> setting " + nbv.meta);
-            }
-
-            if (UnityEngine.Time.time < nextUpdate) return;
-            nextUpdate = UnityEngine.Time.time + 0.2f;
-            prompt = null;
-            promptUi = null;
-            if (!looking || player.IsCrouching) return;   // crouching: the vanilla "take" prompt
-            bv = world.GetBlock(pos);
+            World world = GameManager.Instance == null ? null : GameManager.Instance.World;
+            if (world == null) return "";
             KineticKind kind = Kinetic.Kind(bv.Block);
-            if (kind == KineticKind.None || kind == KineticKind.TorqueCrank) return;   // the crank has its own prompt
+            if (kind == KineticKind.None) return "";
             TorqueNet net = Kinetic.Get(world, pos);
-            string name = bv.Block.GetLocalizedBlockName();
-            if (kind == KineticKind.Shaft)
-            {
+            string name = withName ? bv.Block.GetLocalizedBlockName() : "";
+            string extra = "";
+            if (kind == KineticKind.Shaft || kind == KineticKind.Motor || kind == KineticKind.Engine ||
+                kind == KineticKind.Clutch || kind == KineticKind.Inverter)
                 name += " (" + Kinetic.AxisName(bv) + ")";
-                // diagnostic while the placeholder model's axis is confirmed in game
-                string key = pos + "|" + bv.rotation;
-                if (key != lastShaftLog)
-                {
-                    lastShaftLog = key;
-                    Log.Out(FerroEngrenagemMod.LogPrefix + "look shaft at " + pos + " rot=" + bv.rotation +
-                            " axis=" + Kinetic.AxisName(bv) + " net nodes=" + (net == null ? 0 : net.Nodes.Count));
-                }
-            }
-            else if (kind == KineticKind.SpeedBox)
+            if (kind == KineticKind.SpeedBox)
             {
                 Vector3i a = Kinetic.Axis(bv);
                 float ratio = BlockFeKinetic.Ratio(bv);
-                name += " " + RatioText(ratio) + "\n" + string.Format(
-                    Kinetic.Text("feSpeedBoxInfo", "in: {0} side, out: {1} side - {2} to change"),
-                    Kinetic.DirName(new Vector3i(-a.x, -a.y, -a.z)), Kinetic.DirName(a), KeyName(player));
+                name += " " + RatioText(ratio);
+                extra += "\n" + string.Format(Kinetic.Text("feSideInfo", "in: {0} side, out: {1} side"),
+                    Kinetic.DirName(new Vector3i(-a.x, -a.y, -a.z)), Kinetic.DirName(a));
                 if (net != null && net.Running)
-                    name += "\n" + string.Format(Kinetic.Text("feSpeedBoxRpm", "{0} RPM in, {1} RPM out"),
+                    extra += "\n" + string.Format(Kinetic.Text("feSpeedBoxRpm", "{0} RPM in, {1} RPM out"),
                         Mathf.RoundToInt(net.RpmAt(pos)), Mathf.RoundToInt(Kinetic.ClampRpm(net.RpmAt(pos) * ratio)));
             }
             else if (kind == KineticKind.Clutch)
             {
                 name += ": " + (BlockFeKinetic.Engaged(bv) ? Kinetic.Text("feClutchOn", "engaged")
-                                                          : Kinetic.Text("feClutchOff", "released")) +
-                        " - " + string.Format(Kinetic.Text("feKeyToChange", "{0} to change"), KeyName(player));
-                if (!BlockFeKinetic.Engaged(bv)) { prompt = name; promptUi = ui; return; }   // its own net is just itself
+                                                          : Kinetic.Text("feClutchOff", "released"));
+                if (!BlockFeKinetic.Engaged(bv)) return name.Trim();   // released: its own net is just itself
             }
             else if (kind == KineticKind.Regulator)
             {
                 Vector3i a = Kinetic.Axis(bv);
-                name += " " + BlockFeKinetic.LimitPercent(bv) + "%\n" + string.Format(
-                    Kinetic.Text("feSpeedBoxInfo", "in: {0} side, out: {1} side - {2} to change"),
-                    Kinetic.DirName(new Vector3i(-a.x, -a.y, -a.z)), Kinetic.DirName(a), KeyName(player));
+                name += " " + BlockFeKinetic.LimitPercent(bv) + "%";
+                extra += "\n" + string.Format(Kinetic.Text("feSideInfo", "in: {0} side, out: {1} side"),
+                    Kinetic.DirName(new Vector3i(-a.x, -a.y, -a.z)), Kinetic.DirName(a));
                 RegZone z;
                 if (net != null && net.Regulators.TryGetValue(pos, out z))
                 {
-                    if (z.Bypassed) name += "\n" + Kinetic.Text("feRegBypassed", "Bypassed: the output loops back to the input side");
+                    if (z.Bypassed) extra += "\n" + Kinetic.Text("feRegBypassed", "Bypassed: the output loops back to the input side");
                     else
                     {
-                        name += "\n" + string.Format(Kinetic.Text("feRegInfo", "Lets through {0} UT, behind it wants {1} UT"),
-                                                     z.Limit, z.Wanted);
+                        extra += "\n" + string.Format(Kinetic.Text("feRegInfo", "Lets through {0} UT, behind it wants {1} UT"),
+                                                      z.Limit, z.Wanted);
                         if (z.Scale < 0.999f)
-                            name += " - " + string.Format(Kinetic.Text("feRegSlow", "machines at {0}% speed"),
-                                                          Mathf.RoundToInt(z.Scale * 100f));
+                            extra += " - " + string.Format(Kinetic.Text("feRegSlow", "machines at {0}% speed"),
+                                                           Mathf.RoundToInt(z.Scale * 100f));
                     }
                 }
             }
             else if (kind == KineticKind.Gauge && net != null)
             {
                 int pct = net.Capacity > 0 ? Mathf.RoundToInt(100f * net.Usage / net.Capacity) : 0;
-                name += "\n" + string.Format(Kinetic.Text("feGaugeInfo",
-                            "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
-                            net.Sources, net.Machines.Count, net.Regulators.Count, pct);
+                extra += "\n" + string.Format(Kinetic.Text("feGaugeInfo",
+                             "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
+                             net.Sources, net.Machines.Count, net.Regulators.Count, pct);
             }
-            if (kind == KineticKind.Motor || kind == KineticKind.Engine || kind == KineticKind.Clutch ||
-                kind == KineticKind.Inverter)
-                name += " (" + Kinetic.AxisName(bv) + ")";
-            prompt = name + "\n" + Status(net, pos);
-            if (kind == KineticKind.Engine)
-                prompt += "\n" + string.Format(Kinetic.Text("feEngineOpen", "{0} to open (fuel, on/off)"), KeyName(player));
+            string text = name.Trim() + extra + "\n" + Status(net, pos);
             if (net != null)
                 foreach (KeyValuePair<Vector3i, Vector3i> w in net.WrongSpin)
                     if (w.Value == pos)
-                        prompt += "\n" + string.Format(Kinetic.Text("feWrongSpin",
+                        text += "\n" + string.Format(Kinetic.Text("feWrongSpin",
                             "{0} turns the wrong way: add a Spin Inverter"), world.GetBlock(w.Key).Block.GetLocalizedBlockName());
-            promptUi = ui;
+            return text.Trim();
         }
 
-        void LateUpdate()
+        /// <summary>Escape braces so the text survives the vanilla string.Format with the key as {0}.</summary>
+        public static string Escape(string s)
         {
-            if (prompt != null && promptUi != null) XUiC_InteractionPrompt.SetText(promptUi, prompt);
+            return s.Replace("{", "{{").Replace("}", "}}");
         }
 
         static string RatioText(float r)
         {
             return r < 1f ? "x1/" + Mathf.RoundToInt(1f / r) : "x" + Mathf.RoundToInt(r);
         }
+    }
 
-        static bool WasActivatePressed(EntityPlayerLocal player)
+    // Electric Motor and engines: their vanilla prompt plus the network readout.
+    [HarmonyLib.HarmonyPatch(typeof(BlockPowered), "GetActivationText")]
+    public static class Patch_BlockPowered_ActivationText_Kinetic
+    {
+        public static void Postfix(BlockPowered __instance, BlockValue _blockValue, Vector3i _blockPos, ref string __result)
         {
-            PlayerActionsLocal input = player.playerInput;
-            if (input == null) return false;
-            if (input.Activate != null && input.Activate.WasPressed) return true;
-            PlayerActionsPermanent perm = input.PermanentActions;
-            return perm != null && perm.Activate != null && perm.Activate.WasPressed;
+            if (!PowerGate.IsMotor(__instance)) return;
+            string d = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, true));
+            __result = string.IsNullOrEmpty(__result) ? d : __result + "\n" + d;
         }
+    }
 
-        static string KeyName(EntityPlayerLocal player)
+    [HarmonyLib.HarmonyPatch(typeof(BlockPowerSource), "GetActivationText")]
+    public static class Patch_BlockPowerSource_ActivationText_Kinetic
+    {
+        public static void Postfix(BlockPowerSource __instance, BlockValue _blockValue, Vector3i _blockPos, ref string __result)
         {
-            PlayerActionsLocal input = player.playerInput;
-            if (input == null || input.PermanentActions == null) return "[E]";
-            return XUiUtils.GetBindingXuiMarkupString(input.PermanentActions.Activate,
-                XUiUtils.EmptyBindingStyle.EmptyString, XUiUtils.DisplayStyle.Plain, null);
+            if (!TorqueEngine.IsEngine(__instance)) return;
+            string d = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, false));
+            __result = string.IsNullOrEmpty(__result) ? d : __result + "\n" + d;
         }
     }
 }

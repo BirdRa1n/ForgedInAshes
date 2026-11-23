@@ -499,6 +499,18 @@ aqui fica só o que foi medido/verificado.
 - Motor a Carvão testado rodando (`spin feCoalEngine ... rpm=32 running=True`), mas numa rede só dele: eixo do
   motor N-S, Eixo do jogador L-O (posição; o indicador de pontas mostra).
 
+## 2026-11-22 — Leitura e ajustes pelo menu vanilla (toque/segurar E)
+
+- Depois do radial próprio, a leitura ao olhar e o E da Caixa de Velocidade sumiram: o MonoBehaviour que
+  escrevia `XUiC_InteractionPrompt` a cada quadro perde para o prompt vanilla quando o bloco tem comandos.
+- Caminho vanilla (IL 3.4.0 b10, `PlayerMoveController.TryHandleBlock`): com `HasBlockActivationCommands`, E abre o
+  `XUiC_Radial` (toque = primeiro comando, segurar = menu) e o prompt é `string.Format(GetActivationText, tecla)`.
+  Rótulos do radial: `blockcommand_<texto>`.
+- `BlockFeKinetic`: comandos `fe_setting` (só caixa de velocidade/embreagem/regulador) e `take`;
+  `GetActivationText` = leitura da rede (`KineticLookController.Describe`, chaves `{}` escapadas) + dica.
+  Motor Elétrico e motores a combustível: postfix em `BlockPowered`/`BlockPowerSource.GetActivationText`.
+  O antigo `KineticLookController` não roda mais por quadro.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
