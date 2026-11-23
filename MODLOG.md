@@ -551,6 +551,8 @@ aqui fica só o que foi medido/verificado.
   cada peça. O Eixo precisou de raiz vazia (ver README do feKinetic).
 - `blocks.xml`: os 6 blocos usam `#@modfolder:Resources/ferroengrenagem.unity3d?<bloco>Prefab`; `feShaft` virou
   `ModelEntity` (o Medidor ficou com `Shape=New` próprio); `FeSpinWhole` saiu do Inversor e do Regulador.
+- Teste: modelos aparecem e a rede roda (1024/1024 UT). Um Inversor ficou "rolado" de lado (24 rotações do
+  bloco): Caixa de Velocidade, Inversor e Regulador agora com `OnlySimpleRotations` (só as 4 de pé).
 
 ## Próximo passo (antigo, mantido para histórico)
 

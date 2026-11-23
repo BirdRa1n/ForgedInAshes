@@ -524,6 +524,8 @@
 		<block name="feSpeedBox">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="speedbox"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feSpeedBoxDesc"/>
 			<property name="CustomIcon" value="metalPipeFlange"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
@@ -548,6 +550,8 @@
 		<block name="feTorqueRegulator">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="regulator"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
 			<property name="CustomIcon" value="metalPipeValve"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -571,6 +575,8 @@
 		<block name="feSpinInverter">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="inverter"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feSpinInverterDesc"/>
 			<property name="CustomIcon" value="pipeSmallJoint"/>
 			<property name="Shape" value="ModelEntity"/>
