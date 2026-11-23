@@ -523,6 +523,18 @@ aqui fica só o que foi medido/verificado.
 - Testado (usuário, log 23:46): rede de 18 nós com 4 fontes → Prensa a 128 RPM (x4) com `1024/1024 UT -> ON`;
   travamentos só enquanto montava, já com motivo (`LOCKED(direction)`). T4 concluída.
 
+## 2026-11-22 — Limpeza: fim da Carga (D7 etapa 4), slots dos motores, log enxuto
+
+- Removidos: item `feCharge`, bloco + receita `feGasGenerator` (coletor de Carga a gasolina), chaves de
+  localização deles e `ChargeFuelPatches.cs` (o "só queima Carga" da Prensa/Torno; nenhuma máquina tinha mais
+  `FeChargeOnly`). Saves de teste com Carga no inventário perdem esses itens.
+- Descrições: as 15 máquinas diziam "precisa de N W de Motores elétricos ao lado" → "precisa de N UT de torque
+  no encaixe de motor (motor / manivela / motor a combustível / eixo)" (também no `gen_phase3.py`; sem vírgula
+  para não quebrar o CSV). Manivela sem a frase dos Volantes.
+- Motores a combustível: slots escondidos e shift-click recusado (`EngineSlots`, mesmo mecanismo do CrankSlots).
+- Log: `FerroEngrenagemMod.Verbose` só com `Mods/FerroEngrenagem/debug.txt` (no .gitignore). Sem ele: a linha
+  `power` só quando a máquina liga/desliga; sem `spin`, sem diagnóstico da manivela, sem a lista de patches.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

@@ -16,17 +16,24 @@ namespace FerroEngrenagem
         public const string HarmonyId = "com.ferroengrenagem.mod";
         public const string LogPrefix = "[FerroEngrenagem] ";
 
+        /// <summary>Detailed diagnostics (every network change, spin states, crank input). On only when the mod
+        /// folder has a file named debug.txt; otherwise the log keeps just the machines turning on / off.</summary>
+        public static bool Verbose;
+
         public void InitMod(Mod _modInstance)
         {
+            try { Verbose = System.IO.File.Exists(System.IO.Path.Combine(_modInstance.Path, "debug.txt")); }
+            catch (System.Exception) { Verbose = false; }
             Log.Out(LogPrefix + "InitMod: code loaded (" + Assembly.GetExecutingAssembly().GetName().Version + ")");
             var harmony = new Harmony(HarmonyId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             var patched = harmony.GetPatchedMethods().ToList();
-            Log.Out(LogPrefix + "Harmony: " + patched.Count + " method(s) patched");
-            foreach (var m in patched)
-            {
-                Log.Out(LogPrefix + "  patched " + m.DeclaringType.Name + "." + m.Name);
-            }
+            Log.Out(LogPrefix + "Harmony: " + patched.Count + " method(s) patched" + (Verbose ? " (verbose log)" : ""));
+            if (Verbose)
+                foreach (var m in patched)
+                {
+                    Log.Out(LogPrefix + "  patched " + m.DeclaringType.Name + "." + m.Name);
+                }
         }
     }
 }

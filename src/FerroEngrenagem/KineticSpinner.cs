@@ -170,7 +170,7 @@ namespace FerroEngrenagem
             if (net.Omega.TryGetValue(node, out o)) omega = o.ToVector3();
 
             string key = running + "|" + Mathf.RoundToInt(targetRpm) + "|" + omega + "|" + overloaded + "|" + locked + "|" + wrong;
-            if (key != lastLog)
+            if (key != lastLog && FerroEngrenagemMod.Verbose)
             {
                 lastLog = key;
                 Log.Out(FerroEngrenagemMod.LogPrefix + "spin " + (machine ? "machine " : "") +

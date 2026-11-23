@@ -63,7 +63,7 @@ namespace FerroEngrenagem
         static float nextDiag;
         internal static void Diag(string msg)
         {
-            if (Time.time < nextDiag) return;
+            if (!FerroEngrenagemMod.Verbose || Time.time < nextDiag) return;
             nextDiag = Time.time + 2f;
             Log.Out(FerroEngrenagemMod.LogPrefix + "crank: " + msg);
         }

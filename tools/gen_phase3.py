@@ -252,8 +252,8 @@ def loc_rows():
         rows.append([name, "blocks", "Block", en, pt])
         w = WATTS[m[0]]
         rows.append([name + "Desc", "blocks", "Block",
-                     den + f"\\nNeeds {w} W from powered Electric Motors next to it.",
-                     dpt + f"\\nPrecisa de {w} W de Motores elétricos energizados ao lado."])
+                     den + f"\\nNeeds {round(int(w) * 64 / 30)} UT of torque in its motor socket (motor / crank / engine / shaft).",
+                     dpt + f"\\nPrecisa de {round(int(w) * 64 / 30)} UT de torque no encaixe de motor (motor / manivela / motor a combustível / eixo)."])
     for i in ITEMS:
         _, name, en, pt, den, dpt = i[:6]
         rows.append([name, "items", "Item", en, pt])

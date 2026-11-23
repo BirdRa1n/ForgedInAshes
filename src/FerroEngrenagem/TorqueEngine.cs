@@ -99,6 +99,57 @@ namespace FerroEngrenagem
         }
     }
 
+    // Engines: the vanilla generator window always has 6 slots (PowerSource.Stacks), useless here. Hide them and
+    // refuse shift-click into them (same mechanism as the Crank's hidden slots, CrankSlots.cs).
+    public static class EngineSlots
+    {
+        public static bool IsEngine(TileEntityPowerSource te)
+        {
+            return te != null && TorqueEngine.IsEngine(te.blockValue.Block);
+        }
+
+        public static void Hide(XUiC_PowerSourceSlots grid)
+        {
+            if (grid == null || !IsEngine(grid.TileEntity) || grid.itemControllers == null) return;
+            foreach (XUiC_ItemStack slot in grid.itemControllers)
+            {
+                if (slot == null) continue;
+                if (slot.ViewComponent != null) slot.ViewComponent.IsVisible = false;
+                XUiC_RequiredItemStack req = slot as XUiC_RequiredItemStack;
+                if (req != null) req.TakeOnly = true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(XUiC_PowerSourceSlots), "SetRequirements")]
+    public static class Patch_PowerSourceSlots_SetRequirements_Engine
+    {
+        public static void Postfix(XUiC_PowerSourceSlots __instance)
+        {
+            EngineSlots.Hide(__instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(XUiC_PowerSourceSlots), "UpdateBackend")]
+    public static class Patch_PowerSourceSlots_UpdateBackend_Engine
+    {
+        public static void Postfix(XUiC_PowerSourceSlots __instance)
+        {
+            EngineSlots.Hide(__instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(XUiC_PowerSourceSlots), "TryAddItemToSlot")]
+    public static class Patch_PowerSourceSlots_TryAddItemToSlot_Engine
+    {
+        public static bool Prefix(XUiC_PowerSourceSlots __instance, ref bool __result)
+        {
+            if (!EngineSlots.IsEngine(__instance.TileEntity)) return true;
+            __result = false;
+            return false;
+        }
+    }
+
     // Engines get the spin animator on their model too (KineticSpinner.cs).
     [HarmonyPatch(typeof(BlockPowerSource), "OnBlockEntityTransformAfterActivated")]
     public static class Patch_BlockPowerSource_KineticSpinner

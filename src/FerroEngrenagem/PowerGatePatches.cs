@@ -164,7 +164,7 @@ namespace FerroEngrenagem
                 }
             }
             // Diagnostic: one line whenever the result or the network summary for this machine changes.
-            string key = ok + "|" + socket + "|" + info;
+            string key = FerroEngrenagemMod.Verbose ? ok + "|" + socket + "|" + info : ok.ToString();
             string lastKey;
             if (!lastLog.TryGetValue(pos, out lastKey) || lastKey != key)
             {

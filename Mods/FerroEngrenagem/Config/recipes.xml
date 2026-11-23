@@ -774,16 +774,6 @@
 		</recipe>
 	</append>
 
-	<!-- F4-T03 (D4 = Charge, route A): Charge from gasoline. feGasGenerator (blocks.xml) is a collector; built in
-	     the inventory like every mod machine. -->
-	<append xpath="/recipes">
-		<recipe name="feGasGenerator" count="1" always_unlocked="true">
-			<ingredient name="feResourceIronPlate" count="10"/>
-			<ingredient name="feResourceCoil" count="4"/>
-			<ingredient name="feResourceGear" count="6"/>
-			<ingredient name="resourceElectricParts" count="2"/>
-		</recipe>
-	</append>
 	<!-- D7 bootstrap: wiring must be possible before any powered machine exists. The Electric Motor and the vanilla
 	     Wire Tool are crafted in the INVENTORY from early materials (Electrical Parts come from loot/salvage).
 	     Wire Tool: remap sends it to the Assembler (Forged Steel + Mechanical Parts);
