@@ -768,6 +768,18 @@ aqui fica só o que foi medido/verificado.
   (`BeltMachines.Insert` → estoque da receita fixa). Registro de aparelhos de fluido agora vale para qualquer bloco
   (postfix em `Block.OnBlockAdded`); refinarias já colocadas precisam ser recolocadas.
 
+## 2026-11-23 — Fase 6: modelos próprios das máquinas de produção
+
+- 17 modelos (`model_m_*` em build_feKinetic.py, prefabs `feM_*Prefab`): Fundição, Prensa, Torno, Carvoeira, Prensa de
+  Munição, Montadora, Bancada de Mods, Tear, Refinaria, Laboratório, Cozinha, Bancada Eletrônica, Serralheria,
+  Serraria, Misturadora, Garagem, Robótica. Mesma pegada do placeholder (MultiBlockDim mantido; largura par centrada).
+- SEM `ModelOffset`: o padrão do motor (0, 0,5, 0) é o que o FeBuild espera (filho a −0,5). `gen_phase3.py` ganhou
+  `OWN_MODELS` e `EXTRA` (o `FeFluid` da Refinaria agora sai do gerador); as 4 máquinas escritas à mão foram editadas.
+  A regeneração tinha apagado a receita `feBatteryModule` do colega (estava dentro da região gerada): recolocada fora.
+- MachineVisual.cs: `FeSpin_*` giram (token `x<mult>` na velocidade) e `FePiston_*` sobem/descem enquanto há receita
+  na fila (ou a Fundição queima). Hook: postfix em `Block.OnBlockEntityTransformAfterActivated` (BlockWorkstation não
+  o declara). Partes verticais: construídas ao longo de Y local e giradas (−90°, 0, 0) — mapa local (x,y,z)→(x,z,−y).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

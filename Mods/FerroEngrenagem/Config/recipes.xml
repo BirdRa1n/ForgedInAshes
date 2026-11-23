@@ -101,6 +101,12 @@
 			<ingredient name="feResourceIronPlate" count="3"/>
 			<ingredient name="feResourceGear" count="1"/>
 		</recipe>
+		<!-- Battery Bank Module (colleague, D7): kept outside the generated regions -->
+		<recipe name="feBatteryModule" count="1" craft_area="feElectronics" craft_time="20" always_unlocked="true">
+			<ingredient name="resourceElectricParts" count="4"/>
+			<ingredient name="feResourceIronPlate" count="2"/>
+			<ingredient name="feResourceCoil" count="1"/>
+		</recipe>
 		<recipe name="feGearbox" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
 			<ingredient name="feResourceGear" count="4"/>
 			<ingredient name="feResourceIronPlate" count="2"/>
@@ -358,11 +364,6 @@
 		</recipe>
 		<recipe name="feResourceBrassWire" count="3" craft_area="fePress" craft_time="2" always_unlocked="true">
 			<ingredient name="resourceScrapBrass" count="1"/>
-		</recipe>
-		<recipe name="feBatteryModule" count="1" craft_area="feElectronics" craft_time="20" always_unlocked="true">
-			<ingredient name="resourceElectricParts" count="4"/>
-			<ingredient name="feResourceIronPlate" count="2"/>
-			<ingredient name="feResourceCoil" count="1"/>
 		</recipe>
 		<recipe name="feResourceCoil" count="1" craft_area="feElectronics" craft_time="4" always_unlocked="true">
 			<ingredient name="feResourceBrassWire" count="3"/>

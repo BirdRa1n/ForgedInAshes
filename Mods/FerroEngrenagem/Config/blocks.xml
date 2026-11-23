@@ -30,7 +30,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mstone_scrap"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/forgeWorkstationPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_FoundryPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -91,8 +91,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/combineWorkbenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_PressPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -148,7 +147,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Miron_scrap"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/table_sawPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_LathePrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -211,7 +210,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mstone_scrap"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/forgeWorkstationBrokenPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_KilnPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1050,8 +1049,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/combineWorkbenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_AmmoPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1102,8 +1100,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/woodWorkBenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,.5,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_AssemblerPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1154,8 +1151,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/woodWorkBenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,.5,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_ModBenchPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1206,8 +1202,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/woodWorkBenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,.5,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_LoomPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1261,7 +1256,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/chemStationPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_RefineryPrefab"/>
 			<property name="MultiBlockDim" value="3,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1312,7 +1307,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/chemStationPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_LabPrefab"/>
 			<property name="MultiBlockDim" value="3,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1363,7 +1358,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/campfireCookStationPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_KitchenPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -1413,8 +1408,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/woodWorkBenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,.5,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_ElectronicsPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1465,8 +1459,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/combineWorkbenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_MetalShopPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1517,7 +1510,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/table_sawPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_SawmillPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -1567,8 +1560,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/cementMixerPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_MixerPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -1618,8 +1610,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/combineWorkbenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,0,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_GaragePrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
@@ -1670,8 +1661,7 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Crafting/woodWorkBenchPrefab.prefab"/>
-			<property name="ModelOffset" value="0,.5,0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feM_RoboticsPrefab"/>
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>

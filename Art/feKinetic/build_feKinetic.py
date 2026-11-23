@@ -1125,6 +1125,339 @@ def model_fluid_bottler(col):
     return [to_object(base, "feFluidBottler_Base", bevel=0.003)]
 
 
+# ---------------------------------------------------------------- production machines (phase 6)
+# Footprints: 1x1 = x -0.5..0.5; 2 wide (MultiBlockDim 2,2,1) = x -1..1 (the game shifts an even width by half a
+# block, so the model is centred); 3 wide = x -1.5..1.5. Depth 1 (y -0.5..0.5), height up to the block count.
+# Front = Blender -Y (the side the player works at). Moving parts (MachineVisual, Belt.cs neighbour file
+# MachineVisual.cs): FeSpin_* turn about their Unity local +Z (= the part's Blender local -Y) while the machine
+# crafts; FePiston_* slide along it. Built along local Y, then: no rotation = axis front-back, (0, 0, pi/2) = axis
+# across (X), (-pi/2, 0, 0) = vertical.
+AX_X = (0, 0, math.pi / 2)
+AX_UP = (-math.pi / 2, 0, 0)
+
+
+def _legs(bm, w, d, h, mat=IRON, t=0.07):
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(bm, (t, t, h), (sx * (w / 2 - t / 2), sy * (d / 2 - t / 2), h / 2), mat)
+
+
+def _bench(bm, w, d=0.9, h=0.9, top=WOOD):
+    _legs(bm, w, d, h - 0.06)
+    box(bm, (w, d, 0.06), (0, 0, h - 0.03), top)
+    box(bm, (w - 0.1, d - 0.1, 0.03), (0, 0, 0.18), IRON)                           # lower shelf
+
+
+def _wheel(bm_name_objs, name, loc, r, depth, mat, rot, spokes=6, ring_mat=None):
+    """A spinning wheel / disc built along local Y (its axis), placed at loc with rot."""
+    w = bmesh.new()
+    cyl(w, r * 0.25, depth * 1.4, (0, 0, 0), "Y", STEEL, segs=12)
+    ring(w, r, r * 0.86, depth, (0, 0, 0), "Y", ring_mat or mat, segs=24)
+    for k in range(spokes):
+        a_ = k * 2 * math.pi / spokes
+        box(w, (r * 0.9, depth * 0.6, 0.03), (math.cos(a_) * r * 0.45, 0, math.sin(a_) * r * 0.45), mat,
+            Matrix.Rotation(-a_, 4, "Y"))
+    bm_name_objs.append(to_object(w, name, location=loc, rotation=rot, bevel=0.002))
+
+
+def model_m_foundry(col):
+    """Foundry (2 wide, 2 high): brick furnace with a glowing mouth, a crucible on a tilting frame and a chimney."""
+    b = bmesh.new()
+    box(b, (1.9, 0.9, 1.2), (0, 0.02, 0.6), RUST)                                   # brick body
+    for z in (0.3, 0.6, 0.9):
+        box(b, (1.92, 0.92, 0.02), (0, 0.02, z), IRON)                                 # bands
+    box(b, (0.8, 0.04, 0.45), (-0.35, -0.44, 0.55), OUT)                              # glowing mouth
+    box(b, (0.9, 0.06, 0.55), (-0.35, -0.45, 0.55), IRON)
+    cyl(b, 0.22, 0.85, (0.55, 0.15, 1.6), "Z", IRON, segs=16, r2=0.16)               # chimney
+    cyl(b, 0.25, 0.05, (0.55, 0.15, 2.0), "Z", IRON, segs=16)
+    for sx in (-1, 1):
+        box(b, (0.05, 0.05, 0.5), (0.55 + sx * 0.3, -0.45, 1.45), IRON)               # crucible frame
+    objs = [to_object(b, "feM_Foundry_Base", bevel=0.004)]
+    cr = bmesh.new()
+    cyl(cr, 0.2, 0.3, (0, 0, 0), "Y", IRON, segs=16, r2=0.14)
+    cyl(cr, 0.16, 0.02, (0, -0.16, 0), "Y", OUT, segs=16)
+    objs.append(to_object(cr, "FeSpin_x0.1_Crucible", location=(0.55, -0.45, 1.45), rotation=AX_X))
+    return objs
+
+
+def model_m_press(col):
+    """Parts Press (2 wide, 2 high): two columns, a crown with the motor, a flywheel and the ram going up and down."""
+    b = bmesh.new()
+    box(b, (1.8, 0.85, 0.35), (0, 0, 0.175), IRON)                                    # base
+    box(b, (0.9, 0.6, 0.08), (0, -0.05, 0.39), STEEL)                                 # bolster
+    for sx in (-1, 1):
+        box(b, (0.22, 0.5, 1.5), (sx * 0.62, 0, 1.1), PAINT)                           # columns
+    box(b, (1.6, 0.6, 0.35), (0, 0, 1.75), PAINT)                                      # crown
+    box(b, (0.4, 0.35, 0.25), (0.5, 0.15, 2.0), IRON)                                  # motor
+    objs = [to_object(b, "feM_Press_Base", bevel=0.004)]
+    ram = bmesh.new()
+    box(ram, (0.8, 0.12, 0.6), (0, 0, 0), STEEL)                                       # ram plate (local)
+    box(ram, (0.2, 0.5, 0.2), (0, -0.3, 0), STEEL)                                      # stem (up in world)
+    objs.append(to_object(ram, "FePiston_Ram", location=(0, -0.05, 1.05), rotation=AX_UP))
+    _wheel(objs, "FeSpin_Flywheel", (0.92, 0, 1.75), 0.32, 0.08, IRON, AX_X)
+    return objs
+
+
+def model_m_lathe(col):
+    """Lathe (1 block): bed, headstock with the spinning chuck and a workpiece, tool post and tailstock."""
+    b = bmesh.new()
+    _legs(b, 0.9, 0.5, 0.6)
+    box(b, (0.95, 0.45, 0.08), (0, 0, 0.64), IRON)                                    # bed
+    box(b, (0.28, 0.36, 0.32), (-0.32, 0.02, 0.84), PAINT)                             # headstock
+    box(b, (0.14, 0.2, 0.16), (0.36, 0.02, 0.76), PAINT)                               # tailstock
+    box(b, (0.12, 0.12, 0.12), (0.08, -0.12, 0.74), STEEL)                             # tool post
+    objs = [to_object(b, "feM_Lathe_Base", bevel=0.003)]
+    ch = bmesh.new()
+    cyl(ch, 0.09, 0.06, (0, 0, 0), "Y", STEEL, segs=14)
+    for k in range(3):
+        a_ = k * 2 * math.pi / 3
+        box(ch, (0.03, 0.04, 0.05), (math.cos(a_) * 0.08, -0.03, math.sin(a_) * 0.08), IRON)
+    cyl(ch, 0.035, 0.42, (0, -0.24, 0), "Y", BRASS, segs=10)                           # workpiece
+    objs.append(to_object(ch, "FeSpin_x4_Chuck", location=(-0.15, 0.02, 0.82), rotation=AX_X))
+    return objs
+
+
+def model_m_kiln(col):
+    """Charcoal Kiln (2 wide, 2 high): a domed brick kiln with a door and a smoking chimney."""
+    b = bmesh.new()
+    cyl(b, 0.9, 0.9, (0, 0, 0.45), "Z", RUST, segs=28)
+    cyl(b, 0.9, 0.6, (0, 0, 1.2), "Z", RUST, segs=28, r2=0.35)                       # dome
+    box(b, (0.5, 0.06, 0.55), (0, -0.88, 0.35), IRON)                                  # door
+    box(b, (0.1, 0.03, 0.1), (0.15, -0.92, 0.35), BRASS)
+    cyl(b, 0.12, 0.6, (0.3, 0.2, 1.7), "Z", IRON, segs=12)
+    return [to_object(b, "feM_Kiln_Base", bevel=0.004)]
+
+
+def model_m_ammo(col):
+    """Ammo Press (2 wide, 2 high): bench with a turret reloading press (the turret turns) and a powder hopper."""
+    b = bmesh.new()
+    _bench(b, 1.9)
+    box(b, (0.12, 0.12, 0.8), (-0.3, 0.1, 1.3), PAINT)                                 # press column
+    box(b, (0.5, 0.2, 0.12), (-0.3, -0.05, 1.7), PAINT)
+    cyl(b, 0.14, 0.3, (0.4, 0.1, 1.15), "Z", GLASS, segs=14, r2=0.06)                 # powder hopper
+    for k in range(4):
+        box(b, (0.12, 0.12, 0.08), (0.55 + (k % 2) * 0.15, -0.2 + (k // 2) * 0.15, 0.94), BRASS)   # case boxes
+    objs = [to_object(b, "feM_Ammo_Base", bevel=0.003)]
+    t = bmesh.new()
+    cyl(t, 0.16, 0.06, (0, 0, 0), "Y", STEEL, segs=16)
+    for k in range(5):
+        a_ = k * 2 * math.pi / 5
+        cyl(t, 0.025, 0.12, (math.cos(a_) * 0.11, -0.06, math.sin(a_) * 0.11), "Y", BRASS, segs=8)
+    objs.append(to_object(t, "FeSpin_x0.5_Turret", location=(-0.3, -0.05, 1.3), rotation=AX_UP))
+    return objs
+
+
+def model_m_assembler(col):
+    """Assembler (2 wide, 2 high): heavy bench with a vise, a drill press (the chuck turns) and a parts board."""
+    b = bmesh.new()
+    _bench(b, 1.9)
+    box(b, (0.25, 0.2, 0.12), (-0.6, -0.3, 0.96), IRON)                                # vise
+    box(b, (0.1, 0.1, 0.9), (0.5, 0.25, 1.35), PAINT)                                  # drill column
+    box(b, (0.35, 0.3, 0.25), (0.5, 0.1, 1.7), PAINT)                                  # drill head
+    box(b, (1.8, 0.04, 0.9), (0, 0.43, 1.45), WOOD)                                    # pegboard
+    for k in range(5):
+        box(b, (0.04, 0.06, 0.25), (-0.8 + k * 0.2, 0.38, 1.55), STEEL)               # tools
+    objs = [to_object(b, "feM_Assembler_Base", bevel=0.003)]
+    d = bmesh.new()
+    cyl(d, 0.04, 0.08, (0, 0, 0), "Y", STEEL, segs=10)
+    cyl(d, 0.012, 0.2, (0, 0.12, 0), "Y", IRON, segs=8)
+    objs.append(to_object(d, "FeSpin_x6_Drill", location=(0.5, 0.05, 1.55), rotation=AX_UP))
+    return objs
+
+
+def model_m_modbench(col):
+    """Mod Bench (2 wide, 2 high): bench with a magnifier lamp, a parts tray and a weapon on a stand."""
+    b = bmesh.new()
+    _bench(b, 1.9, top=IRON)
+    box(b, (0.05, 0.05, 0.6), (-0.7, 0.2, 1.2), STEEL)
+    box(b, (0.05, 0.4, 0.05), (-0.7, 0.0, 1.5), STEEL)
+    cyl(b, 0.14, 0.04, (-0.7, -0.2, 1.47), "Z", GLASS, segs=16)                       # magnifier
+    box(b, (0.7, 0.12, 0.08), (0.3, -0.1, 1.0), IRON)                                  # rifle on a stand
+    box(b, (0.3, 0.04, 0.04), (0.75, -0.1, 1.02), IRON)
+    for k in range(6):
+        box(b, (0.12, 0.12, 0.04), (-0.2 + (k % 3) * 0.15, 0.25 + (k // 3) * 0.13, 0.92), OUT if k % 2 else BRASS)
+    return [to_object(b, "feM_ModBench_Base", bevel=0.003)]
+
+
+def model_m_loom(col):
+    """Loom (2 wide, 2 high): a wooden frame with warp threads, a cloth roll that turns and a pedal beam."""
+    b = bmesh.new()
+    for sx in (-1, 1):
+        box(b, (0.1, 0.8, 0.1), (sx * 0.85, 0, 0.05), WOOD)
+        for sy in (-1, 1):
+            box(b, (0.08, 0.08, 1.6), (sx * 0.85, sy * 0.35, 0.8), WOOD)
+    box(b, (1.8, 0.08, 0.08), (0, 0.35, 1.55), WOOD)
+    box(b, (1.8, 0.08, 0.08), (0, -0.35, 1.55), WOOD)
+    for k in range(17):                                                                 # warp threads
+        box(b, (0.01, 0.7, 0.01), (-0.8 + k * 0.1, 0, 1.1), GLASS)
+    box(b, (1.6, 0.06, 0.4), (0, 0.05, 1.3), GLASS)                                    # heddle frame
+    objs = [to_object(b, "feM_Loom_Base", bevel=0.003)]
+    r = bmesh.new()
+    cyl(r, 0.12, 1.6, (0, 0, 0), "Y", PAINT, segs=18)
+    cyl(r, 0.04, 1.75, (0, 0, 0), "Y", WOOD, segs=10)
+    objs.append(to_object(r, "FeSpin_x0.3_ClothRoll", location=(0, -0.3, 0.75), rotation=AX_X))
+    return objs
+
+
+def model_m_refinery(col):
+    """Refinery (3 wide, 2 high): a distillation column, two tanks, a heater and pipes; the pump wheel turns."""
+    b = bmesh.new()
+    box(b, (2.9, 0.9, 0.08), (0, 0, 0.04), IRON)
+    cyl(b, 0.28, 1.9, (-1.0, 0.0, 1.0), "Z", STEEL, segs=20)                          # column
+    for z in (0.4, 0.8, 1.2, 1.6):
+        ring(b, 0.3, 0.27, 0.05, (-1.0, 0.0, z), "Z", IRON, segs=20)
+    cyl(b, 0.35, 1.0, (0.1, 0.1, 0.55), "Z", PAINT, segs=20)                          # tank 1
+    cyl(b, 0.3, 0.8, (0.9, 0.15, 0.45), "Z", PAINT, segs=20)                           # tank 2
+    cyl(b, 0.04, 1.2, (-0.45, 0.0, 1.8), "X", STEEL, segs=8)                           # pipes
+    cyl(b, 0.04, 0.8, (0.5, -0.2, 1.1), "X", STEEL, segs=8)
+    box(b, (0.5, 0.4, 0.3), (0.9, -0.2, 1.05), IRON)                                    # heater
+    box(b, (0.3, 0.03, 0.12), (0.9, -0.41, 1.05), OUT)
+    objs = [to_object(b, "feM_Refinery_Base", bevel=0.004)]
+    _wheel(objs, "FeSpin_PumpWheel", (-0.45, -0.38, 0.55), 0.2, 0.05, IRON, (0, 0, 0), spokes=4, ring_mat=RED)
+    return objs
+
+
+def model_m_lab(col):
+    """Laboratory (3 wide, 2 high): a long bench with flasks, a fume hood and a centrifuge that spins."""
+    b = bmesh.new()
+    _bench(b, 2.9, top=PAINT)
+    box(b, (0.9, 0.7, 0.9), (-0.9, 0.05, 1.35), STEEL)                                 # fume hood
+    box(b, (0.8, 0.02, 0.5), (-0.9, -0.31, 1.2), GLASS)
+    for k in range(6):
+        cyl(b, 0.06, 0.18, (0.0 + (k % 3) * 0.18, -0.15 + (k // 3) * 0.2, 0.99), "Z", GLASS, segs=10, r2=0.025)
+    box(b, (0.5, 0.4, 0.3), (0.95, 0.1, 1.05), PAINT)                                   # centrifuge body
+    objs = [to_object(b, "feM_Lab_Base", bevel=0.003)]
+    c = bmesh.new()
+    cyl(c, 0.17, 0.04, (0, 0, 0), "Y", STEEL, segs=18)
+    for k in range(4):
+        a_ = k * math.pi / 2
+        cyl(c, 0.03, 0.06, (math.cos(a_) * 0.11, -0.03, math.sin(a_) * 0.11), "Y", GLASS, segs=8)
+    objs.append(to_object(c, "FeSpin_x8_Rotor", location=(0.95, 0.1, 1.22), rotation=AX_UP))
+    return objs
+
+
+def model_m_kitchen(col):
+    """Kitchen (1 block): an iron stove with two pots, an oven door and a stovepipe."""
+    b = bmesh.new()
+    box(b, (0.9, 0.7, 0.85), (0, 0.05, 0.425), IRON)
+    box(b, (0.5, 0.03, 0.35), (0, -0.31, 0.35), RUST)                                  # oven door
+    box(b, (0.3, 0.03, 0.04), (0, -0.33, 0.48), BRASS)
+    cyl(b, 0.16, 0.22, (-0.2, 0.0, 0.96), "Z", STEEL, segs=16)                        # pots
+    cyl(b, 0.13, 0.16, (0.22, 0.1, 0.93), "Z", RUST, segs=16)
+    cyl(b, 0.07, 1.0, (0.3, 0.3, 1.3), "Z", IRON, segs=10)                            # stovepipe
+    return [to_object(b, "feM_Kitchen_Base", bevel=0.003)]
+
+
+def model_m_electronics(col):
+    """Electronics Bench (2 wide, 2 high): bench with an oscilloscope, a soldering station, coil spools that turn."""
+    b = bmesh.new()
+    _bench(b, 1.9, top=PAINT)
+    box(b, (0.5, 0.35, 0.35), (-0.55, 0.15, 1.08), IRON)                               # oscilloscope
+    box(b, (0.3, 0.02, 0.22), (-0.6, -0.03, 1.1), IN)
+    box(b, (0.25, 0.2, 0.1), (0.1, 0.1, 0.95), RED)                                     # soldering station
+    box(b, (1.8, 0.04, 0.6), (0, 0.43, 1.3), WOOD)                                      # shelf board
+    objs = [to_object(b, "feM_Electronics_Base", bevel=0.003)]
+    sp = bmesh.new()
+    for k in range(3):
+        cyl(sp, 0.09, 0.12, (0, -0.3 + k * 0.3, 0), "Y", BRASS, segs=14)
+        cyl(sp, 0.11, 0.02, (0, -0.37 + k * 0.3, 0), "Y", IRON, segs=14)
+        cyl(sp, 0.11, 0.02, (0, -0.23 + k * 0.3, 0), "Y", IRON, segs=14)
+    cyl(sp, 0.02, 1.0, (0, 0, 0), "Y", STEEL, segs=8)
+    objs.append(to_object(sp, "FeSpin_x0.5_Spools", location=(0.55, 0.2, 1.35), rotation=AX_X))
+    return objs
+
+
+def model_m_metalshop(col):
+    """Metal Shop (2 wide, 2 high): an anvil, a bending brake with a moving blade and sheet stock."""
+    b = bmesh.new()
+    box(b, (0.3, 0.25, 0.4), (-0.6, 0, 0.2), IRON)                                      # anvil stand
+    box(b, (0.55, 0.25, 0.15), (-0.6, 0, 0.47), STEEL)
+    cyl(b, 0.08, 0.2, (-0.94, 0, 0.47), "X", STEEL, segs=10, r2=0.02)                  # horn
+    for sx in (-1, 1):
+        box(b, (0.12, 0.6, 1.0), (0.3 + sx * 0.5, 0, 0.5), PAINT)                      # brake cheeks
+    box(b, (1.1, 0.5, 0.12), (0.3, 0, 0.9), IRON)                                      # bed
+    for k in range(4):
+        box(b, (0.8, 0.5, 0.015), (0.3, 0.1, 0.05 + k * 0.02), STEEL)                   # sheet stock
+    objs = [to_object(b, "feM_MetalShop_Base", bevel=0.003)]
+    bl = bmesh.new()
+    box(bl, (1.0, 0.25, 0.06), (0, 0, 0), STEEL)
+    objs.append(to_object(bl, "FePiston_Blade", location=(0.3, -0.1, 1.2), rotation=AX_UP))
+    return objs
+
+
+def model_m_sawmill(col):
+    """Sawmill (1 block): a saw table with a big circular blade that turns and a log on the carriage."""
+    b = bmesh.new()
+    _legs(b, 0.95, 0.8, 0.6)
+    box(b, (0.98, 0.82, 0.06), (0, 0, 0.63), IRON)
+    cyl(b, 0.12, 0.8, (0.25, 0.0, 0.78), "Y", WOOD, segs=14)                          # log
+    box(b, (0.1, 0.3, 0.2), (-0.1, 0.25, 0.75), PAINT)                                   # guard
+    objs = [to_object(b, "feM_Sawmill_Base", bevel=0.003)]
+    bl = bmesh.new()
+    cyl(bl, 0.28, 0.015, (0, 0, 0), "Y", STEEL, segs=28)
+    for k in range(16):
+        a_ = k * 2 * math.pi / 16
+        box(bl, (0.04, 0.016, 0.04), (math.cos(a_) * 0.29, 0, math.sin(a_) * 0.29), IRON, Matrix.Rotation(-a_, 4, "Y"))
+    objs.append(to_object(bl, "FeSpin_x8_Blade", location=(-0.1, 0.0, 0.66), rotation=AX_X))
+    return objs
+
+
+def model_m_mixer(col):
+    """Concrete Mixer (1 block): a tilted drum that turns on a frame with a motor."""
+    b = bmesh.new()
+    _legs(b, 0.8, 0.8, 0.35)
+    box(b, (0.8, 0.8, 0.06), (0, 0, 0.38), IRON)
+    box(b, (0.25, 0.25, 0.2), (0.25, 0.25, 0.5), PAINT)                                  # motor
+    for sx in (-1, 1):
+        box(b, (0.05, 0.05, 0.4), (sx * 0.3, 0, 0.6), IRON)
+    objs = [to_object(b, "feM_Mixer_Base", bevel=0.003)]
+    d = bmesh.new()
+    cyl(d, 0.3, 0.5, (0, 0, 0), "Y", OUT, segs=20, r2=0.18)
+    cyl(d, 0.3, 0.12, (0, 0.28, 0), "Y", OUT, segs=20, r2=0.24)
+    for k in range(3):
+        ring(d, 0.31, 0.29, 0.03, (0, -0.15 + k * 0.15, 0), "Y", IRON, segs=20)
+    objs.append(to_object(d, "FeSpin_x0.5_Drum", location=(0, 0.0, 0.8), rotation=(math.radians(-30), 0, 0)))
+    return objs
+
+
+def model_m_garage(col):
+    """Garage (2 wide, 2 high): a two-post lift with its arms going up and down, a tire rack and an engine stand."""
+    b = bmesh.new()
+    box(b, (1.9, 0.9, 0.04), (0, 0, 0.02), IRON)
+    for sx in (-1, 1):
+        box(b, (0.14, 0.14, 1.9), (sx * 0.85, 0.3, 0.95), RED)                          # lift posts
+    for k in range(3):
+        cyl(b, 0.22, 0.12, (-0.4 + k * 0.4, 0.33, 0.25), "Y", IRON, segs=16)            # tires
+    box(b, (0.3, 0.3, 0.3), (0.3, -0.2, 0.35), PAINT)                                    # engine block
+    box(b, (0.05, 0.05, 0.2), (0.3, -0.2, 0.1), IRON)
+    objs = [to_object(b, "feM_Garage_Base", bevel=0.003)]
+    arms = bmesh.new()
+    for sx in (-1, 1):
+        box(arms, (0.6, 0.08, 0.06), (sx * 0.6, 0, 0), STEEL)
+    objs.append(to_object(arms, "FePiston_LiftArms", location=(0, 0.1, 0.9), rotation=AX_UP))
+    return objs
+
+
+def model_m_robotics(col):
+    """Robotics Bench (2 wide, 2 high): bench with a robot arm whose base turns, a drone on a stand and parts bins."""
+    b = bmesh.new()
+    _bench(b, 1.9, top=PAINT)
+    box(b, (0.4, 0.3, 0.12), (0.5, -0.05, 0.98), IRON)                                  # drone body
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            cyl(b, 0.1, 0.01, (0.5 + sx * 0.25, -0.05 + sy * 0.18, 1.05), "Z", STEEL, segs=12)
+    for k in range(4):
+        box(b, (0.2, 0.2, 0.1), (-0.15 + k * 0.22, 0.32, 0.95), OUT if k % 2 else IN)
+    objs = [to_object(b, "feM_Robotics_Base", bevel=0.003)]
+    arm = bmesh.new()
+    cyl(arm, 0.12, 0.08, (0, 0, 0), "Y", IRON, segs=16)                                 # turning base (local)
+    box(arm, (0.08, 0.5, 0.08), (0, -0.28, 0.0), RED)                                    # upper arm (up)
+    box(arm, (0.3, 0.06, 0.06), (0.15, -0.5, 0.0), RED)                                  # forearm
+    box(arm, (0.06, 0.1, 0.06), (0.3, -0.45, 0.0), STEEL)                                # gripper
+    objs.append(to_object(arm, "FeSpin_x0.3_RobotArm", location=(-0.6, -0.05, 0.94), rotation=AX_UP))
+    return objs
+
+
 AXLE_Z = C
 
 
@@ -1207,6 +1540,23 @@ MODELS = {
     "feConveyorDown": model_conveyor_down,
     "feFluidFiller": model_fluid_filler,
     "feFluidBottler": model_fluid_bottler,
+    "feM_Foundry": model_m_foundry,
+    "feM_Press": model_m_press,
+    "feM_Lathe": model_m_lathe,
+    "feM_Kiln": model_m_kiln,
+    "feM_Ammo": model_m_ammo,
+    "feM_Assembler": model_m_assembler,
+    "feM_ModBench": model_m_modbench,
+    "feM_Loom": model_m_loom,
+    "feM_Refinery": model_m_refinery,
+    "feM_Lab": model_m_lab,
+    "feM_Kitchen": model_m_kitchen,
+    "feM_Electronics": model_m_electronics,
+    "feM_MetalShop": model_m_metalshop,
+    "feM_Sawmill": model_m_sawmill,
+    "feM_Mixer": model_m_mixer,
+    "feM_Garage": model_m_garage,
+    "feM_Robotics": model_m_robotics,
 }
 
 

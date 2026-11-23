@@ -30,6 +30,22 @@ MODELS = {
     "mixer": ("@:Entities/Crafting/cementMixerPrefab.prefab", None, "0,0,0", "cementMixer"),
 }
 
+# Phase 6: the mod's own models (Art/feKinetic, model_m_*; bundle ferroengrenagem.unity3d). Same footprint as the
+# placeholder above (MultiBlockDim kept); no ModelOffset (the engine default 0,0.5,0 is what FeBuild expects).
+OWN_MODELS = {
+    "feAmmoPress": "feM_Ammo", "feAssembler": "feM_Assembler", "feModBench": "feM_ModBench", "feLoom": "feM_Loom",
+    "feRefinery": "feM_Refinery", "feLab": "feM_Lab", "feKitchen": "feM_Kitchen", "feElectronics": "feM_Electronics",
+    "feMetalShop": "feM_MetalShop", "feSawmill": "feM_Sawmill", "feMixer": "feM_Mixer", "feGarage": "feM_Garage",
+    "feRobotics": "feM_Robotics",
+}
+
+# extra properties per machine (written right after Class)
+EXTRA = {
+    "feRefinery": "\n\t\t\t<!-- D9: fluid in at its back (oil, gasoline, lubricant) = ingredients of its fixed recipe (AutoCraft.cs) -->"
+                  "\n\t\t\t<property name=\"FeFluid\" value=\"refinery\"/>"
+                  "\n\t\t\t<property name=\"FeFluidBuffer\" value=\"100\"/>",
+}
+
 # id, block, en, pt, en_desc, pt_desc, model, tint, sortorder2, cost [(item, n)]
 MACHINES = [
     ("M04", "feAmmoPress", "Ammo Press", "Prensa de Munição",
@@ -152,12 +168,16 @@ WATTS = {"M04": 30, "M05": 60, "M06": 30, "M07": 30, "M09": 60, "M10": 30, "M11"
 def machine_block(m):
     mid, name, en, pt, den, dpt, model, tint, so2, cost = m
     path, dim, offset, icon = MODELS[model]
+    if name in OWN_MODELS:
+        path = "#@modfolder:Resources/ferroengrenagem.unity3d?" + OWN_MODELS[name] + "Prefab"
+        offset = None
     watts = WATTS[mid]
     dim_line = f'\n\t\t\t<property name="MultiBlockDim" value="{dim}"/>' if dim else ""
     offset_line = f'\n\t\t\t<property name="ModelOffset" value="{offset}"/>' if offset else ""
+    extra = EXTRA.get(name, "")
     return f"""		<!-- {mid} {en} -->
 		<block name="{name}">
-			<property name="Class" value="Workstation"/>
+			<property name="Class" value="Workstation"/>{extra}
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
 				<property name="CraftingAreaRecipes" value="{name}"/>
