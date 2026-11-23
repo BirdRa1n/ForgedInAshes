@@ -377,6 +377,19 @@ aqui fica só o que foi medido/verificado.
 - Testado no jogo (usuário, 2026-11-22): sem bolsa de gasolina ao recolher a manivela; Manivela de Torque no
   encaixe move a Prensa enquanto gira.
 
+## 2026-11-22 — D7 etapa 3: Gerador a Carvão elétrico
+
+- `feCoalGenerator` deixou de ser Collector de Carga: agora `Class=Generator` (TileEntityPowerSource +
+  PowerGenerator). `SlotItem=feFlywheel`, `OutputPerStack` 60 W, `MaxFuel` 200, `MaxPower` 40000,
+  `OutputPerFuel` 30000 (1 Carvão ≈ 80 s de 60 W).
+- Vanilla só sabe gasolina (IL 3.4.0 b10: `XUiC_PowerSourceStats.BtnRefuel_OnPress` pega até 250 itens com a
+  tag do `XUiC_PowerSourceStats.tag`, cinto e depois mochila; `fueltitle` = "xuiGas"; `ReplacedBy` devolve
+  combustível como galões). `FuelGenerator.cs`: propriedade `FeFuelItem`/`FeFuelPerItem` no bloco; prefix no
+  Reabastecer usa o item, postfix troca o título, prefix no `ReplacedBy` devolve o carvão numa bolsa.
+- Chaves de localização do coletor removidas (Fuel/Catalyst/Empty); `feCoalGeneratorHasCharge` fica até a
+  etapa 4 (usada pelo `feGasGenerator`).
+- Geradores a Carvão já colocados no mundo de teste são do tipo antigo (Collector): destruir/recolocar.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

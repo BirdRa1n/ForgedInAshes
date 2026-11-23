@@ -271,52 +271,35 @@
 	     at least 1 Flywheel required. Uses the DewCollector sandbox multipliers (same as the Kiln). -->
 	<append xpath="/blocks">
 		<block name="feCoalGenerator">
-			<property name="Class" value="Collector"/>
-			<property name="CollectorType" value="DewCollector"/>
+			<!-- D7 step 3: an ELECTRIC generator (vanilla Class Generator: TileEntityPowerSource + PowerGenerator) that
+			     burns Charcoal (FeFuelItem, src/FerroEngrenagem/FuelGenerator.cs) instead of gasoline. Output: 60 W per
+			     Flywheel in its slots (no Flywheel, no watts). 1 Charcoal = 1 fuel = 30000 energy = ~80 s of a 60 W
+			     machine (PowerManager tick 0.16 s); MaxFuel 200 Charcoal. -->
+			<property name="Class" value="Generator"/>
+			<property name="FeFuelItem" value="feResourceCharcoal"/>
+			<property name="FeFuelPerItem" value="1"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="60"/>
+			<property name="MaxFuel" value="200"/>
+			<property name="MaxPower" value="40000"/>
+			<property name="OutputPerFuel" value="30000"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCoalGeneratorDesc"/>
-			<property name="LootLabelKey" value="feCoalGenerator"/>
 			<property name="CustomIcon" value="generatorBankA"/>
 			<property name="CustomIconTint" value="ffd0a0"/>
-			<property name="ItemIconBackdrop" value="ui_game_symbol_electric_power"/>
-			<property name="ItemBackgroundColor" value="80,200,255,255"/>
+			<property name="DisplayType" value="blockElectricalHardened"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal_medium"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Electrical/generatorBankAPrefab.prefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
+			<property name="HandleFace" value="Bottom"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
-			<property name="RestrictSubmergedPlacement" value="true"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="Path" value="solid"/>
 			<property name="StabilitySupport" value="false"/>
-			<property name="OpenSound" value="collector_open"/>
-			<property name="CloseSound" value="collector_close"/>
-			<!-- input: Charcoal only -->
-			<property name="FuelTypes" value="{charcoal,feResourceCharcoal}"/>
-			<!-- 1 Charcoal -> 1 x (flywheels x 5) Charge per cycle, 100-150 ticks per cycle -->
-			<property name="OutputTypes" value="{charge,charcoal,1,1,1,feCharge,feCharge,1,1,100,150,forge_item_complete}"/>
-			<property name="Outputs" value="charge,charge,charge,charge,charge,charge"/>
-			<property name="CatalystTypes" value="feFlywheel"/>
-			<property name="CatalystMultiplier" value="charge=5"/>
-			<property name="CatalystRequirements" value="charge=1"/>
-			<property name="CatalystGridHeight" value="1"/>
-			<property name="CatalystTitleText" value="feCoalGeneratorCatalyst"/>
-			<property name="CatalystTitleSprite" value="vehicleWheels"/>
-			<property name="CatalystTitleSpriteAtlas" value="ItemIconAtlasGreyscale"/>
-			<property name="CatalystTypesSprites" value="vehicleWheels,ItemIconAtlasGreyscale"/>
-			<property name="FuelGridHeight" value="1"/>
-			<property name="OutputGridHeight" value="2"/>
-			<property name="FuelTitleText" value="feCoalGeneratorFuel"/>
-			<property name="FuelTitleSprite" value="ui_game_symbol_forge"/>
-			<property name="FuelTitleSpriteAtlas" value="UIAtlas"/>
-			<property name="FuelTypesSprites" value="resourceCoal,ItemIconAtlasGreyscale"/>
-			<property name="EmptyText" value="feCoalGeneratorEmpty"/>
-			<property name="HasItem1Text" value="feCoalGeneratorHasCharge"/>
-			<property name="HasItem2Text" value="feCoalGeneratorHasCharge"/>
-			<property name="RequiredMods" value="feTestItem"/>
-			<property name="RequiredModsOnly" value="true"/>
 			<property name="Weight" value="0"/>
 			<property name="EconomicValue" value="800"/>
 			<property name="MaxDamage" value="600"/>
@@ -336,10 +319,10 @@
 			<property name="SortOrder1" value="B281"/>
 			<property name="SortOrder2" value="0230"/>
 			<property name="Group" value="Building,TCScience,advBuilding"/>
-			<property name="Tags" value="workstationSkill"/>
-			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
-			<property name="SoundPickup" value="workbench_grab"/>
-			<property name="SoundPlace" value="workbench_place"/>
+			<property name="Tags" value="electricianSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+			<property name="SoundPickup" value="bankgenerator_grab"/>
+			<property name="SoundPlace" value="bankgenerator_place"/>
 		</block>
 	</append>
 
