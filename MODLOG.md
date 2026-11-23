@@ -374,6 +374,8 @@ aqui fica só o que foi medido/verificado.
   conta `FeTorqueOutput`=30 W enquanto gira + 1,5 s de inércia; nada armazenado. Estado em memória
   (`TorqueState`, SP/host). Receita no inventário (10 FI, 15 madeira, 6 pregos). Modelo: prefab da manivela.
 - `PowerGate.IsDriver` = motor ou manivela de torque (marcação do encaixe também).
+- Testado no jogo (usuário, 2026-11-22): sem bolsa de gasolina ao recolher a manivela; Manivela de Torque no
+  encaixe move a Prensa enquanto gira.
 
 ## Próximo passo (antigo, mantido para histórico)
 
