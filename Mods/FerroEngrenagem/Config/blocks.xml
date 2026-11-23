@@ -605,6 +605,40 @@
 			<property name="EconomicValue" value="150"/>
 			<property name="SortOrder2" value="0012"/>
 		</block>
+		<!-- D8 T3: Clutch (E: engaged / released), Torque Regulator (E: lets 100/75/50/25 % of the network's UT
+		     through to what is behind its output end; machines there slow down instead of overloading) and Gauge
+		     (joins all six sides; looking at it shows sources, machines, regulators and load). Placeholder models:
+		     vanilla valves (axis assumed local Z like the Shaft) and a pipe cap. -->
+		<block name="feClutch">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="clutch"/>
+			<property name="DescriptionKey" value="feClutchDesc"/>
+			<property name="CustomIcon" value="pipeSmallValve"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Industrial/pipeSmallValvePrefab.prefab"/>
+			<property name="EconomicValue" value="100"/>
+			<property name="SortOrder2" value="0013"/>
+		</block>
+		<block name="feTorqueRegulator">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="regulator"/>
+			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
+			<property name="CustomIcon" value="metalPipeValve"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Plumbing/pipe_valvePrefab.prefab"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="SortOrder2" value="0014"/>
+		</block>
+		<block name="feTorqueGauge">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="gauge"/>
+			<property name="DescriptionKey" value="feTorqueGaugeDesc"/>
+			<property name="CustomIcon" value="metalPipeCap"/>
+			<property name="Model" value="@:Shapes/pipe_cap.fbx"/>
+			<property name="Texture" value="598"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="SortOrder2" value="0015"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

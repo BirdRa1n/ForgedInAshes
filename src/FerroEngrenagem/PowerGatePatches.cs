@@ -156,7 +156,7 @@ namespace FerroEngrenagem
                 {
                     ok = net.Running;
                     float rpm = net.MachineRpm(pos);
-                    speed = rpm / Kinetic.BaseRpm;
+                    speed = net.MachineSpeed(pos);
                     info = "net nodes=" + net.Nodes.Count + " sources=" + net.Sources + " machines=" + net.Machines.Count
                            + " " + net.Usage + "/" + net.Capacity + " UT rpm=" + Mathf.RoundToInt(rpm) + " speed=x" +
                            speed.ToString("0.##") + (net.Overloaded ? " OVERLOAD" : "") + (net.Locked ? " LOCKED" : "");

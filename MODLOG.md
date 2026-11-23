@@ -429,6 +429,20 @@ aqui fica só o que foi medido/verificado.
   x2 → `256/128` OVERLOAD até 2 fontes (`256/256 UT rpm=64 speed=x2 -> ON`). Flange com o mesmo eixo do Eixo.
   E troca a razão de primeira. TRAVADO não testado; tempo real de fabricação confirmado só pelo usuário.
 
+## 2026-11-22 — D8 T3: Embreagem, Regulador de Torque e Medidor
+
+- `feClutch` (axial; meta 0 engatada / 1 solta: solta = nenhuma face, corta a rede). Modelo
+  `pipeSmallValvePrefab` (eixo assumido Z — confirmar).
+- `feTorqueRegulator` (axial, passa direto): `meta` 0..3 = 100/75/50/25 %. `ComputeUsage`: zona = nós alcançados
+  pela saída sem cruzar outro regulador (esses viram zonas filhas); limite = % × capacidade da rede; a zona usa
+  min(pedido, limite) e, se pede mais, as máquinas dela ficam a sqrt(limite/pedido) da velocidade (escala
+  herdada por zonas internas). Zona que volta à entrada do próprio regulador = contornado (sem efeito).
+  Modelo `pipe_valvePrefab` (eixo assumido Z).
+- `feTorqueGauge` (6 faces, `pipe_cap.fbx`): leitura com fontes, máquinas, reguladores e carga %. O "painel fixo"
+  da proposta ficou como leitura ao olhar (texto no mundo fica para a T5, com os modelos).
+- E troca o ajuste de qualquer bloco com `Settings(kind) > 0` (velocidade, embreagem, regulador).
+- Velocidade de fabricação = rpm/32 × escala do regulador (`TorqueNet.MachineSpeed`).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
