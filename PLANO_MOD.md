@@ -302,7 +302,7 @@ como as máquinas). Sem torque, a linha para e os itens ficam parados em cima de
 - Gerador a Carvão: Carvão Vegetal no combustível.
 
 **Etapas (cada uma testada no jogo antes da próxima)**
-1. D10 T1 — Esteira: modelo, ligação com a da frente, torque, itens andando e enfileirando, leitura ao olhar
+1. D10 T1 [feita, falta teste] — Esteira: modelo, ligação com a da frente, torque, itens andando e enfileirando, leitura ao olhar
    (itens, velocidade), devolver itens ao pegar. Teste: jogar item em cima da esteira com a mão (E com item na
    mão) até existir o Funil.
 2. D10 T2 — Funil: tirar e colocar em baús e na saída das estações.

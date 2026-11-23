@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump, Dynamo }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump, Dynamo, Conveyor }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -63,6 +63,7 @@ namespace FerroEngrenagem
                 case "inverter": Kind = KineticKind.Inverter; break;
                 case "waterwheel": Kind = KineticKind.WaterWheel; break;
                 case "pump": Kind = KineticKind.Pump; break;
+                case "conveyor": Kind = KineticKind.Conveyor; break;
                 default: Kind = KineticKind.Gearbox; break;
             }
             if (Properties != null && Properties.Contains("FeShaftAxis"))
@@ -297,6 +298,7 @@ namespace FerroEngrenagem
                 case KineticKind.Inverter:
                 case KineticKind.WaterWheel:
                 case KineticKind.Pump:
+                case KineticKind.Conveyor:
                     local = ((BlockFeKinetic)bv.Block).ShaftAxis.ToVector3();
                     break;
                 case KineticKind.Motor:
@@ -347,6 +349,7 @@ namespace FerroEngrenagem
 
         public static bool NodeHasFace(World world, Vector3i pos, BlockValue bv, Vector3i d)
         {
+            if (Kind(bv.Block) == KineticKind.Conveyor) return Belt.HasTorqueFace(world, pos, bv, d);
             if (!IsMultiEngine(bv.Block)) return HasFace(bv, d);
             Vector3i parent, dir;
             return EnginePort(world, pos, bv, out parent, out dir) && d == dir;
@@ -587,7 +590,8 @@ namespace FerroEngrenagem
                         else if (!Same(net.RefRpm, rr)) net.Lock("speed");
                     }
                 }
-                if ((kind == KineticKind.Pump || kind == KineticKind.Dynamo) && !net.Machines.ContainsKey(pos))
+                if ((kind == KineticKind.Pump || kind == KineticKind.Dynamo || kind == KineticKind.Conveyor) &&
+                    !net.Machines.ContainsKey(pos))
                 {
                     // D9 Mechanical Pump: a torque consumer at its own node (no spin direction needed)
                     net.Machines[pos] = f;
@@ -602,6 +606,24 @@ namespace FerroEngrenagem
                     float leave = f * LeaveMult(bv, d);
                     int c = OutSpin(kind, axis, omega, entryN, d);
                     KineticKind nk = Kind(nb.Block);
+                    if (kind == KineticKind.Conveyor && nk == KineticKind.Conveyor && Dot(d, axis) == 0)
+                    {
+                        // D10: belt to belt along the line. The belt moves to its front whatever the spin; the
+                        // rollers keep the same sense relative to the travel (W = up x front), so a line never locks
+                        // by itself, and two sources driving it from different belts are still compared.
+                        Vector3i on = Mul(Dot(omega, Belt.W(bv)), Belt.W(nb));
+                        float seenB;
+                        if (net.Factor.TryGetValue(n, out seenB))
+                        {
+                            if (!Same(seenB, f)) net.Lock("speed");
+                            if (net.Omega[n] != on) net.Lock("direction");
+                            continue;
+                        }
+                        net.Factor[n] = f;
+                        net.Omega[n] = on;
+                        open.Enqueue(n);
+                        continue;
+                    }
                     if (nk != KineticKind.None)
                     {
                         if (!NodeHasFace(world, n, nb, back)) continue;
@@ -892,6 +914,8 @@ namespace FerroEngrenagem
             }
             if (Fluids.Kind(bv.Block) != FluidKind.None)
                 extra += "\n" + FluidText.Describe(pos, bv, false);
+            if (kind == KineticKind.Conveyor)
+                extra += "\n" + Belt.Describe(world, pos, bv, net);
             if (kind == KineticKind.WaterWheel)
                 extra += "\n" + (Kinetic.WaterTouching(world, pos, bv) > 0
                     ? Kinetic.Text("feWheelWater", "In the water")

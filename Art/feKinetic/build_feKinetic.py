@@ -878,6 +878,51 @@ def model_bus(col):
     return objs
 
 
+def model_conveyor(col):
+    """Conveyor belt (D10). Travel = the block front = Unity +Z = Blender -Y. A drive roller at shaft height
+    (z = C) runs across the block with hubs on both side faces (a shaft plugs in left or right); the belt surface
+    is on top (z ~ 0.61); FeBeltSlats slides along the travel; end rollers spin. Orange arrows point the way."""
+    base = bmesh.new()
+    for sx in (-1, 1):
+        box(base, (0.06, 1.0, 0.10), (sx * 0.44, 0, 0.58), PAINT)              # side rails
+        for sy in (-1, 1):
+            box(base, (0.06, 0.06, 0.53), (sx * 0.44, sy * 0.42, 0.265), IRON)  # legs
+        box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)               # lower stringer
+        for k, (dy, h) in enumerate(((0.10, 0.09), (0.05, 0.06), (0.0, 0.03))):  # arrow toward -Y (the front)
+            box(base, (0.012, 0.05, h), (sx * 0.476, -0.05 - dy, 0.58), OUT)
+            box(base, (0.012, 0.05, h), (sx * 0.476, 0.30 - dy, 0.58), OUT)
+    box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)                          # cross braces
+    box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
+    box(base, (0.80, 0.98, 0.02), (0, 0, 0.565), IRON)                            # belt bed (under the slats)
+    for sx in (-1, 1):
+        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)              # bearing plates
+    objs = [to_object(base, "feConveyor_Base", bevel=0.003)]
+    sl = bmesh.new()
+    for k in range(8):
+        box(sl, (0.78, 0.075, 0.03), (0, -0.4375 + k * 0.125, 0.592), RUST)
+    objs.append(to_object(sl, "FeBeltSlats"))
+    # spin parts: the spin axis (Unity local +Z) is the part's Blender local -Y (like the Pump shaft), so the rollers
+    # are built along local Y and turned 90 degrees about Z to lie across the block (world X)
+    drive = bmesh.new()
+    cyl(drive, 0.05, 0.96, (0, 0, 0), "Y", STEEL, segs=16)
+    for sy in (-1, 1):
+        cyl(drive, 0.07, 0.04, (0, sy * 0.48, 0), "Y", BRASS, segs=16)             # hubs on the side faces
+        for k in range(4):
+            a_ = k * math.pi / 2
+            box(drive, (0.02, 0.03, 0.10), (0.045 * math.cos(a_), sy * 0.49, 0.045 * math.sin(a_)), STEEL,
+                Matrix.Rotation(-a_, 4, "Y"))
+    objs.append(to_object(drive, "FeSpin_BeltDrive", location=(0, 0, C), rotation=(0, 0, math.pi / 2)))
+    for name, y in (("FeSpin_BeltRollerFront", -0.45), ("FeSpin_BeltRollerBack", 0.45)):
+        r = bmesh.new()
+        cyl(r, 0.045, 0.80, (0, 0, 0), "Y", STEEL, segs=14)
+        for k in range(3):
+            a_ = k * 2 * math.pi / 3
+            box(r, (0.012, 0.76, 0.06), (0.02 * math.cos(a_), 0, 0.02 * math.sin(a_)), IRON,
+                Matrix.Rotation(-a_, 4, "Y"))
+        objs.append(to_object(r, name, location=(0, y, 0.56), rotation=(0, 0, math.pi / 2)))
+    return objs
+
+
 AXLE_Z = C
 
 
@@ -954,6 +999,7 @@ MODELS = {
     "feDynamo": model_dynamo,
     "feDynamo2": model_dynamo2,
     "feBus": model_bus,
+    "feConveyor": model_conveyor,
 }
 
 

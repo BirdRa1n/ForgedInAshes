@@ -30,7 +30,7 @@ public static class FeBuild
         // D9 fluid network
         "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
         "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-        "feDynamo2", "feBus"
+        "feDynamo2", "feBus", "feConveyor"
     };
 
     const string ModelsDir = "Assets/Models";

@@ -674,6 +674,24 @@ aqui fica só o que foi medido/verificado.
 - Teste 3: alinhado; alicate ok. PENDENTE (visual, adiado pelo usuário): o braço do cano não se junta à entrada de
   vapor atrás em cima (669,62,868 → célula filha 669,62,869), embora o vapor flua. Nenhum log de braço para esse cano.
 
+## 2026-11-23 — D10 T1: Esteira
+
+- Proposta D10 (PLANO_MOD 5.6) aprovada pelo usuário. T1 = `feConveyor` (Belt.cs, `BlockFeConveyor` : `BlockFeKinetic`,
+  `FeKinetic=conveyor`, eixo dos roletes = X local).
+- Torque: cada esteira é nó e máquina (`FeTorqueCost` 8). Faces: laterais (eixo do rolete; não liga em outra esteira
+  ao lado) e frente/trás quando uma alimenta a outra (`Belt.Linked`). Entre esteiras a rotação segue W = cima × frente
+  (o sentido da esteira não depende do giro), então a linha não trava sozinha.
+- Itens lógicos (`BeltStore`, `<save>/FerroEngrenagem_belts.txt`, ItemValue serializado pelo vanilla em base64),
+  movidos no servidor a 10 Hz: 1 bloco/s × velocidade da máquina; 4 por esteira, espaço 0,25; passam para a esteira da
+  frente (por trás entram no início, pelo lado no meio); no fim, param. Itens soltos (EntityItem) em cima entram na
+  esteira. Pegar a esteira solta os itens.
+- Visual no host: `BeltRenderer` (modelo de item largado via `ItemClass.CloneModel`, cubo para blocos, ~0,35 m),
+  `BeltSurface` (filho `FeBeltSlats` desliza no Z local), roletes `FeSpin_*`.
+- Aprendido: o eixo de giro (Unity +Z local) é o −Y LOCAL do objeto no Blender, levado pela rotação do objeto
+  (log do FeBuild: bomba, caixa, roletes). Roletes feitos ao longo de Y e girados 90° em Z.
+- build.ps1 passou a referenciar UnityEngine.PhysicsModule (Collider/Rigidbody). Receita: 4 esteiras na Montadora
+  (2 Chapa, 1 Eixo, 4 Couro). Não testado.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

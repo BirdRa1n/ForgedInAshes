@@ -509,6 +509,23 @@
 			<property name="Group" value="Building,TCScience,advBuilding"/>
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
+		<!-- D10 T1: Conveyor belt (src/FerroEngrenagem/Belt.cs). Items go to the block's front; a shaft on its left or
+		     right drives the whole line; 8 UT per belt at 32 RPM, 1 block/s (proportional to the RPM). -->
+		<block name="feConveyor">
+			<property name="Extends" value="feShaft"/>
+			<property name="Class" value="FerroEngrenagem.FeConveyor, FerroEngrenagem"/>
+			<property name="FeKinetic" value="conveyor"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeTorqueCost" value="8"/>
+			<property name="FeBeltSpeed" value="1"/>
+			<property name="DescriptionKey" value="feConveyorDesc"/>
+			<property name="CustomIcon" value="cashRegisterConveyorStraight"/>
+			<property name="CustomIconTint" value="c08040"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="30"/>
+			<property name="SortOrder2" value="0030"/>
+		</block>
 		<block name="feGearbox">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="gearbox"/>

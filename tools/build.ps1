@@ -33,6 +33,7 @@ $refs = @(
     (Join-Path $managed 'UnityEngine.dll'),
     (Join-Path $managed 'UnityEngine.CoreModule.dll'),
     (Join-Path $managed 'UnityEngine.AnimationModule.dll'),
+    (Join-Path $managed 'UnityEngine.PhysicsModule.dll'),
     (Join-Path $managed 'InControl.dll'),          # PlayerAction (Activate key) for the Crank
     (Join-Path $harmonyDir '0Harmony.dll')
 )
