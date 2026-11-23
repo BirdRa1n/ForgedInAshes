@@ -389,6 +389,7 @@ aqui fica só o que foi medido/verificado.
 - Chaves de localização do coletor removidas (Fuel/Catalyst/Empty); `feCoalGeneratorHasCharge` fica até a
   etapa 4 (usada pelo `feGasGenerator`).
 - Geradores a Carvão já colocados no mundo de teste são do tipo antigo (Collector): destruir/recolocar.
+- Testado (usuário + log): 30 W não liga a Montadora (60 W); 60 W liga; desligar o gerador pausa.
 
 ## Próximo passo (antigo, mantido para histórico)
 
