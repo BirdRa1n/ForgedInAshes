@@ -462,6 +462,8 @@ aqui fica só o que foi medido/verificado.
   local (tokens `In`/`Out`, `_Rev`, `_xN`), parâmetros de Animator opcionais; log `spin ...` quando o estado muda.
   Placeholders com `FeSpinWhole=true` giram o 1º filho. `build.ps1` passou a referenciar
   `UnityEngine.AnimationModule.dll`. Contrato documentado no ART_BRIEF.md.
+- Testado (usuário, log 22:44): sentido, giro invertido (`wrongSpin`), travado com fontes opostas e eventos
+  `spin` chegando a motores e máquinas; sem exceções. O log `spin` é verboso (260 linhas) — reduzir quando estável.
 
 ## Próximo passo (antigo, mantido para histórico)
 
