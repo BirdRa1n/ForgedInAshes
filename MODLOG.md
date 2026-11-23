@@ -559,6 +559,7 @@ aqui fica só o que foi medido/verificado.
 - Testado (usuário): Inversor gira só os eixos internos. Modelos da rede de torque integrados e funcionando.
 - Embreagem e Medidor modelados (Blender em background, `blender -b feKinetic.blend --python ...`, pois o
   Blender com MCP tinha fechado), bundle de 789 KB, XML apontando para os prefabs (Embreagem só de pé).
+- Testado (usuário, 2026-11-23): Embreagem e Medidor certos no jogo. Os 8 blocos da rede de torque têm modelo.
 
 ## Próximo passo (antigo, mantido para histórico)
 
