@@ -878,48 +878,107 @@ def model_bus(col):
     return objs
 
 
-def model_conveyor(col):
-    """Conveyor belt (D10). Travel = the block front = Unity +Z = Blender -Y. A drive roller at shaft height
-    (z = C) runs across the block with hubs on both side faces (a shaft plugs in left or right); the belt surface
-    is on top (z ~ 0.61); FeBeltSlats slides along the travel; end rollers spin. Orange arrows point the way."""
-    base = bmesh.new()
-    for sx in (-1, 1):
-        box(base, (0.06, 1.0, 0.10), (sx * 0.44, 0, 0.58), PAINT)              # side rails
-        for sy in (-1, 1):
-            box(base, (0.06, 0.06, 0.53), (sx * 0.44, sy * 0.42, 0.265), IRON)  # legs
-        box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)               # lower stringer
-        for k, (dy, h) in enumerate(((0.10, 0.09), (0.05, 0.06), (0.0, 0.03))):  # arrow toward -Y (the front)
-            box(base, (0.012, 0.05, h), (sx * 0.476, -0.05 - dy, 0.58), OUT)
-            box(base, (0.012, 0.05, h), (sx * 0.476, 0.30 - dy, 0.58), OUT)
-    box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)                          # cross braces
-    box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
-    box(base, (0.80, 0.98, 0.02), (0, 0, 0.565), IRON)                            # belt bed (under the slats)
-    for sx in (-1, 1):
-        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)              # bearing plates
-    objs = [to_object(base, "feConveyor_Base", bevel=0.003)]
-    sl = bmesh.new()
-    for k in range(8):
-        box(sl, (0.78, 0.075, 0.03), (0, -0.4375 + k * 0.125, 0.592), RUST)
-    objs.append(to_object(sl, "FeBeltSlats"))
-    # spin parts: the spin axis (Unity local +Z) is the part's Blender local -Y (like the Pump shaft), so the rollers
-    # are built along local Y and turned 90 degrees about Z to lie across the block (world X)
+def _belt_rollers(objs, back_z, front_z):
+    """Spin parts of a belt: the spin axis (Unity local +Z) is the part's Blender local -Y, so the rollers are built
+    along local Y and turned 90 degrees about Z to lie across the block (world X). The drive roller sits at shaft
+    height (z = C) with hubs on both side faces, where a shaft plugs in."""
     drive = bmesh.new()
     cyl(drive, 0.05, 0.96, (0, 0, 0), "Y", STEEL, segs=16)
     for sy in (-1, 1):
-        cyl(drive, 0.07, 0.04, (0, sy * 0.48, 0), "Y", BRASS, segs=16)             # hubs on the side faces
+        cyl(drive, 0.07, 0.04, (0, sy * 0.48, 0), "Y", BRASS, segs=16)
         for k in range(4):
             a_ = k * math.pi / 2
             box(drive, (0.02, 0.03, 0.10), (0.045 * math.cos(a_), sy * 0.49, 0.045 * math.sin(a_)), STEEL,
                 Matrix.Rotation(-a_, 4, "Y"))
     objs.append(to_object(drive, "FeSpin_BeltDrive", location=(0, 0, C), rotation=(0, 0, math.pi / 2)))
-    for name, y in (("FeSpin_BeltRollerFront", -0.45), ("FeSpin_BeltRollerBack", 0.45)):
+    for name, y, z in (("FeSpin_BeltRollerFront", -0.45, front_z), ("FeSpin_BeltRollerBack", 0.45, back_z)):
         r = bmesh.new()
         cyl(r, 0.045, 0.80, (0, 0, 0), "Y", STEEL, segs=14)
         for k in range(3):
             a_ = k * 2 * math.pi / 3
             box(r, (0.012, 0.76, 0.06), (0.02 * math.cos(a_), 0, 0.02 * math.sin(a_)), IRON,
                 Matrix.Rotation(-a_, 4, "Y"))
-        objs.append(to_object(r, name, location=(0, y, 0.56), rotation=(0, 0, math.pi / 2)))
+        objs.append(to_object(r, name, location=(0, y, z), rotation=(0, 0, math.pi / 2)))
+
+
+def model_conveyor(col):
+    """Conveyor belt (D10). Travel = the block front = Unity +Z = Blender -Y. Unity left (-X) = Blender +X.
+    Parts switched by BeltShape (Belt.cs): FeRail_L / FeRail_R (hidden where another belt joins on that side),
+    FeBeltEnd (end stop, shown when nothing is in front), FeCurve_L / FeCurve_R (curve guide at the back corner of a
+    side the items turn to), FeBeltSlats (slides along the travel)."""
+    base = bmesh.new()
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(base, (0.06, 0.06, 0.53), (sx * 0.44, sy * 0.42, 0.265), IRON)  # legs
+        box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)               # lower stringer
+    box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)                          # cross braces
+    box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
+    box(base, (0.80, 0.98, 0.02), (0, 0, 0.565), IRON)                            # belt bed (under the slats)
+    for sx in (-1, 1):
+        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)              # bearing plates
+    objs = [to_object(base, "feConveyor_Base", bevel=0.003)]
+    for name, sx in (("FeRail_L", 1), ("FeRail_R", -1)):
+        r = bmesh.new()
+        box(r, (0.06, 1.0, 0.10), (sx * 0.44, 0, 0.58), PAINT)
+        for dy, h in ((0.10, 0.09), (0.05, 0.06), (0.0, 0.03)):                  # arrows toward -Y (the front)
+            box(r, (0.012, 0.05, h), (sx * 0.476, -0.05 - dy, 0.58), OUT)
+            box(r, (0.012, 0.05, h), (sx * 0.476, 0.30 - dy, 0.58), OUT)
+        objs.append(to_object(r, name, bevel=0.002))
+    end = bmesh.new()
+    box(end, (0.82, 0.04, 0.12), (0, -0.47, 0.64), PAINT)
+    box(end, (0.82, 0.045, 0.03), (0, -0.47, 0.69), OUT)
+    objs.append(to_object(end, "FeBeltEnd", bevel=0.002))
+    for name, sx in (("FeCurve_L", 1), ("FeCurve_R", -1)):
+        cv = bmesh.new()
+        cx, cy, rad = sx * 0.5, 0.5, 0.22                                           # back corner of that side
+        n = 6
+        for k in range(n):
+            t0, t1 = k * (math.pi / 2) / n, (k + 1) * (math.pi / 2) / n
+            tm = (t0 + t1) / 2
+            px = cx - sx * rad * math.cos(tm)
+            py = cy - rad * math.sin(tm)
+            seg = rad * (t1 - t0) + 0.01
+            ang = math.atan2(-math.cos(tm), sx * math.sin(tm))                      # tangent of the arc
+            box(cv, (seg, 0.04, 0.10), (px, py, 0.62), PAINT, Matrix.Rotation(ang, 4, "Z"))
+        box(cv, (0.05, 0.05, 0.12), (cx - sx * 0.025, cy - 0.025, 0.62), OUT)        # corner post
+        objs.append(to_object(cv, name, bevel=0.002))
+    sl = bmesh.new()
+    for k in range(7):
+        box(sl, (0.78, 0.075, 0.03), (0, -0.375 + k * 0.125, 0.592), RUST)
+    objs.append(to_object(sl, "FeBeltSlats"))
+    _belt_rollers(objs, 0.56, 0.56)
+    return objs
+
+
+def model_conveyor_ramp(col):
+    """Conveyor ramp (D10): takes items at its back (belt height 0.62) and lifts them one block up to its front
+    (1.62 = the surface of a belt one block higher and one forward). 45 degrees; the slats slide up the slope."""
+    base = bmesh.new()
+    slope = Matrix.Rotation(-math.pi / 4, 4, "X")                                  # -Y (front) end goes up
+    L = math.sqrt(2.0)
+    for sx in (-1, 1):
+        box(base, (0.06, L, 0.10), (sx * 0.44, 0, 1.08), PAINT, slope)              # side rails
+        for dy in (0.30, -0.25):                                                     # arrows up the slope
+            for k, h in enumerate((0.09, 0.06, 0.03)):
+                y = dy - 0.05 * k
+                box(base, (0.012, 0.05, h), (sx * 0.476, y, 1.08 + (0.0 - y)), OUT, slope)
+        box(base, (0.06, 0.06, 0.53), (sx * 0.44, 0.42, 0.265), IRON)              # back legs
+        box(base, (0.06, 0.06, 1.48), (sx * 0.44, -0.42, 0.74), IRON)              # front legs
+        box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)
+        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)               # bearing plates
+    box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)
+    box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
+    box(base, (0.80, L, 0.02), (0, 0, 1.065), IRON, slope)                          # bed
+    objs = [to_object(base, "feConveyorRamp_Base", bevel=0.003)]
+    sl = bmesh.new()
+    for k in range(10):
+        y = 0.5 - 0.0625 - k * 0.0884
+        if y < -0.45:
+            break
+        z = 0.62 + (0.5 - y) - 0.028
+        box(sl, (0.78, 0.075, 0.03), (0, y, z), RUST, slope)
+    objs.append(to_object(sl, "FeBeltSlats"))
+    _belt_rollers(objs, 0.56, 1.56)
     return objs
 
 
@@ -1000,6 +1059,7 @@ MODELS = {
     "feDynamo2": model_dynamo2,
     "feBus": model_bus,
     "feConveyor": model_conveyor,
+    "feConveyorRamp": model_conveyor_ramp,
 }
 
 

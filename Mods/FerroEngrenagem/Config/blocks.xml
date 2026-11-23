@@ -526,6 +526,15 @@
 			<property name="EconomicValue" value="30"/>
 			<property name="SortOrder2" value="0030"/>
 		</block>
+		<!-- D10: Conveyor Ramp. Takes items at its back and gives them to the belt one block up and one forward. -->
+		<block name="feConveyorRamp">
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltRise" value="1"/>
+			<property name="DescriptionKey" value="feConveyorRampDesc"/>
+			<property name="CustomIconTint" value="e09050"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorRampPrefab"/>
+			<property name="SortOrder2" value="0031"/>
+		</block>
 		<block name="feGearbox">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="gearbox"/>

@@ -606,24 +606,7 @@ namespace FerroEngrenagem
                     float leave = f * LeaveMult(bv, d);
                     int c = OutSpin(kind, axis, omega, entryN, d);
                     KineticKind nk = Kind(nb.Block);
-                    if (kind == KineticKind.Conveyor && nk == KineticKind.Conveyor && Dot(d, axis) == 0)
-                    {
-                        // D10: belt to belt along the line. The belt moves to its front whatever the spin; the
-                        // rollers keep the same sense relative to the travel (W = up x front), so a line never locks
-                        // by itself, and two sources driving it from different belts are still compared.
-                        Vector3i on = Mul(Dot(omega, Belt.W(bv)), Belt.W(nb));
-                        float seenB;
-                        if (net.Factor.TryGetValue(n, out seenB))
-                        {
-                            if (!Same(seenB, f)) net.Lock("speed");
-                            if (net.Omega[n] != on) net.Lock("direction");
-                            continue;
-                        }
-                        net.Factor[n] = f;
-                        net.Omega[n] = on;
-                        open.Enqueue(n);
-                        continue;
-                    }
+                    if (kind == KineticKind.Conveyor && nk == KineticKind.Conveyor) continue;   // belt links below
                     if (nk != KineticKind.None)
                     {
                         if (!NodeHasFace(world, n, nb, back)) continue;
@@ -657,6 +640,27 @@ namespace FerroEngrenagem
                     net.Machines[parent] = leave;
                     net.MachineNode[parent] = pos;
                     machineSpin[parent] = c;   // +1 = turning the right way into the machine (once sign applied)
+                }
+                if (kind == KineticKind.Conveyor)
+                {
+                    // D10: belt to belt (straight, curves, splits, ramps: Belt.Links). The belt moves to where it
+                    // points whatever the spin; the rollers keep the same sense relative to the travel (W = up x
+                    // front), so belts never lock each other, and two sources on one line are still compared.
+                    foreach (Vector3i n in Belt.Links(world, pos, bv))
+                    {
+                        BlockValue nb = world.GetBlock(n);
+                        Vector3i on = Mul(Dot(omega, Belt.W(bv)), Belt.W(nb));
+                        float seenB;
+                        if (net.Factor.TryGetValue(n, out seenB))
+                        {
+                            if (!Same(seenB, f)) net.Lock("speed");
+                            if (net.Omega[n] != on) net.Lock("direction");
+                            continue;
+                        }
+                        net.Factor[n] = f;
+                        net.Omega[n] = on;
+                        open.Enqueue(n);
+                    }
                 }
                 if (kind == KineticKind.Regulator) net.Regulators[pos] = new RegZone();
             }

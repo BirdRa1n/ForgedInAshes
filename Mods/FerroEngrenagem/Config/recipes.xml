@@ -79,6 +79,10 @@
 			<ingredient name="feResourceIronShaft" count="1"/>
 			<ingredient name="resourceLeather" count="4"/>
 		</recipe>
+		<recipe name="feConveyorRamp" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
+			<ingredient name="feConveyor" count="2"/>
+			<ingredient name="feResourceIronPlate" count="1"/>
+		</recipe>
 		<recipe name="feGearbox" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
 			<ingredient name="feResourceGear" count="4"/>
 			<ingredient name="feResourceIronPlate" count="2"/>

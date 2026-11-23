@@ -692,6 +692,19 @@ aqui fica só o que foi medido/verificado.
 - build.ps1 passou a referenciar UnityEngine.PhysicsModule (Collider/Rigidbody). Receita: 4 esteiras na Montadora
   (2 Chapa, 1 Eixo, 4 Couro). Não testado.
 
+## 2026-11-23 — D10: curvas, divisão em 2/3 e Esteira de Subida
+
+- Pedido do usuário (desenho): esteira ao lado vira curva e compartilha o torque; 2 ou 3 saídas dividem os itens;
+  o visual muda; esteira que sobe 1 bloco (escada de itens).
+- `Belt.Outputs`: frente (por trás = início, pelo lado = meio/junção), laterais que apontam PARA FORA (curva/divisão),
+  rampa = só a de cima à frente. `Belt.Links` = saídas + quem tem esta como saída (inclui a rampa embaixo-atrás); a
+  BFS do torque usa `Links` (mapeamento W) e as faces normais só para eixos nas laterais.
+- Divisão: cada item recebe a saída ao entrar, em rodízio por esteira (`ChooseExit`); se a dele está cheia, tenta as
+  outras. Caminho no visual: reto, arco de 1/4 em volta do canto de trás do lado da curva, rampa a 45°.
+- Modelo: `FeRail_L/R` somem onde outra esteira encosta, `FeBeltEnd` (batente) quando não há saída à frente,
+  `FeCurve_L/R` no lado da curva; ripas 7 (não saem mais da esteira). `feConveyorRamp` (FeBeltRise 1) com ripas
+  subindo a rampa. Receita: 2 Esteiras + 1 Chapa.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

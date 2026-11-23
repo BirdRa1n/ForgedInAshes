@@ -13,7 +13,7 @@ NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter"
          "feClutch", "feTorqueGauge", "feWaterWheel",
          "feSteamEngine", "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
          "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-         "feDynamo2", "feBus", "feConveyor"]
+         "feDynamo2", "feBus", "feConveyor", "feConveyorRamp"]
 
 scene = bpy.context.scene
 for engine in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
