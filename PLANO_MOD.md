@@ -269,6 +269,50 @@ volta) e trata isso como fonte infinita — mexer no volume de água do 7DTD é 
 3. D9 T3 — Condensadora elétrica fechando o ciclo da água.
 4. Depois — entrada de itens pelas laterais com as esteiras (fase 5) e outros fluidos.
 
+### 5.6 Esteiras e Funis (proposta D10, pedido do usuário 2026-11-23 — antecipa a fase 5)
+
+Ideia: itens andando de verdade em esteiras movidas a torque (como no Create), saindo de baús e estações e
+entrando nas máquinas. Começa pelo Carvão e Lubrificante nas laterais do Motor a Vapor (já marcadas em amarelo).
+
+**Blocos**
+
+| Bloco | Função | Números (proposta) |
+|---|---|---|
+| Esteira | 1 bloco, anda para a frente do bloco; liga-se sozinha à esteira da frente (reta, rampa de subida/descida depois) | 4 itens por bloco; 1 bloco/s a 32 RPM (velocidade ∝ RPM) |
+| Funil | Encosta num baú, estação ou máquina. Esteira saindo dele = **tira** itens; esteira chegando nele = **coloca** itens | 1 item a cada 0,5 s (pilha inteira com upgrade depois) |
+
+**Torque**: uma linha de esteiras é uma máquina só da rede de torque. Basta **um eixo encostado na lateral de
+qualquer bloco** da linha (como o eixo de uma esteira do Create). Custo 8 UT por bloco a 32 RPM (× (RPM/32)²
+como as máquinas). Sem torque, a linha para e os itens ficam parados em cima dela.
+
+**Comportamento**
+- Itens são lógicos (lista por bloco com a posição 0..1), movidos pelo servidor a cada 0,25 s e salvos num
+  arquivo do save, como os fluidos. O cliente desenha o modelo do item (ou o ícone, nos que não têm modelo)
+  deslizando sobre a esteira.
+- Fim da linha sem nada na frente: os itens **param e enfileiram** (não caem no chão — evita perder itens).
+- Pegar a esteira devolve ao jogador os itens que estavam em cima dela.
+- Baú aberto por um jogador: o Funil espera (mexer no inventário aberto dessincroniza).
+
+**Onde o Funil tira e coloca**
+- Baús e caixas (vanilla e do mod): qualquer slot.
+- Estações (Fundição, Prensa, Torno...): **tira só da Saída**; **coloca** combustível no slot de combustível e
+  matéria-prima no slot de entrada (Fundição).
+- Motor a Vapor: Carvão Vegetal vai para o tanque de carvão, Lubrificante para os slots. Pelas laterais da camada
+  de cima (marcadores amarelos), também sem Funil: a esteira chegando ali já entrega.
+- Gerador a Carvão: Carvão Vegetal no combustível.
+
+**Etapas (cada uma testada no jogo antes da próxima)**
+1. D10 T1 — Esteira: modelo, ligação com a da frente, torque, itens andando e enfileirando, leitura ao olhar
+   (itens, velocidade), devolver itens ao pegar. Teste: jogar item em cima da esteira com a mão (E com item na
+   mão) até existir o Funil.
+2. D10 T2 — Funil: tirar e colocar em baús e na saída das estações.
+3. D10 T3 — Entradas das máquinas: Motor a Vapor (laterais), Fundição (entrada e combustível), Gerador a Carvão.
+4. Depois — receita fixa nas máquinas (a Prensa repete uma receita sozinha enquanto houver ingredientes chegando),
+   divisor/filtro, rampas e multiplayer dedicado.
+
+Limite conhecido: como os fluidos, funciona no single player e para quem hospeda; servidor dedicado fica para a
+F2-T06.
+
 ### 5.3 Logística (opcional — "versão 2.0")
 
 | ID | Bloco | Função | Implementação |
