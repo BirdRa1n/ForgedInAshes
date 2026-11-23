@@ -148,12 +148,12 @@ namespace FerroEngrenagem
                         TorqueNet net = null;
                         foreach (Vector3i d in Dirs)
                         {
-                            if (!Kinetic.HasFace(bv, d)) continue;
+                            if (!Kinetic.NodeHasFace(world, p, bv, d)) continue;
                             Vector3i n = new Vector3i(p.x + d.x, p.y + d.y, p.z + d.z);
                             BlockValue nb = world.GetBlock(n);
                             if (Kinetic.Kind(nb.Block) != KineticKind.None)
                             {
-                                bool joined = Kinetic.HasFace(nb, new Vector3i(-d.x, -d.y, -d.z));
+                                bool joined = Kinetic.NodeHasFace(world, n, nb, new Vector3i(-d.x, -d.y, -d.z));
                                 AddFace(p, d, joined ? Cyan : Orange);
                                 continue;
                             }

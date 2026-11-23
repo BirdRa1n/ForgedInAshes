@@ -585,6 +585,28 @@ aqui fica só o que foi medido/verificado.
 - Receita na Garagem: 2 `smallEngine`, 6 Volantes, 30 Chapas, 10 Engrenagens, 6 Lubrificantes, 6 canos.
 - Modelo (Blender background): caldeira, chaminé, cilindro, volante `FeSpin_SteamFlywheel`; bundle 944 KB.
 
+## 2026-11-23 — D9: rede de fluidos, bombas, Condensadora e Motor a Vapor grande (tudo de uma vez)
+
+- Pedido do usuário (feito sem aprovação por etapas: "faça tudo de uma vez e eu testo no final").
+- `FluidNetwork.cs`: `FeFluid` = pipe | tank | mechpump | elecpump | condenser | steamengine. Canos ligam os 6
+  lados; portas por dispositivo (bombas: entrada atrás/local −Z puxando água do mundo, saída na frente; Condensadora:
+  vapor atrás, água na frente; motor: água por baixo do bloco pai, vapor por cima da célula central de cima).
+  Rede = canos + portas (ou duas portas encostadas). Um fluido por rede, dois = BLOQUEADO. `FluidTicker` (servidor,
+  0,5 s): produção → ofertas para demandas, sobra enche tanques, falta esvazia tanques, vapor sem destino escapa.
+- Persistência: `FluidStore` em `<save>/FerroEngrenagem_fluids.txt` (registro dos dispositivos + níveis), salvo a cada
+  30 s e no `SaveWorld`/`SaveAndCleanupWorld`. Registro: `BlockFeFluid`/`BlockFeKinetic` próprios, postfix em
+  `BlockPowerSource.OnBlockAdded/Removed`, e em `Block.OnBlockAdded` + `BlockPowered.OnBlockRemoved` para os elétricos
+  (BlockPowered não sobrescreve OnBlockAdded, IL 3.4.0 b10).
+- Bomba Mecânica: `BlockFeKinetic` `FeKinetic=pump` (eixo lateral, local X), consumidora de torque como máquina
+  (64 UT; vazão ∝ RPM). Bomba Elétrica (60 W, 150 L/min) e Condensadora (120 W, 120 L/min, 90 %): `Class=Powered`.
+- Motor a Vapor agora multibloco 3×2×3 (`SteamEngine.cs`): até 1024 UT; nó de torque só na célula da frente da
+  camada de baixo (`Kinetic.EnginePort/NodeOf/NodeHasFace`); tanque de água interno 2000 L; consumo de água e carvão
+  ∝ carga (mín. 10 %); vapor para cima.
+- Modelos (Blender background): Cano com 6 braços `FeArm_*` (eixos do Unity) ligados/desligados por `PipeArms`
+  conforme as conexões; Caixa d'Água; Bomba Mecânica (`FeSpin_PumpShaft`); Bomba Elétrica; Condensadora; Motor a Vapor
+  3×3×2. `FeBuild` aceita `WireOffset.001`. Bundle 1,1 MB.
+- Não testado no jogo ainda.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

@@ -587,6 +587,106 @@
 			<property name="EconomicValue" value="250"/>
 			<property name="SortOrder2" value="0022"/>
 		</block>
+		<!-- D9 fluid network (src/FerroEngrenagem/FluidNetwork.cs, PLANO_MOD.md 5.5). Pipes join every side; the arms of
+		     the pipe model show where it connects. Pumps pull from the world water behind them (intake = local -Z) and
+		     push out of the front (local +Z). The Condenser takes steam at its back and gives water at its front. -->
+		<block name="fePipe">
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="FerroEngrenagem.FeFluid, FerroEngrenagem"/>
+			<property name="FeFluid" value="pipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePipeDesc"/>
+			<property name="CustomIcon" value="pipeSmall1x1"/>
+			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?fePipePrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="TakeDelay" value="1"/>
+			<property name="EconomicValue" value="15"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="2" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0001"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<block name="feWaterTank">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="tank"/>
+			<property name="FeFluidCapacity" value="4000"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feWaterTankDesc"/>
+			<property name="CustomIcon" value="cntBarrelGenericQuadA"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterTankPrefab"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="SortOrder2" value="0002"/>
+		</block>
+		<block name="feMechPump">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="mechpump"/>
+			<property name="FeFluidRate" value="100"/>
+			<property name="FeIntakeWater" value="3"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feMechPumpDesc"/>
+			<property name="CustomIcon" value="pipeSmallValve"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechPumpPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0003"/>
+		</block>
+		<block name="feElecPump">
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="Powered"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluid" value="elecpump"/>
+			<property name="FeFluidRate" value="150"/>
+			<property name="FeIntakeWater" value="3"/>
+			<property name="DescriptionKey" value="feElecPumpDesc"/>
+			<property name="CustomIcon" value="electricwirerelay"/>
+			<property name="CustomIconTint" value="40a0ff"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Material" value="Mmetal_weak"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feElecPumpPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="TakeDelay" value="3"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="2"/>
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="2,6"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0004"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+		</block>
+		<block name="feCondenser">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="120"/>
+			<property name="FeFluid" value="condenser"/>
+			<property name="FeFluidRate" value="120"/>
+			<property name="FeCondenseRatio" value="0.9"/>
+			<property name="FeFluidBuffer" value="200"/>
+			<property name="DescriptionKey" value="feCondenserDesc"/>
+			<property name="CustomIconTint" value="c0e0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCondenserPrefab"/>
+			<property name="EconomicValue" value="600"/>
+			<property name="SortOrder2" value="0005"/>
+		</block>
 		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
 		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->
 		<block name="feSpinInverter">
@@ -684,10 +784,20 @@
 		     has Charcoal (1 per 20 s), water next to it or below it (the boiler) and Lubricant in its slots (1 per
 		     5 min). Missing any of them, it stands still and burns nothing. -->
 		<block name="feSteamEngine">
+			<!-- D9: the big Steam Engine (src/FerroEngrenagem/SteamEngine.cs): 3x3 base, 2 high. Water in under the bottom
+			     centre, steam out over the top centre, torque out of the front centre of the bottom layer. Up to 1024 UT;
+			     Charcoal and water used in proportion to the load (min 10 %). Lubricant in its slots, 1 per 5 min. -->
 			<property name="Extends" value="feCoalEngine"/>
+			<property name="MultiBlockDim" value="3,2,3"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="FeFluid" value="steamengine"/>
 			<property name="FeTorqueOutput" value="1024"/>
 			<property name="FeFuelSecondsPerUnit" value="20"/>
-			<property name="FeNeedsWater" value="true"/>
+			<property name="MaxFuel" value="400"/>
+			<property name="FeWaterTank" value="2000"/>
+			<property name="FeWaterPerMin" value="60"/>
+			<property name="FeSteamBuffer" value="500"/>
+			<property name="FeIdleLoad" value="0.1"/>
 			<property name="FeLubeItem" value="feResourceLubricant"/>
 			<property name="FeLubeSecondsPerUnit" value="300"/>
 			<property name="SlotItem" value="feResourceLubricant"/>

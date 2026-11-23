@@ -466,6 +466,179 @@ def model_steam_engine(col):
     return out
 
 
+# ---------------------------------------------------------------- D9 fluid network
+# Pipe arms are named after UNITY local axes (FluidNetwork.cs, PipeArms): Unity +X = Blender -X, Unity +Y = Blender
+# +Z, Unity +Z = Blender -Y.
+PIPE_R = 0.085
+
+
+def pipe_arm(bm, axis_vec):
+    """Arm from the core to the block face along a Blender unit vector, with a flange at the face (local coords,
+    origin = block centre)."""
+    v = Vector(axis_vec)
+    ax = "X" if v.x else ("Y" if v.y else "Z")
+    s_ = v.x + v.y + v.z
+    mid = v * 0.31
+    cyl(bm, PIPE_R, 0.38, mid, ax, STEEL, segs=14)
+    cyl(bm, PIPE_R + 0.03, 0.03, v * 0.485, ax, IRON, segs=14)
+
+
+def model_pipe(col):
+    core = bmesh.new()
+    box(core, (0.26, 0.26, 0.26), (0, 0, 0), IRON)
+    for a in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+        cyl(core, 0.06, 0.02, Vector(a) * 0.135, "X" if a[0] else ("Y" if a[1] else "Z"), STEEL, segs=10)
+    root = bpy.data.objects.new("fePipe_Base", None)   # static empty root at the origin (see model_shaft)
+    out = [root, to_object(core, "fePipe_Core", location=(0, 0, C), bevel=0.004)]
+    names = {"FeArm_PX": (-1, 0, 0), "FeArm_NX": (1, 0, 0), "FeArm_PY": (0, 0, 1), "FeArm_NY": (0, 0, -1),
+             "FeArm_PZ": (0, -1, 0), "FeArm_NZ": (0, 1, 0)}
+    for n, v in names.items():
+        bm = bmesh.new()
+        pipe_arm(bm, v)
+        out.append(to_object(bm, n, location=(0, 0, C), bevel=0.002))
+    return out
+
+
+def model_water_tank(col):
+    bm = bmesh.new()
+    cyl(bm, 0.44, 0.86, (0, 0, 0.47), "Z", STEEL, segs=28)
+    for z in (0.08, 0.47, 0.86):
+        cyl(bm, 0.455, 0.04, (0, 0, z), "Z", IRON, segs=28)
+    cyl(bm, 0.30, 0.04, (0, 0, 0.92), "Z", IRON, segs=20)
+    cyl(bm, 0.10, 0.06, (0, 0, 0.96), "Z", BRASS, segs=12)
+    box(bm, (0.05, 0.02, 0.60), (0, -0.445, 0.47), GLASS)          # level glass
+    for k in range(4):
+        a = math.pi / 4 + k * math.pi / 2
+        beam(bm, (0.40 * math.cos(a), 0.40 * math.sin(a), 0.0), (0.40 * math.cos(a), 0.40 * math.sin(a), 0.06), 0.06, 0.06, IRON)
+    return [to_object(bm, "feWaterTank_Base", bevel=0.004)]
+
+
+def volute(bm, y_in, y_out):
+    """Pump casing on the axis: a drum, an inlet stub to +Y (green ring) and an outlet stub to -Y (orange ring)."""
+    cyl(bm, 0.22, 0.24, (0, 0, C), "Y", PAINT, segs=24)
+    for y in (-0.125, 0.125):
+        cyl(bm, 0.23, 0.03, (0, y, C), "Y", IRON, segs=24)
+    cyl(bm, PIPE_R, 0.5 - 0.14, (0, (0.14 + 0.5) / 2, C), "Y", STEEL, segs=14)
+    cyl(bm, PIPE_R + 0.03, 0.03, (0, 0.485, C), "Y", IRON, segs=14)
+    ring(bm, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, 0.485, C), "Y", IN, segs=14)
+    cyl(bm, PIPE_R, 0.5 - 0.14, (0, -(0.14 + 0.5) / 2, C), "Y", STEEL, segs=14)
+    cyl(bm, PIPE_R + 0.03, 0.03, (0, -0.485, C), "Y", IRON, segs=14)
+    ring(bm, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, -0.485, C), "Y", OUT, segs=14)
+    for sx in (-1, 1):
+        beam(bm, (sx * 0.16, 0, 0.0), (sx * 0.08, 0, C - 0.18), 0.06, 0.30, IRON)
+    box(bm, (0.50, 0.40, 0.03), (0, 0, 0.015), IRON)
+
+
+def model_mech_pump(col):
+    base = bmesh.new()
+    volute(base, 0.5, -0.5)
+    for sx in (-0.30, 0.30):                                        # shaft bearings on the sides
+        box(base, (0.07, 0.12, C - 0.04), (sx, 0, (C - 0.04) / 2 + 0.02), IRON)
+        box(base, (0.09, 0.14, 0.08), (sx, 0, C), RUST)
+    out = [to_object(base, "feMechPump_Base", bevel=0.004)]
+    sh = bmesh.new()   # drive shaft across the block (Blender X): a rotated object whose local Y is X
+    shaft_end(sh, 0.0, -0.5)
+    shaft_end(sh, 0.0, 0.5)
+    gear(sh, 0.12, 0.04, 14, (0, 0.20, 0), "Y", BRASS)
+    out.append(to_object(sh, "FeSpin_PumpShaft", location=(0, 0, C), rotation=(0, 0, -math.pi / 2), bevel=0.002))
+    return out
+
+
+def wire_anchor(col, objs, loc):
+    w = bpy.data.objects.new("WireOffset", None)
+    w.empty_display_type = "SPHERE"
+    w.empty_display_size = 0.03
+    w.location = loc
+    objs.append(w)
+
+
+def model_elec_pump(col):
+    base = bmesh.new()
+    volute(base, 0.5, -0.5)
+    cyl(base, 0.15, 0.36, (0.25, 0, C), "X", (MI["feKin_Paint"]), segs=20)   # motor beside the casing
+    for k in range(6):
+        cyl(base, 0.155, 0.015, (0.12 + k * 0.05, 0, C), "X", IRON, segs=20)  # cooling ribs
+    box(base, (0.10, 0.10, 0.08), (0.25, 0, C + 0.18), IRON)                # terminal box
+    cyl(base, 0.012, 0.10, (0.25, 0, C + 0.27), "Z", BRASS, segs=8)
+    objs = [to_object(base, "feElecPump_Base", bevel=0.004)]
+    wire_anchor(col, objs, (0.25, 0, C + 0.33))
+    return objs
+
+
+def model_condenser(col):
+    base = bmesh.new()
+    box(base, (0.80, 0.70, 0.62), (0, 0, 0.40), PAINT)
+    for k in range(9):                                               # radiator fins on both sides
+        x = -0.32 + k * 0.08
+        box(base, (0.02, 0.74, 0.50), (x, 0, 0.40), IRON)
+    cyl(base, 0.26, 0.06, (0, 0, 0.74), "Z", IRON, segs=24)          # fan shroud on top
+    for k in range(5):
+        a = k * 2 * math.pi / 5
+        box(base, (0.22, 0.05, 0.012), (0.11 * math.cos(a), 0.11 * math.sin(a), 0.77), STEEL, Matrix.Rotation(a, 4, "Z"))
+    # steam in at the back (Blender +Y), water out at the front (Blender -Y), on the axis height
+    cyl(base, PIPE_R, 0.16, (0, 0.42, C), "Y", STEEL, segs=14)
+    cyl(base, PIPE_R + 0.03, 0.03, (0, 0.485, C), "Y", IRON, segs=14)
+    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, 0.485, C), "Y", GLASS, segs=14)
+    cyl(base, PIPE_R, 0.16, (0, -0.42, C), "Y", STEEL, segs=14)
+    cyl(base, PIPE_R + 0.03, 0.03, (0, -0.485, C), "Y", IRON, segs=14)
+    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, -0.485, C), "Y", IN, segs=14)
+    box(base, (0.84, 0.74, 0.04), (0, 0, 0.07), IRON)
+    objs = [to_object(base, "feCondenser_Base", bevel=0.004)]
+    wire_anchor(col, objs, (0.30, -0.30, 0.80))
+    return objs
+
+
+def model_big_steam_engine(col):
+    """3x3 base, 2 high. Origin = floor centre of the PARENT cell (bottom centre). Water in under the centre,
+    steam out over the top centre, torque out of the front centre of the bottom layer (Blender -Y face)."""
+    base = bmesh.new()
+    box(base, (2.96, 2.96, 0.10), (0, 0, 0.05), IRON)                          # bed
+    # boiler: a long drum along X at the back half
+    cyl(base, 0.62, 2.40, (0, 0.55, 0.85), "X", RUST, segs=32)
+    for x in (-1.15, -0.4, 0.4, 1.15):
+        cyl(base, 0.64, 0.05, (x, 0.55, 0.85), "X", IRON, segs=32)
+    for x in (-0.9, 0.9):                                                       # boiler saddles
+        box(base, (0.20, 1.0, 0.30), (x, 0.55, 0.22), IRON)
+    # firebox in front of the boiler (left) with door, ash pit
+    box(base, (0.90, 0.80, 0.90), (-0.95, -0.45, 0.55), IRON)
+    box(base, (0.36, 0.04, 0.30), (-0.95, -0.86, 0.55), BRASS)
+    # steam dome and the steam outlet up to the top centre face (z = 2)
+    cyl(base, 0.22, 0.40, (0, 0.55, 1.55), "Z", BRASS, segs=20)
+    beam(base, (0, 0.55, 1.70), (0, 0.0, 1.80), 0.12, 0.12, STEEL)
+    cyl(base, PIPE_R, 0.30, (0, 0, 1.85), "Z", STEEL, segs=14)
+    cyl(base, PIPE_R + 0.03, 0.03, (0, 0, 1.985), "Z", IRON, segs=14)
+    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, 0, 1.985), "Z", OUT, segs=14)
+    # chimney at the back corner
+    cyl(base, 0.12, 0.85, (1.15, 1.10, 1.55), "Z", IRON, segs=16)
+    # water inlet: a pipe stub down to the underside of the centre cell, green ring at the bed
+    cyl(base, PIPE_R, 0.10, (0, 0, 0.05), "Z", STEEL, segs=14)
+    ring(base, PIPE_R + 0.035, PIPE_R + 0.01, 0.035, (0, 0, 0.012), "Z", IN, segs=14)
+    beam(base, (0, 0, 0.10), (0, 0.40, 0.40), 0.10, 0.10, STEEL)               # feed pipe to the boiler
+    # cylinders (right, front) and crosshead guide towards the flywheel
+    cyl(base, 0.20, 0.70, (0.95, -0.55, 0.55), "Y", STEEL, segs=20)
+    box(base, (0.10, 0.70, 0.10), (0.60, -0.95, 0.55), IRON)
+    # item hoppers on both sides (future conveyor inputs)
+    for sx in (-1, 1):
+        box(base, (0.30, 0.60, 0.40), (sx * 1.30, 0.55, 1.45), WOOD)
+    # main bearings for the output shaft
+    for y in (-1.25, -0.55):
+        box(base, (0.18, 0.12, 0.44), (0, y, 0.30), IRON)
+        box(base, (0.20, 0.14, 0.10), (0, y, C), RUST)
+    out = [to_object(base, "feSteamEngine_Base", bevel=0.005)]
+    w = bmesh.new()
+    shaft_end(w, 0.0, -1.5)                                                    # out of the front face (y = -1.5)
+    ring(w, 0.45, 0.39, 0.10, (0, -0.90, 0), "Y", IRON, segs=40)               # flywheel
+    cyl(w, 0.08, 0.14, (0, -0.90, 0), "Y", IRON, segs=16)
+    for k in range(8):
+        a = k * math.pi / 4
+        m = Matrix.Rotation(a, 4, "Y") @ Matrix.Translation((0.23, -0.90, 0))
+        r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+        _finish(w, IRON, m @ Matrix.Diagonal((0.32, 0.04, 0.05, 1.0)), r["verts"])
+    cyl(w, 0.14, 0.04, (0, -0.30, 0), "Y", RUST, segs=20)                     # crank disc
+    out.append(to_object(w, "FeSpin_SteamFlywheel", location=(0, 0, C), bevel=0.002))
+    return out
+
+
 AXLE_Z = C
 
 
@@ -530,7 +703,12 @@ MODELS = {
     "feClutch": model_clutch,
     "feTorqueGauge": model_gauge,
     "feWaterWheel": model_waterwheel,
-    "feSteamEngine": model_steam_engine,
+    "feSteamEngine": model_big_steam_engine,
+    "fePipe": model_pipe,
+    "feWaterTank": model_water_tank,
+    "feMechPump": model_mech_pump,
+    "feElecPump": model_elec_pump,
+    "feCondenser": model_condenser,
 }
 
 

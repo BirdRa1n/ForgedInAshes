@@ -158,10 +158,12 @@ namespace FerroEngrenagem
             }
             else
             {
-                net = Kinetic.Get(world, pos);
+                node = Kinetic.NodeOf(world, pos);
+                net = Kinetic.Get(world, node);
                 if (net == null) return;
                 running = net.Running;
-                if (running) targetRpm = net.RpmAt(pos);
+                if (running) targetRpm = Kinetic.IsMultiEngine(world.GetBlock(pos).Block) || net.Factor.ContainsKey(node)
+                    ? net.RpmAt(node) : 0f;
                 BlockValue bv = world.GetBlock(pos);
                 if (Kinetic.Kind(bv.Block) == KineticKind.SpeedBox) ratio = BlockFeKinetic.Ratio(bv);
             }

@@ -101,6 +101,11 @@ namespace FerroEngrenagem
         {
             Block b = te.blockValue.Block;
             if (NeedsWater(b) && !HasWater(world, pos)) return "water";
+            if (SteamEngine.Is(b))
+            {
+                FluidStore.EnsureLoaded();
+                if (FluidStore.Get(pos).Amount <= 0.01f) return "water";
+            }
             string lube = LubeItem(b);
             if (lube != null && LubeSlot(te.ItemSlots, lube) < 0) return "lube";
             return null;
@@ -142,6 +147,8 @@ namespace FerroEngrenagem
             burnt.TryGetValue(pos, out acc);
             acc += dt;
             float per = TorqueEngine.SecondsPerUnit(b);
+            // the big Steam Engine burns in proportion to its load
+            if (SteamEngine.Is(b) && world != null) per /= SteamEngine.Factor(world, pos, b);
             if (acc >= per)
             {
                 acc -= per;

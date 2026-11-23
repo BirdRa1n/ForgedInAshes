@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -62,6 +62,7 @@ namespace FerroEngrenagem
                 case "gauge": Kind = KineticKind.Gauge; break;
                 case "inverter": Kind = KineticKind.Inverter; break;
                 case "waterwheel": Kind = KineticKind.WaterWheel; break;
+                case "pump": Kind = KineticKind.Pump; break;
                 default: Kind = KineticKind.Gearbox; break;
             }
             if (Properties != null && Properties.Contains("FeShaftAxis"))
@@ -103,6 +104,19 @@ namespace FerroEngrenagem
                 case KineticKind.Regulator: return Limits.Length;
                 default: return 0;
             }
+        }
+
+        public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue,
+                                          PlatformUserIdentifierAbs _addedByPlayer)
+        {
+            base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue, _addedByPlayer);
+            if (!_blockValue.ischild && Fluids.Kind(this) != FluidKind.None) FluidStore.Register(_blockPos);
+        }
+
+        public override void OnBlockRemoved(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
+        {
+            base.OnBlockRemoved(_world, _chunk, _blockPos, _blockValue);
+            if (!_blockValue.ischild && Fluids.Kind(this) != FluidKind.None) FluidStore.Unregister(_blockPos);
         }
 
         // ModelEntity blocks get the spin animator (KineticSpinner.cs). Shape="New" blocks are meshed into the
@@ -281,6 +295,7 @@ namespace FerroEngrenagem
                 case KineticKind.Regulator:
                 case KineticKind.Inverter:
                 case KineticKind.WaterWheel:
+                case KineticKind.Pump:
                     local = ((BlockFeKinetic)bv.Block).ShaftAxis.ToVector3();
                     break;
                 case KineticKind.Motor:
@@ -293,6 +308,46 @@ namespace FerroEngrenagem
             }
             Vector3 a = bv.Block.shape.GetRotation(bv) * local;
             return new Vector3i(Mathf.RoundToInt(a.x), Mathf.RoundToInt(a.y), Mathf.RoundToInt(a.z));
+        }
+
+        // D9: the big Steam Engine is a multiblock; its only torque node is the front centre cell of its bottom
+        // layer, facing out along the model's local +Z (EnginePort). The other cells are not nodes.
+        public static bool IsMultiEngine(Block b)
+        {
+            return b != null && b.isMultiBlock && TorqueEngine.IsEngine(b);
+        }
+
+        public static bool EnginePort(World world, Vector3i cell, BlockValue bv, out Vector3i parent, out Vector3i dir)
+        {
+            parent = Fluids.ParentOf(world, cell, bv);
+            BlockValue pbv = world.GetBlock(parent);
+            dir = Fluids.Rot(pbv, Vector3.forward);
+            return cell == new Vector3i(parent.x + dir.x, parent.y + dir.y, parent.z + dir.z);
+        }
+
+        /// <summary>The torque node of the block at pos (the port cell for a multiblock engine).</summary>
+        public static Vector3i NodeOf(World world, Vector3i pos)
+        {
+            BlockValue bv = world.GetBlock(pos);
+            if (!IsMultiEngine(bv.Block)) return pos;
+            Vector3i parent, dir;
+            EnginePort(world, pos, bv, out parent, out dir);
+            return new Vector3i(parent.x + dir.x, parent.y + dir.y, parent.z + dir.z);
+        }
+
+        public static Vector3i NodeAxis(World world, Vector3i pos, BlockValue bv)
+        {
+            if (!IsMultiEngine(bv.Block)) return Axis(bv);
+            Vector3i parent, dir;
+            EnginePort(world, pos, bv, out parent, out dir);
+            return dir;
+        }
+
+        public static bool NodeHasFace(World world, Vector3i pos, BlockValue bv, Vector3i d)
+        {
+            if (!IsMultiEngine(bv.Block)) return HasFace(bv, d);
+            Vector3i parent, dir;
+            return EnginePort(world, pos, bv, out parent, out dir) && d == dir;
         }
 
         public static bool IsSource(KineticKind k)
@@ -457,7 +512,7 @@ namespace FerroEngrenagem
                 case KineticKind.TorqueCrank:
                     return TorqueState.IsSpinning(pos) ? SourceOutput(bv.Block) : 0;
                 case KineticKind.Engine:
-                    return TorqueEngine.IsRunning(world, pos) ? SourceOutput(bv.Block) : 0;
+                    return TorqueEngine.IsRunning(world, Fluids.ParentOf(world, pos, bv)) ? SourceOutput(bv.Block) : 0;
                 case KineticKind.WaterWheel:
                     return WaterTouching(world, pos, bv) > 0 ? SourceOutput(bv.Block) : 0;
                 default:
@@ -475,6 +530,7 @@ namespace FerroEngrenagem
         public static TorqueNet Get(World world, Vector3i node)
         {
             TorqueNet net;
+            node = NodeOf(world, node);
             if (byNode.TryGetValue(node, out net) && UnityEngine.Time.time - net.Time < CacheSeconds) return net;
             BlockValue start = world.GetBlock(node);
             if (Kind(start.Block) == KineticKind.None) return null;
@@ -500,7 +556,7 @@ namespace FerroEngrenagem
             net.Factor[start] = 1f;
             {
                 BlockValue sbv = world.GetBlock(start);
-                Vector3i a = Axis(sbv);
+                Vector3i a = NodeAxis(world, start, sbv);
                 net.Omega[start] = a == Vector3i.zero ? new Vector3i(1, 0, 0) : a;
                 net.EntryN[start] = new Vector3i(1, 0, 0);
             }
@@ -509,7 +565,7 @@ namespace FerroEngrenagem
                 Vector3i pos = open.Dequeue();
                 BlockValue bv = world.GetBlock(pos);
                 KineticKind kind = Kind(bv.Block);
-                Vector3i axis = Axis(bv);
+                Vector3i axis = NodeAxis(world, pos, bv);
                 Vector3i omega = net.Omega[pos];
                 Vector3i entryN = net.EntryN.ContainsKey(pos) ? net.EntryN[pos] : Vector3i.zero;
                 float f = net.Factor[pos];
@@ -529,9 +585,15 @@ namespace FerroEngrenagem
                         else if (!Same(net.RefRpm, rr)) net.Lock("speed");
                     }
                 }
+                if (kind == KineticKind.Pump && !net.Machines.ContainsKey(pos))
+                {
+                    // D9 Mechanical Pump: a torque consumer at its own node (no spin direction needed)
+                    net.Machines[pos] = f;
+                    net.MachineNode[pos] = pos;
+                }
                 foreach (Vector3i d in Dirs)
                 {
-                    if (!HasFace(bv, d)) continue;
+                    if (!NodeHasFace(world, pos, bv, d)) continue;
                     Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                     BlockValue nb = world.GetBlock(n);
                     Vector3i back = Neg(d);
@@ -540,19 +602,19 @@ namespace FerroEngrenagem
                     KineticKind nk = Kind(nb.Block);
                     if (nk != KineticKind.None)
                     {
-                        if (!HasFace(nb, back)) continue;
+                        if (!NodeHasFace(world, n, nb, back)) continue;
                         float nf = leave * EnterMult(nb, back);
                         float seen;
                         if (net.Factor.TryGetValue(n, out seen))
                         {
                             if (!Same(seen, nf)) net.Lock("speed");   // a loop that disagrees on speed
                             Vector3i nEntry = net.EntryN.ContainsKey(n) ? net.EntryN[n] : Vector3i.zero;
-                            if (OutSpin(nk, Axis(nb), net.Omega[n], nEntry, back) != -c)
+                            if (OutSpin(nk, NodeAxis(world, n, nb), net.Omega[n], nEntry, back) != -c)
                                 net.Lock("direction");               // a loop that disagrees on direction
                             continue;
                         }
                         net.Factor[n] = nf;
-                        net.Omega[n] = EnterOmega(nk, Axis(nb), d, c);
+                        net.Omega[n] = EnterOmega(nk, NodeAxis(world, n, nb), d, c);
                         if (nk == KineticKind.Gearbox || nk == KineticKind.Gauge) net.EntryN[n] = back;
                         open.Enqueue(n);
                         continue;
@@ -766,6 +828,7 @@ namespace FerroEngrenagem
             KineticKind kind = Kinetic.Kind(bv.Block);
             if (kind == KineticKind.None) return "";
             TorqueNet net = Kinetic.Get(world, pos);
+            Vector3i node = Kinetic.NodeOf(world, pos);   // a multiblock engine reads at its shaft cell
             string name = withName ? bv.Block.GetLocalizedBlockName() : "";
             string extra = "";
             if (kind == KineticKind.Shaft || kind == KineticKind.Motor || kind == KineticKind.Engine ||
@@ -825,11 +888,13 @@ namespace FerroEngrenagem
                 else if (miss == "lube")
                     extra += "\n" + Kinetic.Text("feEngineNoLube", "No Lubricant: put Lubricant in its slots");
             }
+            if (Fluids.Kind(bv.Block) != FluidKind.None)
+                extra += "\n" + FluidText.Describe(pos, bv, false);
             if (kind == KineticKind.WaterWheel)
                 extra += "\n" + (Kinetic.WaterTouching(world, pos, bv) > 0
                     ? Kinetic.Text("feWheelWater", "In the water")
                     : Kinetic.Text("feWheelDry", "No water at the paddles: place it in a river or a water channel"));
-            string text = name.Trim() + extra + "\n" + Status(net, pos);
+            string text = name.Trim() + extra + "\n" + Status(net, node);
             if (net != null)
                 foreach (KeyValuePair<Vector3i, Vector3i> w in net.WrongSpin)
                     if (w.Value == pos)

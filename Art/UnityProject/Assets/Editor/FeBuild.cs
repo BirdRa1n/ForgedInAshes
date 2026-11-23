@@ -26,7 +26,9 @@ public static class FeBuild
         "feCrank",
         // D8 torque network (Art/feKinetic/build_feKinetic.py)
         "feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
-        "feClutch", "feTorqueGauge", "feWaterWheel", "feSteamEngine"
+        "feClutch", "feTorqueGauge", "feWaterWheel", "feSteamEngine",
+        // D9 fluid network
+        "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser"
     };
 
     const string ModelsDir = "Assets/Models";
@@ -78,7 +80,9 @@ public static class FeBuild
 
             // Powered blocks: TileEntityPowered.set_BlockTransform uses blockTransform.Find("WireOffset"),
             // i.e. a DIRECT child of the prefab root, as the wire anchor. Move it up there.
-            var wire = FindDeep(inst.transform, "WireOffset");
+            // Blender renames a second "WireOffset" in the same .blend to "WireOffset.001": accept any of them.
+            var wire = FindDeep(inst.transform, "WireOffset") ?? FindPrefix(inst.transform, "WireOffset");
+            if (wire != null) wire.name = "WireOffset";
             if (wire != null) wire.SetParent(root.transform, true);
 
             // One solid box around everything that renders, in root space.
@@ -110,6 +114,17 @@ public static class FeBuild
             Debug.Log($"[FE] prefab {path}");
         }
         AssetDatabase.SaveAssets();
+    }
+
+    static Transform FindPrefix(Transform t, string prefix)
+    {
+        if (t.name.StartsWith(prefix)) return t;
+        for (int i = 0; i < t.childCount; i++)
+        {
+            var r = FindPrefix(t.GetChild(i), prefix);
+            if (r != null) return r;
+        }
+        return null;
     }
 
     static Transform FindDeep(Transform t, string name)
