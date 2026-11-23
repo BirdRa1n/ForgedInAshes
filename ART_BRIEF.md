@@ -79,6 +79,10 @@ seguir os nomes abaixo (nenhum script dentro do bundle).
   multiplicar a velocidade de um estado), `bool FeRunning`, `bool FeOverloaded`, `bool FeLocked`,
   `bool FeWrongSpin` (máquina recebendo giro ao contrário).
 
+**Modelos feitos (2026-11-23, `Art/feKinetic`)**: Manivela de Torque, Eixo, Caixa de Velocidade, Caixa de
+Transmissão, Inversor de Giro e Regulador de Torque — FBX prontos e listados no `FeBuild.cs`; falta gerar o
+bundle no Unity 2022.3.62f2 e trocar o `Model` no `blocks.xml` (passos em `Art/feKinetic/README.md`).
+
 **Placeholders**: enquanto não há modelo, os blocos com `FeSpinWhole=true` giram o primeiro filho do prefab
 vanilla, só para ver que os eventos chegam (os canos `Shape=New` não têm objeto para animar).
 

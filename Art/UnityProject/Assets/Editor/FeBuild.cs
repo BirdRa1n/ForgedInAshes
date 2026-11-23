@@ -21,7 +21,12 @@ using UnityEngine;
 public static class FeBuild
 {
     // Blocks to export (folder and FBX name under Art/). Items are not handled here yet.
-    static readonly string[] Blocks = { "feCrank" };
+    static readonly string[] Blocks =
+    {
+        "feCrank",
+        // D8 torque network (Art/feKinetic/build_feKinetic.py)
+        "feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator"
+    };
 
     const string ModelsDir = "Assets/Models";
     const string PrefabDir = "Assets/Prefabs";
