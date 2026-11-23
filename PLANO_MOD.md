@@ -230,6 +230,45 @@ passa a ser o conversor watts → torque.
 **Limites conhecidos**: cálculo no servidor/host; o giro visual em clientes multiplayer precisa de pacote de
 rede (fica com o F2-T06). Modelos começam com placeholders vanilla.
 
+### 5.5 Rede de fluidos e o Motor a Vapor grande (proposta D9, pedido do usuário 2026-11-23)
+
+Ideia: canos estilo Create levando líquidos e gases entre máquinas; o Motor a Vapor vira uma máquina grande com
+entradas e saídas de verdade, e o vapor pode ser condensado de volta em água.
+
+**Fluidos e unidades**: litros (L). Começa com **Água** e **Vapor**; o mesmo sistema serve depois para óleo,
+gasolina, Lubrificante etc. Uma rede de canos leva **um fluido por vez** (misturar = rede **bloqueada**).
+
+**Blocos**
+
+| Bloco | Função | Números (proposta) |
+|---|---|---|
+| Cano | Liga-se sozinho aos canos e portas vizinhos (como no Create); leva o fluido da rede | — |
+| Bomba Mecânica | Puxa líquido pela face de entrada (água do mundo ou um tanque) e empurra para o cano. **Consome torque** | 64 UT; 100 L/min a 32 RPM (vazão ∝ RPM) |
+| Bomba Elétrica | O mesmo, ligada por fio | 60 W; 150 L/min |
+| Condensadora | Recebe vapor por um cano e devolve água por outro. **Precisa de energia elétrica** | 120 W; condensa até 120 L/min, devolve 90 % |
+| Caixa d'Água (opcional) | Tanque para guardar fluido entre bombas e máquinas | 4.000 L |
+
+**Água do mundo**: a bomba precisa de água encostada na entrada (rio/lago com pelo menos 3 blocos de água em
+volta) e trata isso como fonte infinita — mexer no volume de água do 7DTD é caro e instável.
+
+**Motor a Vapor grande (3×3 de base, 2 de altura)**
+- **Embaixo (centro)**: entrada de **água** por cano.
+- **Laterais**: entrada de **itens** (Carvão Vegetal, Lubrificante/óleo). Por enquanto pela janela do motor;
+  quando as esteiras existirem (fase 5), elas entram pelas laterais.
+- **Em cima (centro)**: saída de **vapor** por cano (para a Condensadora). Sem cano ou com o cano cheio, o vapor
+  escapa no ar e a água se perde.
+- **Eixo de torque**: frente e trás, no centro, na altura do bloco de baixo.
+- Tanques internos grandes: 2.000 L de água, 400 de Carvão, 6 de Lubrificante.
+- **Consumo proporcional à carga**: entrega **até 1024 UT**; o consumo de carvão e água acompanha o quanto da
+  rede ele está movendo (mínimo de 10 % ligado em vazio). A 100 %: 1 carvão a cada 20 s e 60 L/min de água (que
+  vira 60 L/min de vapor). Sem água, sem carvão ou sem Lubrificante: para.
+
+**Etapas**
+1. D9 T1 — Canos, Bomba Mecânica, Bomba Elétrica e Caixa d'Água; leitura ao olhar (fluido, L/min, cheio/vazio).
+2. D9 T2 — Motor a Vapor 3×3×2 com as portas acima e consumo por carga (substitui o feSteamEngine de 1 bloco).
+3. D9 T3 — Condensadora elétrica fechando o ciclo da água.
+4. Depois — entrada de itens pelas laterais com as esteiras (fase 5) e outros fluidos.
+
 ### 5.3 Logística (opcional — "versão 2.0")
 
 | ID | Bloco | Função | Implementação |
@@ -482,6 +521,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
 | D7 | (Pedido do usuário após a F4-T03) Energia como **watts pela rede elétrica vanilla** (fios ligando Manivela/geradores às máquinas e esteiras), em vez do item Carga? | **Proposta:** bloco "Motor elétrico" encostado na máquina = consumidor vanilla (`RequiredPower` em W); patch Harmony: máquina `fe*` só fabrica com o motor vizinho energizado. Manivela vira gerador (giro soma `CurrentFuel`), Gerador a Carvão vira `PowerGenerator` a Carvão Vegetal, gerador/bateria/solar vanilla ligam direto. Remove item Carga, slot de combustível e `ChargeFuelPatches`. **Aprovado (2026-11-22).** Etapas: (1) Motor elétrico + bloqueio por energia [feita e testada; depois: motor só no **encaixe** da máquina, com contorno ao segurar, e consome o `FeMinPower` dela — testado]; (2) Manivela como gerador [feita e testada: 30 W fixos, slot de Módulo de Banco de Baterias do colega; não solta gasolina ao recolher]; (2b) **Manivela de Torque** no encaixe do motor, torque puro 30 W enquanto gira [feita e testada]; (3) Gerador a Carvão elétrico [feito e testado: `Class Generator`, queima Carvão Vegetal pelo Reabastecer, 60 W por Volante]; (4) remover Carga e geradores de Carga [feito] |
 | D8 | (Pedido do usuário após D7 etapa 3) Rede mecânica de **torque** estilo Create + Satisfactory: eixos, caixas de transmissão, caixa de velocidade, regulador, fontes de torque a carvão/gasolina, motores que somam torque e melhorias, velocidade de fabricação maior com custo muito maior? | **Proposta:** seção 5.4 (RPM + UT, sobrecarga para a rede, custo ao quadrado da velocidade, etapas T1–T5). **Aprovado (2026-11-22).** T1–T4 feitas e testadas (falta T5: modelos/arte e giro visual em multiplayer). |
+| D9 | (Pedido do usuário após o E08) Rede de **fluidos** estilo Create: canos, bombas mecânica e elétrica, Condensadora elétrica, e o Motor a Vapor como máquina grande (3×3×2) com água por baixo, itens pelas laterais, vapor por cima e consumo proporcional à carga? | **Proposta:** seção 5.5 (litros, um fluido por rede, água do mundo infinita para bombas, etapas T1–T3). Aguardando aprovação. |
 | D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | **Decidido (2026-11-22): combustível com Harmony.** EAC não é restrição para o mod (usuário). Prensa/Torno ganham slot de combustível; patch C# faz aceitarem só `feCharge`. Manivela, Carvoeira e Gerador a Carvão continuam em XML |
 
 ---
