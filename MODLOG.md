@@ -656,7 +656,12 @@ aqui fica só o que foi medido/verificado.
   `BlockPowered.OnBlockEntityTransformAfterActivated`): `FeFan*` gira no Z local (240°/s energizada, 900°/s
   condensando); `FeLevelGas` escala Y = vazão de vapor / `FeFluidRate`; `FeLevelLiquid` (azul, material novo
   `feKin_Water`) escala Y = água no buffer / `FeFluidBuffer`. Pivôs no fundo de cada câmara. Collider 1,90×1,95.
-  Não testado.
+- Teste: modelo desalinhado meio bloco das portas. IL: `BlockShapeModelEntity.GetOffsetForMultiblock` já desloca
+  −0,5 em X/Z quando a dimensão é PAR (y: −0,5+0,5 = 0). Logo um multibloco par deve ser modelado CENTRADO na origem;
+  a coluna do pai fica em Blender x −0,5. Corrigido (collider centro 0).
+- "Não gera vapor": o save mostrava a Condensadora com 200,6/200 L de água no buffer → entrada de vapor 0 (saída de
+  água sem destino/afogada), Motor a Vapor com 240 L de vapor parado. Leitura da Condensadora agora mostra a água
+  esperando e "CHEIA: a saída de água não tem para onde ir".
 
 ## Próximo passo (antigo, mantido para histórico)
 

@@ -726,7 +726,12 @@ namespace FerroEngrenagem
                 {
                     string t = name + "\n" + string.Format(Fluids.Text("feFluidCondensing", "Condensing: {0} L/min of steam"),
                         Mathf.RoundToInt(s.LastFlow));
+                    float cap = Fluids.Prop(bv.Block, "FeFluidBuffer", 200f);
+                    t += "\n" + string.Format(Fluids.Text("feCondenserWater", "Condensed water waiting: {0} / {1} L"),
+                        Mathf.RoundToInt(s.Steam), Mathf.RoundToInt(cap));
                     if (s.Note == "power") t += "\n" + Fluids.Text("feFluidNoPower", "No power: wire it to a power source");
+                    else if (s.Steam >= cap)
+                        t += "\n" + Fluids.Text("feCondenserFull", "FULL: the water outlet (front, bottom) has nowhere to go, so no steam is taken in");
                     return t.Trim();
                 }
                 case FluidKind.SteamEngine:

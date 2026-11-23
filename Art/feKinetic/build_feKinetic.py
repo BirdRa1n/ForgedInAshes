@@ -568,11 +568,11 @@ def model_elec_pump(col):
 
 
 def model_condenser(col):
-    """Condenser, 2 wide x 2 high (Unity cells x -1..0 = Blender x 0..+1; parent = Blender x 0). Upper glass
+    """Condenser, 2 wide x 2 high (centred: the game shifts an even-width model by -0.5 x, BlockShapeModelEntity.GetOffsetForMultiblock; parent column = Blender x -0.5). Upper glass
     chamber = gas (steam fill FeLevelGas), lower glass chamber = liquid (water level FeLevelLiquid, blue), a copper
     condensing coil between them and a fan on top (FeFan). Steam in at the back of the upper parent cell, water out
     at the front of the lower parent cell."""
-    X0, X1 = -0.45, 1.45
+    X0, X1 = -0.95, 0.95
     cx, w = (X0 + X1) / 2, X1 - X0
     base = bmesh.new()
     box(base, (w, 0.90, 0.12), (cx, 0, 0.06), IRON)                            # plinth
@@ -600,8 +600,8 @@ def model_condenser(col):
     ring(base, 0.36, 0.33, 0.10, (cx, 0, 1.90), "Z", IRON, segs=28)
     cyl(base, 0.05, 0.10, (cx, 0, 1.90), "Z", IRON, segs=12)
     # ports: steam in at the back of the upper parent cell (white), water out at the front of the lower parent cell
-    inlet_stub(base, (0, 0.5, 1.45), "Y", 1, GASC)
-    inlet_stub(base, (0, -0.5, 0.55), "Y", -1, WATERC)
+    inlet_stub(base, (-0.5, 0.5, 1.45), "Y", 1, GASC)
+    inlet_stub(base, (-0.5, -0.5, 0.55), "Y", -1, WATERC)
     objs = [to_object(base, "feCondenser_Base", bevel=0.004)]
     # liquid level: pivot at the chamber floor, height grows with local Z (Unity Y)
     liq = bmesh.new()
