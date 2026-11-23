@@ -573,6 +573,8 @@ aqui fica só o que foi medido/verificado.
   `unity auth login`, que exige o usuário no navegador). Até gerar, o bloco aponta para um prefab que não existe.
 - Usuário renovou o login; `unity license activate` OK; bundle de 865 KB com `feWaterWheelPrefab` (roda no centro,
   +Z no eixo).
+- Testado (usuário, log 2026-11-23 09:05): sucesso; sem erros. Rede de 86 nós e 16 fontes movendo a Prensa a
+  256 RPM (x8) com `4096/4096 UT -> ON`. F4-T04 (Roda d'Água) concluída.
 
 ## Próximo passo (antigo, mantido para histórico)
 
