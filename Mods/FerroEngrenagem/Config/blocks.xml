@@ -563,7 +563,7 @@
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
 			<property name="Class" value="FerroEngrenagem.FeKinetic, FerroEngrenagem"/>
 			<property name="FeKinetic" value="shaft"/>
-			<property name="FeShaftAxis" value="y"/>
+			<property name="FeShaftAxis" value="z"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feShaftDesc"/>
 			<property name="CustomIcon" value="metalPipeStraight"/>

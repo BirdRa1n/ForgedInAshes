@@ -30,7 +30,7 @@ namespace FerroEngrenagem
     public class BlockFeKinetic : Block
     {
         public KineticKind Kind = KineticKind.Gearbox;
-        public Vector3i ShaftAxis = new Vector3i(0, 1, 0);
+        public Vector3i ShaftAxis = new Vector3i(0, 0, 1);   // pipe_straight.fbx lies along local Z (D8 T1 test)
 
         public override void Init()
         {
@@ -62,7 +62,7 @@ namespace FerroEngrenagem
         public int Rpm = 32;
         public float Time;
 
-        public bool Overloaded { get { return Usage > Capacity; } }
+        public bool Overloaded { get { return Capacity > 0 && Usage > Capacity; } }
         public bool Running { get { return Capacity > 0 && !Overloaded; } }
     }
 
@@ -221,6 +221,7 @@ namespace FerroEngrenagem
         string prompt;
         LocalPlayerUI promptUi;
         float nextUpdate;
+        string lastShaftLog;
 
         public static void Ensure()
         {
@@ -261,7 +262,18 @@ namespace FerroEngrenagem
             if (ui.windowManager.IsModalWindowOpen() || ui.windowManager.IsCursorWindowOpen()) return;
             TorqueNet net = Kinetic.Get(world, hit.hit.blockPos);
             string name = bv.Block.GetLocalizedBlockName();
-            if (kind == KineticKind.Shaft) name += " (" + Kinetic.AxisName(bv) + ")";
+            if (kind == KineticKind.Shaft)
+            {
+                name += " (" + Kinetic.AxisName(bv) + ")";
+                // diagnostic while the placeholder model's axis is confirmed in game
+                string key = hit.hit.blockPos + "|" + bv.rotation;
+                if (key != lastShaftLog)
+                {
+                    lastShaftLog = key;
+                    Log.Out(FerroEngrenagemMod.LogPrefix + "look shaft at " + hit.hit.blockPos + " rot=" + bv.rotation +
+                            " axis=" + Kinetic.AxisName(bv) + " net nodes=" + (net == null ? 0 : net.Nodes.Count));
+                }
+            }
             prompt = name + "\n" + Status(net);
             promptUi = ui;
         }
