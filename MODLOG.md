@@ -748,6 +748,13 @@ aqui fica só o que foi medido/verificado.
   ingredientes que chegam pela esteira vão para um estoque interno (até 5 vezes a receita); com a fila vazia e tudo no
   estoque, põe 1 `RecipeQueueItem` na última posição. Desligar ou remover a máquina solta o estoque. Leitura mostra a
   receita e os ingredientes. Salvo em `FerroEngrenagem_autocraft.txt`.
+- Esteira de Descida (`feConveyorDown`, `FeBeltRise` -1): recebe da esteira um bloco ACIMA atrás (a de cima a vê como
+  saída quando não há nada na frente no nível dela) e entrega na frente no nível dela; modelo = rampa espelhada.
+  `Links` também procura entradas um nível acima.
+- Esteira com Filtro (`feConveyorFilter`, `FeBeltFilter`): radial "Ajustar filtro" com o item na mão (mão vazia
+  limpa); itens iguais ao filtro vão para as saídas laterais, os outros seguem em frente; cada tipo espera se o
+  caminho dele não existe (`Belt.ExitsFor`). O item do filtro flutua girando sobre a esteira (host). Filtros salvos no
+  arquivo das esteiras ("Q;x;y;z;item"). Licença do Unity expirou de novo: `unity license activate` resolveu.
 
 ## Próximo passo (antigo, mantido para histórico)
 

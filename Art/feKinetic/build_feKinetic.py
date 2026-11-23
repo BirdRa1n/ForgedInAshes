@@ -1061,6 +1061,38 @@ def model_funnel(col):
     return [to_object(base, "feFunnel_Base", bevel=0.003)]
 
 
+def model_conveyor_down(col):
+    """Conveyor down ramp (D10): takes items from the belt one block UP behind it (back end at 1.62) and lowers them
+    to its front at belt height (0.62). The mirror of the up ramp; the slats slide down the slope."""
+    base = bmesh.new()
+    slope = Matrix.Rotation(math.pi / 4, 4, "X")                                   # +Y (back) end goes up
+    L = math.sqrt(2.0)
+    for sx in (-1, 1):
+        box(base, (0.06, L, 0.10), (sx * 0.44, 0, 1.08), PAINT, slope)              # side rails
+        for dy in (0.25, -0.30):                                                     # arrows down the slope
+            for k, h in enumerate((0.03, 0.06, 0.09)):
+                y = dy - 0.05 * k
+                box(base, (0.012, 0.05, h), (sx * 0.476, y, 1.08 + y), OUT, slope)
+        box(base, (0.06, 0.06, 1.48), (sx * 0.44, 0.42, 0.74), IRON)               # back legs (tall)
+        box(base, (0.06, 0.06, 0.53), (sx * 0.44, -0.42, 0.265), IRON)             # front legs
+        box(base, (0.06, 0.84, 0.05), (sx * 0.44, 0, 0.12), IRON)
+        cyl(base, 0.09, 0.03, (sx * 0.47, 0, C), "X", IRON, segs=20)               # bearing plates
+    box(base, (0.82, 0.10, 0.04), (0, 0.42, 0.12), IRON)
+    box(base, (0.82, 0.10, 0.04), (0, -0.42, 0.12), IRON)
+    box(base, (0.80, L, 0.02), (0, 0, 1.065), IRON, slope)                          # bed
+    objs = [to_object(base, "feConveyorDown_Base", bevel=0.003)]
+    sl = bmesh.new()
+    for k in range(10):
+        y = -0.5 + 0.0625 + k * 0.0884
+        if y > 0.45:
+            break
+        z = 0.62 + (0.5 + y) - 0.028
+        box(sl, (0.78, 0.075, 0.03), (0, y, z), RUST, slope)
+    objs.append(to_object(sl, "FeBeltSlats"))
+    _belt_rollers(objs, 1.56, 0.56)
+    return objs
+
+
 AXLE_Z = C
 
 
@@ -1140,6 +1172,7 @@ MODELS = {
     "feConveyor": model_conveyor,
     "feConveyorRamp": model_conveyor_ramp,
     "feFunnel": model_funnel,
+    "feConveyorDown": model_conveyor_down,
 }
 
 

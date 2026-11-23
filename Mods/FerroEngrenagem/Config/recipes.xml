@@ -83,6 +83,15 @@
 			<ingredient name="feConveyor" count="2"/>
 			<ingredient name="feResourceIronPlate" count="1"/>
 		</recipe>
+		<recipe name="feConveyorDown" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
+			<ingredient name="feConveyor" count="2"/>
+			<ingredient name="feResourceIronPlate" count="1"/>
+		</recipe>
+		<recipe name="feConveyorFilter" count="1" craft_area="feElectronics" craft_time="15" always_unlocked="true">
+			<ingredient name="feConveyor" count="1"/>
+			<ingredient name="resourceElectricParts" count="2"/>
+			<ingredient name="feResourceGear" count="1"/>
+		</recipe>
 		<recipe name="feBeltCrate" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
 			<ingredient name="resourceForgedIron" count="10"/>
 			<ingredient name="feResourceIronPlate" count="4"/>

@@ -56,7 +56,18 @@ namespace FerroEngrenagem
 
         public static bool IsRamp(Block b)
         {
-            return Is(b) && Fluids.Prop(b, "FeBeltRise", 0f) > 0f;
+            return Is(b) && Fluids.Prop(b, "FeBeltRise", 0f) != 0f;
+        }
+
+        /// <summary>A down ramp: takes items from the belt one block up behind it, gives them in front at its level.</summary>
+        public static bool IsDown(Block b)
+        {
+            return Is(b) && Fluids.Prop(b, "FeBeltRise", 0f) < 0f;
+        }
+
+        public static bool IsFilter(Block b)
+        {
+            return Is(b) && b.Properties != null && b.Properties.Contains("FeBeltFilter") && b.Properties.GetBool("FeBeltFilter");
         }
 
         public static Vector3i Front(BlockValue bv)
@@ -112,7 +123,7 @@ namespace FerroEngrenagem
         {
             List<Vector3i> l = new List<Vector3i>();
             Vector3i f = Front(bv);
-            if (IsRamp(bv.Block))
+            if (IsRamp(bv.Block) && !IsDown(bv.Block))
             {
                 Vector3i c = Add(Add(pos, f), Up);
                 if (Accepts(world, c, f)) l.Add(c);
@@ -120,6 +131,14 @@ namespace FerroEngrenagem
             }
             Vector3i fc = Add(pos, f);
             if (Accepts(world, fc, f)) l.Add(fc);
+            else if (!IsDown(bv.Block))
+            {
+                // nothing in front at this level: a down ramp one block below in front, pointing the same way
+                Vector3i dc = Sub(fc, Up);
+                BlockValue db = world.GetBlock(dc);
+                if (IsDown(db.Block) && Front(db) == f) l.Add(dc);
+            }
+            if (IsDown(bv.Block)) return l;
             Vector3i left = Left(bv);
             foreach (Vector3i s in new Vector3i[] { left, Neg(left) })
             {
@@ -168,7 +187,7 @@ namespace FerroEngrenagem
             List<Vector3i> l = Outputs(world, pos, bv);
             foreach (Vector3i h in Flat)
             {
-                foreach (Vector3i c in new Vector3i[] { Add(pos, h), Add(Sub(pos, Up), h) })
+                foreach (Vector3i c in new Vector3i[] { Add(pos, h), Add(Sub(pos, Up), h), Add(Add(pos, Up), h) })
                 {
                     if (l.Contains(c)) continue;
                     BlockValue cb = world.GetBlock(c);
@@ -196,9 +215,29 @@ namespace FerroEngrenagem
         }
 
         /// <summary>Give the item its exit: the next output in turn (round robin per belt).</summary>
-        public static void ChooseExit(World world, Vector3i pos, BlockValue bv, BeltItem it)
+        /// <summary>The exits an item may take here. A Filter Belt sends the items that match its filter to its side
+        /// outputs and the others straight on (front belt or machine); each kind waits if its way is missing.</summary>
+        public static List<Vector3i> ExitsFor(World world, Vector3i pos, BlockValue bv, ItemStack st)
         {
             List<Vector3i> outs = Exits(world, pos, bv);
+            if (!IsFilter(bv.Block)) return outs;
+            string filter = BeltStore.Filter(pos);
+            if (filter == null) return outs;
+            bool match = st != null && st.itemValue.ItemClass != null && st.itemValue.ItemClass.GetItemName() == filter;
+            Vector3i f = Front(bv);
+            List<Vector3i> l = new List<Vector3i>();
+            foreach (Vector3i o in outs)
+            {
+                Vector3i d = Sub(o, pos);
+                bool side = d.y == 0 && d.x * f.x + d.z * f.z == 0;
+                if (side == match) l.Add(o);
+            }
+            return l;
+        }
+
+        public static void ChooseExit(World world, Vector3i pos, BlockValue bv, BeltItem it)
+        {
+            List<Vector3i> outs = ExitsFor(world, pos, bv, it.Stack);
             if (outs.Count == 0) { it.HasExit = false; return; }
             int k;
             turn.TryGetValue(pos, out k);
@@ -212,6 +251,11 @@ namespace FerroEngrenagem
         {
             Vector3 c = pos.ToVector3() + new Vector3(0.5f, Top, 0.5f);
             Vector3 f = Front(bv).ToVector3();
+            if (IsDown(bv.Block))
+            {
+                dir = (f - Vector3.up).normalized;
+                return c + f * (it.P - 0.5f) + Vector3.up * (1f - it.P);
+            }
             if (IsRamp(bv.Block))
             {
                 dir = (f + Vector3.up).normalized;
@@ -241,6 +285,14 @@ namespace FerroEngrenagem
             float v = Speed(world, pos, bv);
             string t = string.Format(Kinetic.Text("feBeltInfo", "Items: {0} / {1} - {2} blocks/s"), n, Capacity,
                                      v.ToString("0.0", CultureInfo.InvariantCulture));
+            if (IsFilter(bv.Block))
+            {
+                string fl = BeltStore.Filter(pos);
+                t += "\n" + (fl == null
+                    ? Kinetic.Text("feFilterNone", "No filter: hold an item and choose Set filter (empty hand clears)")
+                    : string.Format(Kinetic.Text("feFilterIs", "Filter: {0} to the sides, the rest straight on"),
+                                    ItemClass.GetItemClass(fl, false) != null ? ItemClass.GetItemClass(fl, false).GetLocalizedItemName() : fl));
+            }
             int outs = Outputs(world, pos, bv).Count;
             if (outs > 1) t += "\n" + string.Format(Kinetic.Text("feBeltSplit", "Splits the items between {0} belts"), outs);
             if (items != null && n > 0)
@@ -289,6 +341,22 @@ namespace FerroEngrenagem
         static int nextId = 1;
         static readonly Dictionary<Vector3i, List<BeltItem>> belts = new Dictionary<Vector3i, List<BeltItem>>();
         public static readonly HashSet<Vector3i> Funnels = new HashSet<Vector3i>();
+        public static readonly Dictionary<Vector3i, string> Filters = new Dictionary<Vector3i, string>();
+
+        public static string Filter(Vector3i p)
+        {
+            EnsureLoaded();
+            string f;
+            return Filters.TryGetValue(p, out f) ? f : null;
+        }
+
+        public static void SetFilter(Vector3i p, string item)
+        {
+            EnsureLoaded();
+            if (string.IsNullOrEmpty(item)) Filters.Remove(p);
+            else Filters[p] = item;
+            dirty = true;
+        }
 
         public static ICollection<Vector3i> Belts { get { return belts.Keys; } }
 
@@ -305,6 +373,7 @@ namespace FerroEngrenagem
             loadedFor = f;
             belts.Clear();
             Funnels.Clear();
+            Filters.Clear();
             dirty = false;
             if (!File.Exists(f)) return;
             try
@@ -312,6 +381,11 @@ namespace FerroEngrenagem
                 foreach (string line in File.ReadAllLines(f))
                 {
                     string[] t = line.Split(';');
+                    if (t.Length == 5 && t[0] == "Q")
+                    {
+                        Filters[new Vector3i(int.Parse(t[1]), int.Parse(t[2]), int.Parse(t[3]))] = t[4];
+                        continue;
+                    }
                     if (t.Length == 4 && t[0] == "F")
                     {
                         Funnels.Add(new Vector3i(int.Parse(t[1]), int.Parse(t[2]), int.Parse(t[3])));
@@ -345,6 +419,9 @@ namespace FerroEngrenagem
             try
             {
                 StringBuilder sb = new StringBuilder();
+                foreach (KeyValuePair<Vector3i, string> q in Filters)
+                    sb.Append("Q;").Append(q.Key.x).Append(';').Append(q.Key.y).Append(';').Append(q.Key.z).Append(';')
+                      .Append(q.Value).Append('\n');
                 foreach (Vector3i fp in Funnels)
                     sb.Append("F;").Append(fp.x).Append(';').Append(fp.y).Append(';').Append(fp.z).Append('\n');
                 foreach (KeyValuePair<Vector3i, List<BeltItem>> kv in belts)
@@ -561,7 +638,7 @@ namespace FerroEngrenagem
         // split never stalls on one blocked branch
         bool Pass(World world, Vector3i from, BlockValue bv, BeltItem it, float over)
         {
-            List<Vector3i> outs = Belt.Exits(world, from, bv);
+            List<Vector3i> outs = Belt.ExitsFor(world, from, bv, it.Stack);
             if (outs.Count == 0) return false;
             Vector3i mcell, mparent;
             bool machine = Belt.MachineAt(world, from, bv, out mcell, out mparent);
@@ -851,15 +928,54 @@ namespace FerroEngrenagem
                     }
                 }
             }
+            ShowFilters(world, me);
             List<int> gone = new List<int>();
             foreach (KeyValuePair<int, Shown> kv in shown) if (kv.Value.Seen != frame) gone.Add(kv.Key);
             foreach (int id in gone) { Kill(shown[id]); shown.Remove(id); }
+        }
+
+        readonly Dictionary<Vector3i, Shown> signs = new Dictionary<Vector3i, Shown>();
+        readonly Dictionary<Vector3i, string> signItem = new Dictionary<Vector3i, string>();
+
+        void ShowFilters(World world, Vector3 me)
+        {
+            List<Vector3i> drop = new List<Vector3i>();
+            foreach (KeyValuePair<Vector3i, Shown> kv in signs)
+            {
+                string f = BeltStore.Filter(kv.Key);
+                string had;
+                signItem.TryGetValue(kv.Key, out had);
+                if (f == null || f != had || (kv.Key.ToVector3() - me).sqrMagnitude > 60f * 60f) drop.Add(kv.Key);
+            }
+            foreach (Vector3i p in drop) { Kill(signs[p]); signs.Remove(p); signItem.Remove(p); }
+            foreach (KeyValuePair<Vector3i, string> q in BeltStore.Filters)
+            {
+                if ((q.Key.ToVector3() - me).sqrMagnitude > 60f * 60f) continue;
+                Shown s;
+                if (!signs.TryGetValue(q.Key, out s))
+                {
+                    ItemValue iv = ItemClass.GetItem(q.Value, false);
+                    if (iv == null || iv.IsEmpty()) continue;
+                    s = Make(new ItemStack(iv, 1));
+                    signs[q.Key] = s;
+                    signItem[q.Key] = q.Value;
+                    if (s.Go != null) s.Go.transform.localScale = Vector3.one * 0.7f;
+                }
+                if (s.Go != null)
+                {
+                    s.Go.transform.position = q.Key.ToVector3() + new Vector3(0.5f, 1.05f + 0.04f * Mathf.Sin(Time.time * 2f), 0.5f) - Origin.position;
+                    s.Go.transform.rotation = Quaternion.Euler(0f, Time.time * 45f, 0f);
+                }
+            }
         }
 
         void Clear()
         {
             foreach (Shown s in shown.Values) Kill(s);
             shown.Clear();
+            foreach (Shown s in signs.Values) Kill(s);
+            signs.Clear();
+            signItem.Clear();
         }
 
         static void Kill(Shown s)
@@ -955,7 +1071,8 @@ namespace FerroEngrenagem
             if (s.slats != null) s.basePos = s.slats.localPosition;
             if (s.cslL != null) s.baseL = s.cslL.localRotation;
             if (s.cslR != null) s.baseR = s.cslR.localRotation;
-            s.slide = Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
+            s.slide = Belt.IsDown(block) ? (Vector3.forward - Vector3.up)
+                    : Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
             s.next = 0f;
             if (!Belt.IsRamp(block)) s.Apply(0, false, false, false, false, false);
         }
@@ -1080,6 +1197,35 @@ namespace FerroEngrenagem
         {
             base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
             BeltShape.Attach(_ebcd, _blockPos, this);
+        }
+
+        // Filter Belt: "Set filter" with the item in hand (empty hand clears)
+        public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue,
+                                                                           Vector3i _blockPos, EntityAlive _entityFocusing)
+        {
+            BlockActivationCommand[] b = base.GetBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
+            if (!Belt.IsFilter(this)) return b;
+            BlockActivationCommand[] r = new BlockActivationCommand[b.Length + 1];
+            r[0] = new BlockActivationCommand("fe_filter", "loot_sort", true, false, null);
+            b.CopyTo(r, 1);
+            return r;
+        }
+
+        public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
+                                              BlockValue _blockValue, EntityPlayerLocal _player)
+        {
+            if (_commandName == "fe_filter")
+            {
+                ItemValue held = _player.inventory.holdingItemItemValue;
+                string name = held == null || held.IsEmpty() || held.ItemClass == null || held.ItemClass.GetItemName() == "meleeHandPlayer"
+                    ? null : held.ItemClass.GetItemName();
+                BeltStore.SetFilter(_blockPos, name);
+                GameManager.ShowTooltip(_player, name == null ? Kinetic.Text("feFilterCleared", "Filter cleared")
+                    : string.Format(Kinetic.Text("feFilterIs", "Filter: {0} to the sides, the rest straight on"),
+                                    held.ItemClass.GetLocalizedItemName()), false, false, 0f);
+                return true;
+            }
+            return base.OnBlockActivated(_commandName, _world, _blockPos, _blockValue, _player);
         }
     }
 

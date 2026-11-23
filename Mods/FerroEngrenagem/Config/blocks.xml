@@ -535,6 +535,23 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorRampPrefab"/>
 			<property name="SortOrder2" value="0031"/>
 		</block>
+		<!-- D10: Conveyor Down Ramp. Takes items from the belt one block up behind it; gives them in front at its level. -->
+		<block name="feConveyorDown">
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltRise" value="-1"/>
+			<property name="DescriptionKey" value="feConveyorDownDesc"/>
+			<property name="CustomIconTint" value="b07040"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorDownPrefab"/>
+			<property name="SortOrder2" value="0034"/>
+		</block>
+		<!-- D10: Filter Belt. Items equal to its filter go to its side belts, the others straight on. -->
+		<block name="feConveyorFilter">
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltFilter" value="true"/>
+			<property name="DescriptionKey" value="feConveyorFilterDesc"/>
+			<property name="CustomIconTint" value="60c0ff"/>
+			<property name="SortOrder2" value="0035"/>
+		</block>
 		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
 		     sides (stacks first, then empty slots); while a player has it open or it is full, the items wait. -->
 		<block name="feBeltCrate">
