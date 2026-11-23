@@ -66,6 +66,21 @@
 			<property name="SoundPickup" value="parts_grab"/>
 			<property name="SoundPlace" value="parts_place"/>
 		</item>
+		<!-- D9: Steam Engine Piston (2 per Steam Engine) -->
+		<item name="feSteamPiston">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="120"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMechanicalParts"/>
+			<property name="CustomIconTint" value="a0c0ff"/>
+			<property name="DescriptionKey" value="feSteamPistonDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
 	</append>
 
 	<!-- F2-T02: energy items (route A). FuelValue is burn time in SECONDS (TileEntityWorkstation.getFuelTime).

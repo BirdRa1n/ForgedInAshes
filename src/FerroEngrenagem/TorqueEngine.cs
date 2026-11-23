@@ -262,6 +262,7 @@ namespace FerroEngrenagem
         public static void Postfix(BlockPowerSource __instance, Vector3i _blockPos, BlockEntityData _ebcd)
         {
             if (TorqueEngine.IsEngine(__instance)) KineticSpinner.Attach(_ebcd, _blockPos, __instance);
+            if (SteamEngine.Is(__instance)) SteamVent.Attach(_ebcd, _blockPos);
         }
     }
 }

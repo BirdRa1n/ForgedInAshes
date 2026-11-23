@@ -414,15 +414,15 @@
 			<property name="Class" value="Powered"/>
 			<property name="RequiredPower" value="30"/>
 			<property name="FeMotor" value="true"/>
+			<property name="OnlySimpleRotations" value="false"/>
 			<property name="FeTorqueOutput" value="128"/>
 			<property name="DescriptionKey" value="feElectricMotorDesc"/>
-			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="electricwirerelay"/>
 			<property name="CustomIconTint" value="ffa040"/>
 			<property name="DisplayType" value="blockElectrical"/>
 			<property name="Material" value="Mmetal_weak"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Electrical/relayPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feElectricMotorPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="HandleFace" value="Bottom"/>
@@ -704,6 +704,7 @@
 		<!-- D8 T4: Electric Motor upgrades (more torque, more watts; same socket / shaft rules). -->
 		<block name="feElectricMotor2">
 			<property name="Extends" value="feElectricMotor"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feElectricMotor2Prefab"/>
 			<property name="RequiredPower" value="60"/>
 			<property name="FeTorqueOutput" value="256"/>
 			<property name="DescriptionKey" value="feElectricMotor2Desc"/>
@@ -712,6 +713,11 @@
 		</block>
 		<block name="feElectricMotor3">
 			<property name="Extends" value="feElectricMotor"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="MultiBlockDim" value="3,2,3"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feElectricMotor3Prefab"/>
 			<property name="RequiredPower" value="120"/>
 			<property name="FeTorqueOutput" value="512"/>
 			<property name="DescriptionKey" value="feElectricMotor3Desc"/>
@@ -788,6 +794,7 @@
 			     centre, steam out over the top centre, torque out of the front centre of the bottom layer. Up to 1024 UT;
 			     Charcoal and water used in proportion to the load (min 10 %). Lubricant in its slots, 1 per 5 min. -->
 			<property name="Extends" value="feCoalEngine"/>
+			<property name="StabilitySupport" value="true"/>
 			<property name="MultiBlockDim" value="3,2,3"/>
 			<property name="DisplayType" value="blockMulti"/>
 			<property name="FeFluid" value="steamengine"/>

@@ -607,6 +607,22 @@ aqui fica só o que foi medido/verificado.
   3×3×2. `FeBuild` aceita `WireOffset.001`. Bundle 1,1 MB.
 - Não testado no jogo ainda.
 
+## 2026-11-23 — D9 rodada 2: indicadores de portas, pistões, vapor visível, motores elétricos
+
+- Teste do usuário: "não gera vapor". O arquivo de fluidos mostrou o motor com 980 L de água e 52 L de vapor: gerava,
+  mas escapava invisível; o torque dele travava a rede (`LOCKED(direction/speed)` ao entrar como 17ª fonte).
+  Cano em cima do motor caía: o motor tinha `StabilitySupport=false` → agora true (e no Motor Industrial).
+- Portas de fluido no marcador (segurando peça de torque OU de fluido): azul = entrada de água, branco = saída de
+  vapor, ciano = já ligada; amarelo = entrada de esteira (Motor a Vapor, laterais da camada de cima; só visual até a
+  fase 5). Tanques não mostram (todos os lados).
+- Motor a Vapor: entradas de água também nas laterais esquerda/direita/trás da camada de baixo. Modelo: dois
+  pistões `FePiston_*` (KineticSpinner os desliza no Z local em fase com o giro, 90° entre eles), puffs de vapor
+  `FeSteamPuff_*` (SteamVent.cs: sobem e crescem enquanto o motor roda sem cano no topo), portas de esteira.
+- Item `feSteamPiston` (Metalúrgica); o Motor a Vapor usa 2 no lugar dos motores pequenos.
+- Motores elétricos com modelo próprio; o Industrial (`feElectricMotor3`) virou multibloco 3×2×3 (eixo na frente da
+  camada de baixo; `Kinetic.IsMultiEngine` agora vale para motores; Capacity lê o TE do pai). Bundle 1,5 MB.
+- Não testado ainda: multibloco `Class=Powered` (fio no Motor Industrial) e os pistões/puffs no jogo.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

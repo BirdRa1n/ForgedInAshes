@@ -162,8 +162,14 @@
 			<ingredient name="feResourceGear" count="6"/>
 			<ingredient name="feResourceIronShaft" count="4"/>
 		</recipe>
+		<recipe name="feSteamPiston" count="1" craft_area="feMetalShop" craft_time="20" always_unlocked="true">
+			<ingredient name="feResourceIronShaft" count="2"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+			<ingredient name="resourceMetalPipe" count="1"/>
+			<ingredient name="feResourceLubricant" count="1"/>
+		</recipe>
 		<recipe name="feSteamEngine" count="1" craft_area="feGarage" craft_time="90" always_unlocked="true">
-			<ingredient name="smallEngine" count="2"/>
+			<ingredient name="feSteamPiston" count="2"/>
 			<ingredient name="feFlywheel" count="6"/>
 			<ingredient name="feResourceIronPlate" count="30"/>
 			<ingredient name="feResourceGear" count="10"/>

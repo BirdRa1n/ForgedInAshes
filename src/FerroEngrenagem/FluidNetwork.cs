@@ -153,13 +153,41 @@ namespace FerroEngrenagem
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = Water });
                     break;
                 case FluidKind.SteamEngine:
-                    // parent = bottom centre cell (vanilla multiblock layout: x/z -1..1, y 0..1)
+                    // parent = bottom centre cell (vanilla multiblock layout: x/z -1..1, y 0..1). Water in under the
+                    // centre and on the left, right and back of the bottom layer; steam out over the top centre.
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = new Vector3i(0, -1, 0), Out = false, Fluid = Water });
+                    foreach (Vector3 side in new Vector3[] { Vector3.left, Vector3.right, Vector3.back })
+                    {
+                        Vector3i d = Rot(bv, side);
+                        l.Add(new FluidPort { Owner = pos, Cell = Add(pos, d), Dir = d, Out = false, Fluid = Water });
+                    }
                     Vector3i top = Add(pos, new Vector3i(0, 1, 0));
                     l.Add(new FluidPort { Owner = pos, Cell = top, Dir = new Vector3i(0, 1, 0), Out = true, Fluid = Steam });
                     break;
             }
             return l;
+        }
+
+        /// <summary>Conveyor (item) inputs of a device, for the markers only until conveyors exist (phase 5): the
+        /// Steam Engine takes items on the left and right of its upper layer.</summary>
+        public static List<FluidPort> ConveyorPorts(World world, Vector3i pos)
+        {
+            List<FluidPort> l = new List<FluidPort>();
+            BlockValue bv = world.GetBlock(pos);
+            if (Kind(bv.Block) != FluidKind.SteamEngine) return l;
+            foreach (Vector3 side in new Vector3[] { Vector3.left, Vector3.right })
+            {
+                Vector3i d = Rot(bv, side);
+                l.Add(new FluidPort { Owner = pos, Cell = new Vector3i(pos.x + d.x, pos.y + 1, pos.z + d.z), Dir = d, Out = false, Fluid = "items" });
+            }
+            return l;
+        }
+
+        /// <summary>Is there something that takes or gives fluid on the other side of this port?</summary>
+        public static bool PortConnected(World world, FluidPort p)
+        {
+            Vector3i n = Add(p.Cell, p.Dir);
+            return HasPortAt(world, n, Neg(p.Dir));
         }
 
         /// <summary>Does a device cell have a port facing dir (for pipe connections and the arms of pipe models)?</summary>

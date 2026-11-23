@@ -58,7 +58,17 @@ namespace FerroEngrenagem
         Animator anim;
         readonly HashSet<int> animParams = new HashSet<int>();
 
-        float targetRpm, rpm, ratio = 1f, nextQuery;
+        float targetRpm, rpm, ratio = 1f, nextQuery, angle;
+
+        // FePiston* parts: slide back and forth along their own local Z with the spin (two-cylinder engine)
+        class Piston
+        {
+            public Transform T;
+            public Vector3 Base;
+            public float Phase;
+            public float Amp = 0.12f;
+        }
+        readonly List<Piston> pistons = new List<Piston>();
         Vector3 omega = Vector3.forward;
         bool running, overloaded, locked, wrong, inverter;
         string lastLog;
@@ -91,6 +101,8 @@ namespace FerroEngrenagem
             lastLog = null;
             inverter = Kinetic.Kind(block) == KineticKind.Inverter;
             parts.Clear();
+            pistons.Clear();
+            angle = 0f;
             Collect(transform);
             if (parts.Count == 0 && block.Properties != null && block.Properties.Contains("FeSpinWhole") &&
                 block.Properties.GetBool("FeSpinWhole") && transform.childCount > 0)
@@ -112,6 +124,14 @@ namespace FerroEngrenagem
                 Transform c = t.GetChild(i);
                 // case-sensitive: the Spin Inverter model itself is named "feSpinInverter" and must not spin as a whole
                 if (c.name.StartsWith("FeSpin", System.StringComparison.Ordinal)) parts.Add(Parse(c));
+                else if (c.name.StartsWith("FePiston", System.StringComparison.Ordinal))
+                {
+                    Piston p = new Piston();
+                    p.T = c;
+                    p.Base = c.localPosition;
+                    p.Phase = pistons.Count * Mathf.PI / 2f;
+                    pistons.Add(p);
+                }
                 Collect(c);
             }
         }
@@ -210,6 +230,17 @@ namespace FerroEngrenagem
                     float dir = Vector3.Dot(w, p.T.forward) < 0f ? -1f : 1f;
                     if (p.Rev) dir = -dir;
                     p.T.Rotate(Vector3.forward, dir * r * DegPerRpmSecond * Time.deltaTime, Space.Self);
+                }
+            }
+
+            if (pistons.Count > 0)
+            {
+                angle += rpm * DegPerRpmSecond * Time.deltaTime * Mathf.Deg2Rad;
+                foreach (Piston p in pistons)
+                {
+                    if (p.T == null) continue;
+                    float off = p.Amp * Mathf.Sin(angle + p.Phase);
+                    p.T.localPosition = p.Base + p.T.localRotation * Vector3.forward * off;
                 }
             }
 

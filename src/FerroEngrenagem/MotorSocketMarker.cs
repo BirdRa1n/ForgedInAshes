@@ -59,7 +59,7 @@ namespace FerroEngrenagem
         {
             if (player.inventory == null) return false;
             ItemClassBlock icb = player.inventory.holdingItem as ItemClassBlock;
-            return icb != null && PowerGate.IsDriver(icb.GetBlock());
+            return icb != null && (PowerGate.IsDriver(icb.GetBlock()) || Fluids.Kind(icb.GetBlock()) != FluidKind.None);
         }
 
         void Update()
@@ -105,6 +105,30 @@ namespace FerroEngrenagem
             AddBox(c - half, c + half, col);
         }
 
+        static readonly Color Water = new Color(0.25f, 0.55f, 1f, 1f);
+        static readonly Color SteamCol = new Color(0.95f, 0.95f, 0.95f, 1f);
+        static readonly Color Yellow = new Color(1f, 0.9f, 0.15f, 1f);
+
+        // D9: fluid ports (blue = water in, white = steam out; cyan once a pipe or port is there) and the conveyor
+        // inputs of the Steam Engine (yellow) of every fluid device near the player.
+        void ScanFluids(World world, Vector3i c)
+        {
+            FluidStore.EnsureLoaded();
+            foreach (Vector3i dev in FluidStore.Devices)
+            {
+                if (Mathf.Abs(dev.x - c.x) > RadiusXZ + 2 || Mathf.Abs(dev.z - c.z) > RadiusXZ + 2 ||
+                    Mathf.Abs(dev.y - c.y) > RadiusY + 2) continue;
+                if (world.GetChunkFromWorldPos(dev) == null) continue;
+                foreach (FluidPort p in Fluids.Ports(world, dev))
+                {
+                    if (Fluids.Kind(world.GetBlock(dev).Block) == FluidKind.Tank) continue;   // every side: no plates
+                    Color col = Fluids.PortConnected(world, p) ? Cyan : (p.Fluid == Fluids.Steam ? SteamCol : Water);
+                    AddFace(p.Cell, p.Dir, col);
+                }
+                foreach (FluidPort p in Fluids.ConveyorPorts(world, dev)) AddFace(p.Cell, p.Dir, Yellow);
+            }
+        }
+
         void Scan(World world, EntityPlayerLocal player)
         {
             boxLo.Clear();
@@ -136,6 +160,8 @@ namespace FerroEngrenagem
                         else col = Red;
                         AddSocket(s, col);
                     }
+
+            ScanFluids(world, c);
 
             // connection points of the torque blocks nearby
             for (int dx = -RadiusXZ; dx <= RadiusXZ; dx++)

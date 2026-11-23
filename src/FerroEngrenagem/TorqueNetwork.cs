@@ -314,7 +314,7 @@ namespace FerroEngrenagem
         // layer, facing out along the model's local +Z (EnginePort). The other cells are not nodes.
         public static bool IsMultiEngine(Block b)
         {
-            return b != null && b.isMultiBlock && TorqueEngine.IsEngine(b);
+            return b != null && b.isMultiBlock && (TorqueEngine.IsEngine(b) || PowerGate.IsMotor(b));
         }
 
         public static bool EnginePort(World world, Vector3i cell, BlockValue bv, out Vector3i parent, out Vector3i dir)
@@ -497,7 +497,7 @@ namespace FerroEngrenagem
             {
                 case KineticKind.Motor:
                 {
-                    TileEntityPowered p = world.GetTileEntity(pos) as TileEntityPowered;
+                    TileEntityPowered p = world.GetTileEntity(Fluids.ParentOf(world, pos, bv)) as TileEntityPowered;
                     if (p == null) return 0;
                     // D7 had the motor draw the machine's watts; with torque it draws its own block watts again
                     PowerItem item = p.GetPowerItem();
