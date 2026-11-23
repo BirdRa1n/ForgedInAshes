@@ -671,6 +671,8 @@ aqui fica só o que foi medido/verificado.
     liga/desliga contra um equipamento.
   - `ItemActionConnectPower.GetCrosshairType` devolve PowerSource para todo `BlockPowerSource`; postfix troca por
     Plus nos motores de torque (`FeTorqueEngine`).
+- Teste 3: alinhado; alicate ok. PENDENTE (visual, adiado pelo usuário): o braço do cano não se junta à entrada de
+  vapor atrás em cima (669,62,868 → célula filha 669,62,869), embora o vapor flua. Nenhum log de braço para esse cano.
 
 ## Próximo passo (antigo, mantido para histórico)
 
