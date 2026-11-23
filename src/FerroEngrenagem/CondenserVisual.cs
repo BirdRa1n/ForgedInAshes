@@ -39,6 +39,12 @@ namespace FerroEngrenagem
             if (liquid != null) liquidScale = liquid.localScale;
             gasNow = liquidNow = 0f;
             next = 0f;
+            // alignment check: where the model really sits against its cells
+            World world = GameManager.Instance == null ? null : GameManager.Instance.World;
+            BlockValue bv = world == null ? BlockValue.Air : world.GetBlock(p);
+            Log.Out(FerroEngrenagemMod.LogPrefix + "condenser at " + p + " rot=" + bv.rotation + " model at "
+                    + transform.position.ToString("F2") + " liquid at "
+                    + (liquid != null ? liquid.position.ToString("F2") : "-") + " fan=" + (fan != null));
         }
 
         static Transform Find(Transform t, string n)

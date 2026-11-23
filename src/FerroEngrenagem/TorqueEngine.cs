@@ -266,3 +266,21 @@ namespace FerroEngrenagem
         }
     }
 }
+
+namespace FerroEngrenagem
+{
+    // Torque engines (coal and steam) are vanilla Generators under the hood (fuel UI), so the wire tool showed the
+    // "power source" crosshair over them although they give no electricity. Show the plain crosshair instead.
+    [HarmonyLib.HarmonyPatch(typeof(ItemActionConnectPower), "GetCrosshairType")]
+    public static class Patch_ConnectPower_Crosshair_Engine
+    {
+        public static void Postfix(ItemActionData _actionData, ref ItemClass.EnumCrosshairType __result)
+        {
+            if (__result != ItemClass.EnumCrosshairType.PowerSource) return;
+            EntityPlayerLocal pl = _actionData.invData.holdingEntity as EntityPlayerLocal;
+            if (pl == null || pl.HitInfo == null || !pl.HitInfo.bHitValid) return;
+            Block b = _actionData.invData.world.GetBlock(pl.HitInfo.hit.blockPos).Block;
+            if (TorqueEngine.IsEngine(b)) __result = ItemClass.EnumCrosshairType.Plus;
+        }
+    }
+}

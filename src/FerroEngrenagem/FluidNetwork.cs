@@ -864,7 +864,15 @@ namespace FerroEngrenagem
                 Vector3i d = new Vector3i(Mathf.RoundToInt(w.x), Mathf.RoundToInt(w.y), Mathf.RoundToInt(w.z));
                 Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 bool on = Fluids.HasPortAt(world, n, new Vector3i(-d.x, -d.y, -d.z));
-                if (arms[i].gameObject.activeSelf != on) arms[i].gameObject.SetActive(on);
+                if (arms[i].gameObject.activeSelf != on)
+                {
+                    arms[i].gameObject.SetActive(on);
+                    Block nb = world.GetBlock(n).Block;
+                    if (Fluids.Kind(nb) != FluidKind.Pipe && Fluids.Kind(nb) != FluidKind.None)
+                        Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " arm " + Names[i] + " -> " + n + " ("
+                                + nb.GetBlockName() + ") " + (on ? "ON" : "OFF") + " arm world pos "
+                                + arms[i].position.ToString("F2"));
+                }
             }
         }
     }

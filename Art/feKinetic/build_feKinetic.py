@@ -600,8 +600,8 @@ def model_condenser(col):
     ring(base, 0.36, 0.33, 0.10, (cx, 0, 1.90), "Z", IRON, segs=28)
     cyl(base, 0.05, 0.10, (cx, 0, 1.90), "Z", IRON, segs=12)
     # ports: steam in at the back of the upper parent cell (white), water out at the front of the lower parent cell
-    inlet_stub(base, (-0.5, 0.5, 1.45), "Y", 1, GASC)
-    inlet_stub(base, (-0.5, -0.5, 0.55), "Y", -1, WATERC)
+    inlet_stub(base, (-0.5, 0.5, 1.0 + C), "Y", 1, GASC)
+    inlet_stub(base, (-0.5, -0.5, C), "Y", -1, WATERC)
     objs = [to_object(base, "feCondenser_Base", bevel=0.004)]
     # liquid level: pivot at the chamber floor, height grows with local Z (Unity Y)
     liq = bmesh.new()

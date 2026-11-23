@@ -662,6 +662,15 @@ aqui fica só o que foi medido/verificado.
 - "Não gera vapor": o save mostrava a Condensadora com 200,6/200 L de água no buffer → entrada de vapor 0 (saída de
   água sem destino/afogada), Motor a Vapor com 240 L de vapor parado. Leitura da Condensadora agora mostra a água
   esperando e "CHEIA: a saída de água não tem para onde ir".
+- Teste 2: Condensadora funcionando (34 L/min). Restou: cano da saída de água desalinhado, braço do cano não se junta
+  à entrada de vapor, e o alicate mostrava o ícone de fonte elétrica sobre o Motor a Vapor.
+  - Layout confirmado no IL (`Block.Init`): células x de −(n/2) a round(n/2+0,1)−1 → dim 2 = −1..0; o modelo é
+    deslocado por `rot * (−0,5, 0, 0)` (`GetRotatedOffset`). Bocais agora na altura do cano (C = 0,5 e 1,5; antes
+    0,55 e 1,45).
+  - Log de diagnóstico sempre ligado (só quando muda): posição do modelo da Condensadora e cada braço de cano que
+    liga/desliga contra um equipamento.
+  - `ItemActionConnectPower.GetCrosshairType` devolve PowerSource para todo `BlockPowerSource`; postfix troca por
+    Plus nos motores de torque (`FeTorqueEngine`).
 
 ## Próximo passo (antigo, mantido para histórico)
 
