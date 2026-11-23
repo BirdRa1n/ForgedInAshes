@@ -425,6 +425,9 @@ aqui fica só o que foi medido/verificado.
   fechada) e `XUiC_RecipeStack.Update(float _dt)` (janela aberta; só a fila da máquina aberta, guardada no
   postfix do `XUiC_WorkstationWindowGroup.Update`) têm o tempo multiplicado.
 - Log `power ...` agora inclui `rpm=` e `speed=x`.
+- Testado (log 22:14): x4 → `1024/128 UT rpm=128 OVERLOAD`; x1/2 → `16/128 UT rpm=16 speed=x0.5 -> ON`;
+  x2 → `256/128` OVERLOAD até 2 fontes (`256/256 UT rpm=64 speed=x2 -> ON`). Flange com o mesmo eixo do Eixo.
+  E troca a razão de primeira. TRAVADO não testado; tempo real de fabricação confirmado só pelo usuário.
 
 ## Próximo passo (antigo, mantido para histórico)
 
