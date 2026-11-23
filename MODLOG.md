@@ -491,8 +491,13 @@ aqui fica só o que foi medido/verificado.
   (IL 3.4.0 b10). Para blocos "fe*": vale onde o jogador pode construir (`CanPlaceBlockAt`), mantendo as outras
   condições (colocado por jogador, `TakeDelay` > 0, entrada vazia nas bancadas). `TakeDelay` das máquinas e
   geradores 15 → 5 s (blocks.xml e `gen_phase3.py`).
-- Peças da rede: `CanPickup` + `TakeDelay` 2 no `feShaft` (herdado pelas outras); agachado + E abre o radial com
-  "pegar" (em pé, E continua trocando ajustes).
+- Peças da rede: `TakeDelay` 2 no `feShaft` (herdado); agachado + E abre um radial próprio com "pegar"
+  (`BlockFeKinetic.GetBlockActivationCommands`/`OnBlockActivated` → `takeItemWithTimer`). O `CanPickup` vanilla
+  foi tentado e removido: escreve "Aperte E para pegar" por cima da leitura e pega com E em pé.
+- Bug no log (23:16): rede SEM fonte alternava entre "wrong spin" e "sem fonte" a cada 2 s (o sinal relativo
+  depende do nó inicial). Sem bloco-fonte não há sentido real → não marca giro invertido.
+- Motor a Carvão testado rodando (`spin feCoalEngine ... rpm=32 running=True`), mas numa rede só dele: eixo do
+  motor N-S, Eixo do jogador L-O (posição; o indicador de pontas mostra).
 
 ## Próximo passo (antigo, mantido para histórico)
 

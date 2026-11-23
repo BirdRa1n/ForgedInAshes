@@ -111,13 +111,31 @@ namespace FerroEngrenagem
             KineticSpinner.Attach(_ebcd, _blockPos, this);
         }
 
-        // Standing, E on a speed box / clutch / regulator changes its setting (KineticLookController); crouching,
-        // E opens the vanilla radial with "take" (CanPickup in XML), like the Crank.
+        // Standing, E on a speed box / clutch / regulator changes its setting and looking shows the network
+        // (KineticLookController); crouching, E opens a radial with "take" (TakeDelay seconds), like the Crank.
+        // NOT the vanilla CanPickup: that one writes its own "press E to pick up" prompt over the readout and
+        // picks the block up on a plain E press (D8 T4 test).
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                         EntityAlive _entityFocusing)
         {
-            bool crouch = _entityFocusing != null && _entityFocusing.IsCrouching;
-            return crouch && base.HasBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
+            return _entityFocusing != null && _entityFocusing.IsCrouching;
+        }
+
+        public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue,
+                                                                           Vector3i _blockPos,
+                                                                           EntityAlive _entityFocusing)
+        {
+            bool ok = Pickup.CanBuildHere(_world, _blockPos);
+            return new BlockActivationCommand[] { new BlockActivationCommand("take", "hand", ok, false, null) };
+        }
+
+        public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
+                                              BlockValue _blockValue, EntityPlayerLocal _player)
+        {
+            if (_commandName != "take") return false;
+            float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 2f;
+            takeItemWithTimer(_blockPos, _blockValue, _player, delay);
+            return true;
         }
     }
 
@@ -487,7 +505,8 @@ namespace FerroEngrenagem
                 }
                 if (kind == KineticKind.Regulator) net.Regulators[pos] = new RegZone();
             }
-            // real directions: the first source decides (no source at all: keep the relative ones)
+            // real directions: the first source decides (no source at all: no real direction, nothing is "wrong")
+            bool hasDirection = sign != 0;
             if (sign == 0) sign = 1;
             net.Sign = sign;
             if (sign < 0)
@@ -498,7 +517,7 @@ namespace FerroEngrenagem
             // a machine fed the wrong way round does not run and takes no torque (fix: a Spin Inverter)
             foreach (KeyValuePair<Vector3i, int> m in machineSpin)
             {
-                if (m.Value * sign > 0) continue;
+                if (!hasDirection || m.Value * sign > 0) continue;
                 net.WrongSpin[m.Key] = net.MachineNode[m.Key];
                 net.Machines.Remove(m.Key);
                 net.MachineNode.Remove(m.Key);
@@ -780,7 +799,8 @@ namespace FerroEngrenagem
                             "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
                             net.Sources, net.Machines.Count, net.Regulators.Count, pct);
             }
-            if (kind == KineticKind.Motor || kind == KineticKind.Clutch || kind == KineticKind.Inverter)
+            if (kind == KineticKind.Motor || kind == KineticKind.Engine || kind == KineticKind.Clutch ||
+                kind == KineticKind.Inverter)
                 name += " (" + Kinetic.AxisName(bv) + ")";
             prompt = name + "\n" + Status(net, pos);
             if (kind == KineticKind.Engine)

@@ -565,7 +565,6 @@
 			<property name="Class" value="FerroEngrenagem.FeKinetic, FerroEngrenagem"/>
 			<property name="FeKinetic" value="shaft"/>
 			<property name="FeShaftAxis" value="z"/>
-			<property name="CanPickup" value="true"/>
 			<property name="TakeDelay" value="2"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feShaftDesc"/>
