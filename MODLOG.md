@@ -571,6 +571,8 @@ aqui fica só o que foi medido/verificado.
 - Modelo (Blender em background): roda de pás com aros de ferro e eixo de ponta a ponta, `FeSpin_WaterWheel`.
 - Bundle NÃO gerado ainda: a licença Personal caiu (sessão OAuth "stale", `unity license activate` pede
   `unity auth login`, que exige o usuário no navegador). Até gerar, o bloco aponta para um prefab que não existe.
+- Usuário renovou o login; `unity license activate` OK; bundle de 865 KB com `feWaterWheelPrefab` (roda no centro,
+  +Z no eixo).
 
 ## Próximo passo (antigo, mantido para histórico)
 
