@@ -213,7 +213,7 @@ passa a ser o conversor watts → torque.
 - **Esteiras** (fase 5) entram na mesma rede, com custo por bloco.
 
 **Etapas (cada uma testada no jogo antes da próxima)**
-1. T1 — Núcleo: Eixo, Caixa de Transmissão, rede (BFS), Motor Elétrico e Manivela de Torque como fontes,
+1. T1 [feita, falta teste] — Núcleo: Eixo, Caixa de Transmissão, rede (BFS), Motor Elétrico e Manivela de Torque como fontes,
    máquina no encaixe como consumidor em UT, sobrecarga, leitura ao olhar.
 2. T2 — Caixa de Velocidade + velocidade de fabricação com custo ao quadrado.
 3. T3 — Embreagem, Regulador de Torque e Medidor.
@@ -474,7 +474,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | D4 | Energia "Elét." da fase 3: Carga (rota A) ou rede vanilla (rota B)? | **Adotado no F3-T02 (a confirmar com o usuário): Carga como combustível** em todas as máquinas da fase 3, pelo mesmo patch Harmony, ligado pela propriedade de bloco `FeChargeOnly="true"`. Trocar depois é local (bloco + patch) |
 | D5 | O desmanche deve dar 0 peças ou um pouco? | Um pouco de sucata de ferro, 0 peças prontas |
 | D7 | (Pedido do usuário após a F4-T03) Energia como **watts pela rede elétrica vanilla** (fios ligando Manivela/geradores às máquinas e esteiras), em vez do item Carga? | **Proposta:** bloco "Motor elétrico" encostado na máquina = consumidor vanilla (`RequiredPower` em W); patch Harmony: máquina `fe*` só fabrica com o motor vizinho energizado. Manivela vira gerador (giro soma `CurrentFuel`), Gerador a Carvão vira `PowerGenerator` a Carvão Vegetal, gerador/bateria/solar vanilla ligam direto. Remove item Carga, slot de combustível e `ChargeFuelPatches`. **Aprovado (2026-11-22).** Etapas: (1) Motor elétrico + bloqueio por energia [feita e testada; depois: motor só no **encaixe** da máquina, com contorno ao segurar, e consome o `FeMinPower` dela — testado]; (2) Manivela como gerador [feita e testada: 30 W fixos, slot de Módulo de Banco de Baterias do colega; não solta gasolina ao recolher]; (2b) **Manivela de Torque** no encaixe do motor, torque puro 30 W enquanto gira [feita e testada]; (3) Gerador a Carvão elétrico [feito e testado: `Class Generator`, queima Carvão Vegetal pelo Reabastecer, 60 W por Volante]; (4) remover Carga e geradores de Carga |
-| D8 | (Pedido do usuário após D7 etapa 3) Rede mecânica de **torque** estilo Create + Satisfactory: eixos, caixas de transmissão, caixa de velocidade, regulador, fontes de torque a carvão/gasolina, motores que somam torque e melhorias, velocidade de fabricação maior com custo muito maior? | **Proposta:** seção 5.4 (RPM + UT, sobrecarga para a rede, custo ao quadrado da velocidade, etapas T1–T5). Aguardando aprovação. |
+| D8 | (Pedido do usuário após D7 etapa 3) Rede mecânica de **torque** estilo Create + Satisfactory: eixos, caixas de transmissão, caixa de velocidade, regulador, fontes de torque a carvão/gasolina, motores que somam torque e melhorias, velocidade de fabricação maior com custo muito maior? | **Proposta:** seção 5.4 (RPM + UT, sobrecarga para a rede, custo ao quadrado da velocidade, etapas T1–T5). **Aprovado (2026-11-22).** T1 feita, falta teste. |
 | D6 | Na fase 2, a Carga entra como **ingrediente** das receitas (XML) ou como **combustível** só-Carga (exige Harmony)? | **Decidido (2026-11-22): combustível com Harmony.** EAC não é restrição para o mod (usuário). Prensa/Torno ganham slot de combustível; patch C# faz aceitarem só `feCharge`. Manivela, Carvoeira e Gerador a Carvão continuam em XML |
 
 ---

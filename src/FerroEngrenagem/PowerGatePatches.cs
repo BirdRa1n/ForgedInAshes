@@ -1,11 +1,7 @@
-// D7: machines run on WATTS from the vanilla power network, through an "Electric Motor" block.
-//
-// A machine block opts in with <property name="FeMinPower" value="30"/> (watts). It crafts only while an
-// Electric Motor (a block with <property name="FeMotor" value="true"/>, vanilla Class="Powered" consumer wired
-// like a light) sits in the machine's MOTOR SOCKET and is powered. The motor draws the machine's FeMinPower
-// from the network (its PowerItem.RequiredPower is set to it), so a 30 W crank cannot run a 60 W machine.
-//
-// The socket also takes a Torque Crank (TorqueCrank.cs): pure shaft power while it is turned, no wires.
+// D7 + D8: machines run on TORQUE. A machine block opts in with <property name="FeMinPower" value="30"/>
+// (historic name; its torque cost is FeTorqueCost or FeMinPower x 64/30 UT). It crafts only while the block in
+// its MOTOR SOCKET belongs to a running torque network (TorqueNetwork.cs) that counts it as a consumer: an
+// Electric Motor wired to power, a Torque Crank being turned, or shafts / gearboxes leading to them.
 //
 // Motor socket (user, 2026-11-22: "the motor must be in a specific position to plug it into the machine"):
 // the block cell next to the machine's footprint on the side FeMotorSide (back|front|left|right, default back),
@@ -66,7 +62,7 @@ namespace FerroEngrenagem
         /// <summary>Something that can sit in a motor socket and drive the machine (motor or torque crank).</summary>
         public static bool IsDriver(Block block)
         {
-            return IsMotor(block) || block is BlockFeTorqueCrank;
+            return Kinetic.Kind(block) != KineticKind.None;
         }
 
         public static bool IsGated(TileEntityWorkstation te)
@@ -135,90 +131,48 @@ namespace FerroEngrenagem
                                 parentPos.z + Mathf.RoundToInt(r.z));
         }
 
-        /// <summary>The motor in this machine's socket is powered and draws the machine's FeMinPower.</summary>
+        /// <summary>D8: the node in this machine's socket belongs to a running torque network that counts this
+        /// machine as a consumer (TorqueNetwork.cs).</summary>
         public static bool HasPower(TileEntityWorkstation te)
         {
-            int need = te == null ? 0 : MinPower(te.blockValue.Block);
-            if (need <= 0) return true;
+            if (te == null || MinPower(te.blockValue.Block) <= 0) return true;
             Vector3i pos = te.ToWorldPos();
             float now = Time.time;
             KeyValuePair<float, bool> cached;
             if (poweredCache.TryGetValue(pos, out cached) && now - cached.Key < CacheSeconds) return cached.Value;
 
-            bool ok = false, motor = false;
-            int watts = 0;
-            string chain = "";
+            bool ok = false;
             Vector3i socket = Vector3i.zero;
+            string info = "no world";
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world != null)
             {
                 socket = SocketPos(world.GetBlock(pos), pos);
-                TileEntityPowered p = world.GetTileEntity(socket) as TileEntityPowered;
-                if (p != null && IsMotor(p.blockValue.Block))
-                {
-                    motor = true;
-                    // the motor draws what the machine needs (PowerItem exists only where the network runs:
-                    // SP / host / server)
-                    PowerItem item = p.GetPowerItem();
-                    if (item != null && item.RequiredPower != need)
-                    {
-                        item.RequiredPower = (ushort)Mathf.Min(ushort.MaxValue, need);
-                        p.RequiredPower = need;
-                    }
-                    if (p.IsPowered) watts = need;
-                    chain = Chain(item);
-                }
+                TorqueNet net = Kinetic.Get(world, socket);
+                if (net == null) info = "socket empty";
+                else if (!net.Machines.Contains(pos)) info = "socket block does not face the machine";
                 else
                 {
-                    // Torque Crank in the socket: pure shaft power while someone turns it (TorqueCrank.cs)
-                    BlockFeTorqueCrank torque = world.GetBlock(socket).Block as BlockFeTorqueCrank;
-                    if (torque != null)
-                    {
-                        bool spinning = TorqueState.IsSpinning(socket);
-                        if (spinning) watts = torque.Output;
-                        chain = "torqueCrank spinning=" + spinning + " out=" + torque.Output;
-                    }
+                    ok = net.Running;
+                    info = "net nodes=" + net.Nodes.Count + " sources=" + net.Sources + " machines=" + net.Machines.Count
+                           + " " + net.Usage + "/" + net.Capacity + " UT" + (net.Overloaded ? " OVERLOAD" : "");
                 }
-                ok = watts >= need;
             }
-            // Diagnostic (D7 bring-up): one line whenever the result or the motor's wiring for this machine changes.
-            KeyValuePair<float, bool> prev;
-            bool hadPrev = poweredCache.TryGetValue(pos, out prev);
-            string key = ok + "|" + motor + "|" + socket + "|" + chain;
+            // Diagnostic: one line whenever the result or the network summary for this machine changes.
+            string key = ok + "|" + socket + "|" + info;
             string lastKey;
-            if (!lastLog.TryGetValue(pos, out lastKey) || lastKey != key || !hadPrev || prev.Value != ok)
+            if (!lastLog.TryGetValue(pos, out lastKey) || lastKey != key)
             {
                 lastLog[pos] = key;
                 Log.Out(FerroEngrenagemMod.LogPrefix + "power " + te.blockValue.Block.GetBlockName() + " at " + pos +
-                        " rot=" + te.blockValue.rotation + " socket=" + socket + ": motor=" + motor +
-                        " watts=" + watts + "/" + need + " -> " + (ok ? "ON" : "OFF") +
-                        (chain.Length > 0 ? " | " + chain : ""));
+                        " rot=" + te.blockValue.rotation + " socket=" + socket + " cost=" +
+                        Kinetic.MachineCost(te.blockValue.Block) + " UT: " + info + " -> " + (ok ? "ON" : "OFF"));
             }
             poweredCache[pos] = new KeyValuePair<float, bool>(now, ok);
             return ok;
         }
 
         static readonly Dictionary<Vector3i, string> lastLog = new Dictionary<Vector3i, string>();
-
-        /// <summary>Diagnostic: the motor's power item and its parents up to the root.</summary>
-        static string Chain(PowerItem item)
-        {
-            if (item == null) return "powerItem=none";
-            string s = "motorItem powered=" + item.IsPowered + " req=" + item.RequiredPower;
-            PowerItem par = item.Parent;
-            int guard = 0;
-            while (par != null && guard++ < 8)
-            {
-                string name = par.BlockID < Block.list.Length && Block.list[par.BlockID] != null
-                    ? Block.list[par.BlockID].GetBlockName() : "?";
-                s += " <- " + name;
-                PowerSource src = par as PowerSource;
-                if (src != null) s += "(on=" + src.IsOn + " maxOut=" + src.MaxOutput + ")";
-                par = par.Parent;
-            }
-            if (item.Parent == null) s += " <- (no wire)";
-            return s;
-        }
     }
 
     // window closed: the tile entity does not advance its queue without power

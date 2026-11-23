@@ -20,7 +20,7 @@ namespace FerroEngrenagem
     [UnityEngine.Scripting.Preserve]
     public class BlockFeTorqueCrank : Block
     {
-        public int Output = 30;                   // shaft watts while spinning
+        public int Output = 64;                   // UT while spinning (D8)
         public float CoastSeconds = 1.5f;         // keeps driving this long after the player stops
         public float StaminaPerSecond = 30f;
         public float MinStamina = 5f;
@@ -130,7 +130,8 @@ namespace FerroEngrenagem
 
             if (!IsActivateHeld(player))
             {
-                prompt = string.Format(Text("feTorqueHold", "Hold {0} to turn the Torque Crank"), KeyName(player));
+                prompt = string.Format(Text("feTorqueHold", "Hold {0} to turn the Torque Crank"), KeyName(player)) +
+                         "\n" + KineticLookController.Status(Kinetic.Get(gm.World, pos));
                 return;
             }
             Stat stamina = player.Stats.Stamina;
@@ -143,7 +144,8 @@ namespace FerroEngrenagem
             TorqueState.Spin(pos, crank.CoastSeconds);
             CrankSpinner spinner = CrankSpinner.At(pos);
             if (spinner != null) spinner.Drive(crank.SpinDegPerSecond);
-            prompt = string.Format(Text("feTorqueTurning", "Turning the Torque Crank... {0} W"), crank.Output);
+            prompt = Text("feTorqueTurning", "Turning the Torque Crank...") + "\n" +
+                     KineticLookController.Status(Kinetic.Get(gm.World, pos));
         }
 
         void LateUpdate()

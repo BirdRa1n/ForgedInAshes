@@ -391,6 +391,20 @@ aqui fica só o que foi medido/verificado.
 - Geradores a Carvão já colocados no mundo de teste são do tipo antigo (Collector): destruir/recolocar.
 - Testado (usuário + log): 30 W não liga a Montadora (60 W); 60 W liga; desligar o gerador pausa.
 
+## 2026-11-22 — D8 T1: núcleo da rede de torque
+
+- Aprovada a proposta D8 (PLANO 5.4). `TorqueNetwork.cs`: `BlockFeKinetic` (`FeKinetic` shaft|gearbox,
+  `FeShaftAxis` no espaço do modelo girado por `shape.GetRotation`), `Kinetic.Get` = flood fill face a face
+  (máx. 1024 nós, cache 0,5 s por nó). Fontes: Motor Elétrico (`FeTorqueOutput` 128 UT se energizado; volta a
+  consumir só os próprios 30 W) e Manivela de Torque (64 UT enquanto gira). Consumidor: máquina cujo encaixe
+  (`PowerGate.SocketPos`) é um nó da rede com face para ela; custo `FeTorqueCost` ou FeMinPower×64/30
+  (64/128/192 UT), sempre que conectada. Uso > capacidade = sobrecarga, todas as máquinas da rede param.
+- `PowerGate.HasPower` agora consulta a rede; log `power ... cost= UT: net nodes= sources= machines= u/c UT`.
+- Leitura ao olhar (`KineticLookController`): nome (+ eixo vertical/E-W/N-S) e "RPM - usado/disponível UT",
+  "SOBRECARGA" ou "Parado". Manivela de Torque mostra o mesmo no próprio texto.
+- Blocos: `feShaft` (modelo `@:Shapes/pipe_straight.fbx`, eixo local assumido Y — confirmar no jogo) e
+  `feGearbox` (`pipe_joint.fbx`). Receitas: Eixo ×2 no Torno, Caixa na Montadora.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
