@@ -405,6 +405,8 @@ aqui fica só o que foi medido/verificado.
 - Teste 1: motor direto na Montadora ON (128/128); eixo deitado no encaixe dava "does not face the machine" e a
   leitura dizia "vertical" → o `pipe_straight.fbx` é horizontal; `FeShaftAxis` trocado para Z (log `look shaft
   ... rot= axis=` ao olhar, para confirmar X/Z).
+- Reteste: Motor → Eixo → Caixa → Eixo → encaixe da Montadora: `net nodes=4 sources=1 machines=1 128/128 UT -> ON`;
+  eixos com rot=0 mostram N-S → eixo local Z confirmado. Sobrecarga com 2 máquinas ainda não testada.
 - Blocos: `feShaft` (modelo `@:Shapes/pipe_straight.fbx`, eixo local assumido Y — confirmar no jogo) e
   `feGearbox` (`pipe_joint.fbx`). Receitas: Eixo ×2 no Torno, Caixa na Montadora.
 
