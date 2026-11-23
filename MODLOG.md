@@ -623,6 +623,15 @@ aqui fica só o que foi medido/verificado.
   camada de baixo; `Kinetic.IsMultiEngine` agora vale para motores; Capacity lê o TE do pai). Bundle 1,5 MB.
 - Não testado ainda: multibloco `Class=Powered` (fio no Motor Industrial) e os pistões/puffs no jogo.
 
+## 2026-11-23 — Dínamo (torque → eletricidade)
+
+- `feDynamo` (Dynamo.cs): `Class=Generator` + `FeDynamo`. Na rede de torque é consumidor (nó próprio, eixo local Z,
+  `FeTorqueCost`=128 como máquina, custo ×(rpm/32)²); no lado elétrico, prefixo em `PowerSource.HandleSendPower`
+  mantém combustível cheio e ligado enquanto a rede roda e define `MaxOutput` = `FeDynamoWatts`(60) × (rpm/32),
+  chamando `SendHasLocalChangesToRoot` quando muda; sem torque zera o combustível (vanilla desliga).
+- Reabastecer, linha de combustível e slots escondidos (como Manivela/motores). Receita na Eletrônica. Modelo com
+  enrolamentos de cobre, comutador, isolador e `FeSpin_DynamoArmature`. Bundle 1,5 MB. Não testado ainda.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

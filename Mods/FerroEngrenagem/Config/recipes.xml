@@ -176,6 +176,12 @@
 			<ingredient name="feResourceLubricant" count="6"/>
 			<ingredient name="resourceMetalPipe" count="6"/>
 		</recipe>
+		<recipe name="feDynamo" count="1" craft_area="feElectronics" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceCoil" count="6"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+			<ingredient name="feResourceIronShaft" count="2"/>
+			<ingredient name="resourceElectricParts" count="2"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)

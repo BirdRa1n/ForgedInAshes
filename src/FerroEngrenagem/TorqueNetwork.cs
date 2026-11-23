@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump, Dynamo }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -279,6 +279,7 @@ namespace FerroEngrenagem
             if (b is BlockFeTorqueCrank) return KineticKind.TorqueCrank;
             if (PowerGate.IsMotor(b)) return KineticKind.Motor;
             if (TorqueEngine.IsEngine(b)) return KineticKind.Engine;
+            if (Dynamo.Is(b)) return KineticKind.Dynamo;
             return KineticKind.None;
         }
 
@@ -301,6 +302,7 @@ namespace FerroEngrenagem
                 case KineticKind.Motor:
                 case KineticKind.TorqueCrank:
                 case KineticKind.Engine:
+                case KineticKind.Dynamo:
                     local = Vector3.forward;   // sources: the model's local +Z is the drive shaft; they turn +Z
                     break;
                 default:
@@ -585,7 +587,7 @@ namespace FerroEngrenagem
                         else if (!Same(net.RefRpm, rr)) net.Lock("speed");
                     }
                 }
-                if (kind == KineticKind.Pump && !net.Machines.ContainsKey(pos))
+                if ((kind == KineticKind.Pump || kind == KineticKind.Dynamo) && !net.Machines.ContainsKey(pos))
                 {
                     // D9 Mechanical Pump: a torque consumer at its own node (no spin direction needed)
                     net.Machines[pos] = f;
@@ -932,7 +934,7 @@ namespace FerroEngrenagem
     {
         public static void Postfix(BlockPowerSource __instance, BlockValue _blockValue, Vector3i _blockPos, ref string __result)
         {
-            if (!TorqueEngine.IsEngine(__instance)) return;
+            if (!TorqueEngine.IsEngine(__instance) && !Dynamo.Is(__instance)) return;
             string d = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, false));
             __result = string.IsNullOrEmpty(__result) ? d : __result + "\n" + d;
         }

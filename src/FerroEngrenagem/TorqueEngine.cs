@@ -208,7 +208,7 @@ namespace FerroEngrenagem
     {
         public static bool IsEngine(TileEntityPowerSource te)
         {
-            return te != null && TorqueEngine.IsEngine(te.blockValue.Block);
+            return te != null && (TorqueEngine.IsEngine(te.blockValue.Block) || Dynamo.Is(te.blockValue.Block));
         }
 
         public static void Hide(XUiC_PowerSourceSlots grid)
@@ -261,7 +261,7 @@ namespace FerroEngrenagem
     {
         public static void Postfix(BlockPowerSource __instance, Vector3i _blockPos, BlockEntityData _ebcd)
         {
-            if (TorqueEngine.IsEngine(__instance)) KineticSpinner.Attach(_ebcd, _blockPos, __instance);
+            if (TorqueEngine.IsEngine(__instance) || Dynamo.Is(__instance)) KineticSpinner.Attach(_ebcd, _blockPos, __instance);
             if (SteamEngine.Is(__instance)) SteamVent.Attach(_ebcd, _blockPos);
         }
     }

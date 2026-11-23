@@ -55,7 +55,7 @@ namespace FerroEngrenagem
         {
             if (bindingName != "showfuel") return;
             TileEntityPowerSource te = __instance.TileEntity;
-            if (te != null && te.blockValue.Block is BlockFeCrank)
+            if (te != null && (te.blockValue.Block is BlockFeCrank || Dynamo.Is(te)))
             {
                 value = "false";
                 __result = true;
@@ -69,7 +69,7 @@ namespace FerroEngrenagem
         public static bool Prefix(XUiC_PowerSourceStats __instance)
         {
             TileEntityPowerSource te = __instance.TileEntity;
-            if (te != null && te.blockValue.Block is BlockFeCrank) return false;
+            if (te != null && (te.blockValue.Block is BlockFeCrank || Dynamo.Is(te))) return false;
             return true;
         }
     }

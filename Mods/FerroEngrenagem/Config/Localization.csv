@@ -98,6 +98,8 @@ feFluidNoTorque,blocks,Block,,,,No torque on its shaft,,,,,,,,,Sem torque no eix
 feFluidNoPower,blocks,Block,,,,No power: wire it to a power source,,,,,,,,,Sem energia: ligue por fio a uma fonte,,,,
 feFluidCondensing,blocks,Block,,,,Condensing: {0} L/min of steam,,,,,,,,,Condensando: {0} L/min de vapor,,,,
 feSteamTanks,blocks,Block,,,,Water {0} / {1} L - steam out {2} L/min - load {3}%,,,,,,,,,Água {0} / {1} L - vapor saindo {2} L/min - carga {3}%,,,,
+feDynamo,blocks,Block,,,,Dynamo,,,,,,,,,Dínamo,,,,
+feDynamoDesc,blocks,Block,,,,"Turns torque into electricity: join its shaft (both ends) to a torque network and wire it like a generator. Takes 128 UT and gives 60 W at 32 RPM; faster spins give more watts but cost torque squared.\nNo spin, no power.",,,,,,,,,"Transforma torque em eletricidade: ligue o eixo dele (as duas pontas) numa rede de torque e puxe fio como num gerador. Consome 128 UT e dá 60 W a 32 RPM; girando mais rápido dá mais watts, mas o torque sobe ao quadrado.\nSem giro, sem energia.",,,,
 blockcommand_fe_setting,UI,Radial blockcommand,,,,Change setting,,,,,,,,,Trocar ajuste,,,,
 feHintSetting,blocks,Block,,,,{0} change setting - hold {0}: take,,,,,,,,,{0} troca o ajuste - segure {0}: pegar,,,,
 feHintTake,blocks,Block,,,,Hold {0} to take,,,,,,,,,Segure {0} para pegar,,,,

@@ -764,6 +764,31 @@ def model_electric_motor3(col):
 
 
 
+def model_dynamo(col):
+    """Dynamo: field housing with copper windings on feet, a commutator, brushes and an insulator for the wire;
+    the armature shaft goes through the block (both ends) and spins."""
+    base = bmesh.new()
+    cyl(base, 0.26, 0.50, (0, 0, C), "Y", PAINT, segs=24)
+    for y in (-0.16, -0.05, 0.06, 0.17):
+        ring(base, 0.29, 0.26, 0.05, (0, y, C), "Y", BRASS, segs=24)            # windings
+    for s_ in (-1, 1):
+        cyl(base, 0.22, 0.05, (0, s_ * 0.28, C), "Y", IRON, segs=24)            # end shields
+    for sy in (-0.18, 0.18):
+        box(base, (0.52, 0.10, C - 0.22), (0, sy, (C - 0.22) / 2 + 0.01), IRON)
+    box(base, (0.60, 0.60, 0.03), (0, 0, 0.015), IRON)
+    box(base, (0.12, 0.10, 0.10), (0, 0, C + 0.30), IRON)                       # terminal + insulator
+    for k in range(3):
+        cyl(base, 0.035, 0.02, (0, 0, C + 0.37 + k * 0.045), "Z", GLASS, segs=12, r2=0.024)
+    objs = [to_object(base, "feDynamo_Base", bevel=0.004)]
+    arm = bmesh.new()
+    shaft_end(arm, 0.0, -0.5)
+    shaft_end(arm, 0.0, 0.5)
+    cyl(arm, 0.08, 0.06, (0, -0.36, 0), "Y", BRASS, segs=16)                    # commutator
+    objs.append(to_object(arm, "FeSpin_DynamoArmature", location=(0, 0, C), bevel=0.002))
+    wire_anchor(col, objs, (0, 0, C + 0.52))
+    return objs
+
+
 AXLE_Z = C
 
 
@@ -837,6 +862,7 @@ MODELS = {
     "feElectricMotor": model_electric_motor,
     "feElectricMotor2": model_electric_motor2,
     "feElectricMotor3": model_electric_motor3,
+    "feDynamo": model_dynamo,
 }
 
 

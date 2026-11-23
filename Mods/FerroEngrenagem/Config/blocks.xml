@@ -816,6 +816,47 @@
 			<property name="EconomicValue" value="2500"/>
 			<property name="SortOrder2" value="0023"/>
 		</block>
+		<!-- Dynamo (src/FerroEngrenagem/Dynamo.cs): torque in, watts out. A torque consumer (128 UT at 32 RPM, cost x
+		     (rpm/32)^2) on its shaft (model local Z, both ends) and a vanilla generator on the wire side: 60 W x (rpm/32)
+		     while its torque network runs. The fuel is internal; no Refuel, no slots. -->
+		<block name="feDynamo">
+			<property name="Class" value="Generator"/>
+			<property name="FeDynamo" value="true"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeDynamoWatts" value="60"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="0"/>
+			<property name="MaxFuel" value="10"/>
+			<property name="MaxPower" value="5000"/>
+			<property name="OutputPerFuel" value="2000"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDynamoDesc"/>
+			<property name="CustomIcon" value="generatorBankA"/>
+			<property name="CustomIconTint" value="ffe080"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feDynamoPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="EconomicValue" value="400"/>
+			<property name="MaxDamage" value="400"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="2"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0024"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

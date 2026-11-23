@@ -11,7 +11,7 @@ ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" 
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
          "feClutch", "feTorqueGauge", "feWaterWheel",
          "feSteamEngine", "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
-         "feElectricMotor", "feElectricMotor2", "feElectricMotor3"]
+         "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo"]
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ART, "feKinetic", "feKinetic.blend"))
 exported = {}
