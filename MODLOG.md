@@ -520,6 +520,8 @@ aqui fica só o que foi medido/verificado.
 - Correção: a Caixa (e o Medidor) gira todas as faces no mesmo sentido vistas de fora (k = giro da face de
   entrada); logo TODAS as saídas invertem em relação à entrada, em linha ou em curva (igual ao Create).
 - TRAVADO agora diz o motivo: sentido ("fontes girando uma contra a outra") ou velocidade; no log `LOCKED(direction|speed)`.
+- Testado (usuário, log 23:46): rede de 18 nós com 4 fontes → Prensa a 128 RPM (x4) com `1024/1024 UT -> ON`;
+  travamentos só enquanto montava, já com motivo (`LOCKED(direction)`). T4 concluída.
 
 ## Próximo passo (antigo, mantido para histórico)
 
