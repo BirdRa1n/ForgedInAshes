@@ -708,6 +708,13 @@ aqui fica só o que foi medido/verificado.
   item já foram descarregadas e o arquivo foi sobrescrito vazio. Agora salva no prefixo de
   `GameManager.SaveAndCleanupWorld` / `SaveWorld` e nunca grava lista parcial. Log extra das portas da Condensadora
   (o cano da entrada de vapor não apareceu no diagnóstico dos braços).
+- Teste: itens subiram a rampa e o arquivo de esteiras agora salva. Usuário: a curva (e a subida pelo lado) parecia
+  remendada. Novo modo CURVA (esteira com uma só saída, lateral): some a esteira reta (ripas, trilhos, batente,
+  roletes) e aparece `FeCurveSet_L/R` (piso em 1/4 de anel em volta do canto de trás, trilho externo em arco, poste
+  interno) e `FeCurveSlats_L/R` girando no eixo vertical em volta do canto (raio 0,5 = o arco dos itens; R: +ângulo,
+  L: −ângulo em Unity). Divisões continuam no modo reto com laterais abertas.
+- Condensadora: o log mostrou o cano 669,62,868 existindo e conectado, mas o PipeArms dele nunca rodou. Log novo
+  no Attach dos canos vizinhos a equipamentos (ativo, componente, braços encontrados).
 
 ## Próximo passo (antigo, mantido para histórico)
 

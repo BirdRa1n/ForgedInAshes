@@ -946,6 +946,38 @@ def model_conveyor(col):
     for k in range(7):
         box(sl, (0.78, 0.075, 0.03), (0, -0.375 + k * 0.125, 0.592), RUST)
     objs.append(to_object(sl, "FeBeltSlats"))
+    # curve mode (BeltShape: a belt that only turns to one side): a quarter-ring belt around the back corner of that
+    # side (radius 0.5 = the items' arc), an outer rail and slats turning around the corner (FeCurveSlats_*: origin
+    # at the corner, they turn about the vertical axis)
+    for side, sx in (("L", 1), ("R", -1)):
+        cx, cy = sx * 0.5, 0.5
+        def at(r, th):
+            return (cx - sx * r * math.cos(th), cy - r * math.sin(th))
+        st = bmesh.new()
+        n = 9
+        for k in range(n):
+            th = (k + 0.5) * (math.pi / 2) / n
+            x, y = at(0.5, th)
+            rot = Matrix.Rotation(-sx * th, 4, "Z")
+            box(st, (0.80, 0.17, 0.02), (x, y, 0.565), IRON, rot)                    # bed
+        m = 14
+        for k in range(m):
+            th = (k + 0.5) * (math.pi / 2) / m
+            x, y = at(0.94, th)
+            box(st, (0.06, 0.94 * (math.pi / 2) / m + 0.02, 0.10), (x, y, 0.58), PAINT, Matrix.Rotation(-sx * th, 4, "Z"))
+            if k in (4, 9):                                                             # arrows along the turn
+                x2, y2 = at(0.975, th)
+                box(st, (0.012, 0.05, 0.06), (x2, y2, 0.58), OUT, Matrix.Rotation(-sx * th, 4, "Z"))
+        ix, iy = at(0.07, math.pi / 4)
+        cyl(st, 0.07, 0.12, (ix, iy, 0.60), "Z", PAINT, segs=12)                        # inner post
+        objs.append(to_object(st, "FeCurveSet_" + side, bevel=0.002))
+        cs = bmesh.new()
+        for k in range(9):
+            th = (k + 0.5) * (math.pi / 2) / 9
+            # built around the corner at the origin (the object sits at the corner)
+            x, y = -sx * 0.5 * math.cos(th), -0.5 * math.sin(th)
+            box(cs, (0.76, 0.06, 0.03), (x, y, 0.592), RUST, Matrix.Rotation(-sx * th, 4, "Z"))
+        objs.append(to_object(cs, "FeCurveSlats_" + side, location=(cx, cy, 0)))
     _belt_rollers(objs, 0.56, 0.56)
     return objs
 

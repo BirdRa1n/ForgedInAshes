@@ -839,6 +839,32 @@ namespace FerroEngrenagem
             a.next = 0f;
             a.reported = false;
             for (int i = 0; i < 6; i++) a.arms[i] = Find(ebcd.transform, Names[i]);
+            // diagnostic: a pipe next to a device (the Condenser steam inlet never reported its arms)
+            World world = GameManager.Instance == null ? null : GameManager.Instance.World;
+            if (world != null)
+                for (int i = 0; i < 6; i++)
+                {
+                    Vector3i n = new Vector3i(pos.x + Dirs6[i].x, pos.y + Dirs6[i].y, pos.z + Dirs6[i].z);
+                    FluidKind nk = Fluids.Kind(world.GetBlock(n).Block);
+                    if (nk == FluidKind.None || nk == FluidKind.Pipe) continue;
+                    Log.Out(FerroEngrenagemMod.LogPrefix + "pipe arms attached at " + pos + " (next to " + world.GetBlock(n).Block.GetBlockName()
+                            + " at " + n + ") active=" + ebcd.transform.gameObject.activeInHierarchy
+                            + " enabled=" + a.enabled + " arms found=" + Found(a.arms));
+                    break;
+                }
+        }
+
+        static readonly Vector3i[] Dirs6 =
+        {
+            new Vector3i(1, 0, 0), new Vector3i(-1, 0, 0), new Vector3i(0, 1, 0), new Vector3i(0, -1, 0),
+            new Vector3i(0, 0, 1), new Vector3i(0, 0, -1)
+        };
+
+        static int Found(Transform[] t)
+        {
+            int c = 0;
+            foreach (Transform x in t) if (x != null) c++;
+            return c;
         }
 
         static Transform Find(Transform t, string n)

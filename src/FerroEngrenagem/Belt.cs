@@ -679,10 +679,13 @@ namespace FerroEngrenagem
     public class BeltShape : MonoBehaviour
     {
         const float Spacing = 0.125f;
+        const float CurveStep = 10f;   // degrees between the slats of a curve
         Vector3i pos;
-        Transform slats, railL, railR, end, curveL, curveR;
+        Transform slats, railL, railR, end, curveL, curveR, setL, setR, cslL, cslR, rollF, rollB;
         Vector3 basePos, slide;
-        float speed, offset, next;
+        Quaternion baseL, baseR;
+        float speed, offset, angle, next;
+        int mode;   // 0 straight, 1 curve left, 2 curve right
 
         public static void Attach(BlockEntityData ebcd, Vector3i pos, Block block)
         {
@@ -697,9 +700,19 @@ namespace FerroEngrenagem
             s.end = Find(t, "FeBeltEnd");
             s.curveL = Find(t, "FeCurve_L");
             s.curveR = Find(t, "FeCurve_R");
+            s.setL = Find(t, "FeCurveSet_L");
+            s.setR = Find(t, "FeCurveSet_R");
+            s.cslL = Find(t, "FeCurveSlats_L");
+            s.cslR = Find(t, "FeCurveSlats_R");
+            s.rollF = Find(t, "FeSpin_BeltRollerFront");
+            s.rollB = Find(t, "FeSpin_BeltRollerBack");
             if (s.slats != null) s.basePos = s.slats.localPosition;
+            if (s.cslL != null) s.baseL = s.cslL.localRotation;
+            if (s.cslR != null) s.baseR = s.cslR.localRotation;
             s.slide = Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
+            s.mode = -1;
             s.next = 0f;
+            s.Apply(0, new List<Vector3i>(), new List<Vector3i>(), Vector3i.zero, Vector3i.zero, Vector3i.zero);
         }
 
         static Transform Find(Transform t, string n)
@@ -717,6 +730,24 @@ namespace FerroEngrenagem
         static void Show(Transform t, bool on)
         {
             if (t != null && t.gameObject.activeSelf != on) t.gameObject.SetActive(on);
+        }
+
+        void Apply(int m, List<Vector3i> links, List<Vector3i> outs, Vector3i pl, Vector3i pr, Vector3i pf)
+        {
+            mode = m;
+            bool straight = m == 0;
+            Show(slats, straight);
+            Show(rollF, straight);
+            Show(rollB, straight);
+            Show(setL, m == 1);
+            Show(cslL, m == 1);
+            Show(setR, m == 2);
+            Show(cslR, m == 2);
+            Show(railL, straight && !links.Contains(pl));
+            Show(railR, straight && !links.Contains(pr));
+            Show(curveL, straight && outs.Contains(pl));
+            Show(curveR, straight && outs.Contains(pr));
+            Show(end, straight && !outs.Contains(pf));
         }
 
         void Update()
@@ -737,15 +768,24 @@ namespace FerroEngrenagem
                         Vector3i pl = new Vector3i(pos.x + l.x, pos.y, pos.z + l.z);
                         Vector3i pr = new Vector3i(pos.x - l.x, pos.y, pos.z - l.z);
                         Vector3i pf = new Vector3i(pos.x + f.x, pos.y, pos.z + f.z);
-                        Show(railL, !links.Contains(pl));
-                        Show(railR, !links.Contains(pr));
-                        Show(curveL, outs.Contains(pl));
-                        Show(curveR, outs.Contains(pr));
-                        Show(end, !outs.Contains(pf));
+                        // a pure curve: one side output only (no front, no other side)
+                        int m = 0;
+                        if (outs.Count == 1 && outs[0] == pl) m = 1;
+                        else if (outs.Count == 1 && outs[0] == pr) m = 2;
+                        Apply(m, links, outs, pl, pr, pf);
                     }
                 }
             }
-            if (slats == null || speed <= 0f) return;
+            if (speed <= 0f) return;
+            if (mode == 1 || mode == 2)
+            {
+                // the slats turn around the back corner: radius 0.5 m, so speed / 0.5 rad/s
+                angle = Mathf.Repeat(angle + speed / 0.5f * Mathf.Rad2Deg * Time.deltaTime, CurveStep);
+                if (mode == 1 && cslL != null) cslL.localRotation = baseL * Quaternion.Euler(0f, -angle, 0f);
+                if (mode == 2 && cslR != null) cslR.localRotation = baseR * Quaternion.Euler(0f, angle, 0f);
+                return;
+            }
+            if (slats == null) return;
             offset = Mathf.Repeat(offset + speed * Time.deltaTime, Spacing);
             slats.localPosition = basePos + slide * offset;
         }
