@@ -9,7 +9,8 @@ from mathutils import Vector
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
     r"F:\Github\FerroEngrenagem\Art"
-NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator"]
+NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
+         "feClutch", "feTorqueGauge"]
 
 scene = bpy.context.scene
 for engine in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
@@ -92,10 +93,10 @@ for m in R:
     for o in bpy.data.collections[m].objects:
         o.hide_render = False
 for i, (n, r) in enumerate(R.items()):
-    r.location = saved[n] + Vector((i * 1.4 - 3.5, 0, 0))
+    r.location = saved[n] + Vector((i * 1.4 - (len(R) - 1) * 0.7, 0, 0))
 scene.render.resolution_x, scene.render.resolution_y = 1600, 600
 cam.data.lens = 26
-look((0, 0, 0.45), (0.0, -7.0, 2.6))
+look((0, 0, 0.45), (0.0, -8.6, 3.0))
 p = os.path.join(ART, "feKinetic", "preview_lineup.png")
 render(p)
 written.append(p)

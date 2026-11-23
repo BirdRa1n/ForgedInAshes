@@ -25,7 +25,8 @@ public static class FeBuild
     {
         "feCrank",
         // D8 torque network (Art/feKinetic/build_feKinetic.py)
-        "feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator"
+        "feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
+        "feClutch", "feTorqueGauge"
     };
 
     const string ModelsDir = "Assets/Models";

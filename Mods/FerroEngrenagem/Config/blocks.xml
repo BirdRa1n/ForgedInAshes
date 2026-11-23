@@ -482,7 +482,7 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
 		<!-- D8 T1: torque network (src/FerroEngrenagem/TorqueNetwork.cs, PLANO_MOD.md 5.4). Models: Art/feKinetic (bundle
-		     prefabs with FeSpin parts); the Clutch and the Gauge are still vanilla placeholders. Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
+		     prefabs with FeSpin parts). Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
 		     rotate it with the rotation key to lay it flat or vertical. Gearbox: joins all six faces. -->
 		<block name="feShaft">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
@@ -539,11 +539,12 @@
 		<block name="feClutch">
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="clutch"/>
+			<!-- feet and lever: only the 4 upright turns -->
+			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feClutchDesc"/>
-			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="pipeSmallValve"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Industrial/pipeSmallValvePrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feClutchPrefab"/>
 			<property name="EconomicValue" value="100"/>
 			<property name="SortOrder2" value="0013"/>
 		</block>
@@ -561,12 +562,11 @@
 		</block>
 		<block name="feTorqueGauge">
 			<property name="Extends" value="feShaft"/>
-			<property name="Shape" value="New"/>
+			<property name="Shape" value="ModelEntity"/>
 			<property name="FeKinetic" value="gauge"/>
 			<property name="DescriptionKey" value="feTorqueGaugeDesc"/>
 			<property name="CustomIcon" value="metalPipeCap"/>
-			<property name="Model" value="@:Shapes/pipe_cap.fbx"/>
-			<property name="Texture" value="598"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueGaugePrefab"/>
 			<property name="EconomicValue" value="60"/>
 			<property name="SortOrder2" value="0015"/>
 		</block>

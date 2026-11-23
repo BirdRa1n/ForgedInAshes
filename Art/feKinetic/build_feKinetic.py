@@ -6,6 +6,8 @@
   feGearbox          Gearbox (six hubs)
   feSpinInverter     Spin Inverter (input end + output end, counter-rotating gears in a drum)
   feTorqueRegulator  Torque Regulator (input end + output end, flyball governor, handwheel)
+  feClutch           Clutch (two halves in a bell housing, release lever)
+  feTorqueGauge      Torque Gauge (six hubs, two dials on top, a pointer that turns)
 
 Run inside Blender (Scripting tab, or through the Blender MCP server):
   exec(open(r"<repo>/Art/feKinetic/build_feKinetic.py").read())
@@ -322,6 +324,79 @@ def model_regulator(col):
     return out
 
 
+def model_clutch(col):
+    """Clutch: two shafts meeting in a bell housing; a red lever on top (static). Engaged, both halves spin
+    together; released, the mod gives the clutch no faces, so nothing spins."""
+    base = bmesh.new()
+    cyl(base, 0.20, 0.30, (0, 0, C), "Y", PAINT, segs=24)              # bell housing
+    for y in (-0.16, 0.16):
+        cyl(base, 0.215, 0.025, (0, y, C), "Y", IRON, segs=24)
+        bolts(base, 8, 0.19, y + (0.014 if y > 0 else -0.014), C, IRON)
+    ring(base, 0.22, 0.20, 0.03, (0, 0.16, C), "Y", IN, segs=24)
+    ring(base, 0.22, 0.20, 0.03, (0, -0.16, C), "Y", OUT, segs=24)
+    for sy in (-0.10, 0.10):                                                # cradle
+        beam(base, (-0.16, sy, 0.0), (-0.09, sy, C - 0.16), 0.05, 0.05, IRON)
+        beam(base, (0.16, sy, 0.0), (0.09, sy, C - 0.16), 0.05, 0.05, IRON)
+    box(base, (0.40, 0.28, 0.02), (0, 0, 0.01), IRON)
+    # release lever: pivot block on top, red arm with a knob
+    box(base, (0.08, 0.10, 0.05), (0, 0, C + 0.215), IRON)
+    beam(base, (0, 0, C + 0.23), (0.0, -0.10, C + 0.42), 0.025, 0.025, RED)
+    cyl(base, 0.03, 0.05, (0.0, -0.105, C + 0.43), "X", WOOD, segs=12)
+    out = [to_object(base, "feClutch_Base", bevel=0.004)]
+    sin = bmesh.new()
+    shaft_end(sin, 0.0, 0.5, IN)
+    cyl(sin, 0.15, 0.03, (0, 0.03, 0), "Y", STEEL, segs=24)              # pressure plate
+    out.append(to_object(sin, "FeSpinIn_Clutch", location=(0, 0, C), bevel=0.002))
+    sout = bmesh.new()
+    shaft_end(sout, 0.0, -0.5, OUT)
+    cyl(sout, 0.15, 0.03, (0, -0.03, 0), "Y", RUST, segs=24)             # friction disc
+    out.append(to_object(sout, "FeSpinOut_Clutch", location=(0, 0, C), bevel=0.002))
+    return out
+
+
+def model_gauge(col):
+    """Torque Gauge: a small instrument box that joins all six sides (hubs like the Gearbox) with two dials on
+    top; the right dial has a pointer disc that turns with the network (a quarter of the speed)."""
+    base = bmesh.new()
+    w = 0.52
+    box(base, (w, w, w), (0, 0, C), BRASS)
+    for z in (C - w / 2 + 0.02, C + w / 2 - 0.02):
+        box(base, (w + 0.012, w + 0.012, 0.025), (0, 0, z), IRON)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(base, (0.025, 0.025, w + 0.012), (sx * (w / 2), sy * (w / 2), C), IRON)
+    for axis, sign in (("X", 1), ("X", -1), ("Y", 1), ("Y", -1), ("Z", -1)):
+        loc = Vector((0, 0, C))
+        loc["XYZ".index(axis)] += sign * (w / 2 + 0.01)
+        cyl(base, 0.11, 0.03, loc, axis, IRON, segs=20)
+    # top: a boss for the top hub in the middle and two dials on the corners
+    cyl(base, 0.11, 0.03, (0, 0, C + w / 2 + 0.01), "Z", IRON, segs=20)
+    for dx, dy in ((-0.15, 0.15), (0.15, -0.15)):
+        cyl(base, 0.075, 0.02, (dx, dy, C + w / 2 + 0.01), "Z", IRON, segs=24)
+        cyl(base, 0.065, 0.024, (dx, dy, C + w / 2 + 0.012), "Z", GLASS, segs=24)
+        for k in range(8):
+            a = 2 * math.pi * k / 8
+            box(base, (0.012, 0.004, 0.003), (dx + 0.052 * math.cos(a), dy + 0.052 * math.sin(a), C + w / 2 + 0.025), IRON,
+                Matrix.Rotation(a, 4, "Z"))
+    beam(base, (-0.15, 0.15, C + w / 2 + 0.026), (-0.11, 0.19, C + w / 2 + 0.026), 0.006, 0.003, RED)   # fixed needle
+    out = [to_object(base, "feTorqueGauge_Base", bevel=0.003)]
+    rots = {
+        "+Y": (0, 0, 0), "-Y": (0, 0, math.pi),
+        "+X": (0, 0, -math.pi / 2), "-X": (0, 0, math.pi / 2),
+        "+Z": (math.pi / 2, 0, 0), "-Z": (-math.pi / 2, 0, 0),
+    }
+    for k, (name, rot) in enumerate(rots.items()):
+        bm = bmesh.new()
+        shaft_end(bm, w / 2 - 0.03, 0.5)
+        out.append(to_object(bm, "FeSpin_Gauge" + str(k + 1), location=(0, 0, C), rotation=rot, bevel=0.002))
+    dial = bmesh.new()   # pointer disc, local Y = up (rotated object)
+    cyl(dial, 0.010, 0.012, (0, 0.0, 0), "Y", IRON, segs=8)
+    box(dial, (0.006, 0.004, 0.05), (0, 0.0, 0.025), RED)
+    out.append(to_object(dial, "FeSpin_x0.25_GaugeDial", location=(0.15, -0.15, C + w / 2 + 0.028),
+                         rotation=(math.pi / 2, 0, 0), bevel=0.0))
+    return out
+
+
 AXLE_Z = C
 
 
@@ -383,6 +458,8 @@ MODELS = {
     "feGearbox": model_gearbox,
     "feSpinInverter": model_inverter,
     "feTorqueRegulator": model_regulator,
+    "feClutch": model_clutch,
+    "feTorqueGauge": model_gauge,
 }
 
 

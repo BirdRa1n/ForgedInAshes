@@ -1,6 +1,6 @@
 # feKinetic — modelos da rede de torque (D8)
 
-Seis modelos feitos no Blender 5.3 por script, no mesmo estilo da Manivela (`Art/feCrank`):
+Oito modelos feitos no Blender 5.3 por script, no mesmo estilo da Manivela (`Art/feCrank`):
 
 | Bloco | Pasta | Peças que giram (contrato `FeSpin`, ver ART_BRIEF.md) | Triângulos* |
 |---|---|---|---|
@@ -10,6 +10,8 @@ Seis modelos feitos no Blender 5.3 por script, no mesmo estilo da Manivela (`Art
 | Caixa de Transmissão | `Art/feGearbox` | `FeSpin_Gearbox1..6` (um cubo/flange por face, cada um girado para o seu eixo) | 1.908 |
 | Inversor de Giro | `Art/feSpinInverter` | `FeSpinIn_Inverter`, `FeSpinOut_Inverter` (o mod gira a saída ao contrário) | 2.504 |
 | Regulador de Torque | `Art/feTorqueRegulator` | `FeSpinIn_Regulator`, `FeSpinOut_Regulator`, `FeSpin_x0.5_Governor` (regulador centrífugo vertical, meia velocidade) | 2.092 |
+| Embreagem | `Art/feClutch` | `FeSpinIn_Clutch` (placa de pressão), `FeSpinOut_Clutch` (disco); solta = nada gira | 2.068 |
+| Medidor de Torque | `Art/feTorqueGauge` | `FeSpin_Gauge1..6` (flanges das faces), `FeSpin_x0.25_GaugeDial` (ponteiro girando a 1/4) | 2.520 |
 
 \* sem o bevel de 1 segmento aplicado na exportação.
 
@@ -48,8 +50,8 @@ Passos aplicados no `blocks.xml`:
 - `feShaft`: `Shape` → `ModelEntity`, `Model` → `...?feShaftPrefab` (tirar `Texture`). Os blocos que estendem o
   Eixo herdam o Shape: `feSpeedBox`, `feGearbox`, `feSpinInverter`, `feTorqueRegulator` ganham cada um o seu
   `Model` `...?<bloco>Prefab`; o `feTorqueGauge` (ainda o cano `pipe_cap.fbx`) precisa de `Shape=New` próprio.
-- Tirar `FeSpinWhole` do Inversor e do Regulador (agora têm peças `FeSpin`). A Embreagem e o Medidor continuam
-  placeholders.
+- Tirar `FeSpinWhole` do Inversor e do Regulador (agora têm peças `FeSpin`). Embreagem e Medidor ganharam modelo depois
+  (`feClutch` com `OnlySimpleRotations`; `feTorqueGauge` voltou a `ModelEntity`).
 
 ## Não verificado
 
