@@ -37,9 +37,9 @@ namespace FerroEngrenagem
             ic = null;
             if (block.Properties != null && block.Properties.Contains(FuelItemProperty))
             {
-                string name = block.Properties.GetString(FuelItemProperty);
-                ic = ItemClass.GetItemClass(name, false);
-                if (ic == null)
+                string name = block.Properties.GetString(FuelItemProperty).Trim();
+                ic = name.Length == 0 ? null : ItemClass.GetItemClass(name, false);   // "" = vanilla gasoline
+                if (ic == null && name.Length > 0)
                     Log.Warning(FerroEngrenagemMod.LogPrefix + block.GetBlockName() + ": unknown FeFuelItem " + name);
             }
             fuelByBlock[block.blockID] = ic;

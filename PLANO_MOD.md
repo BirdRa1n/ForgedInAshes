@@ -222,7 +222,8 @@ passa a ser o conversor watts → torque.
    roda nem consome → **Inversor de Giro**; fontes girando uma contra a outra = travado. **Contrato de animação**
    (`KineticSpinner.cs`, ART_BRIEF): peças `FeSpin*` giram no +Z local na RPM/sentido reais; parâmetros de
    Animator `FeRpm`, `FeSpeed`, `FeRunning`, `FeOverloaded`, `FeLocked`, `FeWrongSpin`.
-4. T4 — Motor a Carvão, Motor a Gasolina e Bobinas no Motor Elétrico.
+4. T4 [feita, falta teste] — Motor a Carvão, Motor a Gasolina e melhorias do Motor Elétrico (as Bobinas viraram
+   receitas de Motor Reforçado 256 UT/60 W e Industrial 512 UT/120 W: o motor vanilla `Powered` não tem slots).
 5. T5 — Modelos 3D com peças que giram (colega/arte) e sincronização visual em multiplayer.
 
 **Limites conhecidos**: cálculo no servidor/host; o giro visual em clientes multiplayer precisa de pacote de

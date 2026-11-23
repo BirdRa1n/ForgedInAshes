@@ -655,6 +655,85 @@
 			<property name="EconomicValue" value="120"/>
 			<property name="SortOrder2" value="0016"/>
 		</block>
+		<!-- D8 T4: Electric Motor upgrades (more torque, more watts; same socket / shaft rules). -->
+		<block name="feElectricMotor2">
+			<property name="Extends" value="feElectricMotor"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeTorqueOutput" value="256"/>
+			<property name="DescriptionKey" value="feElectricMotor2Desc"/>
+			<property name="CustomIconTint" value="ff7020"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<block name="feElectricMotor3">
+			<property name="Extends" value="feElectricMotor"/>
+			<property name="RequiredPower" value="120"/>
+			<property name="FeTorqueOutput" value="512"/>
+			<property name="DescriptionKey" value="feElectricMotor3Desc"/>
+			<property name="CustomIconTint" value="ff3020"/>
+			<property name="EconomicValue" value="350"/>
+		</block>
+		<!-- D8 T4: fuel engines (src/FerroEngrenagem/TorqueEngine.cs). Vanilla Class Generator for the fuel window and
+		     on/off, but no electric output (OutputPerStack 0; MaxPower/OutputPerFuel 1). Torque through the model's
+		     local +Z while on and fuelled; one fuel unit per FeFuelSecondsPerUnit seconds. The slots do nothing. -->
+		<block name="feCoalEngine">
+			<property name="Class" value="Generator"/>
+			<property name="FeTorqueEngine" value="true"/>
+			<property name="FeTorqueOutput" value="256"/>
+			<property name="FeFuelSecondsPerUnit" value="60"/>
+			<property name="FeFuelItem" value="feResourceCharcoal"/>
+			<property name="FeFuelPerItem" value="1"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="0"/>
+			<property name="MaxFuel" value="100"/>
+			<property name="MaxPower" value="1"/>
+			<property name="OutputPerFuel" value="1"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCoalEngineDesc"/>
+			<property name="CustomIcon" value="generatorBankA"/>
+			<property name="CustomIconTint" value="c08060"/>
+			<property name="DisplayType" value="blockElectricalHardened"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Electrical/bigGeneratorPrefab.prefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Path" value="solid"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="HeatMapStrength" value="4"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="15"/>
+			<property name="EconomicValue" value="600"/>
+			<property name="MaxDamage" value="600"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="4"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="60" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="feResourceGear" count="3" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0020"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="bankgenerator_grab"/>
+			<property name="SoundPlace" value="bankgenerator_place"/>
+		</block>
+		<block name="feGasEngine">
+			<property name="Extends" value="feCoalEngine"/>
+			<property name="FeTorqueOutput" value="512"/>
+			<property name="FeFuelSecondsPerUnit" value="30"/>
+			<property name="FeFuelItem" value=""/>
+			<property name="MaxFuel" value="200"/>
+			<property name="DescriptionKey" value="feGasEngineDesc"/>
+			<property name="CustomIcon" value="smallEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Model" value="@:Entities/Vehicles/Car/motorPrefab.prefab"/>
+			<property name="EconomicValue" value="1200"/>
+			<property name="SortOrder2" value="0021"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

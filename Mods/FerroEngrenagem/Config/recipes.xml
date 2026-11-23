@@ -105,6 +105,30 @@
 			<ingredient name="feResourceIronPlate" count="1"/>
 			<ingredient name="feResourceIronShaft" count="1"/>
 		</recipe>
+		<!-- D8 T4: engines and motor upgrades -->
+		<recipe name="feElectricMotor2" count="1" craft_area="feElectronics" craft_time="20" always_unlocked="true">
+			<ingredient name="feElectricMotor" count="1"/>
+			<ingredient name="feResourceCoil" count="4"/>
+			<ingredient name="feResourceIronPlate" count="2"/>
+		</recipe>
+		<recipe name="feElectricMotor3" count="1" craft_area="feElectronics" craft_time="30" always_unlocked="true">
+			<ingredient name="feElectricMotor2" count="1"/>
+			<ingredient name="feResourceCoil" count="6"/>
+			<ingredient name="feResourceGear" count="2"/>
+			<ingredient name="resourceElectricParts" count="2"/>
+		</recipe>
+		<recipe name="feCoalEngine" count="1" craft_area="feAssembler" craft_time="40" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="10"/>
+			<ingredient name="feResourceGear" count="8"/>
+			<ingredient name="feResourceIronShaft" count="4"/>
+			<ingredient name="resourceMetalPipe" count="4"/>
+		</recipe>
+		<recipe name="feGasEngine" count="1" craft_area="feGarage" craft_time="60" always_unlocked="true">
+			<ingredient name="smallEngine" count="1"/>
+			<ingredient name="feResourceIronPlate" count="10"/>
+			<ingredient name="feResourceGear" count="6"/>
+			<ingredient name="feResourceIronShaft" count="4"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)

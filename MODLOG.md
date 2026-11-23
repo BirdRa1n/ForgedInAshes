@@ -465,6 +465,21 @@ aqui fica só o que foi medido/verificado.
 - Testado (usuário, log 22:44): sentido, giro invertido (`wrongSpin`), travado com fontes opostas e eventos
   `spin` chegando a motores e máquinas; sem exceções. O log `spin` é verboso (260 linhas) — reduzir quando estável.
 
+## 2026-11-22 — D8 T4: motores a combustível e melhorias do Motor Elétrico
+
+- `TorqueEngine.cs`: motor a combustível = bloco vanilla `Class=Generator` com `FeTorqueEngine` (janela de
+  combustível, Reabastecer, liga/desliga). Sem saída elétrica (`OutputPerStack` 0, `MaxPower`/`OutputPerFuel` 1);
+  dá `FeTorqueOutput` UT pelo eixo (+Z local) enquanto ligado e com combustível. Queima 1 unidade a cada
+  `FeFuelSecondsPerUnit` s (postfix em `PowerSource.HandleSendPower`, acumulando `Time.time`), desliga sozinho em
+  0 (`ShouldAutoTurnOff`).
+- Ligar exige `TileEntityPowerSource.MaxOutput > 0` (radial e botão On, "ttRequiresOneComponent", IL 3.4.0 b10):
+  postfix no getter devolve 1 só para motores; o `PowerSource.MaxOutput` real fica 0 (fios não recebem nada).
+- `feCoalEngine` (256 UT, 60 s/Carvão, `bigGeneratorPrefab`, Montadora) e `feGasEngine` (512 UT, 30 s/galão,
+  `FeFuelItem=""` = gasolina vanilla, modelo do motor de carro, Garagem com 1 `smallEngine`).
+- Bobinas: o Motor Elétrico é `Class=Powered` (sem slots), então viraram receitas de melhoria na Eletrônica:
+  `feElectricMotor2` (256 UT, 60 W) e `feElectricMotor3` (512 UT, 120 W).
+- Spinner também nos motores a combustível (postfix `BlockPowerSource.OnBlockEntityTransformAfterActivated`).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

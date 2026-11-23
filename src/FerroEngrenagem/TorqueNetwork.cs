@@ -35,7 +35,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -208,6 +208,7 @@ namespace FerroEngrenagem
             if (k != null) return k.Kind;
             if (b is BlockFeTorqueCrank) return KineticKind.TorqueCrank;
             if (PowerGate.IsMotor(b)) return KineticKind.Motor;
+            if (TorqueEngine.IsEngine(b)) return KineticKind.Engine;
             return KineticKind.None;
         }
 
@@ -227,6 +228,7 @@ namespace FerroEngrenagem
                     break;
                 case KineticKind.Motor:
                 case KineticKind.TorqueCrank:
+                case KineticKind.Engine:
                     local = Vector3.forward;   // sources: the model's local +Z is the drive shaft; they turn +Z
                     break;
                 default:
@@ -238,7 +240,7 @@ namespace FerroEngrenagem
 
         public static bool IsSource(KineticKind k)
         {
-            return k == KineticKind.Motor || k == KineticKind.TorqueCrank;
+            return k == KineticKind.Motor || k == KineticKind.TorqueCrank || k == KineticKind.Engine;
         }
 
         static int Dot(Vector3i a, Vector3i b)
@@ -367,6 +369,8 @@ namespace FerroEngrenagem
                 }
                 case KineticKind.TorqueCrank:
                     return TorqueState.IsSpinning(pos) ? SourceOutput(bv.Block) : 0;
+                case KineticKind.Engine:
+                    return TorqueEngine.IsRunning(world, pos) ? SourceOutput(bv.Block) : 0;
                 default:
                     return 0;
             }
@@ -777,6 +781,8 @@ namespace FerroEngrenagem
             if (kind == KineticKind.Motor || kind == KineticKind.Clutch || kind == KineticKind.Inverter)
                 name += " (" + Kinetic.AxisName(bv) + ")";
             prompt = name + "\n" + Status(net, pos);
+            if (kind == KineticKind.Engine)
+                prompt += "\n" + string.Format(Kinetic.Text("feEngineOpen", "{0} to open (fuel, on/off)"), KeyName(player));
             if (net != null)
                 foreach (KeyValuePair<Vector3i, Vector3i> w in net.WrongSpin)
                     if (w.Value == pos)
