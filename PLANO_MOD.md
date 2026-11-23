@@ -305,9 +305,9 @@ como as máquinas). Sem torque, a linha para e os itens ficam parados em cima de
 1. D10 T1 [feita, falta teste] — Esteira: modelo, ligação com a da frente, torque, itens andando e enfileirando, leitura ao olhar
    (itens, velocidade), devolver itens ao pegar. Teste: jogar item em cima da esteira com a mão (E com item na
    mão) até existir o Funil.
-2. D10 T2 — Funil: tirar e colocar em baús e na saída das estações.
-3. D10 T3 [Motor a Vapor feito, falta teste] — Entradas das máquinas: Motor a Vapor (laterais), Fundição (entrada e combustível), Gerador a Carvão.
-4. Depois — receita fixa nas máquinas (a Prensa repete uma receita sozinha enquanto houver ingredientes chegando),
+2. D10 T2 [feito, falta teste] — Funil: tirar e colocar em baús e na saída das estações.
+3. D10 T3 [feito, falta teste] — Entradas das máquinas (também Armazém de Esteira e todas as máquinas fe*): Motor a Vapor (laterais), Fundição (entrada e combustível), Gerador a Carvão.
+4. [feito, falta teste: receita fixa, Esteira com Filtro, Esteira de Subida e de Descida; multiplayer dedicado fica para o fim] — receita fixa nas máquinas (a Prensa repete uma receita sozinha enquanto houver ingredientes chegando),
    divisor/filtro, rampas e multiplayer dedicado.
 
 Limite conhecido: como os fluidos, funciona no single player e para quem hospeda; servidor dedicado fica para a
@@ -472,7 +472,7 @@ Só depois do lançamento da 1.0. L01 Funil primeiro; L02 Duto só se o Funil fo
 ### Fase 6 — Visual e assets (dificuldade 5, pode correr em paralelo a partir da fase 3)
 
 - Resolver P07 (versão da Unity).
-- Modelos próprios das máquinas, engrenagens que giram quando ligadas, ícones próprios para os itens novos, sons da manivela e das máquinas.
+- [feito, falta teste] Modelos próprios das 17 máquinas de produção com partes que giram/sobem enquanto fabricam (MachineVisual.cs). Falta: ícones próprios para os itens novos, sons da manivela e das máquinas.
 
 ### Fase 7 — Balanceamento e lançamento (dificuldade 3)
 
