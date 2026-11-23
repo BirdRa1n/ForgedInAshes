@@ -160,7 +160,7 @@ namespace FerroEngrenagem
                     speed = net.MachineSpeed(pos);
                     info = "net nodes=" + net.Nodes.Count + " sources=" + net.Sources + " machines=" + net.Machines.Count
                            + " " + net.Usage + "/" + net.Capacity + " UT rpm=" + Mathf.RoundToInt(rpm) + " speed=x" +
-                           speed.ToString("0.##") + (net.Overloaded ? " OVERLOAD" : "") + (net.Locked ? " LOCKED" : "");
+                           speed.ToString("0.##") + (net.Overloaded ? " OVERLOAD" : "") + (net.Locked ? " LOCKED(" + net.LockReason + ")" : "");
                 }
             }
             // Diagnostic: one line whenever the result or the network summary for this machine changes.

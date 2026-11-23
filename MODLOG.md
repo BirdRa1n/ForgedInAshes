@@ -511,6 +511,16 @@ aqui fica só o que foi medido/verificado.
   Motor Elétrico e motores a combustível: postfix em `BlockPowered`/`BlockPowerSource.GetActivationText`.
   O antigo `KineticLookController` não roda mais por quadro.
 
+## 2026-11-22 — Caixa de Transmissão: regra de giro consistente; motivo do TRAVADO
+
+- Teste: leitura e menu (toque/segurar E) OK. Dois Motores a Carvão + Inversor travavam/alternavam mesmo
+  "certos" (log 23:36: `locked` alternando, omegas trocando de sinal a cada recálculo).
+- Causa: a regra da Caixa "em linha mantém, curva de 90° inverte" não é consistente — o giro de cada face
+  dependia de por qual face o flood fill entrou primeiro (que muda com o nó inicial do recálculo).
+- Correção: a Caixa (e o Medidor) gira todas as faces no mesmo sentido vistas de fora (k = giro da face de
+  entrada); logo TODAS as saídas invertem em relação à entrada, em linha ou em curva (igual ao Create).
+- TRAVADO agora diz o motivo: sentido ("fontes girando uma contra a outra") ou velocidade; no log `LOCKED(direction|speed)`.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

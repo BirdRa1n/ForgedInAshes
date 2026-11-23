@@ -71,7 +71,8 @@ seguir os nomes abaixo (nenhum script dentro do bundle).
   cano de placeholder). Caixa de Velocidade e Regulador: entrada em −Z, saída em +Z.
 - Motor Elétrico e Manivela de Torque: o eixo de saída é o **+Z local**, e eles giram no sentido +Z (regra da
   mão direita). As duas pontas (±Z) entregam torque.
-- Caixa de Transmissão e Medidor: ligam as 6 faces.
+- Caixa de Transmissão e Medidor: ligam as 6 faces; todas as saídas giram ao contrário da entrada (vistas de
+  fora da caixa, todas as faces giram no mesmo sentido).
 
 **Parâmetros de Animator (opcionais; só são usados se existirem no Animator do prefab)**
 - `float FeRpm` (com sinal, em relação ao +Z do bloco), `float FeSpeed` (|RPM|/32; 1 = velocidade base, bom para

@@ -218,7 +218,8 @@ passa a ser o conversor watts → torque.
 2. T2 [feita e testada] — Caixa de Velocidade + velocidade de fabricação com custo ao quadrado.
 3. T3 [feita e testada] — Embreagem, Regulador de Torque e Medidor.
 3b. T3b [feita e testada] — **Sentido de giro** (pedido do usuário): fontes e peças axiais só ligam pelas
-   pontas do eixo; curvas de 90° na Caixa de Transmissão invertem o giro; máquina recebendo giro ao contrário não
+   pontas do eixo; a Caixa de Transmissão inverte o giro em todas as saídas (como no Create; a regra antiga
+   "reto mantém, curva inverte" era inconsistente e travava redes); máquina recebendo giro ao contrário não
    roda nem consome → **Inversor de Giro**; fontes girando uma contra a outra = travado. **Contrato de animação**
    (`KineticSpinner.cs`, ART_BRIEF): peças `FeSpin*` giram no +Z local na RPM/sentido reais; parâmetros de
    Animator `FeRpm`, `FeSpeed`, `FeRunning`, `FeOverloaded`, `FeLocked`, `FeWrongSpin`.

@@ -183,6 +183,13 @@ namespace FerroEngrenagem
         public float RefRpm = Kinetic.BaseRpm;   // RPM of a node with factor 1
         public int Sign = 1;                     // relative spins x Sign = real spins (decided by a source)
         public bool Locked;
+        public string LockReason = "";   // "direction" or "speed"
+
+        public void Lock(string reason)
+        {
+            Locked = true;
+            if (LockReason.Length == 0) LockReason = reason;
+        }
         public float Time;
 
         public ICollection<Vector3i> Nodes { get { return Factor.Keys; } }
@@ -304,16 +311,16 @@ namespace FerroEngrenagem
             return new Vector3i(c * a.x, c * a.y, c * a.z);
         }
 
-        /// <summary>Spin carried out of a node through face d, as +1/-1 along d (right-hand rule): straight
-        /// through keeps the angular velocity; a gearbox turning 90 degrees flips it (bevel gears); an inverter
-        /// flips it between its two ends.</summary>
+        /// <summary>Spin carried out of a node through face d, as +1/-1 along d (right-hand rule): shafts keep the
+        /// angular velocity; an inverter flips it between its two ends; a gearbox (and gauge) turns every face the
+        /// same way as seen from outside the box, so it REVERSES the spin on all its outputs, straight on or 90
+        /// degrees (like Create's gearbox). The D8 rule "straight keeps, 90 degrees flips" was not consistent: the
+        /// result depended on which face the flood fill entered first, and networks LOCKED or flapped (user test,
+        /// 2026-11-22, two Coal Engines + Spin Inverter).</summary>
         static int OutSpin(KineticKind kind, Vector3i axis, Vector3i omega, Vector3i entryN, Vector3i d)
         {
             if (kind == KineticKind.Gearbox || kind == KineticKind.Gauge)
-            {
-                if (d == entryN || d == Neg(entryN)) return Dot(omega, d);
-                return Dot(omega, entryN);
-            }
+                return Dot(omega, entryN);   // the spin seen on every face = the one of the face it entered by
             if (kind == KineticKind.Inverter && d == axis) return -Dot(omega, d);   // omega = the -axis end's
             return Dot(omega, d);
         }
@@ -475,7 +482,7 @@ namespace FerroEngrenagem
                     // a source turns its own +axis: compare with the spin the network gives it
                     int r = omega == axis ? 1 : -1;
                     if (sign == 0) sign = r;
-                    else if (sign != r) net.Locked = true;   // two sources turning against each other
+                    else if (sign != r) net.Lock("direction");   // two sources turning against each other
                     int cap = Capacity(world, pos, bv);
                     if (cap > 0)
                     {
@@ -483,7 +490,7 @@ namespace FerroEngrenagem
                         net.Sources++;
                         float rr = BaseRpm / f;   // this source turns at BaseRpm
                         if (!haveRef) { net.RefRpm = rr; haveRef = true; }
-                        else if (!Same(net.RefRpm, rr)) net.Locked = true;
+                        else if (!Same(net.RefRpm, rr)) net.Lock("speed");
                     }
                 }
                 foreach (Vector3i d in Dirs)
@@ -502,10 +509,10 @@ namespace FerroEngrenagem
                         float seen;
                         if (net.Factor.TryGetValue(n, out seen))
                         {
-                            if (!Same(seen, nf)) net.Locked = true;   // a loop that disagrees on speed
+                            if (!Same(seen, nf)) net.Lock("speed");   // a loop that disagrees on speed
                             Vector3i nEntry = net.EntryN.ContainsKey(n) ? net.EntryN[n] : Vector3i.zero;
                             if (OutSpin(nk, Axis(nb), net.Omega[n], nEntry, back) != -c)
-                                net.Locked = true;                   // a loop that disagrees on direction
+                                net.Lock("direction");               // a loop that disagrees on direction
                             continue;
                         }
                         net.Factor[n] = nf;
@@ -703,7 +710,10 @@ namespace FerroEngrenagem
         public static string Status(TorqueNet net, Vector3i node)
         {
             if (net == null) return "";
-            if (net.Locked) return Kinetic.Text("feNetLocked", "LOCKED: sources would turn at different speeds");
+            if (net.Locked)
+                return net.LockReason == "direction"
+                    ? Kinetic.Text("feNetLockedDir", "LOCKED: sources turn against each other (turn one around or add a Spin Inverter)")
+                    : Kinetic.Text("feNetLocked", "LOCKED: sources would turn at different speeds");
             if (net.Capacity <= 0)
                 return string.Format(Kinetic.Text("feNetStopped", "Stopped: no torque source ({0} UT needed)"), net.Usage);
             if (net.Overloaded)
