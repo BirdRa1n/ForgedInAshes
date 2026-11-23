@@ -63,6 +63,12 @@
 			<ingredient name="resourceWood" count="20"/>
 			<ingredient name="resourceNail" count="10"/>
 		</recipe>
+		<!-- D7: Torque Crank, pure shaft power in a motor socket (bootstrap: no power needed to make it) -->
+		<recipe name="feTorqueCrank" count="1" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="10"/>
+			<ingredient name="resourceWood" count="15"/>
+			<ingredient name="resourceNail" count="6"/>
+		</recipe>
 	</append>
 
 	<!-- F1-T04 (fixed): M01 Foundry = the vanilla forge "replace_smelter" recipes (direct scrap: Scrap Iron + Clay)

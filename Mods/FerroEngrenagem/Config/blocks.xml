@@ -534,6 +534,44 @@
 			<property name="SoundPickup" value="relay_grab"/>
 			<property name="SoundPlace" value="relay_place"/>
 		</block>
+	<!-- D7: Torque Crank (src/FerroEngrenagem/TorqueCrank.cs). Goes in a machine's motor socket instead of the
+	     Electric Motor; hold E on it to drive the machine with FeTorqueOutput watts of shaft power (no wires,
+	     nothing stored). Model: the crank's prefab for now. -->
+		<block name="feTorqueCrank">
+			<property name="Class" value="FerroEngrenagem.FeTorqueCrank, FerroEngrenagem"/>
+			<property name="FeTorqueOutput" value="30"/>
+			<property name="FeTorqueCoastSeconds" value="1.5"/>
+			<property name="FeTorqueStaminaPerSecond" value="30"/>
+			<property name="FeTorqueMinStamina" value="5"/>
+			<property name="FeTorqueSpinDegPerSecond" value="300"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTorqueCrankDesc"/>
+			<property name="CustomIcon" value="decoWildWestWagonWheelFront"/>
+			<property name="CustomIconTint" value="ffc060"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrankPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="MaxDamage" value="50000"/>
+			<property name="EconomicValue" value="120"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="2"/>
+			</property>
+			<drop event="Harvest" name="resourceForgedIron" count="3" tag="salvageHarvest"/>
+			<drop event="Harvest" name="resourceScrapIron" count="10" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0241"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
 	</append>
 
 	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).

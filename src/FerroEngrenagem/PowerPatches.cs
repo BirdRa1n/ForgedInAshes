@@ -73,4 +73,18 @@ namespace FerroEngrenagem
             return true;
         }
     }
+
+    // Picking up / replacing a power source: vanilla TileEntityPowerSource.ReplacedBy (IL 3.4.0 b10) drops its
+    // slot items PLUS CurrentFuel turned into the first item tagged "gasoline" in a DroppedLootContainer. The
+    // crank's fuel is cranked spin, not gasoline (user, 2026-11-22: a bag of gas cans fell out when taking a
+    // charged crank): zero it first, so only the slot items (module, battery) drop.
+    [HarmonyPatch(typeof(TileEntityPowerSource), "ReplacedBy")]
+    public static class Patch_PowerSource_ReplacedBy_NoCrankGas
+    {
+        public static void Prefix(TileEntityPowerSource __instance, BlockValue _bvOld)
+        {
+            if (!(_bvOld.Block is BlockFeCrank)) return;
+            if (__instance.CurrentFuel > 0) __instance.CurrentFuel = 0;
+        }
+    }
 }

@@ -5,6 +5,8 @@
 // like a light) sits in the machine's MOTOR SOCKET and is powered. The motor draws the machine's FeMinPower
 // from the network (its PowerItem.RequiredPower is set to it), so a 30 W crank cannot run a 60 W machine.
 //
+// The socket also takes a Torque Crank (TorqueCrank.cs): pure shaft power while it is turned, no wires.
+//
 // Motor socket (user, 2026-11-22: "the motor must be in a specific position to plug it into the machine"):
 // the block cell next to the machine's footprint on the side FeMotorSide (back|front|left|right, default back),
 // at the machine's lowest layer, in the middle column (left-of-middle for even widths). Computed in the
@@ -59,6 +61,12 @@ namespace FerroEngrenagem
             v = p != null && p.Contains(MotorProperty) && p.GetBool(MotorProperty);
             motorByBlock[block.blockID] = v;
             return v;
+        }
+
+        /// <summary>Something that can sit in a motor socket and drive the machine (motor or torque crank).</summary>
+        public static bool IsDriver(Block block)
+        {
+            return IsMotor(block) || block is BlockFeTorqueCrank;
         }
 
         public static bool IsGated(TileEntityWorkstation te)
@@ -159,6 +167,17 @@ namespace FerroEngrenagem
                     }
                     if (p.IsPowered) watts = need;
                     chain = Chain(item);
+                }
+                else
+                {
+                    // Torque Crank in the socket: pure shaft power while someone turns it (TorqueCrank.cs)
+                    BlockFeTorqueCrank torque = world.GetBlock(socket).Block as BlockFeTorqueCrank;
+                    if (torque != null)
+                    {
+                        bool spinning = TorqueState.IsSpinning(socket);
+                        if (spinning) watts = torque.Output;
+                        chain = "torqueCrank spinning=" + spinning + " out=" + torque.Output;
+                    }
                 }
                 ok = watts >= need;
             }

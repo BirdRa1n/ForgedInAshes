@@ -361,6 +361,20 @@ aqui fica só o que foi medido/verificado.
 - Diagnóstico ampliado: a linha `power ...` agora mostra a cadeia do motor até a fonte (`on=`, `maxOut=`).
 - Encaixe: com rot=0 o `back` (-Z local) ficou na face da bancada de frente para o jogador (print do teste).
 
+## 2026-11-22 — Manivela → motor → Prensa funcionando; gasolina ao recolher; Manivela de Torque
+
+- Teste confirmado no log: `fePress ... motor=True watts=30/30 -> ON | ... <- feCrank(on=True maxOut=30)`, e
+  OFF quando a carga da manivela acaba.
+- Bug: ao recolher a manivela carregada caía uma bolsa de galões. Origem (IL 3.4.0 b10):
+  `TileEntityPowerSource.ReplacedBy` junta os slots + `CurrentFuel` convertido no 1º item com tag `gasoline`
+  e chama `GameManager.DropContentInLootContainerServer("DroppedLootContainer", ...)`. Correção: prefix zera o
+  combustível só da manivela (`PowerPatches.cs`); módulo e bateria continuam caindo.
+- Pedido do usuário: duas manivelas — a elétrica (gerador, já existente) e uma de TORQUE puro, que vai no mesmo
+  encaixe do motor. `feTorqueCrank` (TorqueCrank.cs): bloco simples, segurar E gira (stamina 30/s), a máquina
+  conta `FeTorqueOutput`=30 W enquanto gira + 1,5 s de inércia; nada armazenado. Estado em memória
+  (`TorqueState`, SP/host). Receita no inventário (10 FI, 15 madeira, 6 pregos). Modelo: prefab da manivela.
+- `PowerGate.IsDriver` = motor ou manivela de torque (marcação do encaixe também).
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

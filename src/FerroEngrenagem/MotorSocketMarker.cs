@@ -1,7 +1,7 @@
-// D7: while the local player holds an Electric Motor, outline the motor socket of every power-gated machine
+// D7: while the local player holds an Electric Motor or a Torque Crank, outline the motor socket of every power-gated machine
 // nearby (PowerGate.SocketPos), so it is clear where the motor has to go to "plug into" the machine.
 //   green  = free, place the motor here
-//   cyan   = a motor is already plugged in
+//   cyan   = a motor / torque crank is already plugged in
 //   red    = something else is in the way
 // Client-only visual (one GameObject, LineRenderers; nothing is saved or sent over the network).
 //
@@ -39,7 +39,7 @@ namespace FerroEngrenagem
         {
             if (player.inventory == null) return false;
             ItemClassBlock icb = player.inventory.holdingItem as ItemClassBlock;
-            return icb != null && PowerGate.IsMotor(icb.GetBlock());
+            return icb != null && PowerGate.IsDriver(icb.GetBlock());
         }
 
         void Update()
@@ -79,7 +79,7 @@ namespace FerroEngrenagem
                         Vector3i s = PowerGate.SocketPos(world.GetBlock(parent), parent);
                         BlockValue there = world.GetBlock(s);
                         Color col;
-                        if (PowerGate.IsMotor(there.Block)) col = new Color(0.2f, 0.85f, 1f, 1f);
+                        if (PowerGate.IsDriver(there.Block)) col = new Color(0.2f, 0.85f, 1f, 1f);
                         else if (there.isair) col = new Color(0.3f, 1f, 0.3f, 1f);
                         else col = new Color(1f, 0.25f, 0.2f, 1f);
                         sockets.Add(s);
