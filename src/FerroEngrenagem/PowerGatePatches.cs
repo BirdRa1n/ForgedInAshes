@@ -151,6 +151,7 @@ namespace FerroEngrenagem
                 socket = SocketPos(world.GetBlock(pos), pos);
                 TorqueNet net = Kinetic.Get(world, socket);
                 if (net == null) info = "socket empty";
+                else if (net.WrongSpin.ContainsKey(pos)) info = "wrong spin direction (needs a Spin Inverter)";
                 else if (!net.Machines.ContainsKey(pos)) info = "socket block does not face the machine";
                 else
                 {

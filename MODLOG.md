@@ -443,6 +443,26 @@ aqui fica só o que foi medido/verificado.
 - E troca o ajuste de qualquer bloco com `Settings(kind) > 0` (velocidade, embreagem, regulador).
 - Velocidade de fabricação = rpm/32 × escala do regulador (`TorqueNet.MachineSpeed`).
 
+## 2026-11-22 — D8: sentido de giro, Inversor de Giro e contrato de animação
+
+- T3 testada pelo usuário (embreagem, regulador 100/50 %, medidor).
+- Pedido: a direção do giro importa; torque chegando ao contrário exige um item que inverta. E os modelos 3D
+  precisam receber eventos de giro (com velocidade).
+- Modelo: cada nó guarda a velocidade angular `Omega` (vetor unitário de eixo, regra da mão direita). Giro levado
+  por uma face = +1/-1 ao longo da direção de viagem. Eixo/caixa de velocidade/embreagem/regulador mantêm;
+  Caixa de Transmissão e Medidor: em linha mantém, curva de 90° inverte (engrenagens cônicas); Inversor inverte
+  entre as pontas. Fontes (Motor, Manivela de Torque) agora só ligam pelas pontas do eixo (+Z local do modelo) e
+  giram +Z. A primeira fonte fixa o sinal real; outra fonte contrária, ou laço que discorda = TRAVADO.
+- Máquina: giro levado para dentro dela precisa ser +1; senão vai para `WrongSpin` (não roda, não consome).
+  Log `power ...: wrong spin direction`; leitura do nó "X está girando ao contrário: use um Inversor de Giro";
+  marcação do encaixe laranja quando algo está plugado mas não move a máquina.
+- `feSpinInverter` (axial, `pipeSmallJointPrefab`), receita na Montadora.
+- `KineticSpinner.cs`: em blocos ModelEntity da rede, no Motor (postfix `BlockPowered.OnBlockEntityTransformAfterActivated`)
+  e nas máquinas (postfix `BlockWorkstation.OnBlockEntityTransformBeforeActivated`). Gira filhos `FeSpin*` no +Z
+  local (tokens `In`/`Out`, `_Rev`, `_xN`), parâmetros de Animator opcionais; log `spin ...` quando o estado muda.
+  Placeholders com `FeSpinWhole=true` giram o 1º filho. `build.ps1` passou a referenciar
+  `UnityEngine.AnimationModule.dll`. Contrato documentado no ART_BRIEF.md.
+
 ## Próximo passo (antigo, mantido para histórico)
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,

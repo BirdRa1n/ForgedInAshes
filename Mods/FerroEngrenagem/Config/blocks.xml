@@ -491,6 +491,7 @@
 			<property name="FeMotor" value="true"/>
 			<property name="FeTorqueOutput" value="128"/>
 			<property name="DescriptionKey" value="feElectricMotorDesc"/>
+			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="electricwirerelay"/>
 			<property name="CustomIconTint" value="ffa040"/>
 			<property name="DisplayType" value="blockElectrical"/>
@@ -613,6 +614,7 @@
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="clutch"/>
 			<property name="DescriptionKey" value="feClutchDesc"/>
+			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="pipeSmallValve"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Industrial/pipeSmallValvePrefab.prefab"/>
@@ -623,6 +625,7 @@
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="regulator"/>
 			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
+			<property name="FeSpinWhole" value="true"/>
 			<property name="CustomIcon" value="metalPipeValve"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="@:Entities/Plumbing/pipe_valvePrefab.prefab"/>
@@ -638,6 +641,19 @@
 			<property name="Texture" value="598"/>
 			<property name="EconomicValue" value="60"/>
 			<property name="SortOrder2" value="0015"/>
+		</block>
+		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
+		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->
+		<block name="feSpinInverter">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="inverter"/>
+			<property name="DescriptionKey" value="feSpinInverterDesc"/>
+			<property name="FeSpinWhole" value="true"/>
+			<property name="CustomIcon" value="pipeSmallJoint"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="@:Entities/Industrial/pipeSmallJointPrefab.prefab"/>
+			<property name="EconomicValue" value="120"/>
+			<property name="SortOrder2" value="0016"/>
 		</block>
 	</append>
 

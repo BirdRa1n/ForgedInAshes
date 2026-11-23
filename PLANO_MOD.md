@@ -216,7 +216,12 @@ passa a ser o conversor watts → torque.
 1. T1 [feita e testada] — Núcleo: Eixo, Caixa de Transmissão, rede (BFS), Motor Elétrico e Manivela de Torque como fontes,
    máquina no encaixe como consumidor em UT, sobrecarga, leitura ao olhar.
 2. T2 [feita e testada] — Caixa de Velocidade + velocidade de fabricação com custo ao quadrado.
-3. T3 [feita, falta teste] — Embreagem, Regulador de Torque e Medidor.
+3. T3 [feita e testada] — Embreagem, Regulador de Torque e Medidor.
+3b. T3b [feita, falta teste] — **Sentido de giro** (pedido do usuário): fontes e peças axiais só ligam pelas
+   pontas do eixo; curvas de 90° na Caixa de Transmissão invertem o giro; máquina recebendo giro ao contrário não
+   roda nem consome → **Inversor de Giro**; fontes girando uma contra a outra = travado. **Contrato de animação**
+   (`KineticSpinner.cs`, ART_BRIEF): peças `FeSpin*` giram no +Z local na RPM/sentido reais; parâmetros de
+   Animator `FeRpm`, `FeSpeed`, `FeRunning`, `FeOverloaded`, `FeLocked`, `FeWrongSpin`.
 4. T4 — Motor a Carvão, Motor a Gasolina e Bobinas no Motor Elétrico.
 5. T5 — Modelos 3D com peças que giram (colega/arte) e sincronização visual em multiplayer.
 

@@ -49,6 +49,38 @@ e das máquinas acima. 160×160 RGBA, nome do arquivo = nome do item (`feResourc
 ### 3. Depois (fases 2–4): `E01` Manivela, `E02` Carvoeira, `E03` Gerador a Carvão, `I01` Carvão Vegetal,
 `I02` Volante de Inércia — ver tabelas em `PLANO_MOD.md`.
 
+## Animação de giro da rede de torque (contrato, D8 — src/FerroEngrenagem/KineticSpinner.cs)
+
+Vale para os modelos (prefab no `ferroengrenagem.unity3d`, bloco com `Shape=ModelEntity`) de: Eixo, Caixa de
+Transmissão, Caixa de Velocidade, Embreagem, Regulador, Medidor, Inversor de Giro, Motor Elétrico, Manivela de
+Torque e as máquinas com encaixe de motor. O mod lê a rede a cada 0,25 s e anima sozinho; o asset só precisa
+seguir os nomes abaixo (nenhum script dentro do bundle).
+
+**Peças que giram (por nome do objeto no prefab)**
+- Qualquer objeto cujo nome começa com `FeSpin` gira em torno do **+Z local dele** (Unity; no Blender é o +Y
+  antes de exportar, como o rotor da Manivela), na RPM da peça, no sentido real da rede (1 RPM = 6°/s; a rede vai
+  de 4 a 256 RPM). Gire o pivô do objeto para o centro do eixo.
+- `FeSpinIn` / `FeSpinOut`: lados de entrada e saída (Caixa de Velocidade: a saída usa a relação ×2/×4/×½;
+  Inversor: a saída gira ao contrário). Nos outros blocos, os dois usam a RPM da peça.
+- Sufixos separados por `_`: `_Rev` (gira ao contrário — a segunda engrenagem de um par) e `_x2`, `_x0.5`...
+  (multiplicador, para engrenagens internas de tamanhos diferentes). Ex.: `FeSpinOut_x0.5_Rev`.
+- Aceleração e desaceleração são suavizadas pelo mod (volante).
+
+**Eixos dos blocos (orientação do modelo)**
+- Eixo, Caixa de Velocidade, Embreagem, Regulador e Inversor: o eixo do bloco é o **+Z local** do modelo (como o
+  cano de placeholder). Caixa de Velocidade e Regulador: entrada em −Z, saída em +Z.
+- Motor Elétrico e Manivela de Torque: o eixo de saída é o **+Z local**, e eles giram no sentido +Z (regra da
+  mão direita). As duas pontas (±Z) entregam torque.
+- Caixa de Transmissão e Medidor: ligam as 6 faces.
+
+**Parâmetros de Animator (opcionais; só são usados se existirem no Animator do prefab)**
+- `float FeRpm` (com sinal, em relação ao +Z do bloco), `float FeSpeed` (|RPM|/32; 1 = velocidade base, bom para
+  multiplicar a velocidade de um estado), `bool FeRunning`, `bool FeOverloaded`, `bool FeLocked`,
+  `bool FeWrongSpin` (máquina recebendo giro ao contrário).
+
+**Placeholders**: enquanto não há modelo, os blocos com `FeSpinWhole=true` giram o primeiro filho do prefab
+vanilla, só para ver que os eventos chegam (os canos `Shape=New` não têm objeto para animar).
+
 ## Integração pendente (auditoria de 2026-11-22, sessão de XML)
 
 Já no jogo: **feCrank** (Manivela), via `Resources/ferroengrenagem.unity3d` + `FeBuild.cs`.

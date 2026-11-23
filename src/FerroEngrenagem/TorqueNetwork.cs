@@ -35,7 +35,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Motor, TorqueCrank }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -58,6 +58,7 @@ namespace FerroEngrenagem
                 case "clutch": Kind = KineticKind.Clutch; break;
                 case "regulator": Kind = KineticKind.Regulator; break;
                 case "gauge": Kind = KineticKind.Gauge; break;
+                case "inverter": Kind = KineticKind.Inverter; break;
                 default: Kind = KineticKind.Gearbox; break;
             }
             if (Properties != null && Properties.Contains("FeShaftAxis"))
@@ -101,6 +102,15 @@ namespace FerroEngrenagem
             }
         }
 
+        // ModelEntity blocks get the spin animator (KineticSpinner.cs). Shape="New" blocks are meshed into the
+        // chunk and have no transform to animate (the pipe placeholders).
+        public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
+                                                                  BlockValue _blockValue, BlockEntityData _ebcd)
+        {
+            base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
+            KineticSpinner.Attach(_ebcd, _blockPos, this);
+        }
+
         // E on a speed box / clutch / regulator changes its setting (KineticLookController); no radial.
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
                                                         EntityAlive _entityFocusing)
@@ -116,10 +126,16 @@ namespace FerroEngrenagem
         public readonly Dictionary<Vector3i, Vector3i> MachineNode = new Dictionary<Vector3i, Vector3i>(); // parent -> socket node
         public readonly Dictionary<Vector3i, float> MachineScale = new Dictionary<Vector3i, float>(); // regulator slow-down
         public readonly Dictionary<Vector3i, RegZone> Regulators = new Dictionary<Vector3i, RegZone>();
+        // spin direction: world angular velocity direction of each node (right-hand rule, unit axis vector; for a
+        // gearbox/gauge the one of the shaft that drives it, for an inverter the one of its -axis end)
+        public readonly Dictionary<Vector3i, Vector3i> Omega = new Dictionary<Vector3i, Vector3i>();
+        public readonly Dictionary<Vector3i, Vector3i> EntryN = new Dictionary<Vector3i, Vector3i>();  // gearbox entry face
+        public readonly Dictionary<Vector3i, Vector3i> WrongSpin = new Dictionary<Vector3i, Vector3i>(); // parent -> node
         public int Capacity;
         public int Usage;
         public int Sources;
         public float RefRpm = Kinetic.BaseRpm;   // RPM of a node with factor 1
+        public int Sign = 1;                     // relative spins x Sign = real spins (decided by a source)
         public bool Locked;
         public float Time;
 
@@ -195,14 +211,71 @@ namespace FerroEngrenagem
             return KineticKind.None;
         }
 
-        /// <summary>World direction of an axial block's +axis (shaft / speed box); zero for the others.</summary>
+        /// <summary>World direction of an axial block's +axis (shaft, speed box, clutch, regulator, inverter, and
+        /// the drive shaft of the sources: model local +Z); zero for gearbox / gauge (all six faces).</summary>
         public static Vector3i Axis(BlockValue bv)
         {
-            BlockFeKinetic k = bv.Block as BlockFeKinetic;
-            if (k == null || (k.Kind != KineticKind.Shaft && k.Kind != KineticKind.SpeedBox &&
-                              k.Kind != KineticKind.Clutch && k.Kind != KineticKind.Regulator)) return Vector3i.zero;
-            Vector3 a = k.shape.GetRotation(bv) * k.ShaftAxis.ToVector3();
+            Vector3 local;
+            switch (Kind(bv.Block))
+            {
+                case KineticKind.Shaft:
+                case KineticKind.SpeedBox:
+                case KineticKind.Clutch:
+                case KineticKind.Regulator:
+                case KineticKind.Inverter:
+                    local = ((BlockFeKinetic)bv.Block).ShaftAxis.ToVector3();
+                    break;
+                case KineticKind.Motor:
+                case KineticKind.TorqueCrank:
+                    local = Vector3.forward;   // sources: the model's local +Z is the drive shaft; they turn +Z
+                    break;
+                default:
+                    return Vector3i.zero;
+            }
+            Vector3 a = bv.Block.shape.GetRotation(bv) * local;
             return new Vector3i(Mathf.RoundToInt(a.x), Mathf.RoundToInt(a.y), Mathf.RoundToInt(a.z));
+        }
+
+        public static bool IsSource(KineticKind k)
+        {
+            return k == KineticKind.Motor || k == KineticKind.TorqueCrank;
+        }
+
+        static int Dot(Vector3i a, Vector3i b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        static Vector3i Neg(Vector3i a)
+        {
+            return new Vector3i(-a.x, -a.y, -a.z);
+        }
+
+        static Vector3i Mul(int c, Vector3i a)
+        {
+            return new Vector3i(c * a.x, c * a.y, c * a.z);
+        }
+
+        /// <summary>Spin carried out of a node through face d, as +1/-1 along d (right-hand rule): straight
+        /// through keeps the angular velocity; a gearbox turning 90 degrees flips it (bevel gears); an inverter
+        /// flips it between its two ends.</summary>
+        static int OutSpin(KineticKind kind, Vector3i axis, Vector3i omega, Vector3i entryN, Vector3i d)
+        {
+            if (kind == KineticKind.Gearbox || kind == KineticKind.Gauge)
+            {
+                if (d == entryN || d == Neg(entryN)) return Dot(omega, d);
+                return Dot(omega, entryN);
+            }
+            if (kind == KineticKind.Inverter && d == axis) return -Dot(omega, d);   // omega = the -axis end's
+            return Dot(omega, d);
+        }
+
+        /// <summary>Angular velocity a node takes when spin c (along travel d) enters it.</summary>
+        static Vector3i EnterOmega(KineticKind kind, Vector3i axis, Vector3i d, int c)
+        {
+            Vector3i v = Mul(c, d);
+            if (kind == KineticKind.Inverter && d == Neg(axis)) return Neg(v);   // entered by its +axis end
+            return v;
         }
 
         public static bool HasFace(BlockValue bv, Vector3i dir)
@@ -327,31 +400,52 @@ namespace FerroEngrenagem
             TorqueNet net = new TorqueNet();
             net.Time = UnityEngine.Time.time;
             bool haveRef = false;
+            int sign = 0;   // +1/-1 once a source block fixes the real spin direction (relative spins until then)
+            Dictionary<Vector3i, int> machineSpin = new Dictionary<Vector3i, int>();   // parent -> relative spin in
             Queue<Vector3i> open = new Queue<Vector3i>();
             open.Enqueue(start);
             net.Factor[start] = 1f;
+            {
+                BlockValue sbv = world.GetBlock(start);
+                Vector3i a = Axis(sbv);
+                net.Omega[start] = a == Vector3i.zero ? new Vector3i(1, 0, 0) : a;
+                net.EntryN[start] = new Vector3i(1, 0, 0);
+            }
             while (open.Count > 0 && net.Factor.Count <= MaxNodes)
             {
                 Vector3i pos = open.Dequeue();
                 BlockValue bv = world.GetBlock(pos);
+                KineticKind kind = Kind(bv.Block);
+                Vector3i axis = Axis(bv);
+                Vector3i omega = net.Omega[pos];
+                Vector3i entryN = net.EntryN.ContainsKey(pos) ? net.EntryN[pos] : Vector3i.zero;
                 float f = net.Factor[pos];
-                int cap = Capacity(world, pos, bv);
-                if (cap > 0)
+                if (IsSource(kind))
                 {
-                    net.Capacity += cap;
-                    net.Sources++;
-                    float r = BaseRpm / f;   // this source turns at BaseRpm
-                    if (!haveRef) { net.RefRpm = r; haveRef = true; }
-                    else if (!Same(net.RefRpm, r)) net.Locked = true;
+                    // a source turns its own +axis: compare with the spin the network gives it
+                    int r = omega == axis ? 1 : -1;
+                    if (sign == 0) sign = r;
+                    else if (sign != r) net.Locked = true;   // two sources turning against each other
+                    int cap = Capacity(world, pos, bv);
+                    if (cap > 0)
+                    {
+                        net.Capacity += cap;
+                        net.Sources++;
+                        float rr = BaseRpm / f;   // this source turns at BaseRpm
+                        if (!haveRef) { net.RefRpm = rr; haveRef = true; }
+                        else if (!Same(net.RefRpm, rr)) net.Locked = true;
+                    }
                 }
                 foreach (Vector3i d in Dirs)
                 {
                     if (!HasFace(bv, d)) continue;
                     Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                     BlockValue nb = world.GetBlock(n);
-                    Vector3i back = new Vector3i(-d.x, -d.y, -d.z);
+                    Vector3i back = Neg(d);
                     float leave = f * LeaveMult(bv, d);
-                    if (Kind(nb.Block) != KineticKind.None)
+                    int c = OutSpin(kind, axis, omega, entryN, d);
+                    KineticKind nk = Kind(nb.Block);
+                    if (nk != KineticKind.None)
                     {
                         if (!HasFace(nb, back)) continue;
                         float nf = leave * EnterMult(nb, back);
@@ -359,9 +453,14 @@ namespace FerroEngrenagem
                         if (net.Factor.TryGetValue(n, out seen))
                         {
                             if (!Same(seen, nf)) net.Locked = true;   // a loop that disagrees on speed
+                            Vector3i nEntry = net.EntryN.ContainsKey(n) ? net.EntryN[n] : Vector3i.zero;
+                            if (OutSpin(nk, Axis(nb), net.Omega[n], nEntry, back) != -c)
+                                net.Locked = true;                   // a loop that disagrees on direction
                             continue;
                         }
                         net.Factor[n] = nf;
+                        net.Omega[n] = EnterOmega(nk, Axis(nb), d, c);
+                        if (nk == KineticKind.Gearbox || nk == KineticKind.Gauge) net.EntryN[n] = back;
                         open.Enqueue(n);
                         continue;
                     }
@@ -378,8 +477,25 @@ namespace FerroEngrenagem
                     if (PowerGate.SocketPos(pbv, parent) != pos) continue;
                     net.Machines[parent] = leave;
                     net.MachineNode[parent] = pos;
+                    machineSpin[parent] = c;   // +1 = turning the right way into the machine (once sign applied)
                 }
-                if (Kind(bv.Block) == KineticKind.Regulator) net.Regulators[pos] = new RegZone();
+                if (kind == KineticKind.Regulator) net.Regulators[pos] = new RegZone();
+            }
+            // real directions: the first source decides (no source at all: keep the relative ones)
+            if (sign == 0) sign = 1;
+            net.Sign = sign;
+            if (sign < 0)
+            {
+                List<Vector3i> keys = new List<Vector3i>(net.Omega.Keys);
+                foreach (Vector3i k in keys) net.Omega[k] = Neg(net.Omega[k]);
+            }
+            // a machine fed the wrong way round does not run and takes no torque (fix: a Spin Inverter)
+            foreach (KeyValuePair<Vector3i, int> m in machineSpin)
+            {
+                if (m.Value * sign > 0) continue;
+                net.WrongSpin[m.Key] = net.MachineNode[m.Key];
+                net.Machines.Remove(m.Key);
+                net.MachineNode.Remove(m.Key);
             }
             ComputeUsage(world, net);
             return net;
@@ -658,7 +774,14 @@ namespace FerroEngrenagem
                             "Sources: {0} - Machines: {1} - Regulators: {2} - Load: {3}%"),
                             net.Sources, net.Machines.Count, net.Regulators.Count, pct);
             }
+            if (kind == KineticKind.Motor || kind == KineticKind.Clutch || kind == KineticKind.Inverter)
+                name += " (" + Kinetic.AxisName(bv) + ")";
             prompt = name + "\n" + Status(net, pos);
+            if (net != null)
+                foreach (KeyValuePair<Vector3i, Vector3i> w in net.WrongSpin)
+                    if (w.Value == pos)
+                        prompt += "\n" + string.Format(Kinetic.Text("feWrongSpin",
+                            "{0} turns the wrong way: add a Spin Inverter"), world.GetBlock(w.Key).Block.GetLocalizedBlockName());
             promptUi = ui;
         }
 

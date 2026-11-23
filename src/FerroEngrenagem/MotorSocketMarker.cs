@@ -1,7 +1,8 @@
 // D7: while the local player holds an Electric Motor or a Torque Crank, outline the motor socket of every power-gated machine
 // nearby (PowerGate.SocketPos), so it is clear where the motor has to go to "plug into" the machine.
 //   green  = free, place the motor here
-//   cyan   = a motor / torque crank is already plugged in
+//   cyan   = a motor / torque crank / shaft is plugged in and drives the machine
+//   orange = something is plugged in but faces or turns the wrong way
 //   red    = something else is in the way
 // Client-only visual (one GameObject, LineRenderers; nothing is saved or sent over the network).
 //
@@ -79,7 +80,14 @@ namespace FerroEngrenagem
                         Vector3i s = PowerGate.SocketPos(world.GetBlock(parent), parent);
                         BlockValue there = world.GetBlock(s);
                         Color col;
-                        if (PowerGate.IsDriver(there.Block)) col = new Color(0.2f, 0.85f, 1f, 1f);
+                        if (PowerGate.IsDriver(there.Block))
+                        {
+                            // plugged: cyan when it really drives the machine, orange when it faces the wrong
+                            // way or turns the wrong way round
+                            TorqueNet net = Kinetic.Get(world, s);
+                            bool ok = net != null && net.Machines.ContainsKey(parent);
+                            col = ok ? new Color(0.2f, 0.85f, 1f, 1f) : new Color(1f, 0.6f, 0.1f, 1f);
+                        }
                         else if (there.isair) col = new Color(0.3f, 1f, 0.3f, 1f);
                         else col = new Color(1f, 0.25f, 0.2f, 1f);
                         sockets.Add(s);
