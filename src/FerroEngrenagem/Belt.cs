@@ -310,7 +310,8 @@ namespace FerroEngrenagem
                     foreach (BeltItem it in kv.Value)
                     {
                         string data = WriteItem(it.Stack.itemValue);
-                        if (data == null) continue;
+                        // never overwrite the file with a partial list (at quit the item classes may be gone)
+                        if (data == null) return;
                         Vector3i ex = it.HasExit ? it.Exit : Vector3i.zero;
                         sb.Append(kv.Key.x).Append(';').Append(kv.Key.y).Append(';').Append(kv.Key.z).Append(';')
                           .Append(it.P.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
@@ -433,11 +434,6 @@ namespace FerroEngrenagem
             if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); }
             Move(world, Step);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
-        }
-
-        void OnApplicationQuit()
-        {
-            BeltStore.Save();
         }
 
         // dropped items lying on a (flat) belt get on it
@@ -776,6 +772,26 @@ namespace FerroEngrenagem
         {
             base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
             BeltShape.Attach(_ebcd, _blockPos, this);
+        }
+    }
+
+    // save the belts with the world (before the game unloads the items; at application quit it is too late)
+    [HarmonyLib.HarmonyPatch(typeof(GameManager), "SaveAndCleanupWorld")]
+    public static class Patch_GameManager_SaveAndCleanupWorld_Belts
+    {
+        public static void Prefix()
+        {
+            BeltStore.MarkDirty();
+            BeltStore.Save();
+        }
+    }
+
+    [HarmonyLib.HarmonyPatch(typeof(GameManager), "SaveWorld")]
+    public static class Patch_GameManager_SaveWorld_Belts
+    {
+        public static void Prefix()
+        {
+            BeltStore.Save();
         }
     }
 }

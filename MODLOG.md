@@ -704,6 +704,10 @@ aqui fica só o que foi medido/verificado.
 - Modelo: `FeRail_L/R` somem onde outra esteira encosta, `FeBeltEnd` (batente) quando não há saída à frente,
   `FeCurve_L/R` no lado da curva; ripas 7 (não saem mais da esteira). `feConveyorRamp` (FeBeltRise 1) com ripas
   subindo a rampa. Receita: 2 Esteiras + 1 Chapa.
+- Teste: ao fechar o jogo, "belts: could not write an item: Object reference" — no OnApplicationQuit as classes de
+  item já foram descarregadas e o arquivo foi sobrescrito vazio. Agora salva no prefixo de
+  `GameManager.SaveAndCleanupWorld` / `SaveWorld` e nunca grava lista parcial. Log extra das portas da Condensadora
+  (o cano da entrada de vapor não apareceu no diagnóstico dos braços).
 
 ## Próximo passo (antigo, mantido para histórico)
 

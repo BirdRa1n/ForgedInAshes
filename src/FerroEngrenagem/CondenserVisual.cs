@@ -45,6 +45,14 @@ namespace FerroEngrenagem
             Log.Out(FerroEngrenagemMod.LogPrefix + "condenser at " + p + " rot=" + bv.rotation + " model at "
                     + transform.position.ToString("F2") + " liquid at "
                     + (liquid != null ? liquid.position.ToString("F2") : "-") + " fan=" + (fan != null));
+            if (world != null)
+                foreach (FluidPort port in Fluids.Ports(world, p))
+                {
+                    Vector3i n = new Vector3i(port.Cell.x + port.Dir.x, port.Cell.y + port.Dir.y, port.Cell.z + port.Dir.z);
+                    Log.Out(FerroEngrenagemMod.LogPrefix + "condenser port " + (port.Out ? "out " : "in ") + port.Fluid
+                            + " cell " + port.Cell + " dir " + port.Dir + " -> " + n + " = " + world.GetBlock(n).Block.GetBlockName()
+                            + " connected=" + Fluids.PortConnected(world, port));
+                }
         }
 
         static Transform Find(Transform t, string n)
