@@ -784,3 +784,9 @@ aqui fica só o que foi medido/verificado.
 
 Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `feResourceGear` (+ localização,
 ícones vanilla). Antes do F1-T03 resolver P14 (pasta XUi do mod).
+
+## 2026-11-23: correções do teste geral (esteiras)
+- Rampa (subida/descida) ao lado de uma esteira era vista como curva/divisão: `Belt.Outputs` não conta mais rampa como saída lateral.
+- Tirar uma Esteira com Filtro deixava o item flutuando: o filtro é apagado ao remover o bloco, filtros órfãos são limpos (`PruneFilters`) e o desenho ignora posições sem filtro.
+- Funil: funciona nos dois sentidos (`Funnel.Route`: baú/máquina de um lado, esteira do outro), registra-se de novo ao olhar para ele e loga `belt -> feFunnel at ...: took ...`.
+- Salvar com itens nas esteiras: confirmado no jogo.

@@ -144,7 +144,8 @@ namespace FerroEngrenagem
             {
                 Vector3i c = Add(pos, s);
                 BlockValue cb = world.GetBlock(c);
-                if (Is(cb.Block) && Front(cb) == s) l.Add(c);   // pointing away from us: a curve / split
+                // pointing away from us: a curve / split (a ramp beside is not one: it takes only from its back)
+                if (Is(cb.Block) && !IsRamp(cb.Block) && Front(cb) == s) l.Add(c);
             }
             return l;
         }
@@ -520,6 +521,16 @@ namespace FerroEngrenagem
         {
             dirty = true;
         }
+
+        /// <summary>Forget the filters of filter belts that are gone (loaded chunks only).</summary>
+        public static void PruneFilters(World world)
+        {
+            List<Vector3i> gone = new List<Vector3i>();
+            foreach (Vector3i p in Filters.Keys)
+                if (world.GetChunkFromWorldPos(p) != null && !Belt.IsFilter(world.GetBlock(p).Block)) gone.Add(p);
+            foreach (Vector3i p in gone) Filters.Remove(p);
+            if (gone.Count > 0) dirty = true;
+        }
     }
 
     // ------------------------------------------------------------------ server tick
@@ -549,7 +560,7 @@ namespace FerroEngrenagem
             next = Time.time + Step;
             BeltStore.EnsureLoaded();
             tick++;
-            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); Funnel.TickAll(world); AutoCraft.TickAll(world); FluidDevices.TickAll(world); }
+            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); BeltStore.PruneFilters(world); Funnel.TickAll(world); AutoCraft.TickAll(world); FluidDevices.TickAll(world); }
             Move(world, Step);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
         }
@@ -953,12 +964,13 @@ namespace FerroEngrenagem
                 string f = BeltStore.Filter(kv.Key);
                 string had;
                 signItem.TryGetValue(kv.Key, out had);
-                if (f == null || f != had || (kv.Key.ToVector3() - me).sqrMagnitude > 60f * 60f) drop.Add(kv.Key);
+                if (f == null || f != had || !Belt.IsFilter(world.GetBlock(kv.Key).Block) || (kv.Key.ToVector3() - me).sqrMagnitude > 60f * 60f) drop.Add(kv.Key);
             }
             foreach (Vector3i p in drop) { Kill(signs[p]); signs.Remove(p); signItem.Remove(p); }
             foreach (KeyValuePair<Vector3i, string> q in BeltStore.Filters)
             {
                 if ((q.Key.ToVector3() - me).sqrMagnitude > 60f * 60f) continue;
+                if (!Belt.IsFilter(world.GetBlock(q.Key).Block)) continue;   // the filter belt is gone
                 Shown s;
                 if (!signs.TryGetValue(q.Key, out s))
                 {
@@ -1197,7 +1209,11 @@ namespace FerroEngrenagem
         {
             base.OnBlockRemoved(_world, _chunk, _blockPos, _blockValue);
             World w = _world as World;
-            if (w != null && SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer) Belt.DropAll(w, _blockPos);
+            if (w != null && SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer)
+            {
+                Belt.DropAll(w, _blockPos);
+                if (BeltStore.Filter(_blockPos) != null) BeltStore.SetFilter(_blockPos, null);
+            }
         }
 
         public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
@@ -1268,12 +1284,38 @@ namespace FerroEngrenagem
             return Fluids.Rot(bv, Vector3.forward);
         }
 
-        /// <summary>The source behind the funnel: a tile entity with storage or with output slots.</summary>
-        public static TileEntity Source(World world, Vector3i pos, BlockValue bv)
+        /// <summary>Which way the funnel works: from a source on one side to a belt on the other. Its back on the
+        /// source and its front on the belt is the normal way; turned round it works too (dir = the way to the belt).</summary>
+        public static bool Route(World world, Vector3i pos, BlockValue bv, out TileEntity src, out Vector3i dst, out Vector3i dir)
         {
             Vector3i f = Front(bv);
-            Vector3i c = new Vector3i(pos.x - f.x, pos.y - f.y, pos.z - f.z);
+            src = null;
+            dst = Vector3i.zero;
+            dir = f;
+            for (int k = 0; k < 2; k++)
+            {
+                Vector3i d = k == 0 ? f : new Vector3i(-f.x, -f.y, -f.z);
+                TileEntity te = SourceAt(world, new Vector3i(pos.x - d.x, pos.y - d.y, pos.z - d.z));
+                Vector3i b = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                if (te != null && src == null) { src = te; dst = b; dir = d; }
+                if (te != null && Belt.Accepts(world, b, d)) { src = te; dst = b; dir = d; return true; }
+            }
+            return false;
+        }
+
+        /// <summary>The source next to the funnel: a tile entity with storage or with output slots.</summary>
+        public static TileEntity Source(World world, Vector3i pos, BlockValue bv)
+        {
+            TileEntity src;
+            Vector3i dst, dir;
+            Route(world, pos, bv, out src, out dst, out dir);
+            return src;
+        }
+
+        static TileEntity SourceAt(World world, Vector3i c)
+        {
             BlockValue cb = world.GetBlock(c);
+            if (cb.isair || Belt.Is(cb.Block)) return null;
             Vector3i par = Fluids.ParentOf(world, c, cb);
             TileEntity te = world.GetTileEntity(par);
             if (te is TileEntityWorkstation) return te;
@@ -1330,9 +1372,9 @@ namespace FerroEngrenagem
                 if (world.GetChunkFromWorldPos(pos) == null) continue;
                 BlockValue bv = world.GetBlock(pos);
                 if (!(bv.Block is BlockFeFunnel)) { gone.Add(pos); continue; }
-                Vector3i f = Front(bv);
-                Vector3i dst = new Vector3i(pos.x + f.x, pos.y + f.y, pos.z + f.z);
-                if (!Belt.Accepts(world, dst, f)) continue;
+                TileEntity src;
+                Vector3i dst, f;
+                if (!Route(world, pos, bv, out src, out dst, out f)) continue;
                 float entry = Belt.EntryP(world, dst, f);
                 List<BeltItem> items = BeltStore.Items(dst, false);
                 if (!Belt.Room(items, entry)) continue;
@@ -1342,13 +1384,13 @@ namespace FerroEngrenagem
                     foreach (BeltItem o in items) if (o.P < entry + Belt.Gap) blocked = true;
                     if (blocked) continue;
                 }
-                TileEntity src = Source(world, pos, bv);
-                if (src == null) continue;
                 int amount = (int)Fluids.Prop(bv.Block, "FeFunnelAmount", 16f);
                 ItemStack got = Take(src, amount);
                 if (got == null || got.IsEmpty()) continue;
                 BeltItem it = BeltStore.Add(dst, got, entry);
                 Belt.ChooseExit(world, dst, world.GetBlock(dst), it);
+                BeltMachines.Note(world, pos, "took " + got.count + "x " + got.itemValue.ItemClass.GetItemName() +
+                                  " from " + src.blockValue.Block.GetBlockName() + ", onto the belt at " + dst);
             }
             foreach (Vector3i p in gone) BeltStore.Funnels.Remove(p);
             if (gone.Count > 0) BeltStore.MarkDirty();
@@ -1356,13 +1398,13 @@ namespace FerroEngrenagem
 
         public static string Describe(World world, Vector3i pos, BlockValue bv)
         {
-            Vector3i f = Front(bv);
-            Vector3i dst = new Vector3i(pos.x + f.x, pos.y + f.y, pos.z + f.z);
-            TileEntity src = Source(world, pos, bv);
+            TileEntity src;
+            Vector3i dst, f;
+            bool ok = Route(world, pos, bv, out src, out dst, out f);
             string t;
             if (src == null) t = Kinetic.Text("feFunnelNoSource", "Nothing to take from: put a crate or a machine behind it");
             else t = string.Format(Kinetic.Text("feFunnelFrom", "Takes from: {0}"), src.blockValue.Block.GetLocalizedBlockName());
-            if (!Belt.Accepts(world, dst, f)) t += "\n" + Kinetic.Text("feFunnelNoBelt", "No belt in front taking items from it");
+            if (src != null && !ok) t += "\n" + Kinetic.Text("feFunnelNoBelt", "No belt in front taking items from it");
             return t;
         }
     }
@@ -1397,6 +1439,11 @@ namespace FerroEngrenagem
             World w = _world as World;
             string baseText = base.GetActivationText(_world, _blockValue, _blockPos, _entityFocusing);
             if (w == null) return baseText;
+            if (SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer && !_blockValue.ischild)
+            {
+                BeltStore.EnsureLoaded();
+                if (BeltStore.Funnels.Add(_blockPos)) BeltStore.MarkDirty();
+            }
             string line = KineticLookController.Escape(GetLocalizedBlockName() + "\n" + Funnel.Describe(w, _blockPos, _blockValue));
             return string.IsNullOrEmpty(baseText) ? line : line + "\n" + baseText;
         }
