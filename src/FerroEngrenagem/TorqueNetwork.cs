@@ -142,6 +142,13 @@ namespace FerroEngrenagem
                                                                            Vector3i _blockPos,
                                                                            EntityAlive _entityFocusing)
         {
+            BlockActivationCommand[] r = Commands(_world, _blockPos);
+            RecipeBook.AddCommand(this, ref r);
+            return r;
+        }
+
+        BlockActivationCommand[] Commands(WorldBase _world, Vector3i _blockPos)
+        {
             bool canTake = Pickup.CanBuildHere(_world, _blockPos);
             BlockActivationCommand take = new BlockActivationCommand("take", "hand", canTake, false, null);
             if (Settings(Kind) > 0)
@@ -161,6 +168,11 @@ namespace FerroEngrenagem
         public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos,
                                               BlockValue _blockValue, EntityPlayerLocal _player)
         {
+            if (_commandName == RecipeBook.Command)
+            {
+                RecipeBook.Open(this, _player);
+                return true;
+            }
             if (_commandName == "fe_setting")
             {
                 int n = Settings(Kind);

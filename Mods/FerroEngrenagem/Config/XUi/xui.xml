@@ -1,0 +1,8 @@
+<configs>
+	<!-- Recipe book: hold E on a mod machine -> "Recipes" (src/FerroEngrenagem/RecipeBook.cs) -->
+	<append xpath="/xui">
+		<window_group name="feRecipes" defaultselected="feRecipesClose">
+			<window name="feRecipes" />
+		</window_group>
+	</append>
+</configs>

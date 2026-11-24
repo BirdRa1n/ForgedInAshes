@@ -157,3 +157,8 @@ Pegue no criativo: Triturador, Lavadora, Misturador Químico, Secador a Vapor; C
    - 10 Carne Podre + 4 Ossos → 1 Terra Nitrosa (6 min). A Lavadora transforma em 4 Salitre.
    - 10 Carne Podre sem ossos (ou 12 Milho / 12 Batata) → 1 Mosto Orgânico.
 5. **Biocombustível:** Refinaria, 2 Mosto Orgânico + 1 Gordura Animal. Por esteira no Motor a Gasolina: a cada 3 latas o combustível sobe 1.
+
+## 11. Texto, Receitas e ícones
+- [ ] Olhar para o Biodigestor / Triturador: o texto aparece em tamanho normal (não minúsculo).
+- [ ] Segurar E em uma máquina (Triturador, Mesa de Moldagem, Fundição, Torno): opção "Receitas" abre a janela com a lista; << e >> trocam a página; OK ou Esc fecha.
+- [ ] Barra e inventário: blocos e itens do mod com ícones próprios (moldes com a cavidade laranja, pós, biocombustível verde).

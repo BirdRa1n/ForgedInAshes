@@ -78,9 +78,12 @@ namespace FerroEngrenagem
             }
             else if (k == FluidKind.Smelter)
                 add.Add(new BlockActivationCommand("fe_melt", "loot_sort", true, false, null));
-            if (add.Count == 0) return;
-            if (__result != null) add.AddRange(__result);
-            __result = add.ToArray();
+            if (add.Count > 0)
+            {
+                if (__result != null) add.AddRange(__result);
+                __result = add.ToArray();
+            }
+            RecipeBook.AddCommand(__instance, ref __result);
         }
     }
 
@@ -90,6 +93,12 @@ namespace FerroEngrenagem
         public static bool Prefix(BlockPowered __instance, string _commandName, WorldBase _world, Vector3i _blockPos,
                                   BlockValue _blockValue, EntityPlayerLocal _player, ref bool __result)
         {
+            if (_commandName == RecipeBook.Command)
+            {
+                RecipeBook.Open(__instance, _player);
+                __result = true;
+                return false;
+            }
             if (_commandName != "fe_put" && _commandName != "fe_cast_take" && _commandName != "fe_mold" && _commandName != "fe_melt")
                 return true;
             World w = _world as World;

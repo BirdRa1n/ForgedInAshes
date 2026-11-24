@@ -15,6 +15,8 @@
 		     Phase 1: direct-scrap recipes only (works in both SmeltingType modes); vanilla
 		     "workstation_forge_nosmelting" window = tools + fuel + output, no input grid. -->
 		<block name="feFoundry">
+			<property name="CustomIcon" value="feFoundry"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Forge"/>
 			<property class="Workstation">
 				<property name="CraftingAreaRecipes" value="feFoundry"/>
@@ -27,8 +29,6 @@
 			<!-- F8.1: melts scrap / ingots into molten metal for Metal Chutes (MetalWorks.cs) -->
 			<property name="FeFluid" value="smelter"/>
 			<property name="FeMetalBuffer" value="200"/>
-			<property name="CustomIcon" value="forge"/>
-			<property name="CustomIconTint" value="ffb080"/>
 			<property name="WorkstationIcon" value="ui_game_symbol_forge"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mstone_scrap"/>
@@ -77,6 +77,8 @@
 		<!-- M02 Parts Press: workbench-style station (model of vanilla combineStation).
 		     Runs on torque (D7/D8: motor socket, src/FerroEngrenagem/PowerGatePatches.cs). -->
 		<block name="fePress">
+			<property name="CustomIcon" value="fePress"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -88,8 +90,6 @@
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="fePressDesc"/>
 			<property name="DisplayType" value="blockMulti"/>
-			<property name="CustomIcon" value="combineStation"/>
-			<property name="CustomIconTint" value="a8bccc"/>
 			<property name="WorkstationIcon" value="ui_game_symbol_workbench"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
@@ -133,6 +133,8 @@
 		<!-- M03 Lathe: workbench-style station (model of vanilla dev-only tableSaw, 1x1).
 		     Runs on torque like the Parts Press. -->
 		<block name="feLathe">
+			<property name="CustomIcon" value="feLathe"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -143,8 +145,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLatheDesc"/>
-			<property name="CustomIcon" value="tableSaw"/>
-			<property name="CustomIconTint" value="d8b070"/>
 			<property name="WorkstationIcon" value="ui_game_symbol_table_saw"/>
 			<property name="CraftIcon" value="ui_game_symbol_table_saw"/>
 			<property name="Stacknumber" value="1"/>
@@ -201,13 +201,13 @@
 	         so dew collector mods cannot be inserted. Revisit when the test item is removed. -->
 	<append xpath="/blocks">
 		<block name="feCharcoalKiln">
+			<property name="CustomIcon" value="feCharcoalKiln"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Collector"/>
 			<property name="CollectorType" value="DewCollector"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCharcoalKilnDesc"/>
 			<property name="LootLabelKey" value="feCharcoalKiln"/>
-			<property name="CustomIcon" value="cntForgeWorkstationBroken"/>
-			<property name="CustomIconTint" value="e0c0a0"/>
 			<property name="ItemIconBackdrop" value="ui_game_symbol_forge"/>
 			<property name="ItemBackgroundColor" value="160,110,60,255"/>
 			<property name="Stacknumber" value="1"/>
@@ -412,6 +412,8 @@
 	     (src/FerroEngrenagem/PowerGatePatches.cs, socket outline: MotorSocketMarker.cs). Placeholder model: relay. -->
 	<append xpath="/blocks">
 		<block name="feElectricMotor">
+			<property name="CustomIcon" value="feElectricMotor"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="Class" value="Powered"/>
 			<property name="RequiredPower" value="30"/>
@@ -419,8 +421,6 @@
 			<property name="OnlySimpleRotations" value="false"/>
 			<property name="FeTorqueOutput" value="128"/>
 			<property name="DescriptionKey" value="feElectricMotorDesc"/>
-			<property name="CustomIcon" value="electricwirerelay"/>
-			<property name="CustomIconTint" value="ffa040"/>
 			<property name="DisplayType" value="blockElectrical"/>
 			<property name="Material" value="Mmetal_weak"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -450,6 +450,8 @@
 	     Electric Motor; hold E on it to drive the machine with FeTorqueOutput watts of shaft power (no wires,
 	     nothing stored). Model: the crank's prefab for now. -->
 		<block name="feTorqueCrank">
+			<property name="CustomIcon" value="feTorqueCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="FerroEngrenagem.FeTorqueCrank, FerroEngrenagem"/>
 			<property name="FeTorqueOutput" value="64"/>
 			<property name="FeTorqueCoastSeconds" value="1.5"/>
@@ -458,8 +460,6 @@
 			<property name="FeTorqueSpinDegPerSecond" value="300"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feTorqueCrankDesc"/>
-			<property name="CustomIcon" value="decoWildWestWagonWheelFront"/>
-			<property name="CustomIconTint" value="ffc060"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -487,6 +487,8 @@
 		     prefabs with FeSpin parts). Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
 		     rotate it with the rotation key to lay it flat or vertical. Gearbox: joins all six faces. -->
 		<block name="feShaft">
+			<property name="CustomIcon" value="feShaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
 			<property name="Class" value="FerroEngrenagem.FeKinetic, FerroEngrenagem"/>
 			<property name="FeKinetic" value="shaft"/>
@@ -494,8 +496,6 @@
 			<property name="TakeDelay" value="2"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feShaftDesc"/>
-			<property name="CustomIcon" value="metalPipeStraight"/>
-			<property name="CustomIconTint" value="ffc060"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feShaftPrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
@@ -514,6 +514,8 @@
 		<!-- D10 T1: Conveyor belt (src/FerroEngrenagem/Belt.cs). Items go to the block's front; a shaft on its left or
 		     right drives the whole line; 8 UT per belt at 32 RPM, 1 block/s (proportional to the RPM). -->
 		<block name="feConveyor">
+			<property name="CustomIcon" value="feConveyor"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="Class" value="FerroEngrenagem.FeConveyor, FerroEngrenagem"/>
 			<property name="FeKinetic" value="conveyor"/>
@@ -521,8 +523,6 @@
 			<property name="FeTorqueCost" value="8"/>
 			<property name="FeBeltSpeed" value="1"/>
 			<property name="DescriptionKey" value="feConveyorDesc"/>
-			<property name="CustomIcon" value="cashRegisterConveyorStraight"/>
-			<property name="CustomIconTint" value="c08040"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="30"/>
@@ -530,28 +530,31 @@
 		</block>
 		<!-- D10: Conveyor Ramp. Takes items at its back and gives them to the belt one block up and one forward. -->
 		<block name="feConveyorRamp">
+			<property name="CustomIcon" value="feConveyorRamp"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feConveyor"/>
 			<property name="FeBeltRise" value="1"/>
 			<property name="DescriptionKey" value="feConveyorRampDesc"/>
-			<property name="CustomIconTint" value="e09050"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorRampPrefab"/>
 			<property name="SortOrder2" value="0031"/>
 		</block>
 		<!-- D10: Conveyor Down Ramp. Takes items from the belt one block up behind it; gives them in front at its level. -->
 		<block name="feConveyorDown">
+			<property name="CustomIcon" value="feConveyorDown"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feConveyor"/>
 			<property name="FeBeltRise" value="-1"/>
 			<property name="DescriptionKey" value="feConveyorDownDesc"/>
-			<property name="CustomIconTint" value="b07040"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorDownPrefab"/>
 			<property name="SortOrder2" value="0034"/>
 		</block>
 		<!-- D10: Filter Belt. Items equal to its filter go to its side belts, the others straight on. -->
 		<block name="feConveyorFilter">
+			<property name="CustomIcon" value="feConveyorFilter"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feConveyor"/>
 			<property name="FeBeltFilter" value="true"/>
 			<property name="DescriptionKey" value="feConveyorFilterDesc"/>
-			<property name="CustomIconTint" value="60c0ff"/>
 			<property name="SortOrder2" value="0035"/>
 		</block>
 		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
@@ -594,13 +597,13 @@
 		<!-- D10 T2: Funnel (Belt.cs, Funnel). Back on a crate or a machine, front on a belt: puts up to 16 items every
 		     0.5 s on the belt (crates: any slot; machines: their output). -->
 		<block name="feFunnel">
+			<property name="CustomIcon" value="feFunnel"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
 			<property name="Class" value="FerroEngrenagem.FeFunnel, FerroEngrenagem"/>
 			<property name="FeFunnelAmount" value="16"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feFunnelDesc"/>
-			<property name="CustomIcon" value="metalPipeJoint"/>
-			<property name="CustomIconTint" value="ff9040"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFunnelPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
@@ -619,10 +622,11 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
 		<block name="feGearbox">
+			<property name="CustomIcon" value="feGearbox"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="gearbox"/>
 			<property name="DescriptionKey" value="feGearboxDesc"/>
-			<property name="CustomIcon" value="metalPipeJoint"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feGearboxPrefab"/>
 			<property name="EconomicValue" value="80"/>
 			<property name="SortOrder2" value="0011"/>
@@ -631,12 +635,13 @@
 		     output RPM = input x2 / x4 / x1/2 (E cycles, stored in the block meta). Faster machines craft faster but
 		     cost (rpm/32)^2 times their torque. Placeholder model: vanilla pipe flange. -->
 		<block name="feSpeedBox">
+			<property name="CustomIcon" value="feSpeedBox"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="speedbox"/>
 			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feSpeedBoxDesc"/>
-			<property name="CustomIcon" value="metalPipeFlange"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
 			<property name="EconomicValue" value="150"/>
 			<property name="SortOrder2" value="0012"/>
@@ -646,35 +651,38 @@
 		     (joins all six sides; looking at it shows sources, machines, regulators and load). Placeholder models:
 		     vanilla valves (axis assumed local Z like the Shaft) and a pipe cap. -->
 		<block name="feClutch">
+			<property name="CustomIcon" value="feClutch"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="clutch"/>
 			<!-- feet and lever: only the 4 upright turns -->
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feClutchDesc"/>
-			<property name="CustomIcon" value="pipeSmallValve"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feClutchPrefab"/>
 			<property name="EconomicValue" value="100"/>
 			<property name="SortOrder2" value="0013"/>
 		</block>
 		<block name="feTorqueRegulator">
+			<property name="CustomIcon" value="feTorqueRegulator"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="regulator"/>
 			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
-			<property name="CustomIcon" value="metalPipeValve"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueRegulatorPrefab"/>
 			<property name="EconomicValue" value="200"/>
 			<property name="SortOrder2" value="0014"/>
 		</block>
 		<block name="feTorqueGauge">
+			<property name="CustomIcon" value="feTorqueGauge"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="FeKinetic" value="gauge"/>
 			<property name="DescriptionKey" value="feTorqueGaugeDesc"/>
-			<property name="CustomIcon" value="metalPipeCap"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueGaugePrefab"/>
 			<property name="EconomicValue" value="60"/>
 			<property name="SortOrder2" value="0015"/>
@@ -683,14 +691,14 @@
 		     its paddles (its cell, the cell below, and the side cells off its axle; Kinetic.WaterTouching). Its axle is
 		     the model's local Z like the Shaft; both ends connect. Mixing it with 32 RPM sources needs a Speed Box. -->
 		<block name="feWaterWheel">
+			<property name="CustomIcon" value="feWaterWheel"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="waterwheel"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="FeTorqueOutput" value="128"/>
 			<property name="FeSourceRpm" value="16"/>
 			<property name="DescriptionKey" value="feWaterWheelDesc"/>
-			<property name="CustomIcon" value="decoWildWestWagonWheelFront"/>
-			<property name="CustomIconTint" value="80c0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterWheelPrefab"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="EconomicValue" value="250"/>
@@ -700,13 +708,13 @@
 		     the pipe model show where it connects. Pumps pull from the world water behind them (intake = local -Z) and
 		     push out of the front (local +Z). The Condenser takes steam at its back and gives water at its front. -->
 		<block name="fePipe">
+			<property name="CustomIcon" value="fePipe"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
 			<property name="Class" value="FerroEngrenagem.FeFluid, FerroEngrenagem"/>
 			<property name="FeFluid" value="pipe"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="fePipeDesc"/>
-			<property name="CustomIcon" value="pipeSmall1x1"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?fePipePrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
@@ -723,12 +731,13 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
 		</block>
 		<block name="feWaterTank">
+			<property name="CustomIcon" value="feWaterTank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="tank"/>
 			<property name="FeFluidCapacity" value="4000"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feWaterTankDesc"/>
-			<property name="CustomIcon" value="cntBarrelGenericQuadA"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterTankPrefab"/>
 			<property name="TakeDelay" value="3"/>
 			<property name="EconomicValue" value="200"/>
@@ -736,39 +745,41 @@
 		</block>
 		<!-- D9: Filler and Bottler (FluidNetwork.cs, FluidDevices): items <-> fluid. Oil 10 L, Gas Can 1 L, Lubricant 10 L. -->
 		<block name="feFluidFiller">
+			<property name="CustomIcon" value="feFluidFiller"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="filler"/>
 			<property name="FeFluidBuffer" value="1000"/>
 			<property name="DescriptionKey" value="feFluidFillerDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="ffc080"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidFillerPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="120"/>
 		</block>
 		<block name="feFluidBottler">
+			<property name="CustomIcon" value="feFluidBottler"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="bottler"/>
 			<property name="FeFluidBuffer" value="100"/>
 			<property name="DescriptionKey" value="feFluidBottlerDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="80c0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidBottlerPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="120"/>
 		</block>
 		<!-- F8.1 (PLANO_CRAFT.md): Metal Chute, a pipe for molten metal only, and the Casting Table (MetalWorks.cs) -->
 		<block name="feMetalChute">
+			<property name="CustomIcon" value="feMetalChute"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="chute"/>
 			<property name="DescriptionKey" value="feMetalChuteDesc"/>
-			<property name="CustomIcon" value="pipeSmall1x1"/>
-			<property name="CustomIconTint" value="ff7020"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMetalChutePrefab"/>
 			<property name="EconomicValue" value="20"/>
 		</block>
 		<!-- F8.2 (PLANO_CRAFT.md): process machines (ProcessMachine.cs; what they do: Data/fe_processes.xml) -->
 		<block name="feCrusher">
+			<property name="CustomIcon" value="feCrusher"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
@@ -776,12 +787,12 @@
 			<property name="FeTorqueCost" value="128"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feCrusherDesc"/>
-			<property name="CustomIcon" value="toolAnvil"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrusherPrefab"/>
 			<property name="EconomicValue" value="200"/>
 		</block>
 		<block name="feChemMixer">
+			<property name="CustomIcon" value="feChemMixer"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
@@ -790,57 +801,57 @@
 			<property name="FeTorqueCost" value="64"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feChemMixerDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="c0ff80"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feChemMixerPrefab"/>
 			<property name="EconomicValue" value="200"/>
 		</block>
 		<block name="feWasher">
+			<property name="CustomIcon" value="feWasher"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="processor"/>
 			<property name="FeFluidBuffer" value="20"/>
 			<property name="DescriptionKey" value="feWasherDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="60a0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWasherPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
 		<block name="feSteamDryer">
+			<property name="CustomIcon" value="feSteamDryer"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="processor"/>
 			<property name="FeFluidBuffer" value="20"/>
 			<property name="DescriptionKey" value="feSteamDryerDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSteamDryerPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
 		<!-- Biodigester: rots meat and turns organic matter into Nitre Earth (gunpowder) or Organic Mash (biofuel) -->
 		<block name="feBiodigester">
+			<property name="CustomIcon" value="feBiodigester"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="processor"/>
 			<property name="FeFluidBuffer" value="40"/>
 			<property name="DescriptionKey" value="feBiodigesterDesc"/>
-			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
-			<property name="CustomIconTint" value="80a040"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBiodigesterPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="300"/>
 		</block>
 		<block name="feCaster">
+			<property name="CustomIcon" value="feCaster"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="caster"/>
 			<property name="FeFluidRate" value="300"/>
 			<property name="DescriptionKey" value="feCasterDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="ff9050"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
 		<block name="feMechPump">
+			<property name="CustomIcon" value="feMechPump"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
@@ -850,8 +861,6 @@
 			<property name="FeTorqueCost" value="64"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feMechPumpDesc"/>
-			<property name="CustomIcon" value="pipeSmallValve"/>
-			<property name="CustomIconTint" value="80c0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechPumpPrefab"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="EconomicValue" value="150"/>
@@ -859,6 +868,8 @@
 			<property name="SortOrder2" value="0003"/>
 		</block>
 		<block name="feElecPump">
+			<property name="CustomIcon" value="feElecPump"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="Class" value="Powered"/>
 			<property name="RequiredPower" value="60"/>
@@ -866,8 +877,6 @@
 			<property name="FeFluidRate" value="150"/>
 			<property name="FeIntakeWater" value="3"/>
 			<property name="DescriptionKey" value="feElecPumpDesc"/>
-			<property name="CustomIcon" value="electricwirerelay"/>
-			<property name="CustomIconTint" value="40a0ff"/>
 			<property name="DisplayType" value="blockElectrical"/>
 			<property name="Material" value="Mmetal_weak"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -890,6 +899,8 @@
 			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
 		</block>
 		<block name="feCondenser">
+			<property name="CustomIcon" value="feCondenser"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElecPump"/>
 			<property name="RequiredPower" value="120"/>
 			<property name="FeFluid" value="condenser"/>
@@ -902,13 +913,14 @@
 			<property name="DisplayType" value="blockMulti"/>
 			<property name="StabilitySupport" value="true"/>
 			<property name="DescriptionKey" value="feCondenserDesc"/>
-			<property name="CustomIconTint" value="c0e0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCondenserPrefab"/>
 			<property name="EconomicValue" value="600"/>
 			<property name="SortOrder2" value="0005"/>
 		</block>
 		<!-- Industrial versions (Industrial.cs): electric, for full automation -->
 		<block name="feInductionFurnace">
+			<property name="CustomIcon" value="feInductionFurnace"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElecPump"/>
 			<property name="RequiredPower" value="250"/>
 			<property name="FeFluid" value="smelter"/>
@@ -919,42 +931,41 @@
 			<property name="DisplayType" value="blockMulti"/>
 			<property name="StabilitySupport" value="true"/>
 			<property name="DescriptionKey" value="feInductionFurnaceDesc"/>
-			<property name="CustomIcon" value="forge"/>
-			<property name="CustomIconTint" value="80c0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feInductionFurnacePrefab"/>
 			<property name="EconomicValue" value="1500"/>
 		</block>
 		<block name="feCasterElectric">
+			<property name="CustomIcon" value="feCasterElectric"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElecPump"/>
 			<property name="RequiredPower" value="60"/>
 			<property name="FeFluid" value="caster"/>
 			<property name="FeFluidRate" value="600"/>
 			<property name="FeCoolFactor" value="4"/>
 			<property name="DescriptionKey" value="feCasterElectricDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="80c0ff"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterElectricPrefab"/>
 			<property name="EconomicValue" value="400"/>
 		</block>
 		<block name="feRetortKiln">
+			<property name="CustomIcon" value="feRetortKiln"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElecPump"/>
 			<property name="RequiredPower" value="100"/>
 			<property name="FeFluid" value="processor"/>
 			<property name="DescriptionKey" value="feRetortKilnDesc"/>
-			<property name="CustomIcon" value="forge"/>
-			<property name="CustomIconTint" value="606060"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feRetortKilnPrefab"/>
 			<property name="EconomicValue" value="500"/>
 		</block>
 		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
 		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->
 		<block name="feSpinInverter">
+			<property name="CustomIcon" value="feSpinInverter"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="inverter"/>
 			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="DescriptionKey" value="feSpinInverterDesc"/>
-			<property name="CustomIcon" value="pipeSmallJoint"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpinInverterPrefab"/>
 			<property name="EconomicValue" value="120"/>
@@ -962,15 +973,18 @@
 		</block>
 		<!-- D8 T4: Electric Motor upgrades (more torque, more watts; same socket / shaft rules). -->
 		<block name="feElectricMotor2">
+			<property name="CustomIcon" value="feElectricMotor2"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElectricMotor"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feElectricMotor2Prefab"/>
 			<property name="RequiredPower" value="60"/>
 			<property name="FeTorqueOutput" value="256"/>
 			<property name="DescriptionKey" value="feElectricMotor2Desc"/>
-			<property name="CustomIconTint" value="ff7020"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
 		<block name="feElectricMotor3">
+			<property name="CustomIcon" value="feElectricMotor3"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feElectricMotor"/>
 			<property name="StabilitySupport" value="true"/>
 			<property name="OnlySimpleRotations" value="true"/>
@@ -980,7 +994,6 @@
 			<property name="RequiredPower" value="120"/>
 			<property name="FeTorqueOutput" value="512"/>
 			<property name="DescriptionKey" value="feElectricMotor3Desc"/>
-			<property name="CustomIconTint" value="ff3020"/>
 			<property name="EconomicValue" value="350"/>
 		</block>
 		<!-- D8 T4: fuel engines (src/FerroEngrenagem/TorqueEngine.cs). Vanilla Class Generator for the fuel window and
@@ -1052,6 +1065,8 @@
 		     has Charcoal (1 per 20 s), water next to it or below it (the boiler) and Lubricant in its slots (1 per
 		     5 min). Missing any of them, it stands still and burns nothing. -->
 		<block name="feSteamEngine">
+			<property name="CustomIcon" value="feSteamEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<!-- D9: the big Steam Engine (src/FerroEngrenagem/SteamEngine.cs): 3x3 base, 2 high. Water in under the bottom
 			     centre, steam out over the top centre, torque out of the front centre of the bottom layer. Up to 1024 UT;
 			     Charcoal and water used in proportion to the load (min 10 %). Lubricant in its slots, 1 per 5 min. -->
@@ -1071,8 +1086,6 @@
 			<property name="FeLubeSecondsPerUnit" value="300"/>
 			<property name="SlotItem" value="feResourceLubricant"/>
 			<property name="DescriptionKey" value="feSteamEngineDesc"/>
-			<property name="CustomIcon" value="generatorBankA"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSteamEnginePrefab"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="EconomicValue" value="2500"/>
@@ -1082,6 +1095,8 @@
 		     (rpm/32)^2) on its shaft (model local Z, both ends) and a vanilla generator on the wire side: 60 W x (rpm/32)
 		     while its torque network runs. The fuel is internal; no Refuel, no slots. -->
 		<block name="feDynamo">
+			<property name="CustomIcon" value="feDynamo"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Generator"/>
 			<property name="FeDynamo" value="true"/>
 			<property name="FeTorqueCost" value="128"/>
@@ -1093,8 +1108,6 @@
 			<property name="OutputPerFuel" value="2000"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feDynamoDesc"/>
-			<property name="CustomIcon" value="generatorBankA"/>
-			<property name="CustomIconTint" value="ffe080"/>
 			<property name="DisplayType" value="blockElectrical"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal_medium"/>
@@ -1121,6 +1134,8 @@
 		</block>
 		<!-- Industrial Dynamo: 3x3 base, 2 high; shaft = front centre of the bottom layer. 1024 UT -> 500 W at 32 RPM. -->
 		<block name="feDynamo2">
+			<property name="CustomIcon" value="feDynamo2"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feDynamo"/>
 			<property name="MultiBlockDim" value="3,2,3"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -1129,13 +1144,14 @@
 			<property name="MaxPower" value="20000"/>
 			<property name="OutputPerFuel" value="10000"/>
 			<property name="DescriptionKey" value="feDynamo2Desc"/>
-			<property name="CustomIconTint" value="ffb040"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feDynamo2Prefab"/>
 			<property name="EconomicValue" value="2000"/>
 			<property name="SortOrder2" value="0025"/>
 		</block>
 		<!-- Power Bus (Dynamo.cs): wire it TO dynamos (and to other buses); it outputs the sum of their watts. -->
 		<block name="feBus">
+			<property name="CustomIcon" value="feBus"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feDynamo"/>
 			<property name="FeDynamo" value="false"/>
 			<property name="FeBus" value="true"/>
@@ -1143,8 +1159,6 @@
 			<property name="MaxPower" value="60000"/>
 			<property name="OutputPerFuel" value="30000"/>
 			<property name="DescriptionKey" value="feBusDesc"/>
-			<property name="CustomIcon" value="electricwirerelay"/>
-			<property name="CustomIconTint" value="ffd060"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBusPrefab"/>
 			<property name="EconomicValue" value="300"/>
 			<property name="SortOrder2" value="0026"/>
@@ -1162,6 +1176,8 @@
 	<append xpath="/blocks">
 		<!-- M04 Ammo Press -->
 		<block name="feAmmoPress">
+			<property name="CustomIcon" value="feAmmoPress"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1172,8 +1188,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feAmmoPressDesc"/>
-			<property name="CustomIcon" value="combineStation"/>
-			<property name="CustomIconTint" value="ffa060"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1213,6 +1227,8 @@
 		</block>
 		<!-- M05 Weapon and Tool Assembler -->
 		<block name="feAssembler">
+			<property name="CustomIcon" value="feAssembler"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1223,8 +1239,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feAssemblerDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="ff8080"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1264,6 +1278,8 @@
 		</block>
 		<!-- M06 Mod Bench -->
 		<block name="feModBench">
+			<property name="CustomIcon" value="feModBench"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1274,8 +1290,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feModBenchDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="c080ff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1315,6 +1329,8 @@
 		</block>
 		<!-- M07 Loom and Tannery -->
 		<block name="feLoom">
+			<property name="CustomIcon" value="feLoom"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1325,8 +1341,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLoomDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="80ff80"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1366,6 +1380,8 @@
 		</block>
 		<!-- M09 Refinery -->
 		<block name="feRefinery">
+			<property name="CustomIcon" value="feRefinery"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<!-- D9: fluid in at its back (oil, gasoline, lubricant) = ingredients of its fixed recipe (AutoCraft.cs) -->
 			<property name="FeFluid" value="refinery"/>
@@ -1379,8 +1395,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRefineryDesc"/>
-			<property name="CustomIcon" value="chemistryStation"/>
-			<property name="CustomIconTint" value="ffd060"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1420,6 +1434,8 @@
 		</block>
 		<!-- M10 Laboratory -->
 		<block name="feLab">
+			<property name="CustomIcon" value="feLab"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1430,8 +1446,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feLabDesc"/>
-			<property name="CustomIcon" value="chemistryStation"/>
-			<property name="CustomIconTint" value="80ffff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1471,6 +1485,8 @@
 		</block>
 		<!-- M11 Kitchen and Distillery -->
 		<block name="feKitchen">
+			<property name="CustomIcon" value="feKitchen"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1481,8 +1497,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feKitchenDesc"/>
-			<property name="CustomIcon" value="campfire"/>
-			<property name="CustomIconTint" value="ffffa0"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1521,6 +1535,8 @@
 		</block>
 		<!-- M12 Electronics Bench -->
 		<block name="feElectronics">
+			<property name="CustomIcon" value="feElectronics"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1531,8 +1547,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feElectronicsDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="60c0ff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1572,6 +1586,8 @@
 		</block>
 		<!-- M14 Metal Shop -->
 		<block name="feMetalShop">
+			<property name="CustomIcon" value="feMetalShop"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1582,8 +1598,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMetalShopDesc"/>
-			<property name="CustomIcon" value="combineStation"/>
-			<property name="CustomIconTint" value="b0b0b0"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1623,6 +1637,8 @@
 		</block>
 		<!-- M16 Sawmill -->
 		<block name="feSawmill">
+			<property name="CustomIcon" value="feSawmill"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1633,8 +1649,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feSawmillDesc"/>
-			<property name="CustomIcon" value="tableSaw"/>
-			<property name="CustomIconTint" value="d0a060"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1673,6 +1687,8 @@
 		</block>
 		<!-- M08 Concrete Mixer -->
 		<block name="feMixer">
+			<property name="CustomIcon" value="feMixer"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1683,8 +1699,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMixerDesc"/>
-			<property name="CustomIcon" value="cementMixer"/>
-			<property name="CustomIconTint" value="c0c0ff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1723,6 +1737,8 @@
 		</block>
 		<!-- M13 Garage -->
 		<block name="feGarage">
+			<property name="CustomIcon" value="feGarage"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1733,8 +1749,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feGarageDesc"/>
-			<property name="CustomIcon" value="combineStation"/>
-			<property name="CustomIconTint" value="ffb040"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -1774,6 +1788,8 @@
 		</block>
 		<!-- M15 Robotics Workshop -->
 		<block name="feRobotics">
+			<property name="CustomIcon" value="feRobotics"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Workstation"/>
 			<property class="Workstation">
 				<property name="Modules" value="output"/>
@@ -1784,8 +1800,6 @@
 			<property name="WorkstationWindow" value="workstation_workbench"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRoboticsDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="ff60ff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>

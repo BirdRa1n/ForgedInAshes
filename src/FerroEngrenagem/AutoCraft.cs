@@ -311,6 +311,7 @@ namespace FerroEngrenagem
     {
         public static void Postfix(BlockWorkstation __instance, ref BlockActivationCommand[] __result)
         {
+            RecipeBook.AddCommand(__instance, ref __result);
             if (!AutoCraft.IsMachine(__instance) || __result == null) return;
             foreach (BlockActivationCommand c in __result) if (c.text == "fe_autocraft") return;
             BlockActivationCommand[] r = new BlockActivationCommand[__result.Length + 1];
@@ -327,8 +328,14 @@ namespace FerroEngrenagem
     [HarmonyPatch(typeof(BlockWorkstation), "OnBlockActivated", new System.Type[] { typeof(string), typeof(WorldBase), typeof(Vector3i), typeof(BlockValue), typeof(EntityPlayerLocal) })]
     public static class Patch_Workstation_Activated_AutoCraft
     {
-        public static bool Prefix(string _commandName, WorldBase _world, Vector3i _blockPos, EntityPlayerLocal _player, ref bool __result)
+        public static bool Prefix(BlockWorkstation __instance, string _commandName, WorldBase _world, Vector3i _blockPos, EntityPlayerLocal _player, ref bool __result)
         {
+            if (_commandName == RecipeBook.Command)
+            {
+                RecipeBook.Open(__instance, _player);
+                __result = true;
+                return false;
+            }
             if (_commandName != "fe_autocraft" && _commandName != "fe_recipe_next" && _commandName != "fe_recipe_prev")
                 return true;
             World w = _world as World;

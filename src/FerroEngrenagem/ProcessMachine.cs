@@ -201,15 +201,8 @@ namespace FerroEngrenagem
             Dictionary<string, int> d = Stock(s);
             List<Process> ps = Of(bv.Block);
             if (ps.Count == 0) return Kinetic.Text("feProcNone", "No processes for this machine");
-            sb.Append(Kinetic.Text("feProcMakes", "Makes:"));
-            foreach (Process pr in ps)
-            {
-                List<string> ins = new List<string>();
-                for (int i = 0; i < pr.Inputs.Length; i++) ins.Add(pr.Counts[i] + "x " + ItemName(pr.Inputs[i]));
-                if (pr.FluidIn != null) ins.Add(Mathf.RoundToInt(pr.Liters) + " L " + Fluids.FluidName(pr.FluidIn));
-                sb.Append("\n  ").Append(string.Join(" + ", ins.ToArray())).Append(" -> ").Append(pr.OutCount).Append("x ")
-                  .Append(ItemName(pr.Output));
-            }
+            // the full list is in the recipe book (hold E -> Recipes): the look text stays short and readable
+            sb.Append(string.Format(Kinetic.Text("feProcCount", "{0} recipes (hold E: Recipes)"), ps.Count));
             if (d.Count > 0)
             {
                 List<string> st = new List<string>();

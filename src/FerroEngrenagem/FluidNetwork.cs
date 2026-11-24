@@ -843,6 +843,13 @@ namespace FerroEngrenagem
                                                                            Vector3i _blockPos,
                                                                            EntityAlive _entityFocusing)
         {
+            BlockActivationCommand[] r = Commands(_world, _blockPos);
+            RecipeBook.AddCommand(this, ref r);
+            return r;
+        }
+
+        BlockActivationCommand[] Commands(WorldBase _world, Vector3i _blockPos)
+        {
             BlockActivationCommand take = new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null);
             FluidKind k = Fluids.Kind(this);
             if (k == FluidKind.Filler)
@@ -868,6 +875,11 @@ namespace FerroEngrenagem
                                               BlockValue _blockValue, EntityPlayerLocal _player)
         {
             World w = _world as World;
+            if (_commandName == RecipeBook.Command)
+            {
+                RecipeBook.Open(this, _player);
+                return true;
+            }
             if (_commandName == "fe_pour" && w != null)
             {
                 ItemStack held = _player.inventory.holdingItemStack;

@@ -20,7 +20,7 @@ namespace FerroEngrenagem
 {
     public static class MetalWorks
     {
-        const string CasterBlock = "feCaster";
+        public const string CasterBlock = "feCaster";
         const int MaxCasts = 64;
 
         // ------------------------------------------------------------ processes
