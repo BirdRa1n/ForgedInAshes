@@ -290,7 +290,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal_medium"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Electrical/generatorBankAPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCoalGeneratorPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="HandleFace" value="Bottom"/>
@@ -334,6 +335,8 @@
 	     Path syntax "#<bundle>?<asset>" with @modfolder: read in DataLoader.ParseDataPathIdentifier (3.4.0 b10). -->
 	<append xpath="/blocks">
 		<block name="feCrank">
+			<property name="CustomIcon" value="feCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="FerroEngrenagem.FeCrank, FerroEngrenagem"/>
 			<!-- D7 step 2: the crank is a vanilla-style GENERATOR (BlockFeCrank : BlockGenerator). Cranking adds fuel;
 			     1 fuel = 60 energy (PowerManager tick = 0.16 s), so 12.5 fuel/s = 750 energy per second of cranking =
@@ -359,8 +362,6 @@
 			<property name="FeCrankSpinDegPerSecond" value="300"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCrankDesc"/>
-			<property name="CustomIcon" value="decoWildWestWagonWheelFront"/>
-			<property name="CustomIconTint" value="80e0ff"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
@@ -595,6 +596,8 @@
 		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
 		     sides (stacks first, then empty slots); while a player has it open or it is full, the items wait. -->
 		<block name="feBeltCrate">
+			<property name="CustomIcon" value="feBeltCrate"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="Class" value="CompositeTileEntity"/>
 			<property class="CompositeFeatures">
@@ -605,11 +608,9 @@
 			</property>
 			<property name="FeBeltInput" value="true"/>
 			<property name="DescriptionKey" value="feBeltCrateDesc"/>
-			<property name="CustomIcon" value="cntIronWritableCrate"/>
-			<property name="CustomIconTint" value="ffb060"/>
 			<property name="Material" value="Mmetal"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/LootContainers/ironWritableCratePrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBeltCratePrefab"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Path" value="solid"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
@@ -1052,6 +1053,8 @@
 		     on/off, but no electric output (OutputPerStack 0; MaxPower/OutputPerFuel 1). Torque through the model's
 		     local +Z while on and fuelled; one fuel unit per FeFuelSecondsPerUnit seconds. The slots do nothing. -->
 		<block name="feCoalEngine">
+			<property name="CustomIcon" value="feCoalEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Class" value="Generator"/>
 			<property name="FeTorqueEngine" value="true"/>
 			<property name="FeTorqueOutput" value="256"/>
@@ -1065,13 +1068,11 @@
 			<property name="OutputPerFuel" value="1"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCoalEngineDesc"/>
-			<property name="CustomIcon" value="generatorBankA"/>
-			<property name="CustomIconTint" value="c08060"/>
 			<property name="DisplayType" value="blockElectricalHardened"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal_medium"/>
 			<property name="Shape" value="ModelEntity"/>
-			<property name="Model" value="@:Entities/Electrical/bigGeneratorPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCoalEnginePrefab"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
@@ -1098,6 +1099,8 @@
 			<property name="SoundPlace" value="bankgenerator_place"/>
 		</block>
 		<block name="feGasEngine">
+			<property name="CustomIcon" value="feGasEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feCoalEngine"/>
 			<property name="FeTorqueOutput" value="512"/>
 			<property name="FeFuelSecondsPerUnit" value="30"/>
@@ -1107,9 +1110,7 @@
 			<property name="FeAltFuel" value="feBiofuel"/>
 			<property name="FeAltFuelPer" value="3"/>
 			<property name="DescriptionKey" value="feGasEngineDesc"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="ffffff"/>
-			<property name="Model" value="@:Entities/Vehicles/Car/motorPrefab.prefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feGasEnginePrefab"/>
 			<property name="EconomicValue" value="1200"/>
 			<property name="SortOrder2" value="0021"/>
 		</block>

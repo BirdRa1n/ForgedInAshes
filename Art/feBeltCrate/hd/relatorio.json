@@ -1,0 +1,16 @@
+{
+ "nome": "feBeltCrate",
+ "config": "F:\\IA\\fe_blender\\configs\\feBeltCrate.json",
+ "triangulos_antes": 4536,
+ "triangulos_depois": 1272,
+ "atlas": 1024,
+ "arquivos": [
+  "feBeltCrate_Albedo.png",
+  "feBeltCrate_Normal.png",
+  "feBeltCrate_MetallicSmoothness.png",
+  "feBeltCrate_Roughness.png",
+  "feBeltCrate_HD.fbx",
+  "feBeltCrate_HD.blend"
+ ],
+ "segundos": 12.1
+}

@@ -1,7 +1,7 @@
 {
  "nome": "feElectricMotor3",
  "config": "F:\\IA\\fe_blender\\configs\\feElectricMotor3.json",
- "triangulos_antes": 11116,
+ "triangulos_antes": 11124,
  "triangulos_depois": 3812,
  "atlas": 2048,
  "arquivos": [
@@ -12,5 +12,5 @@
   "feElectricMotor3_HD.fbx",
   "feElectricMotor3_HD.blend"
  ],
- "segundos": 24.6
+ "segundos": 24.8
 }

@@ -1,0 +1,16 @@
+{
+ "nome": "feGasEngine",
+ "config": "F:\\IA\\fe_blender\\configs\\feGasEngine.json",
+ "triangulos_antes": 7144,
+ "triangulos_depois": 2656,
+ "atlas": 1024,
+ "arquivos": [
+  "feGasEngine_Albedo.png",
+  "feGasEngine_Normal.png",
+  "feGasEngine_MetallicSmoothness.png",
+  "feGasEngine_Roughness.png",
+  "feGasEngine_HD.fbx",
+  "feGasEngine_HD.blend"
+ ],
+ "segundos": 18.1
+}

@@ -30,7 +30,7 @@ public static class FeBuild
         // D9 fluid network
         "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
         "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-        "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDuct", "feConveyorStand", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
+        "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDuct", "feConveyorStand", "feCoalGenerator", "feCoalEngine", "feGasEngine", "feBeltCrate", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
         "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"
     };
 
@@ -100,6 +100,10 @@ public static class FeBuild
     const string HdDir = "Assets/Models/HD";
     const string FxDir = "Assets/Fx";
     const string MatDir = "Assets/Materials";
+    // Wire anchors for powered models that have no WireOffset empty (Unity model space: x = -Blender x, y = up)
+    static readonly System.Collections.Generic.Dictionary<string, Vector3> WireFallback =
+        new System.Collections.Generic.Dictionary<string, Vector3> { { "feCoalGenerator", new Vector3(-0.42f, 1.30f, 0f) } };
+
     static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem" };
     static readonly string[] HdMaps = { "Albedo", "Normal", "MetallicSmoothness", "Emission" };
 
@@ -344,6 +348,14 @@ public static class FeBuild
             // i.e. a DIRECT child of the prefab root, as the wire anchor. Move it up there.
             // Blender renames a second "WireOffset" in the same .blend to "WireOffset.001": accept any of them.
             var wire = FindDeep(inst.transform, "WireOffset") ?? FindPrefix(inst.transform, "WireOffset");
+            Vector3 wirePos;
+            if (wire == null && WireFallback.TryGetValue(b, out wirePos))
+            {
+                // models made before the WireOffset contract: an anchor at a fixed place (model space, Unity axes)
+                wire = new GameObject("WireOffset").transform;
+                wire.SetParent(inst.transform, false);
+                wire.localPosition = wirePos;
+            }
             if (wire != null) wire.name = "WireOffset";
             if (wire != null) wire.SetParent(root.transform, true);
 

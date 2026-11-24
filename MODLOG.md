@@ -912,3 +912,37 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Correção (`RecipeBook.cs`): a janela abre alguns quadros depois, quando não há janela modal aberta (como o jogo faz
   com baús/bancadas); ao fechar, um vigia conclui uma transição da mão ainda presa depois de 1 s
   (`Hand.CompleteTransition`, com aviso no log). **Não verificado no jogo.**
+
+## 2026-11-24: rede de torque parada ao carregar, pendências de arte e desempenho
+
+- **Bug (usuário):** ao iniciar o mundo a rede ficava parada até isolar com a embreagem o Motor Elétrico Industrial
+  e o Dínamo Industrial. Log 15:20: `sources=2 ... 4018/2048 UT OVERLOAD`. Impasse: o dínamo só gera com a rede
+  rodando, a rede só roda sem sobrecarga, e o motor elétrico (alimentado por esse dínamo) só soma capacidade com
+  energia. Correção: **inércia de partida** (`TorqueNet.Grace`, `Kinetic.GraceSeconds` = 20 s): uma rede que entra em
+  sobrecarga continua girando 20 s antes de parar (tempo do dínamo ligar o motor); sobrecarga real para depois disso e
+  só tenta de novo quando a carga cai. Texto de foco "PARTINDO (inércia)"; log no início e no fim do episódio.
+- Modelos próprios (HD) e ícones: Motor a Carvão (cilindro vertical + virabrequim, fornalha, chaminé), Motor a
+  Gasolina (monocilíndrico horizontal, dois volantes), Baú de Esteira (caixote de ferro com 4 entradas de esteira),
+  Manivela (texturizada), Gerador a Carvão (HD no bundle, `MultiBlockDim 2,2,1`, ponto de fio pelo `FeBuild.WireFallback`,
+  virabrequim e dínamo giram enquanto queima). O ícone do Gerador a Carvão estava quebrado (PNG apagado, propriedade
+  ficou) — corrigido.
+- Braço do cano na entrada de vapor da Condensadora: já resolvido (log 15:20 `port=True arm=shown` na célula filha).
+- Desempenho: `HasPortAt` sai cedo em célula de ar (antes varria todos os equipamentos de fluido por braço de cano a
+  cada 0,5 s); `FxVisual` dorme a mais de 45 m da câmera e só reenvia cor/emissão quando muda; diagnóstico dos canos
+  só com `Verbose`.
+- Bundle 52 MB; jogo carrega (15:59). **Não verificado no mundo**: `TESTE_GERAL.md` seção 18.
+- **Pegue e coloque de novo** os Geradores a Carvão já colocados (agora ocupam 2×2).
+
+## 2026-11-24: peças piscando, cadinho da Fundição, molde piscando
+
+- Relato com prints: peças piscando com o movimento (Caixa de Transmissão, Torno, Motor a Vapor...), cadinho "sem
+  nada" com faíscas, metal piscando ao encher o molde.
+- Piscar = z-fighting: primitivas montadas rentes tinham faces no mesmo plano (nervuras cruzadas, chapas sobre
+  chapas). `build_feHD.py`: cada box/cyl/ring cresce uma folga determinística diferente (0..4,8 mm, no máx. ¼ da menor
+  medida). Os 32 modelos HD reconstruídos e rebakeados; ícones refeitos.
+- Cadinho: era um cilindro tampado escondendo o metal. Agora panela aberta com revestimento refratário, metal
+  incandescente com escória e a tampa levantada num braço giratório; faíscas no lado descoberto.
+- Molde: `FeCastMetal` 4 mm acima da areia (não coincide no começo do enchimento) e o jato fica visível 0,8 s depois
+  do último fluxo (a rede de fluidos move o metal em passos; antes o jato piscava).
+- Bundle 52 MB; jogo carrega. **Não verificado no mundo.** (O Gerador a Carvão e a Manivela vêm de scripts antigos e
+  não ganharam a folga.)

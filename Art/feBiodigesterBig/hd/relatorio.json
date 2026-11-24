@@ -1,7 +1,7 @@
 {
  "nome": "feBiodigesterBig",
  "config": "F:\\IA\\fe_blender\\configs\\feBiodigesterBig.json",
- "triangulos_antes": 8700,
+ "triangulos_antes": 8676,
  "triangulos_depois": 3428,
  "atlas": 1024,
  "arquivos": [
@@ -12,5 +12,5 @@
   "feBiodigesterBig_HD.fbx",
   "feBiodigesterBig_HD.blend"
  ],
- "segundos": 19.2
+ "segundos": 18.4
 }

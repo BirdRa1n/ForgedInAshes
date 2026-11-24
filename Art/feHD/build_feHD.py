@@ -79,7 +79,21 @@ def _fin(bm, mat, mtx, verts):
         f.material_index = mat
 
 
+# Anti z-fighting (2026-11-24, user: "parts flicker as I move"): primitives built flush with each other had faces in
+# exactly the same plane (crossing ribs, plates on plates, strips on walls). Every primitive now grows by a small
+# amount that differs from its neighbours' (0 .. 4.8 mm, never more than a quarter of its thinnest side), so no two
+# faces coincide any more. Deterministic: the counter restarts for every model (build()).
+_JIT = [0]
+
+
+def _j(smallest):
+    _JIT[0] += 1
+    return min(0.0012 * (_JIT[0] % 5), 0.25 * max(smallest, 0.0))
+
+
 def box(bm, size, loc, mat, rot=None):
+    j = _j(min(size))
+    size = (size[0] + j, size[1] + j, size[2] + j)
     r = bmesh.ops.create_cube(bm, size=1.0, calc_uvs=True)
     _fin(bm, mat, Matrix.Translation(loc) @ (rot or Matrix.Identity(4)) @ Matrix.Diagonal((*size, 1)), r["verts"])
 
@@ -91,12 +105,20 @@ def beam(bm, a, b, w, t, mat):
 
 
 def cyl(bm, r, depth, loc, axis, mat, segs=16, r2=None, rot=None):
+    j = _j(min(r, depth))
+    r += j / 2
+    r2 = None if r2 is None else r2 + j / 2
+    depth += j
     res = bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=segs, radius1=r,
                                 radius2=r if r2 is None else r2, depth=depth, calc_uvs=True)
     _fin(bm, mat, Matrix.Translation(loc) @ (rot or Matrix.Identity(4)) @ AXIS[axis], res["verts"])
 
 
 def ring(bm, ro, ri, depth, loc, axis, mat, segs=24):
+    j = _j(min(ro - ri, depth))
+    ro += j / 2
+    ri -= j / 2
+    depth += j
     loops = []
     for rad, z in ((ro, -depth / 2), (ro, depth / 2), (ri, depth / 2), (ri, -depth / 2)):
         loops.append([bm.verts.new((rad * math.cos(2 * math.pi * i / segs), rad * math.sin(2 * math.pi * i / segs), z))
@@ -508,7 +530,7 @@ def model_caster():
     out = [to_object(b, "feCaster_Base", bevel=0.003)]
     metal = bmesh.new()
     box(metal, (0.40, 0.30, 0.10), (0, 0, 0.05), MOLTEN)
-    out.append(to_object(metal, "FeCastMetal", location=(0, 0, CB)))
+    out.append(to_object(metal, "FeCastMetal", location=(0, 0, CB + 0.004)))   # never flush with the sand
     ready = bmesh.new()
     for k, (x, y) in enumerate(((-0.07, -0.025), (0.07, -0.025), (0.0, 0.025))):
         box(ready, (0.13, 0.06, 0.04), (x, y, 0.02 + (0.04 if k == 2 else 0)), CAST)
@@ -596,10 +618,27 @@ def model_m_foundry():
     cyl(b, 0.058, 0.032, (-0.02, -0.345, 1.05), "Y", GLASS, segs=18)
     hazard(b, 1.50, (0, -0.33, 1.20), "X", h=0.05, n=18)
     # crucible on top (right part): steel pot in a tilting yoke, molten surface inside
-    cyl(b, 0.30, 0.04, (-0.40, 0, 1.32), "Z", IRON, segs=24)
-    cyl(b, 0.25, 0.40, (-0.40, 0, 1.54), "Z", CAST, segs=24, r2=0.29)
-    ring(b, 0.30, 0.25, 0.04, (-0.40, 0, 1.74), "Z", STEEL, segs=24)
-    cyl(b, 0.25, 0.02, (-0.40, 0, 1.70), "Z", MOLTEN, segs=24)
+    # an OPEN pot (walls only: the old capped cylinder hid the melt under a grey lid): thick refractory walls,
+    # dark inside, the glowing melt a little under the rim, the lid swung back on its hinge
+    CRX, CRY = -0.40, 0.0
+    cyl(b, 0.30, 0.04, (CRX, CRY, 1.32), "Z", IRON, segs=24)                         # stand plate
+    cyl(b, 0.27, 0.06, (CRX, CRY, 1.37), "Z", CAST, segs=24)                         # bottom
+    ring(b, 0.285, 0.235, 0.36, (CRX, CRY, 1.55), "Z", CAST, segs=28)                # pot wall
+    ring(b, 0.236, 0.22, 0.30, (CRX, CRY, 1.56), "Z", BRICK, segs=28)                # refractory lining
+    ring(b, 0.30, 0.235, 0.04, (CRX, CRY, 1.74), "Z", STEEL, segs=28)                # rim band
+    cyl(b, 0.222, 0.02, (CRX, CRY, 1.66), "Z", MOLTEN, segs=28)                      # the melt
+    for k in range(5):                                                                  # slag crusts floating
+        a_ = 2 * math.pi * k / 5 + 0.3
+        cyl(b, 0.03 + 0.01 * (k % 2), 0.012, (CRX + 0.12 * math.cos(a_), CRY + 0.12 * math.sin(a_), 1.675), "Z", SOOT, segs=7)
+    # lid on a swing arm: a post at the back-right corner holds it raised and turned half aside
+    PX_, PY_ = CRX - 0.32, CRY + 0.30
+    cyl(b, 0.025, 0.62, (PX_, PY_, 1.32 + 0.31), "Z", STEEL, segs=10)                 # post
+    cyl(b, 0.04, 0.05, (PX_, PY_, 1.92), "Z", CAST, segs=10)
+    LX_, LY_ = CRX - 0.20, CRY + 0.16                                                  # lid centre (off the pot)
+    beam(b, (PX_, PY_, 1.92), (LX_, LY_, 1.92), 0.03, 0.03, STEEL)                   # arm
+    cyl(b, 0.26, 0.035, (LX_, LY_, 1.89), "Z", CAST, segs=24)                        # the lid, held up
+    cyl(b, 0.27, 0.012, (LX_, LY_, 1.866), "Z", SOOT, segs=24)                       # sooty underside
+    cyl(b, 0.04, 0.05, (LX_, LY_, 1.93), "Z", STEEL, segs=10)                        # handle
     box(b, (0.10, 0.10, 0.04), (-0.40, -0.29, 1.72), STEEL, Matrix.Rotation(0.4, 4, "X"))   # pour lip
     for sx in (-1, 1):
         box(b, (0.05, 0.05, 0.42), (-0.40 + sx * 0.36, 0, 1.53), IRON)
@@ -631,7 +670,7 @@ def model_m_foundry():
                                  rings=24, lead=0.008), "FePour_Foundry", location=lip))
     objs.append(empty("FeFx_Splash_1", (-0.40, -0.415, 0.47)))                    # where it lands
     objs.append(empty("FeFx_Smoke_1", (0.52, 0.06, 2.0)))
-    objs.append(empty("FeFx_Sparks_1", (-0.40, 0, 1.75)))
+    objs.append(empty("FeFx_Sparks_1", (-0.33, -0.08, 1.70)))
     objs.append(empty("FeFx_Fire_1", (0.40, -0.39, 0.66)))                         # flames inside the mouth
     return objs
 
@@ -2231,7 +2270,168 @@ def model_m_ammo():
 
 
 
+# ================================================================ round 6: coal / gas engines, belt crate
+def crank_linkage(objs, n, pin, ch, rod_w=0.025):
+    """Crosshead (piston) + connecting rod + crank pin marker for KineticSpinner's slider-crank solver."""
+    pin, ch = Vector(pin), Vector(ch)
+    d = pin - ch
+    rd = bmesh.new()
+    beam(rd, (0, 0, 0), d, rod_w, rod_w * 0.8, STEEL)
+    cyl(rd, rod_w * 1.1, 0.035, (0, 0, 0), "Y", CAST, segs=10)
+    cyl(rd, rod_w * 1.5, 0.04, d, "Y", CAST, segs=12)
+    objs.append(to_object(rd, "FeConrod_%d" % n, location=ch, bevel=0.001))
+    objs.append(empty("FeCrankPin_%d" % n, tuple(pin), 0.03))
+
+
+def model_coal_engine():
+    """Coal Engine (1 block, torque source, shaft = Blender Y at 0.5 through both faces): a firebox with a chimney
+    on the left, a vertical single cylinder over a crank on the shaft, the flywheel at the front. The crankshaft
+    (FeSpin_EngineCrank) drives the crosshead / rod through KineticSpinner's slider-crank. Fire, coal glow and
+    chimney smoke while it runs (FxVisual)."""
+    objs = []
+    b = bmesh.new()
+    box(b, (0.92, 0.92, 0.05), (0, 0, 0.025), IRON)
+    hazard(b, 0.90, (0, -0.465, 0.05), "X", h=0.04, n=12)
+    # firebox (left), riveted, with an open door and coal bed; chimney up to the top
+    FX = -0.27
+    plate(b, (0.34, 0.50, 0.42), (FX, 0.15, 0.26), CAST, "-X", n=4)
+    box(b, (0.36, 0.52, 0.03), (FX, 0.15, 0.48), IRON)
+    box(b, (0.20, 0.02, 0.16), (FX, -0.105, 0.24), SOOT)                                # mouth
+    box(b, (0.16, 0.03, 0.03), (FX, -0.11, 0.18), GLOW)                                 # coal bed
+    plate(b, (0.02, 0.16, 0.18), (FX - 0.20, -0.17, 0.25), CAST, "-X", n=2)             # open door
+    cyl(b, 0.07, 0.46, (FX, 0.30, 0.73), "Z", IRON, segs=14)
+    cyl(b, 0.09, 0.04, (FX, 0.30, 0.97), "Z", CAST, segs=14)
+    # main bearings on A-frames, cylinder on a column over the crank
+    for y in (-0.08, 0.40):
+        box(b, (0.16, 0.10, 0.40), (0, y, 0.25), CAST)
+        cyl(b, 0.07, 0.11, (0, y, C), "Y", CAST, segs=16)
+        cyl(b, 0.01, 0.03, (0, y, C + 0.08), "Z", BRASS, segs=6)
+    for sx in (-1, 1):
+        box(b, (0.03, 0.04, 0.24), (sx * 0.06, 0.16, 0.74), STEEL)                       # crosshead guides
+    box(b, (0.20, 0.10, 0.04), (0, 0.16, 0.86), CAST)
+    cyl(b, 0.075, 0.12, (0, 0.16, 0.92), "Z", PAINT, segs=18)                             # cylinder
+    cyl(b, 0.085, 0.02, (0, 0.16, 0.985), "Z", CAST, segs=18)
+    pipe_run(b, [(0.07, 0.16, 0.94), (0.16, 0.16, 0.94), (0.16, 0.20, 0.52), (FX + 0.17, 0.25, 0.40)], r=0.018)
+    cyl(b, 0.04, 0.02, (0.16, 0.06, 0.80), "Y", BRASS, segs=12)                            # gauge
+    objs.append(to_object(b, "feCoalEngine_Base", bevel=0.003))
+    ER, EL, TY = 0.05, 0.20, 0.16                                                         # crank radius, rod, throw y
+    w = bmesh.new()
+    shaft_end(w, 0.0, -0.5)
+    shaft_end(w, 0.0, 0.5)
+    ring(w, 0.30, 0.25, 0.06, (0, -0.30, 0), "Y", CAST, segs=36)                         # flywheel
+    cyl(w, 0.06, 0.09, (0, -0.30, 0), "Y", CAST, segs=14)
+    for k in range(5):
+        a_ = k * 2 * math.pi / 5
+        m = Matrix.Rotation(a_, 4, "Y") @ Matrix.Translation((0.15, -0.30, 0))
+        r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+        _fin(w, CAST, m @ Matrix.Diagonal((0.20, 0.03, 0.035, 1)), r["verts"])
+    for dy in (-0.035, 0.035):                                                            # crank webs
+        box(w, (0.05, 0.02, ER + 0.07), (0, TY + dy, ER / 2 - 0.015), RUST)
+    cyl(w, 0.015, 0.09, (0, TY, ER), "Y", STEEL, segs=10)                               # crank pin (up)
+    objs.append(to_object(w, "FeSpin_EngineCrank", location=(0, 0, C), bevel=0.0015))
+    pin = (0, TY, C + ER)
+    ch = (0, TY, C + ER + EL)
+    x = bmesh.new()
+    box(x, (0.09, 0.05, 0.04), (0, 0, 0), BRASS)
+    cyl(x, 0.012, 0.22, (0, 0, 0.11), "Z", STEEL, segs=8)                               # piston rod
+    cyl(x, 0.065, 0.04, (0, 0, 0.21), "Z", IRON, segs=14)                                # piston (inside)
+    objs.append(to_object(x, "FeCrosshead_1", location=ch, bevel=0.001))
+    crank_linkage(objs, 1, pin, ch)
+    objs.append(empty("FeFx_Fire_1", (FX, -0.13, 0.19)))
+    objs.append(empty("FeFx_Smoke_1", (FX, 0.30, 0.99)))
+    return objs
+
+
+def model_gas_engine():
+    """Gas Engine (1 block, torque source, shaft = Blender Y at 0.5): a single-cylinder horizontal engine in the
+    hit-and-miss style. Two big flywheels on the crankshaft (FeSpin_EngineCrank), the cylinder lying across (+X)
+    with its cooling-water hopper and the piston / rod driven by the slider-crank; fuel tank, ignition box, exhaust
+    (FeFx_Smoke_1 puffs while it runs)."""
+    objs = []
+    b = bmesh.new()
+    box(b, (0.92, 0.92, 0.05), (0, 0, 0.025), IRON)
+    for sx in (-1, 1):
+        box(b, (0.08, 0.80, 0.10), (sx * 0.40, 0, 0.10), WOOD)                            # skids
+    hazard(b, 0.90, (0, -0.465, 0.05), "X", h=0.04, n=12)
+    # crankcase / frame with the main bearings
+    box(b, (0.24, 0.40, 0.30), (0.0, 0, 0.27), CAST)
+    for y in (-0.19, 0.19):
+        cyl(b, 0.065, 0.07, (0, y, C), "Y", CAST, segs=16)
+        box(b, (0.16, 0.07, 0.12), (0, y, 0.44), CAST)
+    # the cylinder across (+X): water jacket box with an open hopper on top, head, spark plug, exhaust
+    CX0, CX1 = 0.14, 0.44
+    plate(b, (CX1 - CX0, 0.20, 0.20), ((CX0 + CX1) / 2, 0, C), PAINT, "-Y", n=3)
+    for k in range(4):
+        box(b, (0.012, 0.22, 0.22), (CX0 + 0.05 + k * 0.07, 0, C), CAST)                  # fins / bands
+    box(b, (0.26, 0.16, 0.10), ((CX0 + CX1) / 2, 0, C + 0.15), PAINT)                    # water hopper
+    box(b, (0.22, 0.12, 0.01), ((CX0 + CX1) / 2, 0, C + 0.195), LIQUID)
+    box(b, (0.04, 0.16, 0.16), (CX1 + 0.02, 0, C), CAST)                                 # head
+    cyl(b, 0.012, 0.05, (CX1 + 0.04, 0.04, C + 0.09), "Z", BRASS, segs=6)                # spark plug
+    pipe_run(b, [(CX1 - 0.04, -0.10, C + 0.04), (CX1 - 0.04, -0.20, C + 0.04), (CX1 - 0.04, -0.20, 0.92)], r=0.025)
+    cyl(b, 0.035, 0.06, (CX1 - 0.04, -0.20, 0.95), "Z", CAST, segs=10)                   # exhaust cap
+    # fuel tank on a stand (left), line to the carb, ignition box
+    cyl(b, 0.10, 0.22, (-0.30, 0.20, 0.72), "X", HAZ, segs=16)
+    for sx in (-1, 1):
+        box(b, (0.03, 0.03, 0.62), (-0.30 + sx * 0.08, 0.20, 0.31), IRON)
+    pipe_run(b, [(-0.30, 0.20, 0.62), (0.05, 0.20, 0.62), (CX0 + 0.04, 0.08, C + 0.06)], r=0.008, mat=COPPER)
+    box(b, (0.10, 0.08, 0.10), (0.20, 0.25, 0.30), CAST)                                  # ignition / magneto
+    objs.append(to_object(b, "feGasEngine_Base", bevel=0.003))
+    ER, EL = 0.06, 0.24
+    w = bmesh.new()
+    shaft_end(w, 0.0, -0.5)
+    shaft_end(w, 0.0, 0.5)
+    for y in (-0.31, 0.31):                                                               # twin flywheels
+        ring(w, 0.32, 0.27, 0.055, (0, y, 0), "Y", CAST, segs=40)
+        cyl(w, 0.06, 0.08, (0, y, 0), "Y", CAST, segs=14)
+        for k in range(6):
+            a_ = k * math.pi / 3
+            m = Matrix.Rotation(a_, 4, "Y") @ Matrix.Translation((0.165, y, 0))
+            r = bmesh.ops.create_cube(w, size=1.0, calc_uvs=True)
+            _fin(w, CAST, m @ Matrix.Diagonal((0.22, 0.03, 0.035, 1)), r["verts"])
+    for dy in (-0.04, 0.04):
+        box(w, (ER + 0.08, 0.02, 0.06), (ER / 2 - 0.01, dy, 0), RUST)                    # crank webs
+    cyl(w, 0.016, 0.10, (ER, 0, 0), "Y", STEEL, segs=10)                               # crank pin (+X)
+    objs.append(to_object(w, "FeSpin_EngineCrank", location=(0, 0, C), bevel=0.0015))
+    pin = (ER, 0, C)
+    ch = (ER + EL, 0, C)
+    x = bmesh.new()                                                                      # piston (in the cylinder)
+    cyl(x, 0.07, 0.10, (0.06, 0, 0), "X", IRON, segs=16)
+    cyl(x, 0.014, 0.03, (0, 0, 0), "Y", STEEL, segs=8)
+    objs.append(to_object(x, "FeCrosshead_1", location=ch, bevel=0.001))
+    crank_linkage(objs, 1, pin, ch, rod_w=0.022)
+    objs.append(empty("FeFx_Smoke_1", (CX1 - 0.04, -0.20, 0.98)))
+    return objs
+
+
+def model_belt_crate():
+    """Belt Storage crate (1 block): a riveted iron crate with corner posts, bands, a hinged lid, a stencil plate
+    and a conveyor inlet frame on each side (it takes items from a belt pointing into any of its sides)."""
+    b = bmesh.new()
+    plate(b, (0.84, 0.84, 0.70), (0, 0, 0.42), PAINT, "-Y", n=6)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(b, (0.07, 0.07, 0.80), (sx * 0.42, sy * 0.42, 0.40), IRON)
+            box(b, (0.10, 0.10, 0.03), (sx * 0.42, sy * 0.42, 0.015), IRON)
+    for z in (0.12, 0.76):
+        for s in (-1, 1):
+            box(b, (0.86, 0.03, 0.04), (0, s * 0.43, z), IRON)
+            box(b, (0.03, 0.86, 0.04), (s * 0.43, 0, z), IRON)
+    plate(b, (0.86, 0.86, 0.05), (0, 0.0, 0.80), CAST, "-Y", n=6)                       # lid
+    for x in (-0.25, 0.25):
+        box(b, (0.10, 0.04, 0.04), (x, 0.44, 0.80), STEEL)                               # hinges
+    box(b, (0.16, 0.03, 0.05), (0, -0.445, 0.78), STEEL)                                 # latch
+    box(b, (0.30, 0.012, 0.12), (0, -0.44, 0.60), HAZ)                                   # stencil plate
+    for p, n in (((0, -0.5, 0.25), (0, -1, 0)), ((0, 0.5, 0.25), (0, 1, 0)),
+                 ((-0.5, 0, 0.25), (-1, 0, 0)), ((0.5, 0, 0.25), (1, 0, 0))):
+        conveyor_port(b, p, n)
+    return [to_object(b, "feBeltCrate_Base", bevel=0.003)]
+
+
+
 MODELS = {
+    "feCoalEngine": model_coal_engine,
+    "feGasEngine": model_gas_engine,
+    "feBeltCrate": model_belt_crate,
     "feBiodigester": model_biodigester,
     "feBiodigesterBig": model_biodigester_big,
     "feSteamDryer": model_steam_dryer,
@@ -2265,6 +2465,7 @@ MODELS = {
 
 
 def build(name):
+    _JIT[0] = 0
     bpy.ops.wm.read_factory_settings(use_empty=True)
     make_materials()
     objs = MODELS[name]()

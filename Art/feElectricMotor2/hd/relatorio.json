@@ -1,7 +1,7 @@
 {
  "nome": "feElectricMotor2",
  "config": "F:\\IA\\fe_blender\\configs\\feElectricMotor2.json",
- "triangulos_antes": 5672,
+ "triangulos_antes": 5680,
  "triangulos_depois": 2040,
  "atlas": 1024,
  "arquivos": [

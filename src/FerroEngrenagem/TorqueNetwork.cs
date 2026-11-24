@@ -238,7 +238,11 @@ namespace FerroEngrenagem
 
         public ICollection<Vector3i> Nodes { get { return Factor.Keys; } }
         public bool Overloaded { get { return Capacity > 0 && Usage > Capacity; } }
-        public bool Running { get { return Capacity > 0 && !Overloaded && !Locked; } }
+        // Start-up inertia (bug 2026-11-24: a line whose Industrial Dynamo powers its own Industrial Electric Motor
+        // never started after loading the world): an overload keeps the line turning for Kinetic.GraceSeconds, so a
+        // dynamo can power the motors that complete the capacity; a real overload still stops it after that.
+        public bool Grace;
+        public bool Running { get { return Capacity > 0 && (!Overloaded || Grace) && !Locked; } }
 
         public float RpmAt(Vector3i node)
         {
@@ -551,6 +555,45 @@ namespace FerroEngrenagem
             }
         }
 
+        public const float GraceSeconds = 20f;
+        // overload episodes: key = the smallest node of the network -> when the overload began
+        static readonly Dictionary<Vector3i, float> overloadSince = new Dictionary<Vector3i, float>();
+        static readonly HashSet<Vector3i> graceLogged = new HashSet<Vector3i>();
+
+        static Vector3i KeyOf(TorqueNet net)
+        {
+            bool first = true;
+            Vector3i k = Vector3i.zero;
+            foreach (Vector3i n in net.Nodes)
+                if (first || n.x < k.x || (n.x == k.x && (n.y < k.y || (n.y == k.y && n.z < k.z)))) { k = n; first = false; }
+            return k;
+        }
+
+        static void ApplyGrace(TorqueNet net)
+        {
+            if (net.Factor.Count == 0) return;
+            Vector3i key = KeyOf(net);
+            if (!net.Overloaded || net.Locked)
+            {
+                overloadSince.Remove(key);
+                return;
+            }
+            float now = UnityEngine.Time.time, t;
+            if (!overloadSince.TryGetValue(key, out t))
+            {
+                t = now;
+                overloadSince[key] = t;
+                graceLogged.Remove(key);
+                Log.Out(FerroEngrenagemMod.LogPrefix + "torque line at " + key + " overloaded " + net.Usage + "/" + net.Capacity
+                        + " UT (" + net.Sources + " sources): start-up inertia for " + GraceSeconds + " s");
+            }
+            net.Grace = now - t < GraceSeconds;
+            if (!net.Grace && graceLogged.Add(key))
+                Log.Out(FerroEngrenagemMod.LogPrefix + "torque line at " + key + " still overloaded " + net.Usage + "/" + net.Capacity
+                        + " UT after the inertia: stopped");
+            if (overloadSince.Count > 256) overloadSince.Clear();   // stale keys of rebuilt lines
+        }
+
         /// <summary>Forget cached networks (a speed box changed).</summary>
         public static void Invalidate()
         {
@@ -708,6 +751,7 @@ namespace FerroEngrenagem
                 net.MachineNode.Remove(m.Key);
             }
             ComputeUsage(world, net);
+            ApplyGrace(net);
             return net;
         }
 
@@ -868,6 +912,9 @@ namespace FerroEngrenagem
                     : Kinetic.Text("feNetLocked", "LOCKED: sources would turn at different speeds");
             if (net.Capacity <= 0)
                 return string.Format(Kinetic.Text("feNetStopped", "Stopped: no torque source ({0} UT needed)"), net.Usage);
+            if (net.Overloaded && net.Grace)
+                return string.Format(Kinetic.Text("feNetStarting", "STARTING (inertia): {0}/{1} UT - it stops if the load stays too high"),
+                                     net.Usage, net.Capacity);
             if (net.Overloaded)
                 return string.Format(Kinetic.Text("feNetOverload", "OVERLOADED: {0}/{1} UT"), net.Usage, net.Capacity);
             return string.Format(Kinetic.Text("feNetRunning", "{0} RPM - {1}/{2} UT"),

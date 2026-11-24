@@ -18,7 +18,7 @@ OUT = os.path.join(REPO, "Mods", "FerroEngrenagem", "UIAtlases", "ItemIconAtlas"
 BLOCKS = {
     "feM_Foundry": ["feFoundry"], "feM_Lathe": ["feLathe"], "feM_Ammo": ["feAmmoPress"],
 }
-HIDE = ("FePour", "FeFx", "FeDuctSide", "FeDuctHatch", "FeDuctBoot", "FeDuctRamp", "FeDuctCapF", "FeCurve",
+HIDE = ("fePreview", "FePour", "FeFx", "FeDuctSide", "FeDuctHatch", "FeDuctBoot", "FeDuctRamp", "FeDuctCapF", "FeCurve",
         "FeJunction", "FeBeltChute", "FeFunnelSpoutDuct", "FeLevelGas")
 HIDE_EXACT = ("FeFunnelSpout",)
 

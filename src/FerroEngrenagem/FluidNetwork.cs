@@ -308,6 +308,7 @@ namespace FerroEngrenagem
         public static bool HasPortAt(World world, Vector3i cell, Vector3i dir, bool metal)
         {
             BlockValue bv = world.GetBlock(cell);
+            if (bv.isair) return false;   // perf: most pipe arms face air; skip the device scan below
             FluidKind k = Kind(bv.Block);
             if (k == FluidKind.None)
             {
@@ -1121,9 +1122,9 @@ namespace FerroEngrenagem
                 a.arms[i] = Find(ebcd.transform, Names[i]);
                 if (a.arms[i] == null) a.arms[i] = FindPrefix(ebcd.transform, Names[i] + ".");
             }
-            // diagnostic: a pipe next to a device (the Condenser steam inlet never reported its arms)
+            // diagnostic (verbose only since 2026-11-24): a pipe next to a device
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
-            if (world != null)
+            if (world != null && FerroEngrenagemMod.Verbose)
                 for (int i = 0; i < 6; i++)
                 {
                     Vector3i n = new Vector3i(pos.x + Dirs6[i].x, pos.y + Dirs6[i].y, pos.z + Dirs6[i].z);
@@ -1177,7 +1178,7 @@ namespace FerroEngrenagem
             next = Time.time + 0.5f;
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world == null) return;
-            bool first = !reported;
+            bool first = !reported && FerroEngrenagemMod.Verbose;
             reported = true;
             for (int i = 0; i < 6; i++)
             {
@@ -1203,7 +1204,7 @@ namespace FerroEngrenagem
                 {
                     arms[i].gameObject.SetActive(on);
                     Block nb = world.GetBlock(n).Block;
-                    if (!Fluids.IsConduit(Fluids.Kind(nb)) && Fluids.Kind(nb) != FluidKind.None)
+                    if (FerroEngrenagemMod.Verbose && !Fluids.IsConduit(Fluids.Kind(nb)) && Fluids.Kind(nb) != FluidKind.None)
                         Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " arm " + Names[i] + " -> " + n + " ("
                                 + nb.GetBlockName() + ") " + (on ? "ON" : "OFF") + " arm world pos "
                                 + arms[i].position.ToString("F2"));

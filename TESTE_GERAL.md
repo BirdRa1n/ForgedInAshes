@@ -253,3 +253,15 @@ No fim, feche o jogo e peça para ler o log (`Player.log` quando aberto direto p
 2. Troque de slot pelo número e pela roda do mouse: tem de funcionar na hora.
 3. Repita depois de "Pôr o item da mão" na máquina. Se ainda travar, feche o jogo e peça para ler o log
    (procure "recipe book" e "stuck switching").
+
+## 18. Partida da rede, motores a combustível, baú de esteira, gerador a carvão
+
+1. **Partida:** com a linha dos Motores a Vapor + Dínamo Industrial + Motor Elétrico Industrial montada (sem isolar
+   nada), salve, saia e entre de novo. A rede deve mostrar "PARTINDO (inércia)" por alguns segundos e depois rodar
+   sozinha. Se a carga for maior que tudo junto, ela para depois de 20 s (log: "still overloaded ... stopped").
+2. **Motor a Carvão / a Gasolina:** modelos novos; ligados, o virabrequim gira e o pistão/biela acompanham; fogo e
+   fumaça no de carvão, fumaça no escapamento do de gasolina.
+3. **Baú de Esteira:** caixote de ferro com entradas de esteira nos 4 lados; continua guardando o que chega.
+4. **Gerador a Carvão:** pegue e coloque de novo (agora 2×2); o fio liga em cima do dínamo; queimando, o volante e o
+   dínamo giram.
+5. **Ícones:** Manivela, Gerador a Carvão, Baú de Esteira, Motor a Carvão e Motor a Gasolina com ícone próprio.

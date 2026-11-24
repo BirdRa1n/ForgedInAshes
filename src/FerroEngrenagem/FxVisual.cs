@@ -94,9 +94,17 @@ namespace FerroEngrenagem
             v.Init(pos, Fluids.Kind(block), block);
         }
 
+        static bool FindName(Transform t, string n)
+        {
+            if (t.name.StartsWith(n, System.StringComparison.Ordinal)) return true;
+            for (int i = 0; i < t.childCount; i++) if (FindName(t.GetChild(i), n)) return true;
+            return false;
+        }
+
         static bool HasFx(Transform t)
         {
             if (t.GetComponentsInChildren<ParticleSystem>(true).Length > 0) return true;
+            if (t.name.StartsWith("feCoalGenerator") || FindName(t, "feCoalGen_Crank")) return true;
             foreach (Transform c in t.GetComponentsInChildren<Transform>(true))
                 if (c.name.StartsWith("FeLever", System.StringComparison.Ordinal) || c.name.StartsWith("FeWorkSpin", System.StringComparison.Ordinal) ||
                     c.name.StartsWith("FeSurface", System.StringComparison.Ordinal)) return true;
@@ -107,13 +115,18 @@ namespace FerroEngrenagem
             return false;
         }
 
-        bool engine;
+        bool engine, fuelGen;
 
         void Init(Vector3i p, FluidKind k, Block b)
         {
             pos = p;
             kind = k;
-            engine = SteamEngine.Is(b);
+            engine = SteamEngine.Is(b) || TorqueEngine.IsEngine(b);   // fuel engines: fire, glow, smoke too
+            fuelGen = !engine && b is BlockPowerSource && FuelGenerator.FuelItem(b) != null;   // Coal Generator
+            lastE = lastB = lastLiquid = Color.clear;                 // pooled models: re-send everything once
+            lastCast = lastGlow = -1f;
+            far = false;
+            nextFar = 0f;
             mpb = mpb ?? new MaterialPropertyBlock();
             molten.Clear(); liquid.Clear(); glow.Clear(); pours.Clear();
             steam.Clear(); smoke.Clear(); sparks.Clear(); fire.Clear(); splash.Clear(); dust.Clear();
@@ -138,6 +151,11 @@ namespace FerroEngrenagem
             foreach (Transform t in GetComponentsInChildren<Transform>(true))
             {
                 if (t.name.StartsWith("FePour", System.StringComparison.Ordinal)) pours.Add(t.gameObject);
+                // Coal Generator HD (Art/feCoalGenerator): its crank and the dynamo rotor (2x, the other way) turn
+                // while it burns; it is not a torque block, so KineticSpinner does not drive them
+                if (fuelGen && (t.name.EndsWith("_Crank", System.StringComparison.Ordinal) ||
+                                t.name.EndsWith("_DynamoRotor", System.StringComparison.Ordinal)))
+                    workSpins.Add(new WorkSpin { T = t, Mult = t.name.EndsWith("_Crank", System.StringComparison.Ordinal) ? 1.5f : -3f });
                 if (t.name.StartsWith("FeWorkSpin", System.StringComparison.Ordinal))
                 {
                     WorkSpin w = new WorkSpin { T = t };
@@ -258,6 +276,14 @@ namespace FerroEngrenagem
             pouring = steaming = smoking = sparking = burning = dusting = false;
             working = dripping = false;
             if (lever != null) leverGoal = BlockFeKinetic.Engaged(bv) ? 1f : -1f;
+            if (fuelGen)
+            {
+                TileEntityPowerSource gte = world.GetTileEntity(owner) as TileEntityPowerSource;
+                working = gte != null && gte.IsOn && gte.CurrentFuel > 0;
+                smoking = steaming = working;
+                Show();
+                return;
+            }
             if (engine)
             {
                 // Steam Engine: fire, coal glow and stack smoke while it runs, the drain cocks puff (FeFx_Steam_*);
@@ -265,6 +291,7 @@ namespace FerroEngrenagem
                 bool run = TorqueEngine.IsRunning(world, owner);
                 burning = smoking = steaming = run;
                 glowGoal = run ? 1f : 0f;
+                fluid = Fluids.Water;                                     // the Gas Engine's cooling hopper
                 Show();
                 return;
             }
@@ -299,7 +326,7 @@ namespace FerroEngrenagem
                     smoking = lit;
                     sparking = lit && full;
                     burning = lit;
-                    pouring = out_;
+                    pouring = Pour(out_);
                     break;
                 }
                 case FluidKind.Caster:
@@ -312,7 +339,7 @@ namespace FerroEngrenagem
                     bool full = pr != null && s.Amount >= pr.Liters - 0.01f;
                     float cooled = full && pr.Time > 0f ? Mathf.Clamp01(s.Steam / pr.Time) : 0f;
                     castHeatGoal = !hasMetal ? 0f : (full ? 1f - cooled : 1f);
-                    pouring = s.LastFlow > 0.1f;
+                    pouring = Pour(s.LastFlow > 0.1f);
                     heatGoal = pouring ? 1f : 0f;                 // the stream itself
                     flowSpeed = 0.5f;
                     steaming = full && castHeatGoal > 0.1f;       // the cast steams while it cools
@@ -350,6 +377,16 @@ namespace FerroEngrenagem
             Show();
         }
 
+        // the fluid network moves metal in steps: keep the stream on 0.8 s after the last flow seen so it does not
+        // blink on and off while a mold fills (user report 2026-11-24)
+        float lastPour = -10f;
+
+        bool Pour(bool flowing)
+        {
+            if (flowing) lastPour = Time.time;
+            return Time.time - lastPour < 0.8f;
+        }
+
         void Show()
         {
             foreach (GameObject g in pours) if (g.activeSelf != pouring) g.SetActive(pouring);
@@ -374,8 +411,35 @@ namespace FerroEngrenagem
             }
         }
 
+        // perf (2026-11-24): every pipe carries this component (its sight glass), so far away it sleeps and near it
+        // only re-sends material values that changed
+        const float FarSqr = 45f * 45f;
+        bool far;
+        float nextFar;
+        Color lastE = Color.clear, lastB = Color.clear, lastLiquid = Color.clear;
+        float lastCast = -1f, lastGlow = -1f;
+
+        void StopAll()
+        {
+            Apply(steam, false); Apply(smoke, false); Apply(sparks, false); Apply(fire, false);
+            Apply(splash, false); Apply(dust, false); Apply(drip, false); Apply(spray, false); Apply(bubbles, false);
+        }
+
         void Update()
         {
+            if (Time.time >= nextFar)
+            {
+                nextFar = Time.time + 1f + (pos.x & 3) * 0.05f;
+                Camera cam = Camera.main;
+                bool f = cam != null && (cam.transform.position - transform.position).sqrMagnitude > FarSqr;
+                if (f != far)
+                {
+                    far = f;
+                    if (far) StopAll();
+                    else next = 0f;
+                }
+            }
+            if (far) return;
             if (Time.time >= next)
             {
                 next = Time.time + 0.25f;
@@ -424,10 +488,16 @@ namespace FerroEngrenagem
                 Color e = Heated(metal, heat);
                 Color b = MetalBase(metal, heat);
                 Vector4 st = new Vector4(1f, 1f, 0f, scroll);
-                foreach (Slot sl in molten) SetMolten(sl, e, b, st);
+                if (e != lastE || b != lastB || (flowSpeed > 0f && heat > 0.001f))
+                {
+                    lastE = e;
+                    lastB = b;
+                    foreach (Slot sl in molten) SetMolten(sl, e, b, st);
+                }
             }
-            if (castMetal != null)
+            if (castMetal != null && (castHeat != lastCast || castHeat > 0.001f))
             {
+                lastCast = castHeat;
                 mpb.Clear();
                 mpb.SetColor(EmissionColor, Heated(metal, castHeat));
                 mpb.SetColor(ColorId, MetalBase(metal, castHeat));
@@ -437,6 +507,9 @@ namespace FerroEngrenagem
             if (liquid.Count > 0)
             {
                 Color c = FluidColor(fluid);
+                if (c != lastLiquid)
+                {
+                lastLiquid = c;
                 foreach (Slot sl in liquid)
                 {
                     if (sl.R == null) continue;
@@ -444,9 +517,11 @@ namespace FerroEngrenagem
                     mpb.SetColor(ColorId, c);
                     sl.R.SetPropertyBlock(mpb, sl.Index);
                 }
+                }
             }
-            if (glow.Count > 0)
+            if (glow.Count > 0 && (glowNow > 0.001f || lastGlow != 0f))
             {
+                lastGlow = glowNow > 0.001f ? glowNow : 0f;
                 float flicker = glowNow * (0.8f + 0.2f * Mathf.PerlinNoise(Time.time * 3f, pos.x * 0.37f));
                 Color g = new Color(1f, 0.33f, 0.06f) * 5f * flicker;
                 foreach (Slot sl in glow)

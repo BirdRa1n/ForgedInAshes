@@ -1,0 +1,16 @@
+{
+ "nome": "feCoalEngine",
+ "config": "F:\\IA\\fe_blender\\configs\\feCoalEngine.json",
+ "triangulos_antes": 6512,
+ "triangulos_depois": 2392,
+ "atlas": 1024,
+ "arquivos": [
+  "feCoalEngine_Albedo.png",
+  "feCoalEngine_Normal.png",
+  "feCoalEngine_MetallicSmoothness.png",
+  "feCoalEngine_Roughness.png",
+  "feCoalEngine_HD.fbx",
+  "feCoalEngine_HD.blend"
+ ],
+ "segundos": 18.9
+}

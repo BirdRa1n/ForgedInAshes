@@ -1,0 +1,16 @@
+{
+ "nome": "feCrank",
+ "config": "F:\\IA\\fe_blender\\configs\\feCrank.json",
+ "triangulos_antes": 9132,
+ "triangulos_depois": 3516,
+ "atlas": 1024,
+ "arquivos": [
+  "feCrank_Albedo.png",
+  "feCrank_Normal.png",
+  "feCrank_MetallicSmoothness.png",
+  "feCrank_Roughness.png",
+  "feCrank_HD.fbx",
+  "feCrank_HD.blend"
+ ],
+ "segundos": 20.2
+}

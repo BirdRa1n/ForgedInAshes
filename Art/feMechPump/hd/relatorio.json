@@ -1,7 +1,7 @@
 {
  "nome": "feMechPump",
  "config": "F:\\IA\\fe_blender\\configs\\feMechPump.json",
- "triangulos_antes": 7888,
+ "triangulos_antes": 7872,
  "triangulos_depois": 2896,
  "atlas": 1024,
  "arquivos": [
