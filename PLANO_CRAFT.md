@@ -266,6 +266,8 @@ Despejador/Envasadora, e as bancadas (receita fixa + esteira + Funil). Manivelas
 
 ## 7. Fases
 
+> **2026-11-24:** as fases F8.3 a F8.11 abaixo foram reorganizadas como F9.0 a F9.11 no [PLANO_CADEIA.md](PLANO_CADEIA.md) (proposta D12).
+
 | Fase | Entrega | Prova no jogo |
 |---|---|---|
 | **F8.0** [feito, falta teste] | Arquivo de processos, validador, planilha de cobertura (`tools/craft_matrix.py` → CSV com as ~600 receitas e o modelo de cada uma), painel de receita (N10) | Painel abre e escolhe receita; validador passa |

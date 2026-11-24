@@ -946,3 +946,12 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   do último fluxo (a rede de fluidos move o metal em passos; antes o jato piscava).
 - Bundle 52 MB; jogo carrega. **Não verificado no mundo.** (O Gerador a Carvão e a Manivela vêm de scripts antigos e
   não ganharam a folga.)
+
+## 2026-11-24: proposta D12, cadeia completa (PLANO_CADEIA.md)
+
+- Pedido do usuário: todos os itens do jogo pelo mod, borracha da seiva até o pneu, refinaria de petróleo, tanques,
+  gases com pressão, válvulas, menus próprios, comida numa máquina simples.
+- `PLANO_CADEIA.md`: cobertura das 600 receitas (`craft_matrix.py`: 448 ganham cadeia, 152 ficam), 17 itens que o
+  jogo só dá por loot/desmanche com rota nova, fluidos 2.0 (líquido/gás, bar, tanques que se juntam, 6 válvulas),
+  passagem nas esteiras, 5 janelas XUi, cadeias por grupo, 49 blocos novos, fases F9.0–F9.11, decisões D12-1..11.
+- Só proposta: nada aplicado. Esperando o usuário.
