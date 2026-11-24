@@ -17,7 +17,8 @@ namespace FerroEngrenagem
     public class CondenserVisual : MonoBehaviour
     {
         Vector3i pos;
-        Transform fan, gas, liquid;
+        Transform fan, gas, liquid, needle;   // HD model: a pressure gauge needle instead of the gas box
+        Quaternion needle0;
         Vector3 gasScale, liquidScale;
         float fanSpeed, gasNow, liquidNow, gasGoal, liquidGoal, fanGoal, next;
 
@@ -35,6 +36,8 @@ namespace FerroEngrenagem
             fan = Find(transform, "FeFan");
             gas = Find(transform, "FeLevelGas");
             liquid = Find(transform, "FeLevelLiquid");
+            needle = Find(transform, "FeNeedle");
+            if (needle != null) needle0 = needle.localRotation;
             if (gas != null) gasScale = gas.localScale;
             if (liquid != null) liquidScale = liquid.localScale;
             gasNow = liquidNow = 0f;
@@ -92,6 +95,10 @@ namespace FerroEngrenagem
             fanSpeed = Mathf.MoveTowards(fanSpeed, fanGoal, 600f * dt);
             if (fan != null && fanSpeed > 0.1f) fan.Rotate(Vector3.forward, fanSpeed * dt, Space.Self);
             gasNow = Mathf.MoveTowards(gasNow, gasGoal, 0.8f * dt);
+            // steam pressure: the needle sweeps 270 degrees with the intake (a little shake while it takes steam)
+            if (needle != null)
+                needle.localRotation = needle0 * Quaternion.AngleAxis(135f - 270f * gasNow
+                                                                      + (gasNow > 0.05f ? 2f * Mathf.Sin(Time.time * 23f) : 0f), Vector3.forward);
             liquidNow = Mathf.MoveTowards(liquidNow, liquidGoal, 0.3f * dt);
             if (gas != null) gas.localScale = new Vector3(gasScale.x, gasScale.y * Mathf.Max(0.02f, gasNow), gasScale.z);
             if (liquid != null) liquid.localScale = new Vector3(liquidScale.x, liquidScale.y * Mathf.Max(0.02f, liquidNow), liquidScale.z);

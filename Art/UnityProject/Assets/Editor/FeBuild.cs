@@ -30,7 +30,7 @@ public static class FeBuild
         // D9 fluid network
         "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
         "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-        "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
+        "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDuct", "feConveyorStand", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
         "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"
     };
 
@@ -56,19 +56,274 @@ public static class FeBuild
     public static void SyncModels()
     {
         Directory.CreateDirectory(Path.Combine(ProjectRoot, ModelsDir));
+        Directory.CreateDirectory(Path.Combine(ProjectRoot, HdDir));
+        Directory.CreateDirectory(Path.Combine(ProjectRoot, FxDir));
         foreach (var b in Blocks)
         {
-            var src = Path.Combine(ArtDir, b, b + ".fbx");
+            // HD remake (Art/<block>/hd/<block>_HD.fbx + PBR atlas, made by F:\IA texturizar): used when present
+            var hd = Path.Combine(ArtDir, b, "hd", b + "_HD.fbx");
+            var src = File.Exists(hd) ? hd : Path.Combine(ArtDir, b, b + ".fbx");
             if (!File.Exists(src)) { Debug.LogError($"[FE] missing {src}"); continue; }
             File.Copy(src, Path.Combine(ProjectRoot, ModelsDir, b + ".fbx"), true);
+            if (src != hd) continue;
+            foreach (var map in HdMaps)
+            {
+                var png = Path.Combine(ArtDir, b, "hd", $"{b}_{map}.png");
+                if (File.Exists(png)) File.Copy(png, Path.Combine(ProjectRoot, HdDir, $"{b}_{map}.png"), true);
+            }
+            Debug.Log($"[FE] {b}: HD model");
         }
+        foreach (var f in Directory.GetFiles(Path.Combine(ArtDir, "feFx"), "*.png"))
+            File.Copy(f, Path.Combine(ProjectRoot, FxDir, Path.GetFileName(f)), true);
         AssetDatabase.Refresh();
+        // texture import settings: normal maps as normal maps, data maps linear
+        foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { HdDir, FxDir }))
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var ti = (TextureImporter)AssetImporter.GetAtPath(path);
+            bool changed = false;
+            void Set<T>(T now, T want, System.Action<T> apply) { if (!Equals(now, want)) { apply(want); changed = true; } }
+            if (path.EndsWith("_Normal.png")) Set(ti.textureType, TextureImporterType.NormalMap, v => ti.textureType = v);
+            if (path.EndsWith("_MetallicSmoothness.png") || path.EndsWith("_heat.png"))
+                Set(ti.sRGBTexture, false, v => ti.sRGBTexture = v);
+            if (path.StartsWith(FxDir) && !path.Contains("molten"))
+                Set(ti.alphaIsTransparency, true, v => ti.alphaIsTransparency = v);
+            Set(ti.maxTextureSize, 2048, v => ti.maxTextureSize = v);
+            // crunch: ~5x smaller bundle (35 MB -> ~7 MB for the first seven HD models); small loss, fine for props
+            Set(ti.crunchedCompression, true, v => ti.crunchedCompression = v);
+            Set(ti.compressionQuality, 60, v => ti.compressionQuality = v);
+            if (changed) ti.SaveAndReimport();
+        }
+    }
+
+    // ------------------------------------------------------------------ HD materials and effects
+    const string HdDir = "Assets/Models/HD";
+    const string FxDir = "Assets/Fx";
+    const string MatDir = "Assets/Materials";
+    static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem" };
+    static readonly string[] HdMaps = { "Albedo", "Normal", "MetallicSmoothness", "Emission" };
+
+    static Material SaveMat(Material m, string name)
+    {
+        Directory.CreateDirectory(Path.Combine(ProjectRoot, MatDir));
+        var path = $"{MatDir}/{name}.mat";
+        var old = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (old != null) { old.shader = m.shader; old.CopyPropertiesFromMaterial(m); old.shaderKeywords = m.shaderKeywords; old.renderQueue = m.renderQueue; old.globalIlluminationFlags = m.globalIlluminationFlags; EditorUtility.SetDirty(old); return old; }
+        AssetDatabase.CreateAsset(m, path);
+        return m;
+    }
+
+    static Texture2D Tex(string path) => AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+
+    /// <summary>The block's own PBR atlas material (Standard, metallic workflow); null when it has no HD model.</summary>
+    static Material HdMaterial(string b)
+    {
+        var alb = Tex($"{HdDir}/{b}_Albedo.png");
+        if (alb == null) return null;
+        var m = new Material(Shader.Find("Standard"));
+        m.SetTexture("_MainTex", alb);
+        var nrm = Tex($"{HdDir}/{b}_Normal.png");
+        if (nrm != null) { m.SetTexture("_BumpMap", nrm); m.EnableKeyword("_NORMALMAP"); }
+        var ms = Tex($"{HdDir}/{b}_MetallicSmoothness.png");
+        if (ms != null) { m.SetTexture("_MetallicGlossMap", ms); m.EnableKeyword("_METALLICGLOSSMAP"); m.SetFloat("_GlossMapScale", 1f); }
+        var em = Tex($"{HdDir}/{b}_Emission.png");
+        if (em != null)
+        {
+            m.SetTexture("_EmissionMap", em); m.SetColor("_EmissionColor", Color.white * 3f); m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        }
+        return SaveMat(m, b + "_HD");
+    }
+
+    static void Transparent(Material m, bool premultiply)
+    {
+        m.SetFloat("_Mode", premultiply ? 3f : 2f);
+        m.SetInt("_SrcBlend", (int)(premultiply ? UnityEngine.Rendering.BlendMode.One : UnityEngine.Rendering.BlendMode.SrcAlpha));
+        m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        m.SetInt("_ZWrite", 0);
+        m.DisableKeyword("_ALPHATEST_ON");
+        if (premultiply) m.EnableKeyword("_ALPHAPREMULTIPLY_ON"); else m.EnableKeyword("_ALPHABLEND_ON");
+        m.renderQueue = 3000;
+    }
+
+    static Material molten, liquid, gas, glow, smoke, spark, flame;
+
+    /// <summary>Shared effect materials. FxVisual (the mod's C#) recolours them per block with property blocks:
+    /// _EmissionColor (heat / metal colour), _Color (fluid colour), _MainTex_ST offset (flow).</summary>
+    static void EffectMaterials()
+    {
+        molten = new Material(Shader.Find("Standard"));
+        molten.SetTexture("_MainTex", Tex($"{FxDir}/molten_crust.png"));
+        molten.SetTexture("_EmissionMap", Tex($"{FxDir}/molten_heat.png"));
+        molten.SetColor("_Color", Color.white);
+        molten.SetColor("_EmissionColor", Color.black);          // cold until the mod heats it
+        molten.SetFloat("_Glossiness", 0.35f);
+        molten.SetFloat("_Metallic", 0.2f);
+        molten.EnableKeyword("_EMISSION");
+        molten.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        molten = SaveMat(molten, "FeMolten");
+
+        liquid = new Material(Shader.Find("Standard"));
+        liquid.SetColor("_Color", new Color(0.05f, 0.06f, 0.06f, 0.9f)); // empty sight glass until the mod colours it
+        liquid.SetFloat("_Glossiness", 0.96f);
+        liquid.SetFloat("_Metallic", 0f);
+        Transparent(liquid, true);
+        liquid = SaveMat(liquid, "FeLiquid");
+
+        gas = new Material(Shader.Find("Standard"));
+        gas.SetColor("_Color", new Color(0.92f, 0.94f, 0.96f, 0.35f));
+        gas.SetFloat("_Glossiness", 0.2f);
+        Transparent(gas, false);
+        gas = SaveMat(gas, "FeGas");
+
+        glow = new Material(Shader.Find("Standard"));
+        glow.SetColor("_Color", new Color(0.08f, 0.05f, 0.04f));
+        glow.SetColor("_EmissionColor", Color.black);            // off until it burns
+        glow.EnableKeyword("_EMISSION");
+        glow.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        glow = SaveMat(glow, "FeGlow");
+
+        smoke = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended"));
+        smoke.SetTexture("_MainTex", Tex($"{FxDir}/smoke_puff.png"));
+        smoke.SetColor("_TintColor", new Color(0.5f, 0.5f, 0.5f, 0.5f));
+        smoke = SaveMat(smoke, "FeSmoke");
+
+        spark = new Material(Shader.Find("Legacy Shaders/Particles/Additive"));
+        spark.SetTexture("_MainTex", Tex($"{FxDir}/spark.png"));
+        spark.SetColor("_TintColor", new Color(1f, 0.55f, 0.2f, 0.6f));
+        spark = SaveMat(spark, "FeSpark");
+
+        flame = new Material(Shader.Find("Legacy Shaders/Particles/Additive"));
+        flame.SetTexture("_MainTex", Tex($"{FxDir}/flame.png"));
+        flame.SetColor("_TintColor", new Color(1f, 0.6f, 0.3f, 0.7f));
+        flame = SaveMat(flame, "FeFlame");
+    }
+
+    /// <summary>Swaps the imported FBX materials: "<block>_HD" -> atlas, feHD_Molten / Liquid / Gas / Glow -> effects.</summary>
+    static void ApplyMaterials(GameObject inst, Material hd)
+    {
+        foreach (var r in inst.GetComponentsInChildren<Renderer>(true))
+        {
+            var mats = r.sharedMaterials;
+            for (int i = 0; i < mats.Length; i++)
+            {
+                var n = mats[i] == null ? "" : mats[i].name;
+                if (hd != null && n.EndsWith("_HD")) mats[i] = hd;
+                else if (n.StartsWith("feHD_Molten") || n.StartsWith("feKin_Molten")) mats[i] = molten;
+                else if (n.StartsWith("feHD_Liquid")) mats[i] = liquid;
+                else if (n.StartsWith("feHD_Gas")) mats[i] = gas;
+                else if (n.StartsWith("feHD_Glow")) mats[i] = glow;
+            }
+            r.sharedMaterials = mats;
+        }
+    }
+
+    /// <summary>A particle look: name prefix -> settings. All emit along world up (the prefab is unrotated here).</summary>
+    class Fx
+    {
+        public string Prefix; public bool Additive, Stretch; public Material Mat;
+        public float Life0, Life1, Speed0, Speed1, Size0, Size1, Grav, Rate, Angle, Radius, Grow; public int Max;
+        public Color Col;
+    }
+
+    static Fx[] FxLooks() => new[]
+    {
+        // fire inside a firebox: short, licking flames that stay under the lintel
+        new Fx { Prefix = "FeFx_Fire", Additive = true, Mat = flame, Life0 = 0.25f, Life1 = 0.45f, Speed0 = 0.15f, Speed1 = 0.35f,
+                 Size0 = 0.08f, Size1 = 0.16f, Grav = -0.15f, Rate = 26f, Angle = 8f, Radius = 0.14f, Grow = 0.4f, Max = 40,
+                 Col = new Color(1f, 0.75f, 0.45f, 0.9f) },
+        // hot metal hitting the mold / launder: few low, short sparks
+        new Fx { Prefix = "FeFx_Splash", Additive = true, Stretch = true, Mat = spark, Life0 = 0.2f, Life1 = 0.45f, Speed0 = 0.4f,
+                 Speed1 = 1.0f, Size0 = 0.012f, Size1 = 0.03f, Grav = 1.0f, Rate = 22f, Angle = 55f, Radius = 0.02f, Grow = 1f,
+                 Max = 30, Col = new Color(1f, 0.75f, 0.35f, 1f) },
+        new Fx { Prefix = "FeFx_Sparks", Additive = true, Stretch = true, Mat = spark, Life0 = 0.4f, Life1 = 0.9f, Speed0 = 1.0f,
+                 Speed1 = 2.2f, Size0 = 0.02f, Size1 = 0.05f, Grav = 0.6f, Rate = 18f, Angle = 25f, Radius = 0.08f, Grow = 1f,
+                 Max = 60, Col = new Color(1f, 0.7f, 0.3f, 1f) },
+        new Fx { Prefix = "FeFx_Smoke", Mat = smoke, Life0 = 2.2f, Life1 = 3.5f, Speed0 = 0.3f, Speed1 = 0.7f, Size0 = 0.3f,
+                 Size1 = 0.5f, Grav = -0.04f, Rate = 6f, Angle = 12f, Radius = 0.08f, Grow = 2.4f, Max = 40,
+                 Col = new Color(0.18f, 0.17f, 0.16f, 0.55f) },
+        new Fx { Prefix = "FeFx_Dust", Mat = smoke, Life0 = 1.0f, Life1 = 1.8f, Speed0 = 0.1f, Speed1 = 0.3f, Size0 = 0.15f,
+                 Size1 = 0.3f, Grav = -0.01f, Rate = 8f, Angle = 40f, Radius = 0.25f, Grow = 2f, Max = 30,
+                 Col = new Color(0.55f, 0.50f, 0.42f, 0.35f) },
+        // condensate dripping in a sight-flow glass / off a wet drum: falling drops
+        new Fx { Prefix = "FeFx_Drip", Stretch = true, Mat = smoke, Life0 = 0.35f, Life1 = 0.5f, Speed0 = 0f, Speed1 = 0.05f,
+                 Size0 = 0.012f, Size1 = 0.02f, Grav = 1.0f, Rate = 7f, Angle = 2f, Radius = 0.01f, Grow = 1f, Max = 12,
+                 Col = new Color(0.65f, 0.80f, 0.95f, 0.8f) },
+        // water spray from a spray bar: pointed DOWN (negative speed), fine and fast
+        new Fx { Prefix = "FeFx_Spray", Stretch = true, Mat = smoke, Life0 = 0.25f, Life1 = 0.4f, Speed0 = -1.4f, Speed1 = -0.8f,
+                 Size0 = 0.02f, Size1 = 0.045f, Grav = 0.8f, Rate = 70f, Angle = 28f, Radius = 0.12f, Grow = 1f, Max = 60,
+                 Col = new Color(0.80f, 0.90f, 1.0f, 0.45f) },
+        // gas / air bubbles bursting on a liquid surface
+        new Fx { Prefix = "FeFx_Bubbles", Mat = smoke, Life0 = 0.4f, Life1 = 0.9f, Speed0 = 0.03f, Speed1 = 0.10f,
+                 Size0 = 0.02f, Size1 = 0.05f, Grav = -0.02f, Rate = 14f, Angle = 70f, Radius = 0.18f, Grow = 1.6f, Max = 24,
+                 Col = new Color(0.85f, 0.82f, 0.70f, 0.45f) },
+        // exhaust steam of the engine: a strong white plume
+        new Fx { Prefix = "FeFx_SteamVent", Mat = smoke, Life0 = 1.6f, Life1 = 2.6f, Speed0 = 1.2f, Speed1 = 2.0f, Size0 = 0.25f,
+                 Size1 = 0.45f, Grav = -0.08f, Rate = 14f, Angle = 8f, Radius = 0.06f, Grow = 3f, Max = 60,
+                 Col = new Color(0.95f, 0.95f, 0.97f, 0.55f) },
+        new Fx { Prefix = "FeFx_Steam", Mat = smoke, Life0 = 1.8f, Life1 = 3.0f, Speed0 = 0.25f, Speed1 = 0.6f, Size0 = 0.2f,
+                 Size1 = 0.4f, Grav = -0.04f, Rate = 5f, Angle = 12f, Radius = 0.06f, Grow = 2.2f, Max = 40,
+                 Col = new Color(0.92f, 0.93f, 0.95f, 0.45f) },
+    };
+
+    /// <summary>FeFx_* empties become particle systems (look by name prefix, see FxLooks). They do not play on their
+    /// own: FxVisual / SteamVent start and stop them from the block's state.</summary>
+    static void AddParticles(Transform root)
+    {
+        var looks = FxLooks();
+        foreach (var t in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (!t.name.StartsWith("FeFx_")) continue;
+            Fx fx = null;
+            foreach (var l in looks) if (t.name.StartsWith(l.Prefix)) { fx = l; break; }
+            if (fx == null) { Debug.LogError($"[FE] unknown effect {t.name}"); continue; }
+            t.rotation = Quaternion.LookRotation(Vector3.up, Vector3.forward);
+            var ps = t.gameObject.GetComponent<ParticleSystem>();
+            if (ps == null) ps = t.gameObject.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.playOnAwake = false;
+            main.loop = true;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = fx.Max;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(fx.Life0, fx.Life1);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(fx.Speed0, fx.Speed1);
+            main.startSize = new ParticleSystem.MinMaxCurve(fx.Size0, fx.Size1);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, 6.28f);
+            main.gravityModifier = fx.Grav;
+            main.startColor = fx.Col;
+            var em = ps.emission;
+            em.rateOverTime = fx.Rate;
+            var sh = ps.shape;
+            sh.shapeType = ParticleSystemShapeType.Cone;
+            sh.angle = fx.Angle;
+            sh.radius = fx.Radius;
+            var col = ps.colorOverLifetime;
+            col.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                      new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.12f), new GradientAlphaKey(0f, 1f) });
+            col.color = g;
+            var size = ps.sizeOverLifetime;
+            size.enabled = fx.Grow != 1f;
+            size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, fx.Grow < 1f ? 1f : 0.5f, 1f, fx.Grow));
+            var rot = ps.rotationOverLifetime;
+            rot.enabled = !fx.Stretch;
+            rot.z = new ParticleSystem.MinMaxCurve(-0.6f, 0.6f);
+            var pr = t.GetComponent<ParticleSystemRenderer>();
+            pr.sharedMaterial = fx.Mat;
+            pr.renderMode = fx.Stretch ? ParticleSystemRenderMode.Stretch : ParticleSystemRenderMode.Billboard;
+            if (fx.Stretch) { pr.velocityScale = 0.04f; pr.lengthScale = 1f; }
+            pr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            pr.receiveShadows = false;
+        }
     }
 
     [MenuItem("FerroEngrenagem/2. Build Prefabs")]
     public static void BuildPrefabs()
     {
         Directory.CreateDirectory(Path.Combine(ProjectRoot, PrefabDir));
+        EffectMaterials();
         foreach (var b in Blocks)
         {
             var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{ModelsDir}/{b}.fbx");
@@ -80,6 +335,10 @@ public static class FeBuild
             inst.name = b;
             inst.transform.SetParent(root.transform, false);
             inst.transform.localPosition = new Vector3(0f, -0.5f, 0f);
+            ApplyMaterials(inst, HdMaterial(b));
+            // falling metal streams only show while metal flows (FxVisual); hidden before the collider is measured
+            foreach (var t in inst.GetComponentsInChildren<Transform>(true))
+                if (t.name.StartsWith("FePour")) t.gameObject.SetActive(false);
 
             // Powered blocks: TileEntityPowered.set_BlockTransform uses blockTransform.Find("WireOffset"),
             // i.e. a DIRECT child of the prefab root, as the wire anchor. Move it up there.
@@ -89,7 +348,9 @@ public static class FeBuild
             if (wire != null) wire.SetParent(root.transform, true);
 
             // One solid box around everything that renders, in root space.
-            var rends = root.GetComponentsInChildren<Renderer>();
+            // optional joint pieces that reach into the next block (shown by Belt.cs) do not size the collider
+            var rends = root.GetComponentsInChildren<Renderer>()
+                .Where(r => !OptionalParts.Any(o => r.name.StartsWith(o))).ToArray();
             if (rends.Length > 0)
             {
                 var bounds = rends[0].bounds;
@@ -99,6 +360,7 @@ public static class FeBuild
                 col.size = bounds.size;
                 Debug.Log($"[FE] {b}: collider center {col.center} size {col.size}");
             }
+            AddParticles(root.transform);   // after the collider: particle renderers must not size it
 
             // Spinning parts (KineticSpinner turns them around their local +Z): log where they sit and where their
             // +Z points in prefab-root space, to check the Blender -> FBX -> Unity axis conversion.

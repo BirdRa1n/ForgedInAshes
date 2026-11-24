@@ -1,0 +1,17 @@
+{
+ "nome": "feCoalGenerator",
+ "config": "F:\\IA\\fe_blender\\configs\\feCoalGenerator.json",
+ "triangulos_antes": 13152,
+ "triangulos_depois": 5128,
+ "atlas": 2048,
+ "arquivos": [
+  "feCoalGenerator_Albedo.png",
+  "feCoalGenerator_Normal.png",
+  "feCoalGenerator_MetallicSmoothness.png",
+  "feCoalGenerator_Emission.png",
+  "feCoalGenerator_Roughness.png",
+  "feCoalGenerator_HD.fbx",
+  "feCoalGenerator_HD.blend"
+ ],
+ "segundos": 30.2
+}

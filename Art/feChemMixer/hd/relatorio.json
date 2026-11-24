@@ -1,0 +1,16 @@
+{
+ "nome": "feChemMixer",
+ "config": "F:\\IA\\fe_blender\\configs\\feChemMixer.json",
+ "triangulos_antes": 8132,
+ "triangulos_depois": 3164,
+ "atlas": 1024,
+ "arquivos": [
+  "feChemMixer_Albedo.png",
+  "feChemMixer_Normal.png",
+  "feChemMixer_MetallicSmoothness.png",
+  "feChemMixer_Roughness.png",
+  "feChemMixer_HD.fbx",
+  "feChemMixer_HD.blend"
+ ],
+ "segundos": 16.9
+}

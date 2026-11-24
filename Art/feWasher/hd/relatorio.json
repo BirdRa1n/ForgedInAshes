@@ -1,0 +1,16 @@
+{
+ "nome": "feWasher",
+ "config": "F:\\IA\\fe_blender\\configs\\feWasher.json",
+ "triangulos_antes": 7100,
+ "triangulos_depois": 2596,
+ "atlas": 1024,
+ "arquivos": [
+  "feWasher_Albedo.png",
+  "feWasher_Normal.png",
+  "feWasher_MetallicSmoothness.png",
+  "feWasher_Roughness.png",
+  "feWasher_HD.fbx",
+  "feWasher_HD.blend"
+ ],
+ "segundos": 14.2
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feCrusher",
+ "config": "F:\\IA\\fe_blender\\configs\\feCrusher.json",
+ "triangulos_antes": 9772,
+ "triangulos_depois": 3036,
+ "atlas": 1024,
+ "arquivos": [
+  "feCrusher_Albedo.png",
+  "feCrusher_Normal.png",
+  "feCrusher_MetallicSmoothness.png",
+  "feCrusher_Roughness.png",
+  "feCrusher_HD.fbx",
+  "feCrusher_HD.blend"
+ ],
+ "segundos": 20.9
+}

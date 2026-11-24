@@ -1,0 +1,16 @@
+{
+ "nome": "feSpeedBox",
+ "config": "F:\\IA\\fe_blender\\configs\\feSpeedBox.json",
+ "triangulos_antes": 7728,
+ "triangulos_depois": 2796,
+ "atlas": 1024,
+ "arquivos": [
+  "feSpeedBox_Albedo.png",
+  "feSpeedBox_Normal.png",
+  "feSpeedBox_MetallicSmoothness.png",
+  "feSpeedBox_Roughness.png",
+  "feSpeedBox_HD.fbx",
+  "feSpeedBox_HD.blend"
+ ],
+ "segundos": 15.8
+}

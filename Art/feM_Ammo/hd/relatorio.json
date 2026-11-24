@@ -1,0 +1,16 @@
+{
+ "nome": "feM_Ammo",
+ "config": "F:\\IA\\fe_blender\\configs\\feM_Ammo.json",
+ "triangulos_antes": 10736,
+ "triangulos_depois": 4552,
+ "atlas": 2048,
+ "arquivos": [
+  "feM_Ammo_Albedo.png",
+  "feM_Ammo_Normal.png",
+  "feM_Ammo_MetallicSmoothness.png",
+  "feM_Ammo_Roughness.png",
+  "feM_Ammo_HD.fbx",
+  "feM_Ammo_HD.blend"
+ ],
+ "segundos": 109.6
+}

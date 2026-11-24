@@ -1,0 +1,16 @@
+{
+ "nome": "feSteamEngine",
+ "config": "F:\\IA\\fe_blender\\configs\\feSteamEngine.json",
+ "triangulos_antes": 25264,
+ "triangulos_depois": 9256,
+ "atlas": 2048,
+ "arquivos": [
+  "feSteamEngine_Albedo.png",
+  "feSteamEngine_Normal.png",
+  "feSteamEngine_MetallicSmoothness.png",
+  "feSteamEngine_Roughness.png",
+  "feSteamEngine_HD.fbx",
+  "feSteamEngine_HD.blend"
+ ],
+ "segundos": 35.7
+}

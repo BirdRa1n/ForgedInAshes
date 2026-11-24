@@ -1,0 +1,16 @@
+{
+ "nome": "feClutch",
+ "config": "F:\\IA\\fe_blender\\configs\\feClutch.json",
+ "triangulos_antes": 7104,
+ "triangulos_depois": 2880,
+ "atlas": 1024,
+ "arquivos": [
+  "feClutch_Albedo.png",
+  "feClutch_Normal.png",
+  "feClutch_MetallicSmoothness.png",
+  "feClutch_Roughness.png",
+  "feClutch_HD.fbx",
+  "feClutch_HD.blend"
+ ],
+ "segundos": 19.0
+}

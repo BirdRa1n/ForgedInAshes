@@ -53,3 +53,21 @@ Evite colocar outras peças na faixa de 0,095 a 0,405 m de altura na frente de u
 
 Mantenha todas as peças móveis como filhas **diretas** da base: o export FBX (`bake_space_transform`)
 desloca objetos em hierarquia de dois níveis.
+
+## Encaixe real esteira ↔ máquina (2026-11-24)
+
+A superfície da esteira aberta fica a **0,62 m** e as entradas das máquinas a **0,25 m** (centro). Para não ficar
+uma esteira "flutuando" na frente da moldura, as pontas mudam de forma sozinhas (`Belt.cs`, `BeltShape`):
+
+| Situação | Peça mostrada |
+|---|---|
+| Esteira aberta apontando para uma máquina ou para um duto | `FeBeltChute`: calha íngreme do fim da esteira até a boca (entra 6 cm nela), com capuz e pernas |
+| Duto apontando para uma máquina | `FeDuctBoot`: luva de borracha com abraçadeira que entra 10 cm na boca |
+| Duto apontando para uma esteira aberta | `FeDuctRamp`: o trecho da frente sobe e solta os itens sobre a esteira |
+| Duto sem nada na frente / atrás | `FeDuctCapF` / `FeDuctCapB` (tampa) |
+| Esteira, duto ou funil chegando pelo lado | `FeDuctSide_L/R` (abertura com ramal até a face) no lugar de `FeDuctWall_L/R` |
+| Funil em cima do duto, virado para baixo | `FeDuctHatch` (escotilha com tubo até o topo do bloco) |
+
+O **Duto de Esteira** tem a boca do tamanho da moldura padrão (0,36 × 0,22, centro a 0,25), então encaixa direto.
+O **Funil** gira para qualquer lado e troca de bico: na esteira (`FeFunnelSpoutBelt`), no duto (`FeFunnelSpoutDuct`,
+desce até a boca) ou reto no eixo (`FeFunnelSpout`, por exemplo virado para baixo em cima do duto).

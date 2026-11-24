@@ -1,0 +1,16 @@
+{
+ "nome": "feShaft",
+ "config": "F:\\IA\\fe_blender\\configs\\feShaft.json",
+ "triangulos_antes": 2348,
+ "triangulos_depois": 940,
+ "atlas": 1024,
+ "arquivos": [
+  "feShaft_Albedo.png",
+  "feShaft_Normal.png",
+  "feShaft_MetallicSmoothness.png",
+  "feShaft_Roughness.png",
+  "feShaft_HD.fbx",
+  "feShaft_HD.blend"
+ ],
+ "segundos": 14.1
+}

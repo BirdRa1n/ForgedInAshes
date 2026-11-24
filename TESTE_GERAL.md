@@ -169,3 +169,87 @@ Pegue no criativo: Triturador, Lavadora, Misturador Químico, Secador a Vapor; C
 - [ ] Segurar E > Escolher receita no Biodigestor: cicla as receitas e volta para "automática"; o texto de foco mostra a escolhida.
 - [ ] Com "Terra Nitrosa (carne podre + ossos)" escolhida: carne crua na esteira não entra; carne podre + ossos entram e saem Terra Nitrosa.
 - [ ] Biodigestor Industrial (Montador): 2 blocos de altura, eixo na lateral com torque, água por trás; esteiras por qualquer lado; carne crua + ossos -> 2 Terra Nitrosa; agitador gira no topo.
+
+## 13. Modelos HD e efeitos (Fundição, Calha, Mesa de Moldagem, Eixo, Condensadora, Cano, Bomba Mecânica)
+
+Pegue e coloque de novo os sete blocos (o modelo troca sozinho, mas assim os efeitos se ligam do zero).
+
+1. **Visual parado:** os sete têm textura (tijolo, ferro, ferrugem, tinta verde gasta), sem peças flutuando nem
+   buracos. A Fundição mostra as 4 molduras de esteira (2 atrás, 1 em cada ponta) e o canal em volta da base.
+2. **Fundição queimando** (combustível + sucata de ferro): frestas da porta acendem e piscam, fumaça na chaminé,
+   o soprador atrás gira; com metal dentro, faíscas sobre o cadinho e o metal do cadinho/canal acende.
+3. **Metal saindo:** ligue uma Calha de Metal numa face de baixo e uma Mesa de Moldagem (com molde) na ponta.
+   - Aparece o jato do cadinho até o canal da Fundição.
+   - Na calha, o metal brilha e "corre".
+   - Na mesa, o jato cai do bico no molde e o metal sobe no molde.
+4. **Resfriamento:** com o molde cheio, o metal da mesa vai de amarelo a vermelho e escurece até o fim do tempo;
+   sai vapor durante o resfriamento. Quando o fluxo para, o metal parado na calha escurece em uns 10 s.
+5. **Cores:** troque o metal (chumbo, latão, aço): chumbo quase não brilha (prateado), latão amarelo, aço mais claro.
+6. **Canos e bomba:** o visor da cruz do cano mostra a cor do fluido (água azulada, óleo preto, gasolina âmbar);
+   o visor da bomba fica com água enquanto ela bombeia; o eixo e a bomba giram com torque.
+7. **Condensadora:** sai vapor pela ventoinha enquanto condensa; a água continua subindo no nível.
+8. **Girar os blocos:** coloque a Fundição e a Mesa viradas para outros lados: a fumaça/vapor sobe (não sai de lado).
+
+No fim, feche o jogo e peça para ler o log (`Player.log` quando aberto direto pelo exe).
+
+### 13b. Rodada 2 (fogo da fornalha, despejo, nove modelos novos)
+
+1. **Fundição:** a chama fica dentro da boca da fornalha (célula esquerda, porta aberta encostada no tijolo); nada de
+   fogo atravessando o tijolo.
+2. **Despejo na Mesa de Moldagem:** o metal enche o copo atrás, desce pelo canal e cai em arco fino no molde, com
+   faíscas onde bate; o molde enche e depois esfria (amarelo → vermelho → escuro) soltando vapor.
+3. **Motor a Vapor:** ligado, chama e brasa na fornalha, fumaça na chaminé, vapor nas purgas; sem cano na saída de
+   vapor, sai a pluma de escape por cima. Pistões e volante como antes.
+4. **Embreagem:** "Trocar ajuste" troca a alavanca de lado (engatada / solta) e o giro passa ou não.
+5. **Caixa de Transmissão, Caixa de Velocidade, Inversor de Giro:** giram como antes (no inversor, a engrenagem
+   cônica do meio também gira).
+6. **Torno e Prensa de Munição:** trabalhando, a placa do torno gira e o carro anda; na prensa, a torre gira e o
+   aríete desce e sobe.
+7. **Triturador:** enquanto tritura, sai poeira do funil; os rolos giram em sentidos opostos.
+8. **Esteira:** reta, curva, divisão em 2 e 3, filtro: todas as peças aparecem/somem como antes, sem buracos.
+
+## 14. Duto de Esteira, Suporte, Funil girando e encaixes
+
+1. **Duto:** monte uma linha de Dutos de Esteira com um eixo na lateral de um deles. Coloque itens com um funil:
+   eles andam dentro (não aparecem), o texto de foco mostra a contagem e a velocidade. Itens jogados em cima **não**
+   entram.
+2. **Pontas do duto:** sem nada na frente fica tampado; apontando para uma máquina com moldura de esteira (Fundição,
+   Motor a Vapor) aparece a luva entrando na boca; apontando para uma esteira aberta o fim do duto sobe e solta os
+   itens em cima dela; duto/esteira chegando pelo lado abre a lateral.
+3. **Esteira → máquina / duto:** a esteira aberta apontando para uma máquina ou para a traseira de um duto ganha a
+   calha que desce até a boca (sem esteira flutuando na moldura).
+4. **Suporte:** coloque um Suporte de Esteira e um Duto em cima: os pés do duto assentam no berço. Uma linha de
+   suportes com dutos passa um bloco acima do chão.
+5. **Funil girando:** coloque um baú, um funil embaixo dele virado para baixo e um duto embaixo do funil: aparece a
+   escotilha no duto e os itens descem. Funil deitado na traseira de um duto: o bico desce até a boca do duto; na
+   esteira aberta, o bico normal sobre a esteira.
+6. **Motores e dínamos:** os cinco têm modelo novo; eixos giram como antes e o fio liga no mesmo lugar.
+
+## 15. Motor a Vapor com virabrequim
+
+1. Ligue o Motor a Vapor (água + combustível) e olhe pela frente/lateral: o virabrequim gira, as duas bielas sobem e
+   descem presas nos pinos das manivelas (defasadas 90°), as cruzetas correm nas guias e as hastes entram nos cilindros.
+2. Nada atravessa a fornalha nem a base; o volante gira na frente sem raspar no chão.
+3. Desligado, tudo para na posição em que estava (sem pular). Pegue e coloque o motor de novo: continua certo.
+
+## 16. Condensadora, máquinas de processo e Prensa de Munição
+
+1. **Condensadora** (energia + vapor): a ventoinha gira; o ponteiro do manômetro sobe com o vapor; pingam gotas no
+   visor de fluxo (frente, embaixo à esquerda); a coluna d'água sobe no visor de nível do tambor; sai vapor sobre a
+   ventoinha. Nada "pulando".
+2. **Biodigestor** (água + ingredientes): trabalhando, a campânula de cima gira devagar e sobe com o nível; no visor
+   da frente o mosto sobe e borbulha; a tocha acende.
+3. **Biodigestor Industrial**: com torque o agitador gira no poço de cima (mosto borbulhando); a coluna marrom sobe
+   no visor alto; tocha acesa trabalhando.
+4. **Secador a Vapor**: trabalhando, o tambor gira; sai vapor na chaminé; pinga no purgador.
+5. **Misturador Químico**: com torque o agitador gira; a calda sobe com a água e gira com espuma; bolhas.
+6. **Lavadora**: trabalhando, o tambor gira, o spray molha de cima e pinga na calha de água barrenta.
+7. **Prensa de Munição** (fabricando): as tigelas de cima giram, a torre gira e o aríete desce; cápsulas andam do
+   caixote pela mini-esteira e sobem ao prato; cartuchos prontos descem pela calha e vão até a caixa.
+
+## 17. Livro de receitas e barra de atalhos
+
+1. Com um item na mão, segure E na Lavadora e abra "Receitas"; feche com OK (e depois com Esc).
+2. Troque de slot pelo número e pela roda do mouse: tem de funcionar na hora.
+3. Repita depois de "Pôr o item da mão" na máquina. Se ainda travar, feche o jogo e peça para ler o log
+   (procure "recipe book" e "stuck switching").

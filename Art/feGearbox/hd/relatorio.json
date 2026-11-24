@@ -1,0 +1,16 @@
+{
+ "nome": "feGearbox",
+ "config": "F:\\IA\\fe_blender\\configs\\feGearbox.json",
+ "triangulos_antes": 8528,
+ "triangulos_depois": 3200,
+ "atlas": 1024,
+ "arquivos": [
+  "feGearbox_Albedo.png",
+  "feGearbox_Normal.png",
+  "feGearbox_MetallicSmoothness.png",
+  "feGearbox_Roughness.png",
+  "feGearbox_HD.fbx",
+  "feGearbox_HD.blend"
+ ],
+ "segundos": 25.3
+}

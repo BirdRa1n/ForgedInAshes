@@ -1,0 +1,16 @@
+{
+ "nome": "feMechPump",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechPump.json",
+ "triangulos_antes": 7888,
+ "triangulos_depois": 2896,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechPump_Albedo.png",
+  "feMechPump_Normal.png",
+  "feMechPump_MetallicSmoothness.png",
+  "feMechPump_Roughness.png",
+  "feMechPump_HD.fbx",
+  "feMechPump_HD.blend"
+ ],
+ "segundos": 14.0
+}

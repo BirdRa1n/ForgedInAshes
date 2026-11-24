@@ -1,0 +1,16 @@
+{
+ "nome": "feM_Lathe",
+ "config": "F:\\IA\\fe_blender\\configs\\feM_Lathe.json",
+ "triangulos_antes": 2972,
+ "triangulos_depois": 1172,
+ "atlas": 1024,
+ "arquivos": [
+  "feM_Lathe_Albedo.png",
+  "feM_Lathe_Normal.png",
+  "feM_Lathe_MetallicSmoothness.png",
+  "feM_Lathe_Roughness.png",
+  "feM_Lathe_HD.fbx",
+  "feM_Lathe_HD.blend"
+ ],
+ "segundos": 17.9
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feCaster",
+ "config": "F:\\IA\\fe_blender\\configs\\feCaster.json",
+ "triangulos_antes": 4588,
+ "triangulos_depois": 1324,
+ "atlas": 1024,
+ "arquivos": [
+  "feCaster_Albedo.png",
+  "feCaster_Normal.png",
+  "feCaster_MetallicSmoothness.png",
+  "feCaster_Roughness.png",
+  "feCaster_HD.fbx",
+  "feCaster_HD.blend"
+ ],
+ "segundos": 14.0
+}

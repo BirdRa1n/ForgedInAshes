@@ -836,3 +836,79 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Escolha de receita (máquinas de processo): comando "Escolher receita" (fe_proc_pick) cicla automática -> receita 1 -> ... -> automática. Novo campo `FluidState.Pick` (coluna 11 do fluids.txt). Com uma receita escolhida, a máquina só roda essa receita e só aceita os ingredientes dela (esteira e mão). O texto de foco mostra a receita atual.
 - Biodigestor no teste: carne crua + osso -> carne podre estava certo pelo projeto (rot_meat). A Terra Nitrosa pede carne PODRE + ossos; agora dá para escolher a receita.
 - feBiodigesterBig (Biodigestor Industrial): 1x2x1, torque 64 (FeKinetic pump, eixo x), água por trás, esteira em qualquer lado, calha na frente. Lotes dobrados; só nele, carne crua vai direto para Terra Nitrosa (nitre_meat_big) ou Mosto (mash_meat_big). Receita no Montador: 2 Biodigestores + 6 engrenagens + 16 chapas + 2 eixos. Comandos em multiblocos usam o bloco pai (ParentOf).
+
+## 2026-11-24: modelos HD com IA local e efeitos (Art/feHD)
+
+- IA local em `F:\IA` (ComfyUI 0.46 + SDXL + Hunyuan3D-2, scripts do Blender headless; ver `F:\IA\LEIA-ME.md`).
+- Sete blocos refeitos em estilo 7DTD (`Art/feHD/build_feHD.py`): Fundição (`feM_Foundry`), Calha de Metal, Mesa de
+  Moldagem, Eixo, Condensadora, Cano, Bomba Mecânica. Textura PBR em atlas (1 material por bloco), contratos de nome
+  antigos mantidos. Gerador a Carvão ganhou versão HD de teste (`Art/feCoalGenerator/hd`, ainda fora do bundle).
+- `FeBuild.cs`: usa `Art/<bloco>/hd/<bloco>_HD.fbx` quando existe; cria o material Standard do atlas, os materiais de
+  efeito (`FeMolten`, `FeLiquid`, `FeGas`, `FeGlow`, `FeSmoke`, `FeSpark`) e `ParticleSystem` nos empties `FeFx_*`;
+  esconde `FePour_*`; texturas com crunch (bundle 14 MB).
+- `FxVisual.cs` (novo): metal fundido com cor por metal, fluxo rolando e resfriamento; cor do fluido nos visores;
+  brilho da fornalha; jatos de metal; vapor/fumaça/faíscas pelo estado (FluidStore, FluidTicker, workstation).
+  Patches em `Block`, `BlockPowered` e `BlockPowerSource.OnBlockEntityTransformAfterActivated`.
+- `tools/build.ps1`: referência `UnityEngine.ParticleSystemModule.dll`.
+- Verificado: DLL compila; bundle gera com os sete HD (pivôs das peças que giram conferidos no log); jogo carrega o mod
+  sem erro (`Harmony: 34 method(s) patched`). **Não verificado no mundo**: roteiro em `TESTE_GERAL.md` seção 13.
+
+## 2026-11-24: HD rodada 2 (fogo, despejo, nove modelos)
+
+- Teste do usuário: fogo da forja vanilla atravessando a Fundição → `ParticleName`/`ParticleOffset` removidos do
+  `feFoundry`; fornalha aberta com chama própria (`FeFx_Fire`).
+- Despejo natural: jatos em arco afinando (helper `stream()` no `build_feHD.py`, UV ao longo do jato), respingo
+  (`FeFx_Splash`); Mesa de Moldagem rebaixada para o metal descer por gravidade (molde a 0,22 m).
+- Novos HD: Motor a Vapor, Caixa de Transmissão, Embreagem (alavanca `FeLever_Clutch` animada pelo estado), Caixa de
+  Velocidade, Inversor de Giro (engrenagem cônica intermediária `FeSpin_InverterIdler`), Torno (`FePiston_Carriage`),
+  Triturador (poeira `FeFx_Dust`), Esteira, Prensa de Munição (`FePiston_Ram`).
+- FeBuild: tabela de partículas `FxLooks` (Fire, Splash, Sparks, Smoke, Dust, SteamVent, Steam), `flame.png`.
+- `FxVisual`: motor a vapor (fogo/brasa/fumaça/purgas via `TorqueEngine.IsRunning`), poeira das máquinas de processo,
+  alavanca da embreagem; `SteamVent` também liga `FeFx_SteamVent_*`.
+- Bundle 27,5 MB (16 modelos HD, crunch). Jogo carrega sem erro (Player.log 13:21). **Não verificado no mundo**:
+  `TESTE_GERAL.md` 13b.
+
+## 2026-11-24: Duto de Esteira, Suporte, funil girando, encaixes reais, motores e dínamos HD
+
+- `feConveyorDuct` (Duto de Esteira): variante fechada da esteira (`FeBeltClosed`, `Belt.IsClosed`): o `BeltRenderer`
+  não desenha os itens, o `Absorb` não pega itens do chão, nada anima. Boca no padrão das entradas de máquina.
+  Receita: 2 esteiras + 3 chapas → 2 dutos (Montador).
+- `feConveyorStand` (Suporte de Esteira): cavalete decorativo com berço para o duto. Receita: 1 chapa + 6 sucata → 2.
+- Funil: `AllowedRotations=No45` (qualquer lado, inclusive para baixo); `FunnelShape` escolhe o bico.
+- Encaixes: `FeBeltChute` (esteira → máquina/duto), `FeDuctBoot`, `FeDuctRamp`, `FeDuctCapF/B`, `FeDuctSide_L/R`,
+  `FeDuctHatch` (`Belt.FedFrom` = quem alimenta pelo lado/trás/cima). Ver `Art/CONVEYOR_PORTS.md`.
+- HD: Funil, Esteira (com calha), Motores Elétricos 1/2/3, Dínamos 1/2. Ícones dos 25 blocos HD refeitos.
+- Colliders sem as peças de encaixe (`FeBuild.OptionalParts`). Bundle 39,8 MB.
+- Verificado: DLL compila, XPath 534/0, regras 23/23, bundle gera, jogo carrega o mod (14:12). **Não verificado no
+  mundo**: `TESTE_GERAL.md` seção 14.
+
+## 2026-11-24: Motor a Vapor com virabrequim (biela-manivela)
+
+- Pistão atravessando a fornalha (teste do usuário) → motor refeito: vertical, dois cilindros sobre o virabrequim
+  (o eixo de saída), manivelas a 90°, volante, mancais, colunas, guias, cruzetas e bielas.
+- `KineticSpinner.Linkage`: `FeCrankPin_n` / `FeCrosshead_n` / `FeConrod_n` resolvidos a partir do ângulo real do
+  virabrequim (captura uma vez no modelo intacto; contas no espaço da raiz do modelo). Os antigos `FePiston_*`
+  senoidais saíram do motor (o contrato `FePiston` continua para as outras máquinas).
+- Cinemática validada no Blender (erro 0 nos 4 ângulos). DLL compila, bundle gera. **Não verificado no jogo**: seção 15.
+
+## 2026-11-24: Condensadora realista, máquinas de processo e Prensa de Munição HD
+
+- Condensadora refeita como condensador a ar (núcleos aletados, ventilador, coletores, tambor com visor de nível,
+  visor de fluxo, manômetro). `CondenserVisual`: ponteiro `FeNeedle` (vapor); o nível é uma coluna num visor.
+- Biodigestor (campânula flutuante), Biodigestor Industrial, Secador a Vapor (tambor rotativo), Misturador Químico
+  (tanque aberto com agitador âncora), Lavadora (trommel com spray) e Prensa de Munição (alimentadores, mini-esteiras).
+- `FxVisual`: `FeWorkSpin_*`, `FeSurface_r*_[Spin]`, ponteiros `FeNeedle_*`, gotas/spray/bolhas, tocha do biogás,
+  cores do mosto / calda / água de lavagem; `MachineVisual`: mini-esteiras `FeTrack_n_P*` + `FeTrackItem_n_*`.
+- FeBuild: presets Drip/Spray/Bubbles; `FeSurface`/`FeTrackItem` fora do collider. Bundle 45 MB. Jogo carrega (15:03).
+  **Não verificado no mundo**: `TESTE_GERAL.md` seção 16.
+
+## 2026-11-24: barra de atalhos travada depois do livro de receitas
+
+- Relato: depois de mexer na Lavadora e abrir "Receitas", a barra não trocava mais de slot (nem pelo número).
+  Log da sessão 15:04: janela aberta normalmente (`recipe book feWasher ... window=True`), sem exceção.
+- Causa provável (IL 3.4.0): o comando roda dentro do callback do menu radial; abrir uma janela modal ali fecha o
+  radial à força no meio do fechamento dele, e a transição do item na mão (`Hand.isSwitching`) pode ficar presa.
+  `PlayerMoveController.Update` só troca de slot com `canSwapHeldItem()` = mão sem transição.
+- Correção (`RecipeBook.cs`): a janela abre alguns quadros depois, quando não há janela modal aberta (como o jogo faz
+  com baús/bancadas); ao fechar, um vigia conclui uma transição da mão ainda presa depois de 1 s
+  (`Hand.CompleteTransition`, com aviso no log). **Não verificado no jogo.**

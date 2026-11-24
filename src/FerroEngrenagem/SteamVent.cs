@@ -65,6 +65,13 @@ namespace FerroEngrenagem
         void Show(bool on)
         {
             foreach (Puff p in puffs) if (p.T != null && p.T.gameObject.activeSelf != on) p.T.gameObject.SetActive(on);
+            // HD model (Art/feHD): a particle plume FeFx_SteamVent_* instead of the puff meshes
+            foreach (ParticleSystem ps in GetComponentsInChildren<ParticleSystem>(true))
+            {
+                if (!ps.name.StartsWith("FeFx_SteamVent", System.StringComparison.Ordinal)) continue;
+                if (on && !ps.isEmitting) ps.Play(true);
+                else if (!on && ps.isEmitting) ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
         }
 
         void Update()

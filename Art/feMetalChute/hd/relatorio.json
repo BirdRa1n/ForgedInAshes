@@ -1,0 +1,16 @@
+{
+ "nome": "feMetalChute",
+ "config": "F:\\IA\\fe_blender\\configs\\feMetalChute.json",
+ "triangulos_antes": 4596,
+ "triangulos_depois": 1300,
+ "atlas": 1024,
+ "arquivos": [
+  "feMetalChute_Albedo.png",
+  "feMetalChute_Normal.png",
+  "feMetalChute_MetallicSmoothness.png",
+  "feMetalChute_Roughness.png",
+  "feMetalChute_HD.fbx",
+  "feMetalChute_HD.blend"
+ ],
+ "segundos": 24.2
+}

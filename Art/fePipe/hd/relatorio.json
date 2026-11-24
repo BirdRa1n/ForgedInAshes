@@ -1,0 +1,16 @@
+{
+ "nome": "fePipe",
+ "config": "F:\\IA\\fe_blender\\configs\\fePipe.json",
+ "triangulos_antes": 6196,
+ "triangulos_depois": 2404,
+ "atlas": 1024,
+ "arquivos": [
+  "fePipe_Albedo.png",
+  "fePipe_Normal.png",
+  "fePipe_MetallicSmoothness.png",
+  "fePipe_Roughness.png",
+  "fePipe_HD.fbx",
+  "fePipe_HD.blend"
+ ],
+ "segundos": 25.0
+}

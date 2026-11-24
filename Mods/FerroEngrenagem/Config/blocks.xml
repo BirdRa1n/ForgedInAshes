@@ -37,8 +37,6 @@
 			<property name="MultiBlockDim" value="2,2,1"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
-			<property name="ParticleName" value="forgeWorkstation"/>
-			<property name="ParticleOffset" value="0,0.4,0.5"/>
 			<property name="Place" value="TowardsPlacerInverted"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="Path" value="solid"/>
@@ -272,6 +270,8 @@
 	     at least 1 Flywheel required. Uses the DewCollector sandbox multipliers (same as the Kiln). -->
 	<append xpath="/blocks">
 		<block name="feCoalGenerator">
+			<property name="CustomIcon" value="feCoalGenerator"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<!-- D7 step 3: an ELECTRIC generator (vanilla Class Generator: TileEntityPowerSource + PowerGenerator) that
 			     burns Charcoal (FeFuelItem, src/FerroEngrenagem/FuelGenerator.cs) instead of gasoline. Output: 60 W per
 			     Flywheel in its slots (no Flywheel, no watts). 1 Charcoal = 1 fuel = 30000 energy = ~80 s of a 60 W
@@ -286,8 +286,6 @@
 			<property name="OutputPerFuel" value="30000"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCoalGeneratorDesc"/>
-			<property name="CustomIcon" value="generatorBankA"/>
-			<property name="CustomIconTint" value="ffd0a0"/>
 			<property name="DisplayType" value="blockElectricalHardened"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Mmetal_medium"/>
@@ -557,6 +555,43 @@
 			<property name="DescriptionKey" value="feConveyorFilterDesc"/>
 			<property name="SortOrder2" value="0035"/>
 		</block>
+		<!-- 2026-11-24: Conveyor Duct (Belt.cs, FeBeltClosed): an enclosed belt. Same logic as the belt (torque from a
+		     shaft on its left or right, curves, splits, filters by the belts around it), items hidden inside, no dropped
+		     items taken. Its mouth fits the machines' conveyor ports (centre 0.25 m). Stand it on a Conveyor Stand. -->
+		<block name="feConveyorDuct">
+			<property name="CustomIcon" value="feConveyorDuct"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltClosed" value="true"/>
+			<property name="FeTorqueCost" value="6"/>
+			<property name="DescriptionKey" value="feConveyorDuctDesc"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorDuctPrefab"/>
+			<property name="SortOrder2" value="0036"/>
+		</block>
+		<!-- 2026-11-24: Conveyor Stand: a trestle (legs and a cradle) to carry a Conveyor Duct one block up. No logic. -->
+		<block name="feConveyorStand">
+			<property name="CustomIcon" value="feConveyorStand"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feConveyorStandDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorStandPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="1"/>
+			<property name="EconomicValue" value="15"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="2" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0037"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
 		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
 		     sides (stacks first, then empty slots); while a player has it open or it is full, the items wait. -->
 		<block name="feBeltCrate">
@@ -606,7 +641,9 @@
 			<property name="DescriptionKey" value="feFunnelDesc"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFunnelPrefab"/>
-			<property name="OnlySimpleRotations" value="true"/>
+			<!-- 2026-11-24: turns any way (down onto a duct's hatch, up, sideways); the spout follows what it feeds -->
+			<property name="OnlySimpleRotations" value="false"/>
+			<property name="AllowedRotations" value="No45"/>
 			<property name="ImposterDontBlock" value="true"/>
 			<property name="WaterFlow" value="permitted"/>
 			<property name="StabilitySupport" value="true"/>

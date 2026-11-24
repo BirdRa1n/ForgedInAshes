@@ -1,0 +1,16 @@
+{
+ "nome": "feM_Foundry",
+ "config": "F:\\IA\\fe_blender\\configs\\feM_Foundry.json",
+ "triangulos_antes": 12020,
+ "triangulos_depois": 3900,
+ "atlas": 2048,
+ "arquivos": [
+  "feM_Foundry_Albedo.png",
+  "feM_Foundry_Normal.png",
+  "feM_Foundry_MetallicSmoothness.png",
+  "feM_Foundry_Roughness.png",
+  "feM_Foundry_HD.fbx",
+  "feM_Foundry_HD.blend"
+ ],
+ "segundos": 20.4
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feElectricMotor",
+ "config": "F:\\IA\\fe_blender\\configs\\feElectricMotor.json",
+ "triangulos_antes": 5080,
+ "triangulos_depois": 1840,
+ "atlas": 1024,
+ "arquivos": [
+  "feElectricMotor_Albedo.png",
+  "feElectricMotor_Normal.png",
+  "feElectricMotor_MetallicSmoothness.png",
+  "feElectricMotor_Roughness.png",
+  "feElectricMotor_HD.fbx",
+  "feElectricMotor_HD.blend"
+ ],
+ "segundos": 14.1
+}

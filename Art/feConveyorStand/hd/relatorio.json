@@ -1,0 +1,16 @@
+{
+ "nome": "feConveyorStand",
+ "config": "F:\\IA\\fe_blender\\configs\\feConveyorStand.json",
+ "triangulos_antes": 2316,
+ "triangulos_depois": 652,
+ "atlas": 1024,
+ "arquivos": [
+  "feConveyorStand_Albedo.png",
+  "feConveyorStand_Normal.png",
+  "feConveyorStand_MetallicSmoothness.png",
+  "feConveyorStand_Roughness.png",
+  "feConveyorStand_HD.fbx",
+  "feConveyorStand_HD.blend"
+ ],
+ "segundos": 13.4
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feDynamo2",
+ "config": "F:\\IA\\fe_blender\\configs\\feDynamo2.json",
+ "triangulos_antes": 9928,
+ "triangulos_depois": 3488,
+ "atlas": 2048,
+ "arquivos": [
+  "feDynamo2_Albedo.png",
+  "feDynamo2_Normal.png",
+  "feDynamo2_MetallicSmoothness.png",
+  "feDynamo2_Roughness.png",
+  "feDynamo2_HD.fbx",
+  "feDynamo2_HD.blend"
+ ],
+ "segundos": 24.9
+}

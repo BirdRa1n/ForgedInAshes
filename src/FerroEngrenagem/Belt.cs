@@ -4,6 +4,15 @@
 //   (model local +Z). Roller axis = the model's local X: a shaft on the LEFT or RIGHT of any belt drives the line.
 //   feConveyorRamp (FeBeltRise=1): same, but it takes items at its back and gives them to the belt one block UP and
 //   one block forward (stack ramps for a staircase of items).
+//   feConveyorDuct (FeBeltClosed=true, 2026-11-24): an enclosed belt (a box with the belt inside, like an airport
+//   baggage tunnel). Same logic as a belt; its items are not drawn, it takes no dropped items and nothing slides,
+//   so a long run costs nothing to draw. Its mouth is the size and height of the machines' conveyor ports (0.36 x
+//   0.22, centre 0.25) so it plugs into them. Stand it on a Conveyor Stand (feConveyorStand) to run it overhead.
+//
+//   Joints that look real (BeltShape): an open belt pointing into a machine or into a duct grows a chute down to
+//   the port height (FeBeltChute); a duct ends in a boot into a machine (FeDuctBoot), rises in a short ramp onto an
+//   open belt (FeDuctRamp), is capped where nothing joins (FeDuctCapF/B, FeDuctWall_L/R) and opens a hatch on top
+//   for a Funnel above it (FeDuctHatch).
 //
 //   Where a belt sends its items (Outputs):
 //     - the belt in front (from its back: at its start; from its side: in its middle = a merge);
@@ -63,6 +72,28 @@ namespace FerroEngrenagem
         public static bool IsDown(Block b)
         {
             return Is(b) && Fluids.Prop(b, "FeBeltRise", 0f) < 0f;
+        }
+
+        /// <summary>An enclosed belt (Conveyor Duct): items hidden, no dropped items taken.</summary>
+        public static bool IsClosed(Block b)
+        {
+            return Is(b) && b.Properties != null && b.Properties.Contains("FeBeltClosed") && b.Properties.GetBool("FeBeltClosed");
+        }
+
+        /// <summary>Does the block at pos + d put items into the belt at pos (a belt or duct giving to it, or a Funnel
+        /// whose way ends here)?</summary>
+        public static bool FedFrom(World world, Vector3i pos, Vector3i d)
+        {
+            Vector3i c = Add(pos, d);
+            BlockValue cb = world.GetBlock(c);
+            if (Is(cb.Block)) return Outputs(world, c, cb).Contains(pos);
+            if (cb.Block is BlockFeFunnel)
+            {
+                TileEntity src;
+                Vector3i dst, dir;
+                return Funnel.Route(world, c, cb, out src, out dst, out dir) && dst == pos;
+            }
+            return false;
         }
 
         public static bool IsFilter(Block b)
@@ -586,7 +617,7 @@ namespace FerroEngrenagem
                     bv = world.GetBlock(cell);
                     if (!Belt.Is(bv.Block)) continue;
                 }
-                if (Belt.IsRamp(bv.Block)) continue;
+                if (Belt.IsRamp(bv.Block) || Belt.IsClosed(bv.Block)) continue;
                 if (wp.y < cell.y + Belt.Top - 0.35f) continue;   // under / beside the belt, not on it
                 Vector3i f = Belt.Front(bv);
                 float p = Mathf.Clamp(Vector3.Dot(wp - (cell.ToVector3() + new Vector3(0.5f, 0f, 0.5f)), f.ToVector3()) + 0.5f, 0.05f, 0.95f);
@@ -984,7 +1015,7 @@ namespace FerroEngrenagem
                 List<BeltItem> items = BeltStore.Items(pos, false);
                 if (items == null || items.Count == 0) continue;
                 BlockValue bv = world.GetBlock(pos);
-                if (!Belt.Is(bv.Block)) continue;
+                if (!Belt.Is(bv.Block) || Belt.IsClosed(bv.Block)) continue;   // a duct hides its items
                 foreach (BeltItem it in items)
                 {
                     Vector3 dir;
@@ -1123,6 +1154,9 @@ namespace FerroEngrenagem
         const float CurveStep = 10f;   // degrees between the slats of a curve
         Vector3i pos;
         Transform slats, bed, railL, railR, end, setL, setR, cslL, cslR, rollF, rollB, junction, posts, wedge;
+        Transform chute;                                                     // open belt: chute down into a port
+        Transform capF, capB, wallL, wallR, sideL, sideR, boot, ramp, hatch, frontSeg; // duct
+        bool closed;
         Vector3 basePos, slide;
         Quaternion baseL, baseR;
         float speed, offset, angle, next;
@@ -1149,13 +1183,43 @@ namespace FerroEngrenagem
             s.junction = Find(t, "FeJunction");
             s.posts = Find(t, "FeJunctionPosts");
             s.wedge = Find(t, "FeJunctionWedge");
+            s.chute = Find(t, "FeBeltChute");
+            s.capF = Find(t, "FeDuctCapF");
+            s.capB = Find(t, "FeDuctCapB");
+            s.wallL = Find(t, "FeDuctWall_L");
+            s.wallR = Find(t, "FeDuctWall_R");
+            s.sideL = Find(t, "FeDuctSide_L");
+            s.sideR = Find(t, "FeDuctSide_R");
+            s.boot = Find(t, "FeDuctBoot");
+            s.ramp = Find(t, "FeDuctRamp");
+            s.hatch = Find(t, "FeDuctHatch");
+            s.frontSeg = Find(t, "FeDuctFront");
+            s.closed = Belt.IsClosed(block);
             if (s.slats != null) s.basePos = s.slats.localPosition;
             if (s.cslL != null) s.baseL = s.cslL.localRotation;
             if (s.cslR != null) s.baseR = s.cslR.localRotation;
             s.slide = Belt.IsDown(block) ? (Vector3.forward - Vector3.up)
                     : Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
             s.next = 0f;
-            if (!Belt.IsRamp(block)) s.Apply(0, false, false, false, false, false);
+            if (s.closed) s.ApplyDuct(false, false, false, false, false, 0);
+            else if (!Belt.IsRamp(block)) s.Apply(0, false, false, false, false, false);
+            Show(s.chute, false);
+        }
+
+        // Duct: open sides / ends where something joins, caps elsewhere; front: 0 nothing (cap), 1 duct or other
+        // belt end (open mouth), 2 machine (boot into its port), 3 open belt (ramp up to the belt surface)
+        void ApplyDuct(bool openL, bool openR, bool openB, bool top, bool unused, int front)
+        {
+            Show(wallL, !openL);
+            Show(sideL, openL);
+            Show(wallR, !openR);
+            Show(sideR, openR);
+            Show(capB, !openB);
+            Show(hatch, top);
+            Show(capF, front == 0);
+            Show(boot, front == 2);
+            Show(ramp, front == 3);
+            Show(frontSeg, front != 3);                                     // the ramp replaces the front part
         }
 
         static Transform Find(Transform t, string n)
@@ -1225,7 +1289,27 @@ namespace FerroEngrenagem
                 {
                     BlockValue bv = world.GetBlock(pos);
                     speed = Belt.Speed(world, pos, bv);
-                    if (!Belt.IsRamp(bv.Block))
+                    if (closed)
+                    {
+                        Vector3i l = Belt.Left(bv), f = Belt.Front(bv);
+                        List<Vector3i> exits = Belt.Exits(world, pos, bv);
+                        Vector3i pf = new Vector3i(pos.x + f.x, pos.y, pos.z + f.z);
+                        int front = 0;
+                        if (exits.Contains(pf))
+                        {
+                            Block fb = world.GetBlock(pf).Block;
+                            front = !Belt.Is(fb) ? 2 : (Belt.IsClosed(fb) ? 1 : 3);
+                        }
+                        else if (exits.Contains(new Vector3i(pf.x, pf.y - 1, pf.z))) front = 3;   // down ramp ahead
+                        Vector3i nl = new Vector3i(-l.x, -l.y, -l.z), nf = new Vector3i(-f.x, -f.y, -f.z);
+                        Vector3i pl = new Vector3i(pos.x + l.x, pos.y, pos.z + l.z);
+                        Vector3i pr = new Vector3i(pos.x - l.x, pos.y, pos.z - l.z);
+                        bool openL = exits.Contains(pl) || Belt.FedFrom(world, pos, l);
+                        bool openR = exits.Contains(pr) || Belt.FedFrom(world, pos, nl);
+                        ApplyDuct(openL, openR, Belt.FedFrom(world, pos, nf), Belt.FedFrom(world, pos, new Vector3i(0, 1, 0)),
+                                  false, front);
+                    }
+                    else if (!Belt.IsRamp(bv.Block))
                     {
                         List<Vector3i> links = Belt.Links(world, pos, bv);
                         List<Vector3i> exits = Belt.Exits(world, pos, bv);
@@ -1239,10 +1323,13 @@ namespace FerroEngrenagem
                         else if (outL) m = 1;
                         else if (outR) m = 2;
                         Apply(m, links.Contains(pl), links.Contains(pr), outF, outL && outR && !outF, false);
+                        // into a machine or a duct: the belt ends in a chute down to the port height
+                        Block fb = world.GetBlock(pf).Block;
+                        Show(chute, outF && (!Belt.Is(fb) || Belt.IsClosed(fb)));
                     }
                 }
             }
-            if (speed <= 0f) return;
+            if (speed <= 0f || closed) return;   // nothing moves you can see in a duct
             if (mode == 1 || mode == 2)
             {
                 // the slats turn around the back corner: radius 0.5 m, so speed / 0.5 rad/s
@@ -1470,6 +1557,61 @@ namespace FerroEngrenagem
         }
     }
 
+    // The Funnel turns any way (AllowedRotations No45). Its spout follows what it feeds (local front = model -Y in
+    // Blender): FeFunnelSpoutBelt drops onto an open belt's surface, FeFunnelSpoutDuct goes down into a duct's mouth
+    // (port height), FeFunnelSpout (straight, on the axis) for anything else, e.g. pointing down into a duct's hatch.
+    public class FunnelShape : MonoBehaviour
+    {
+        Vector3i pos;
+        Transform straight, belt, duct;
+        float next;
+
+        public static void Attach(BlockEntityData ebcd, Vector3i pos)
+        {
+            if (ebcd == null || ebcd.transform == null || GameManager.IsDedicatedServer) return;
+            FunnelShape s = ebcd.transform.GetComponent<FunnelShape>();
+            if (s == null) s = ebcd.transform.gameObject.AddComponent<FunnelShape>();
+            s.pos = pos;
+            s.straight = Find(ebcd.transform, "FeFunnelSpout");
+            s.belt = Find(ebcd.transform, "FeFunnelSpoutBelt");
+            s.duct = Find(ebcd.transform, "FeFunnelSpoutDuct");
+            s.next = 0f;
+        }
+
+        static Transform Find(Transform t, string n)
+        {
+            if (t.name == n) return t;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                Transform r = Find(t.GetChild(i), n);
+                if (r != null) return r;
+            }
+            return null;
+        }
+
+        static void Show(Transform t, bool on)
+        {
+            if (t != null && t.gameObject.activeSelf != on) t.gameObject.SetActive(on);
+        }
+
+        void Update()
+        {
+            if (Time.time < next) return;
+            next = Time.time + 1f;
+            World world = GameManager.Instance == null ? null : GameManager.Instance.World;
+            if (world == null) return;
+            BlockValue bv = world.GetBlock(pos);
+            Vector3i f = Funnel.Front(bv);
+            Block tb = world.GetBlock(new Vector3i(pos.x + f.x, pos.y + f.y, pos.z + f.z)).Block;
+            int look = 0;
+            if (f.y == 0 && Belt.Is(tb) && !Belt.IsRamp(tb)) look = Belt.IsClosed(tb) ? 2 : 1;
+            if (straight == null && belt != null) look = Mathf.Max(look, 1);   // old model: one spout only
+            Show(straight, look == 0);
+            Show(belt, look == 1);
+            Show(duct, look == 2);
+        }
+    }
+
     [UnityEngine.Scripting.Preserve]
     public class BlockFeFunnel : Block
     {
@@ -1477,6 +1619,13 @@ namespace FerroEngrenagem
         {
             base.Init();
             BeltTicker.Ensure();
+        }
+
+        public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
+                                                                  BlockValue _blockValue, BlockEntityData _ebcd)
+        {
+            base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
+            FunnelShape.Attach(_ebcd, _blockPos);
         }
 
         public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue,

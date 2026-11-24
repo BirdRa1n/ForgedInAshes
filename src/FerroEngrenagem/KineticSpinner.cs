@@ -69,6 +69,22 @@ namespace FerroEngrenagem
             public float Amp = 0.12f;
         }
         readonly List<Piston> pistons = new List<Piston>();
+
+        // Slider-crank (Steam Engine HD, 2026-11-24): FeCrankPin_<n> (empty at the crank pin, built pose) rides on the
+        // crank (the FeSpin part named *Flywheel* / *Crank*); FeCrosshead_<n> slides on the line from the crank axis
+        // through its built position; FeConrod_<n> (pivot at the crosshead pin) turns to point at the pin. Solved
+        // from the crank's real angle every frame, in the model root's space (floating origin safe). Captured once,
+        // from the pristine model (the component stays on the pooled instance).
+        class Linkage
+        {
+            public Transform Cross, Rod;
+            public Vector3 PinInCrank, C, D, Cross0, Dir0;
+            public Quaternion Rod0;
+            public float L;
+        }
+        readonly List<Linkage> links = new List<Linkage>();
+        Transform crank;
+        bool linksCaptured, linksSolved;
         Vector3 omega = Vector3.forward;
         bool running, overloaded, locked, wrong, inverter;
         string lastLog;
@@ -103,7 +119,10 @@ namespace FerroEngrenagem
             parts.Clear();
             pistons.Clear();
             angle = 0f;
+            linkParts.Clear();
             Collect(transform);
+            CaptureLinks();
+            linksSolved = false;
             if (parts.Count == 0 && block.Properties != null && block.Properties.Contains("FeSpinWhole") &&
                 block.Properties.GetBool("FeSpinWhole") && transform.childCount > 0)
             {
@@ -124,6 +143,10 @@ namespace FerroEngrenagem
                 Transform c = t.GetChild(i);
                 // case-sensitive: the Spin Inverter model itself is named "feSpinInverter" and must not spin as a whole
                 if (c.name.StartsWith("FeSpin", System.StringComparison.Ordinal)) parts.Add(Parse(c));
+                else if (c.name.StartsWith("FeCrosshead_", System.StringComparison.Ordinal) ||
+                         c.name.StartsWith("FeConrod_", System.StringComparison.Ordinal) ||
+                         c.name.StartsWith("FeCrankPin_", System.StringComparison.Ordinal))
+                    linkParts[c.name] = c;
                 else if (c.name.StartsWith("FePiston", System.StringComparison.Ordinal))
                 {
                     Piston p = new Piston();
@@ -133,6 +156,59 @@ namespace FerroEngrenagem
                     pistons.Add(p);
                 }
                 Collect(c);
+            }
+        }
+
+        readonly Dictionary<string, Transform> linkParts = new Dictionary<string, Transform>();
+
+        /// <summary>Pairs FeCrosshead_n / FeConrod_n / FeCrankPin_n with the crank. Only on the pristine model.</summary>
+        void CaptureLinks()
+        {
+            if (linksCaptured) return;
+            linksCaptured = true;
+            links.Clear();
+            crank = null;
+            foreach (Part p in parts)
+                if (p.T != null && (p.T.name.Contains("Flywheel") || p.T.name.Contains("Crank"))) { crank = p.T; break; }
+            if (crank == null) return;
+            Vector3 o = transform.InverseTransformPoint(crank.position);
+            Vector3 a = transform.InverseTransformDirection(crank.forward).normalized;   // spin axis = local +Z
+            for (int n = 1; n <= 8; n++)
+            {
+                Transform cross, rod, pin;
+                if (!linkParts.TryGetValue("FeCrosshead_" + n, out cross) | !linkParts.TryGetValue("FeConrod_" + n, out rod) |
+                    !linkParts.TryGetValue("FeCrankPin_" + n, out pin)) continue;
+                Linkage l = new Linkage();
+                l.Cross = cross;
+                l.Rod = rod;
+                l.PinInCrank = crank.InverseTransformPoint(pin.position);
+                l.Cross0 = transform.InverseTransformPoint(cross.position);
+                l.C = o + a * Vector3.Dot(l.Cross0 - o, a);
+                l.D = (l.Cross0 - l.C).normalized;
+                Vector3 p0 = transform.InverseTransformPoint(pin.position);
+                l.L = (l.Cross0 - p0).magnitude;
+                l.Dir0 = (p0 - l.Cross0).normalized;
+                l.Rod0 = Quaternion.Inverse(transform.rotation) * rod.rotation;
+                links.Add(l);
+            }
+        }
+
+        void SolveLinks()
+        {
+            if (crank == null) return;
+            foreach (Linkage l in links)
+            {
+                if (l.Cross == null || l.Rod == null) continue;
+                Vector3 pin = transform.InverseTransformPoint(crank.TransformPoint(l.PinInCrank));
+                Vector3 v = pin - l.C;
+                float along = Vector3.Dot(v, l.D);
+                float perp = (v - l.D * along).magnitude;
+                float s = along + Mathf.Sqrt(Mathf.Max(0f, l.L * l.L - perp * perp));
+                Vector3 x = l.C + l.D * s;
+                l.Cross.position = transform.TransformPoint(x);
+                l.Rod.position = l.Cross.position;
+                Vector3 dir = (pin - x).normalized;
+                l.Rod.rotation = transform.rotation * (Quaternion.FromToRotation(l.Dir0, dir) * l.Rod0);
             }
         }
 
@@ -232,6 +308,8 @@ namespace FerroEngrenagem
                     p.T.Rotate(Vector3.forward, dir * r * DegPerRpmSecond * Time.deltaTime, Space.Self);
                 }
             }
+
+            if (links.Count > 0 && (rpm > 0.01f || !linksSolved)) { SolveLinks(); linksSolved = true; }
 
             if (pistons.Count > 0)
             {

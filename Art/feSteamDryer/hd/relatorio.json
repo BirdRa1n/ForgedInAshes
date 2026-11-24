@@ -1,0 +1,16 @@
+{
+ "nome": "feSteamDryer",
+ "config": "F:\\IA\\fe_blender\\configs\\feSteamDryer.json",
+ "triangulos_antes": 10688,
+ "triangulos_depois": 4336,
+ "atlas": 1024,
+ "arquivos": [
+  "feSteamDryer_Albedo.png",
+  "feSteamDryer_Normal.png",
+  "feSteamDryer_MetallicSmoothness.png",
+  "feSteamDryer_Roughness.png",
+  "feSteamDryer_HD.fbx",
+  "feSteamDryer_HD.blend"
+ ],
+ "segundos": 16.2
+}

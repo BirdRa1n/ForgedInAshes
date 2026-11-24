@@ -5,9 +5,18 @@
 // The window is Config/XUi/windows.xml "feRecipes" (window_group in xui.xml), controller XUiC_FeRecipes below.
 // If the window does not open (XUi failed to load), the first lines go to a tooltip instead.
 //
+// 2026-11-24 (bug: after opening the book from the Washer, the toolbelt would not change slot any more, not even by
+// number): the command runs inside the radial menu's callback, and opening a modal window there force-closed the
+// radial in the middle of its own close; the held item's holster / draw transition (Hand.isSwitching) could stay
+// stuck, and PlayerMoveController refuses slot changes while the hand is switching. Now the window opens a few
+// frames later, once no modal window is open (like the game does with crates and workbenches), and when it closes
+// a watchdog finishes a hand transition still stuck after 1 s (Hand.CompleteTransition).
+//
 // C# 5 only.
 
+using System.Collections;
 using System.Collections.Generic;
+using HarmonyLib;
 using System.Text;
 using UnityEngine;
 
@@ -137,6 +146,43 @@ namespace FerroEngrenagem
         {
             List<string> lines = Lines(b);
             string title = string.Format(Kinetic.Text("feRecipesTitle", "Recipes: {0}"), b.GetLocalizedBlockName());
+            if (GameManager.Instance != null)
+                GameManager.Instance.StartCoroutine(OpenWhenFree(b, player, lines, title));
+            else
+                OpenNow(b, player, lines, title);
+        }
+
+        /// <summary>Waits until the radial menu (and any other modal window) has fully closed, then opens.</summary>
+        static IEnumerator OpenWhenFree(Block b, EntityPlayerLocal player, List<string> lines, string title)
+        {
+            LocalPlayerUI ui = LocalPlayerUI.GetUIForPlayer(player);
+            for (int i = 0; i < 90 && ui != null && ui.windowManager != null && ui.windowManager.IsModalWindowOpen(); i++)
+                yield return null;
+            yield return null;
+            yield return null;
+            OpenNow(b, player, lines, title);
+        }
+
+        /// <summary>After the book closes: a hand transition still running after 1 s is stuck; finish it.</summary>
+        public static IEnumerator UnstickHand(EntityPlayerLocal player)
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            if (player == null || player.inventory == null || !player.inventory.IsHandSwitching()) yield break;
+            yield return new WaitForSecondsRealtime(1f);
+            if (player == null || player.inventory == null || !player.inventory.IsHandSwitching()) yield break;
+            try
+            {
+                AccessTools.Method(typeof(Hand), "CompleteTransition").Invoke(player.inventory.Hand, null);
+                Log.Warning(FerroEngrenagemMod.LogPrefix + "recipe book: the held item was stuck switching; finished the transition");
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning(FerroEngrenagemMod.LogPrefix + "recipe book: could not unstick the hand: " + e.Message);
+            }
+        }
+
+        static void OpenNow(Block b, EntityPlayerLocal player, List<string> lines, string title)
+        {
             LocalPlayerUI ui = LocalPlayerUI.GetUIForPlayer(player);
             bool shown = false;
             try
@@ -196,6 +242,13 @@ namespace FerroEngrenagem
             base.OnOpen();
             page = 0;
             RefreshBindings();
+        }
+
+        public override void OnClose()
+        {
+            base.OnClose();
+            EntityPlayerLocal pl = xui != null && xui.playerUI != null ? xui.playerUI.entityPlayer : null;
+            if (pl != null && GameManager.Instance != null) GameManager.Instance.StartCoroutine(RecipeBook.UnstickHand(pl));
         }
 
         public override bool GetBindingValueInternal(ref string _value, string _bindingName)
