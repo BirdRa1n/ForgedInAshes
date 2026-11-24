@@ -149,6 +149,33 @@
 			<ingredient name="fePipe" count="2"/>
 			<ingredient name="feResourceGear" count="2"/>
 		</recipe>
+		<!-- Industrial versions and the Biodigester -->
+		<recipe name="feInductionFurnace" count="1" craft_area="feElectronics" craft_time="60" always_unlocked="true">
+			<ingredient name="feResourceCoil" count="10"/>
+			<ingredient name="feResourceIronPlate" count="20"/>
+			<ingredient name="resourceClayLump" count="20"/>
+			<ingredient name="feResourceBrassWire" count="20"/>
+		</recipe>
+		<recipe name="feCasterElectric" count="1" craft_area="feElectronics" craft_time="30" always_unlocked="true">
+			<ingredient name="feCaster" count="1"/>
+			<ingredient name="feResourceCoil" count="2"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+		</recipe>
+		<recipe name="feRetortKiln" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="16"/>
+			<ingredient name="resourceClayLump" count="20"/>
+			<ingredient name="feResourceCoil" count="2"/>
+			<ingredient name="fePipe" count="2"/>
+		</recipe>
+		<recipe name="feBiodigester" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="12"/>
+			<ingredient name="fePipe" count="4"/>
+			<ingredient name="resourceMetalPipe" count="2"/>
+		</recipe>
+		<recipe name="feBiofuel" count="1" craft_area="feRefinery" craft_time="60" always_unlocked="true">
+			<ingredient name="feBioMash" count="2"/>
+			<ingredient name="resourceAnimalFat" count="1"/>
+		</recipe>
 		<!-- F8.2 chemistry machines -->
 		<recipe name="feCrusher" count="1" craft_area="feAssembler" craft_time="30" always_unlocked="true">
 			<ingredient name="feResourceGear" count="6"/>

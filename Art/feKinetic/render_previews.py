@@ -13,7 +13,7 @@ NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter"
          "feClutch", "feTorqueGauge", "feWaterWheel",
          "feSteamEngine", "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
          "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-         "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer",
+         "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester",
          "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"]
 
 scene = bpy.context.scene

@@ -144,3 +144,16 @@ Pegue no criativo: Triturador, Lavadora, Misturador Químico, Secador a Vapor; C
 5. **Linha completa:** esteiras ligando Triturador e Lavadora → Misturador → Secador → Prensa de Munição. Com a Mesa de Moldagem fazendo cápsulas e pontas, a Bala 9mm sai na Prensa de Munição com "Escolher produção".
 6. A leitura de cada máquina mostra o que ela faz, o que tem dentro, a água/vapor e o progresso.
 7. Saia e entre: o que estava dentro das máquinas continua.
+
+## 10. Versões industriais e Biodigestor
+
+1. **Forno de Indução** (2x2, ligue fios de energia, 250 W):
+   - Sem energia: a leitura mostra "Sem energia". Com energia: derrete o que chega por esteira (ou "Derreter o item da mão") sem combustível.
+   - O metal sai pela Calha de Metal em qualquer lado de fora da parte de baixo.
+2. **Moldadora Industrial** (60 W): mesmos moldes da Mesa; com energia esfria bem mais rápido.
+3. **Forno de Retorta** (100 W): madeira por esteira (5 por vez), Carvão Vegetal sai na esteira da frente a cada 20 s.
+4. **Biodigestor** (água por trás):
+   - 5 Carne Crua → 5 Carne Podre (3 min).
+   - 10 Carne Podre + 4 Ossos → 1 Terra Nitrosa (6 min). A Lavadora transforma em 4 Salitre.
+   - 10 Carne Podre sem ossos (ou 12 Milho / 12 Batata) → 1 Mosto Orgânico.
+5. **Biocombustível:** Refinaria, 2 Mosto Orgânico + 1 Gordura Animal. Por esteira no Motor a Gasolina: a cada 3 latas o combustível sobe 1.

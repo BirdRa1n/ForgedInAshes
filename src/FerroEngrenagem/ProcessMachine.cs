@@ -110,6 +110,12 @@ namespace FerroEngrenagem
 
         static float Speed(World world, Vector3i p, Process pr, FluidState s)
         {
+            Block b = world.GetBlock(p).Block;
+            if (Industrial.IsElectric(b))
+            {
+                if (!Industrial.IsPowered(world, p)) { s.Note = "power"; return 0f; }
+                return Fluids.Prop(b, "FeProcSpeed", 1f);
+            }
             if (pr.Torque <= 0f) return 1f;
             TorqueNet net = Kinetic.Get(world, p);
             if (net == null || !net.Running || !net.Machines.ContainsKey(p)) { s.Note = "torque"; return 0f; }
@@ -220,6 +226,7 @@ namespace FerroEngrenagem
                         Mathf.RoundToInt(100f * s.Steam / Mathf.Max(0.1f, pr.Time))));
             if (s.Count > 0) sb.Append("\n").Append(string.Format(Kinetic.Text("feCasterReady", "Ready: {0}x {1}"), s.Count, ItemName(s.Made)));
             if (s.Note == "torque") sb.Append("\n").Append(Kinetic.Text("feFluidNoTorque", "No torque on its shaft"));
+            else if (s.Note == "power") sb.Append("\n").Append(Kinetic.Text("feFluidNoPower", "No power: wire it to a power source"));
             else if (s.Note == "full") sb.Append("\n").Append(Kinetic.Text("feCasterFull", "Full: take the casts or put a belt in front"));
             return sb.ToString();
         }

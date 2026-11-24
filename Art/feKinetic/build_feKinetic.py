@@ -1312,6 +1312,91 @@ def model_steam_dryer(col):
     return [to_object(base, "feSteamDryer_Base", bevel=0.003)]
 
 
+# ---------------------------------------------------------------- industrial versions (electric)
+def model_induction_furnace(col):
+    """Induction Furnace: 2 wide x 2 high (centred, x -1..1). A crucible in a copper coil, a control cabinet, a
+    hood on top; metal spouts at the bottom of each side (the Metal Chute joins any outer side of the bottom)."""
+    bm = bmesh.new()
+    box(bm, (1.96, 0.96, 0.10), (0, 0, 0.05), IRON)
+    box(bm, (0.80, 0.80, 1.30), (0.52, 0, 0.75), PAINT)                              # cabinet (right)
+    for k in range(5):
+        box(bm, (0.50, 0.02, 0.05), (0.52, -0.41, 0.55 + k * 0.14), IRON)           # vents
+    box(bm, (0.20, 0.02, 0.14), (0.52, -0.41, 1.25), GLASS)                          # display
+    cyl(bm, 0.36, 0.95, (-0.45, 0, 0.60), "Z", STEEL, segs=28)                       # crucible
+    for k in range(7):
+        ring(bm, 0.40, 0.36, 0.05, (-0.45, 0, 0.22 + k * 0.12), "Z", BRASS, segs=28)   # induction coil
+    cyl(bm, 0.30, 0.02, (-0.45, 0, 1.08), "Z", MOLTEN, segs=28)                      # glowing melt
+    ring(bm, 0.38, 0.30, 0.06, (-0.45, 0, 1.10), "Z", IRON, segs=28)
+    box(bm, (0.90, 0.90, 0.08), (-0.45, 0, 1.75), IRON)                               # hood
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(bm, (0.05, 0.05, 0.60), (-0.45 + sx * 0.40, sy * 0.40, 1.45), IRON)
+    cyl(bm, 0.10, 0.18, (-0.45, 0, 1.88), "Z", STEEL, segs=14)                       # flue
+    beam(bm, (0.12, 0, 1.30), (-0.20, 0, 1.30), 0.08, 0.08, RED)                      # power cable
+    for sx in (-1, 1):
+        box(bm, (0.16, 0.16, 0.10), (sx * 0.92, 0, C - 0.05), OUT)                   # metal spouts (sides)
+    for sy in (-1, 1):
+        box(bm, (0.16, 0.10, 0.10), (-0.45, sy * 0.46, C - 0.05), OUT)                # front / back
+        box(bm, (0.16, 0.10, 0.10), (0.52, sy * 0.46, C - 0.05), OUT)
+    out = [to_object(bm, "feInductionFurnace_Base", bevel=0.003)]
+    wire_anchor(col, out, (0.52, 0.0, 1.42))
+    return out
+
+
+def model_caster_electric(col):
+    """Industrial Casting Table: the Casting Table plus an electric fan blowing on the mold."""
+    out = model_caster(col)
+    out[0].name = "feCasterElectric_Base"
+    fan = bmesh.new()
+    box(fan, (0.06, 0.06, 0.40), (0.38, 0.0, 0.80), IRON)                              # post
+    cyl(fan, 0.14, 0.10, (0.30, 0.0, 0.96), "X", PAINT, segs=20)                       # fan housing
+    ring(fan, 0.16, 0.14, 0.03, (0.24, 0.0, 0.96), "X", IRON, segs=20)
+    for k in range(4):
+        box(fan, (0.01, 0.02, 0.24), (0.24, 0.0, 0.96), STEEL, Matrix.Rotation(k * math.pi / 4, 4, "X"))
+    out.append(to_object(fan, "feCasterElectric_Fan", bevel=0.002))
+    wire_anchor(col, out, (0.38, 0.0, 1.0))
+    return out
+
+
+def model_retort_kiln(col):
+    """Retort Kiln: a brick oven with an iron retort drum inside, a door, a chimney; wood in from any side, charcoal
+    out of the chute in front."""
+    bm = bmesh.new()
+    box(bm, (0.94, 0.90, 0.06), (0, 0, 0.03), IRON)
+    box(bm, (0.90, 0.80, 0.70), (0, 0.04, 0.40), RUST)                                # brick body
+    for z in (0.18, 0.36, 0.54, 0.72):
+        box(bm, (0.92, 0.82, 0.02), (0, 0.04, z), IRON)                               # courses
+    cyl(bm, 0.24, 0.70, (0, 0.04, 0.48), "X", STEEL, segs=20)                         # retort drum
+    for sx in (-1, 1):
+        cyl(bm, 0.26, 0.04, (sx * 0.36, 0.04, 0.48), "X", IRON, segs=20)
+    box(bm, (0.30, 0.03, 0.24), (0, -0.37, 0.30), IRON)                                # fire door
+    box(bm, (0.24, 0.02, 0.18), (0, -0.39, 0.30), MOLTEN)
+    cyl(bm, 0.08, 0.24, (0.28, 0.24, 0.86), "Z", IRON, segs=14)                       # chimney
+    box(bm, (0.14, 0.08, 0.10), (-0.30, -0.36, 0.70), PAINT)                           # electric heater box
+    out_chute(bm)
+    out = [to_object(bm, "feRetortKiln_Base", bevel=0.003)]
+    wire_anchor(col, out, (-0.30, -0.36, 0.76))
+    return out
+
+
+def model_biodigester(col):
+    """Biodigester: a sealed green tank with a dome (gas), a sight glass with the brown mash, water in at its back,
+    the chute in front."""
+    bm = bmesh.new()
+    box(bm, (0.84, 0.84, 0.06), (0, 0, 0.03), IRON)
+    cyl(bm, 0.36, 0.62, (0, 0.04, 0.37), "Z", PAINT, segs=28)                        # tank
+    for z in (0.10, 0.38, 0.66):
+        cyl(bm, 0.375, 0.03, (0, 0.04, z), "Z", IRON, segs=28)
+    cyl(bm, 0.30, 0.16, (0, 0.04, 0.74), "Z", PAINT, segs=28, r2=0.12)               # dome
+    cyl(bm, 0.05, 0.14, (0, 0.04, 0.88), "Z", STEEL, segs=10)                         # gas valve
+    cyl(bm, 0.07, 0.03, (0, 0.04, 0.96), "Z", RED, segs=10)
+    box(bm, (0.10, 0.02, 0.40), (0.18, -0.30, 0.36), GLASS)                           # sight glass
+    box(bm, (0.08, 0.02, 0.22), (0.18, -0.31, 0.27), RUST)                            # the mash
+    inlet_stub(bm, (0, 0.5, C), "Y", 1, IN)
+    out_chute(bm)
+    return [to_object(bm, "feBiodigester_Base", bevel=0.003)]
+
+
 # ---------------------------------------------------------------- production machines (phase 6)
 # Footprints: 1x1 = x -0.5..0.5; 2 wide (MultiBlockDim 2,2,1) = x -1..1 (the game shifts an even width by half a
 # block, so the model is centred); 3 wide = x -1.5..1.5. Depth 1 (y -0.5..0.5), height up to the block count.
@@ -1733,6 +1818,10 @@ MODELS = {
     "feChemMixer": model_chem_mixer,
     "feWasher": model_washer,
     "feSteamDryer": model_steam_dryer,
+    "feInductionFurnace": model_induction_furnace,
+    "feCasterElectric": model_caster_electric,
+    "feRetortKiln": model_retort_kiln,
+    "feBiodigester": model_biodigester,
     "feM_Foundry": model_m_foundry,
     "feM_Press": model_m_press,
     "feM_Lathe": model_m_lathe,

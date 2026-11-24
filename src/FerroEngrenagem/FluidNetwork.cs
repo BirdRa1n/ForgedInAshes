@@ -964,6 +964,12 @@ namespace FerroEngrenagem
                     return (name + "\n" + MetalWorks.DescribeCaster(world, owner, bv, s)).Trim();
                 case FluidKind.Processor:
                     return (name + "\n" + ProcessMachine.Describe(world, owner, bv, s)).Trim();
+                case FluidKind.Smelter:
+                {
+                    string t = name + "\n" + MetalWorks.DescribeSmelter(world, owner);
+                    if (s.Note == "power") t += "\n" + Fluids.Text("feFluidNoPower", "No power: wire it to a power source");
+                    return t.Trim();
+                }
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
                         Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),
@@ -1249,6 +1255,11 @@ namespace FerroEngrenagem
                 if (k == FluidKind.Processor)
                 {
                     ProcessMachine.Tick(world, p, bv, FluidStore.Get(p), 0.5f);
+                    continue;
+                }
+                if (k == FluidKind.Smelter && Industrial.IsElectric(bv.Block))
+                {
+                    MetalWorks.TickElectricSmelter(world, p, bv, FluidStore.Get(p));
                     continue;
                 }
                 if (k == FluidKind.Bottler)

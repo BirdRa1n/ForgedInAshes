@@ -817,6 +817,57 @@
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
+		<!-- Industrial versions (Industrial.cs): electric, for full automation -->
+		<block name="feInductionFurnace">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="250"/>
+			<property name="FeFluid" value="smelter"/>
+			<property name="FeMetalBuffer" value="500"/>
+			<property name="FeMeltSpeed" value="2"/>
+			<property name="FeHeatMax" value="20"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="DescriptionKey" value="feInductionFurnaceDesc"/>
+			<property name="CustomIcon" value="forge"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feInductionFurnacePrefab"/>
+			<property name="EconomicValue" value="1500"/>
+		</block>
+		<block name="feCasterElectric">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluid" value="caster"/>
+			<property name="FeFluidRate" value="600"/>
+			<property name="FeCoolFactor" value="4"/>
+			<property name="DescriptionKey" value="feCasterElectricDesc"/>
+			<property name="CustomIcon" value="workbench"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterElectricPrefab"/>
+			<property name="EconomicValue" value="400"/>
+		</block>
+		<block name="feRetortKiln">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="100"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="DescriptionKey" value="feRetortKilnDesc"/>
+			<property name="CustomIcon" value="forge"/>
+			<property name="CustomIconTint" value="606060"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feRetortKilnPrefab"/>
+			<property name="EconomicValue" value="500"/>
+		</block>
+		<!-- Biodigester: rots meat and turns organic matter into Nitre Earth (gunpowder) or Organic Mash (biofuel) -->
+		<block name="feBiodigester">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+			<property name="DescriptionKey" value="feBiodigesterDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="80a040"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBiodigesterPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="300"/>
+		</block>
 		<block name="feCaster">
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="caster"/>
@@ -987,6 +1038,9 @@
 			<property name="FeFuelSecondsPerUnit" value="30"/>
 			<property name="FeFuelItem" value=""/>
 			<property name="MaxFuel" value="200"/>
+			<!-- Biofuel by belt: 3 cans = 1 unit of fuel (Industrial.cs) -->
+			<property name="FeAltFuel" value="feBiofuel"/>
+			<property name="FeAltFuelPer" value="3"/>
 			<property name="DescriptionKey" value="feGasEngineDesc"/>
 			<property name="CustomIcon" value="smallEngine"/>
 			<property name="CustomIconTint" value="ffffff"/>

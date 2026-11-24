@@ -815,3 +815,9 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `ProcessMachine.cs`: máquina genérica (FeFluid processor). O que faz = processos não planejados do fe_processes.xml com machine = nome do bloco. Itens por esteira (qualquer lado) ou "Colocar o item da mão", estoque de 8 receitas por ingrediente; fluido pela porta de trás (o fluid_in dos processos); torque quando o processo pede (bloco FeKinetic pump, eixo na lateral); produtos na esteira da frente ou "Pegar os produtos". FluidState.Stock salvo (coluna 10).
 - Blocos: feCrusher (torque 128), feChemMixer (torque 64 + água), feWasher (água), feSteamDryer (vapor). Itens: feCoalDust, feNitratePure, feGunPowderWet. Processos crush_coal, crush_stone, wash_nitrate, mix_powder, dry_powder; linha "Pólvora" no site.
 - Modelos com FeSpin (rolos do Triturador ao contrário um do outro, agitador vertical no Misturador).
+
+## 2026-11-24: versões industriais e Biodigestor
+- `Industrial.cs`: patches no BlockPowered (comandos colocar/pegar/molde/derreter e visual da Mesa) para máquinas F8 elétricas; `ProcessMachine.Speed` e a Mesa respeitam energia (FeProcSpeed, FeCoolFactor); Fundição elétrica (`te == null` em `Melt`) aquece enquanto ligada (`TickElectricSmelter`, FeMeltSpeed, FeHeatMax).
+- Blocos: feInductionFurnace (2x2, 250 W), feCasterElectric (60 W), feRetortKiln (100 W), feBiodigester (água). Itens: feNitreEarth, feBioMash, feBiofuel. Processos: ind_melt_*, retort_wood, nitre_flesh/crops, rot_meat, mash_*, wash_nitre_earth, distill_biofuel (receita da Refinaria).
+- Combustível alternativo nos motores: FeAltFuel/FeAltFuelPer (Motor a Gasolina: 3 Biocombustíveis = 1 unidade), só por esteira.
+- Exportação do Blender: o disco F: deu "Invalid argument"/"cannot save" intermitente ao gravar FBX/PNG; repetir a exportação até "EXPORTED".

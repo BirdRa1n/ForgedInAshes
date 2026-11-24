@@ -32,6 +32,11 @@
 	<machine name="feWasher" text="Lavadora"/>
 	<machine name="feSteamDryer" text="Secador a Vapor"/>
 	<machine name="feChemMixer" text="Misturador Químico"/>
+	<machine name="feInductionFurnace" text="Forno de Indução"/>
+	<machine name="feCasterElectric" text="Moldadora Industrial"/>
+	<machine name="feRetortKiln" text="Forno de Retorta"/>
+	<machine name="feBiodigester" text="Biodigestor"/>
+	<machine name="feRefinery" text="Refinaria"/>
 	<machine name="feInlinePress" text="Prensa em Linha" planned="true"/>
 
 	<!-- new items -->
@@ -42,6 +47,9 @@
 	<item name="feMoldPipe" text="Molde de Tubo" metals="molten_iron"/>
 	<item name="feMoldGear" text="Molde de Engrenagem" metals="molten_iron"/>
 	<item name="feCasingRaw" text="Cápsula Bruta"/>
+	<item name="feNitreEarth" text="Terra Nitrosa"/>
+	<item name="feBioMash" text="Mosto Orgânico"/>
+	<item name="feBiofuel" text="Biocombustível"/>
 	<item name="feCoalDust" text="Pó de Carvão"/>
 	<item name="feNitratePure" text="Salitre Purificado"/>
 	<item name="feGunPowderWet" text="Pólvora Úmida"/>
@@ -114,6 +122,52 @@
 	         output="resourceCrushedSand" out_count="1" time="2" torque="128"
 	         text="O Triturador também mói pedra em areia."/>
 
+	<!-- Industrial versions: the Induction Furnace melts like the Foundry (electric); the Industrial Casting Table
+	     uses the same molds (MetalWorks looks the casts up on feCaster) -->
+	<process id="ind_melt_brass" kind="melt" machine="feInductionFurnace" input="resourceScrapBrass" count="1"
+	         fluid_out="molten_brass" out_liters="10" time="1" text="O Forno de Indução derrete com eletricidade."/>
+	<process id="ind_melt_lead" kind="melt" machine="feInductionFurnace" input="resourceScrapLead" count="1"
+	         fluid_out="molten_lead" out_liters="10" time="1" text="O Forno de Indução derrete o chumbo."/>
+	<process id="ind_melt_scrap_iron" kind="melt" machine="feInductionFurnace" input="resourceScrapIron" count="1"
+	         fluid_out="molten_iron" out_liters="2" time="0.5" text="O Forno de Indução derrete a sucata de ferro."/>
+	<process id="ind_melt_iron" kind="melt" machine="feInductionFurnace" input="resourceForgedIron" count="1"
+	         fluid_out="molten_iron" out_liters="10" time="1" text="O Forno de Indução derrete o ferro forjado."/>
+	<process id="ind_melt_steel" kind="melt" machine="feInductionFurnace" input="resourceForgedSteel" count="1"
+	         fluid_out="molten_steel" out_liters="10" time="1.5" text="O Forno de Indução derrete o aço forjado."/>
+	<process id="retort_wood" kind="distill" machine="feRetortKiln" input="resourceWood" count="5"
+	         output="feResourceCharcoal" out_count="1" time="20"
+	         text="O Forno de Retorta (elétrico) transforma madeira em carvão vegetal, com esteira na entrada e na saída."/>
+
+	<!-- Biodigester (slow and expensive on purpose) -->
+	<process id="nitre_flesh" kind="mix" machine="feBiodigester" input="foodRottingFlesh,resourceBone" count="10,4"
+	         fluid_in="water" liters="20" output="feNitreEarth" out_count="1" time="360"
+	         text="Com ossos, a carne podre vira Terra Nitrosa (a antiga nitreira)."/>
+	<process id="nitre_crops" kind="mix" machine="feBiodigester" input="foodCropCorn,resourceBone" count="15,4"
+	         fluid_in="water" liters="20" output="feNitreEarth" out_count="1" time="480"
+	         text="Milho com ossos também vira Terra Nitrosa, mais devagar."/>
+	<process id="rot_meat" kind="mix" machine="feBiodigester" input="foodRawMeat" count="5"
+	         fluid_in="water" liters="5" output="foodRottingFlesh" out_count="5" time="180"
+	         text="O Biodigestor apodrece a carne crua."/>
+	<process id="mash_flesh" kind="mix" machine="feBiodigester" input="foodRottingFlesh" count="10"
+	         fluid_in="water" liters="20" output="feBioMash" out_count="1" time="360"
+	         text="Sem ossos, a carne podre fermenta em Mosto Orgânico."/>
+	<process id="mash_corn" kind="mix" machine="feBiodigester" input="foodCropCorn" count="12"
+	         fluid_in="water" liters="20" output="feBioMash" out_count="1" time="300"
+	         text="Milho fermenta em Mosto Orgânico."/>
+	<process id="mash_potato" kind="mix" machine="feBiodigester" input="foodCropPotato" count="12"
+	         fluid_in="water" liters="20" output="feBioMash" out_count="1" time="300"
+	         text="Batata fermenta em Mosto Orgânico."/>
+	<process id="wash_nitre_earth" kind="wash" machine="feWasher" input="feNitreEarth" count="1"
+	         fluid_in="water" liters="10" output="resourcePotassiumNitratePowder" out_count="4" time="6"
+	         text="A Lavadora tira o salitre da Terra Nitrosa (lixiviação)."/>
+	<process id="distill_biofuel" kind="distill" machine="feRefinery" input="feBioMash,resourceAnimalFat" count="2,1"
+	         output="feBiofuel" out_count="1" time="60"
+	         text="Na Refinaria (receita fixa ou à mão), 2 Mostos + 1 Gordura viram 1 Biocombustível. No Motor a Gasolina, 3 latas valem 1 de gasolina."/>
+
+	<chain product="feResourceCharcoal" text="Carvão Vegetal industrial" phase="Industrial" steps="retort_wood"/>
+	<chain product="resourcePotassiumNitratePowder" text="Salitre de carne podre" phase="Industrial"
+	       steps="rot_meat,nitre_flesh,wash_nitre_earth"/>
+	<chain product="feBiofuel" text="Biocombustível" phase="Industrial" steps="rot_meat,mash_flesh,distill_biofuel"/>
 	<chain product="resourceGunPowder" text="Pólvora" phase="F8.2" steps="crush_coal,wash_nitrate,mix_powder,dry_powder"/>
 	<chain product="resourceBulletCasing" text="Revestimento de Bala (cápsula)" phase="F8.1"
 	       steps="melt_brass,cast_casing,press_casing_bench"/>

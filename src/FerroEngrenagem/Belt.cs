@@ -717,7 +717,8 @@ namespace FerroEngrenagem
         {
             if (b == null) return false;
             if (IsStorage(b)) return true;
-            if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor) return true;
+            if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor || Fluids.Kind(b) == FluidKind.Smelter) return true;
+            if (b is BlockPowerSource && Industrial.AltFuel(b) != null) return true;
             if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
             return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
         }
@@ -865,6 +866,17 @@ namespace FerroEngrenagem
                 if (st.count < before) { BeltStore.MarkDirty(); Note(world, parent, "poured " + (before - st.count) + " items"); }
                 return st.count <= 0;
             }
+            if (MetalWorks.IsSmelter(world.GetBlock(parent).Block) && Industrial.IsElectric(world.GetBlock(parent).Block))
+            {
+                string why;
+                int m = MetalWorks.Melt(world, parent, null, st, out why);
+                string mname = st.itemValue.ItemClass == null ? "?" : st.itemValue.ItemClass.GetItemName();
+                if (m <= 0) { Note(world, parent, mname + " waits: " + why); return false; }
+                st.count -= m;
+                BeltStore.MarkDirty();
+                Note(world, parent, "melted " + m + "x " + mname);
+                return st.count <= 0;
+            }
             if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Processor)
             {
                 int ptook = ProcessMachine.Insert(world, parent, st);
@@ -883,7 +895,12 @@ namespace FerroEngrenagem
             Block b = world.GetBlock(parent).Block;
             int took = 0;
             ItemClass fuel = FuelGenerator.FuelItem(b);
-            if (fuel != null && st.itemValue.type == fuel.Id)
+            string alt = Industrial.AltFuel(b);
+            if (alt != null && st.itemValue.ItemClass != null && st.itemValue.ItemClass.GetItemName() == alt)
+            {
+                took = Industrial.FeedAlt(parent, b, gen, st);   // e.g. Biofuel: 3 cans = 1 unit of fuel
+            }
+            else if (fuel != null && st.itemValue.type == fuel.Id)
             {
                 int per = Mathf.Max(1, FuelGenerator.FuelPerItem(b));
                 int room = (gen.MaxFuel - gen.CurrentFuel) / per;

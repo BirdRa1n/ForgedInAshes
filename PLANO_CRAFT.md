@@ -236,6 +236,34 @@ script (fase F8.0) lista receita por receita com o modelo e os produtos intermed
 
 ---
 
+## 6.1 Versões industriais e Biodigestor (pedido do usuário, 2026-11-24)
+
+Máquinas que dependiam do jogador (esvaziar, abastecer, esperar esfriar) ganharam uma versão **elétrica**, para a
+linha rodar sozinha:
+
+| Original | Industrial | Por que elétrica |
+|---|---|---|
+| Carvoeira (esvaziar à mão, abastecer à mão) | **Forno de Retorta** (100 W): madeira por esteira, carvão sai na esteira | aquecedor elétrico; nada a recolher |
+| Fundição (queima combustível) | **Forno de Indução** (250 W, 2x2): derrete sem combustível, 2x mais rápido, 500 L | indução é o forno elétrico de verdade |
+| Mesa de Moldagem (esfria devagar; água ajuda) | **Moldadora Industrial** (60 W): ventilador, esfria 4x mais rápido, enche 2x mais rápido | ventilador elétrico |
+
+As que já são automáticas ficaram como estão: Triturador e Misturador (torque), Lavadora (água), Secador (vapor),
+Despejador/Envasadora, e as bancadas (receita fixa + esteira + Funil). Manivelas já têm os motores.
+
+**Biodigestor** (água por trás, lento e caro de propósito):
+
+| Entra | Sai | Tempo |
+|---|---|---|
+| 5 Carne Crua + 5 L água | 5 Carne Podre | 180 s |
+| 10 Carne Podre + 4 Ossos + 20 L | 1 Terra Nitrosa | 360 s |
+| 15 Milho + 4 Ossos + 20 L | 1 Terra Nitrosa | 480 s |
+| 10 Carne Podre + 20 L (sem ossos) | 1 Mosto Orgânico | 360 s |
+| 12 Milho ou 12 Batatas + 20 L | 1 Mosto Orgânico | 300 s |
+
+- Terra Nitrosa → **Lavadora** → 4 Salitre (a nitreira histórica: salitre de matéria orgânica podre).
+- 2 Mosto Orgânico + 1 Gordura Animal → **Refinaria** → 1 Biocombustível.
+- **Biocombustível queima muito mais rápido**: no Motor a Gasolina (por esteira), 3 latas valem 1 de gasolina.
+
 ## 7. Fases
 
 | Fase | Entrega | Prova no jogo |

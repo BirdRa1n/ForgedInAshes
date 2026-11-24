@@ -92,11 +92,12 @@ namespace FerroEngrenagem
             int n = Mathf.Min(st.count, Mathf.FloorToInt((cap - s.Amount) / Mathf.Max(0.01f, pr.OutLiters) + 0.001f));
             if (n <= 0) { why = Kinetic.Text("feMeltFull", "Its metal is full: connect a Metal Chute to it"); return 0; }
             int done = 0;
-            ItemStack[] fuel = te.Fuel;
+            ItemStack[] fuel = te == null ? null : te.Fuel;
             while (done < n)
             {
                 if (s.Steam < pr.Time)
                 {
+                    if (te == null) break;   // Induction Furnace: only the heat its power built up
                     bool burnt = false;
                     for (int i = 0; fuel != null && i < fuel.Length && !burnt; i++)
                     {
@@ -118,7 +119,11 @@ namespace FerroEngrenagem
                 s.Fluid = pr.FluidOut;
                 done++;
             }
-            if (done == 0) why = Kinetic.Text("feMeltNoFuel", "No fuel to melt it: put fuel in the Foundry");
+            if (done == 0)
+                why = te == null
+                    ? (Industrial.IsPowered(world, p) ? Kinetic.Text("feMeltHeating", "Heating up: wait a moment")
+                                                      : Kinetic.Text("feFluidNoPower", "No power: wire it to a power source"))
+                    : Kinetic.Text("feMeltNoFuel", "No fuel to melt it: put fuel in the Foundry");
             if (done > 0) FluidStore.MarkDirty();
             return done;
         }
@@ -178,7 +183,10 @@ namespace FerroEngrenagem
             Process pr = s.Amount > 0.01f ? CastOf(s.Mold, s.Fluid) : null;
             if (pr != null && s.Amount >= pr.Liters - 0.01f)
             {
-                s.Steam += WaterNear(world, p) ? 1f : 0.5f;
+                float cool = WaterNear(world, p) ? 1f : 0.5f;
+                if (Industrial.IsElectric(bv.Block) && Industrial.IsPowered(world, p))
+                    cool = 0.5f * Fluids.Prop(bv.Block, "FeCoolFactor", 4f);   // the electric fan
+                s.Steam += cool;
                 if (s.Steam >= pr.Time)
                 {
                     s.Steam = 0f;
@@ -287,6 +295,16 @@ namespace FerroEngrenagem
             string[] m = MoldMetals(mold);
             if (m != null) foreach (string x in m) names.Add(Fluids.FluidName(x));
             return string.Join(", ", names.ToArray());
+        }
+
+        /// <summary>Every 0.5 s: an electric smelter builds up heat while powered (FeMeltSpeed s of melting per s,
+        /// up to FeHeatMax).</summary>
+        public static void TickElectricSmelter(World world, Vector3i p, BlockValue bv, FluidState s)
+        {
+            if (!Industrial.IsPowered(world, p)) { s.Note = "power"; return; }
+            s.Note = "";
+            float max = Fluids.Prop(bv.Block, "FeHeatMax", 20f);
+            if (s.Steam < max) { s.Steam = Mathf.Min(max, s.Steam + 0.5f * Fluids.Prop(bv.Block, "FeMeltSpeed", 2f)); FluidStore.MarkDirty(); }
         }
 
         /// <summary>Is this a Foundry with a melt buffer?</summary>
