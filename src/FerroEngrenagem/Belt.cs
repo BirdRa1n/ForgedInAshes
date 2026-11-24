@@ -747,8 +747,34 @@ namespace FerroEngrenagem
 
         /// <summary>A workstation: fuel (items with a fuel value) to its fuel slots, smeltable material (forge
         /// category) to its input slots (the Foundry); anything else to the fixed-recipe store (AutoCraft).</summary>
+        /// <summary>Give back what an older version hid in the input slots of a mod machine (its window shows no
+        /// input grid): dropped on the ground next to it. Server; called when a belt delivers or a player looks.</summary>
+        public static void RescueHidden(World world, Vector3i p, TileEntityWorkstation te)
+        {
+            if (te == null || !AutoCraft.IsMachine(world.GetBlock(p).Block) || GameManager.Instance == null) return;
+            if (!SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer || te.IsUserAccessing()) return;
+            ItemStack[] input = te.Input;
+            if (input == null) return;
+            bool any = false;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == null || input[i].IsEmpty()) continue;
+                GameManager.Instance.ItemDropServer(input[i].Clone(), p.ToVector3() + new Vector3(0.5f, 1.5f, 0.5f),
+                                                   Vector3.zero, -1, 600f, false);
+                Log.Out(FerroEngrenagemMod.LogPrefix + "rescued " + input[i].count + "x " +
+                        (input[i].itemValue.ItemClass == null ? "?" : input[i].itemValue.ItemClass.GetItemName()) +
+                        " hidden in " + world.GetBlock(p).Block.GetBlockName() + " at " + p);
+                input[i] = ItemStack.Empty.Clone();
+                any = true;
+            }
+            if (!any) return;
+            te.Input = input;
+            te.SetModified();
+        }
+
         static bool InsertWorkstation(World world, Vector3i p, TileEntityWorkstation te, ItemStack st)
         {
+            RescueHidden(world, p, te);
             if (te.IsUserAccessing()) { Note(world, p, "open by a player, waiting"); return false; }
             ItemClass ic = st.itemValue.ItemClass;
             if (ic == null) return false;
@@ -767,8 +793,10 @@ namespace FerroEngrenagem
             {
                 // F8.1: the Foundry melts it into its metal buffer
             }
+            // the material input of a smelting forge: never on the mod's machines (their windows have no input
+            // grid, so items put there were hidden and lost: the 2026-11-23 test lost raw casings and clay)
             else if (input != null && te.InputSlotCount > 0 && ic.MadeOfMaterial != null &&
-                     !string.IsNullOrEmpty(ic.MadeOfMaterial.ForgeCategory))
+                     !string.IsNullOrEmpty(ic.MadeOfMaterial.ForgeCategory) && !AutoCraft.IsMachine(world.GetBlock(p).Block))
             {
                 took = Fill(input, st.count, st, 0, Mathf.Min(te.InputSlotCount, input.Length));
                 if (took > 0) te.Input = input;

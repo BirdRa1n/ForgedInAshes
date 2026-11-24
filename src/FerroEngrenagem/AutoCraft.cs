@@ -258,7 +258,7 @@ namespace FerroEngrenagem
 
         /// <summary>Radial commands "next / previous production": pick the recipe without crafting it by hand first.
         /// Turns the fixed recipe on; a different recipe drops the ingredients stored for the old one.</summary>
-        public static string Cycle(World world, Vector3i p, string area, int step)
+        public static string Cycle(World world, Vector3i p, string area, int step, string held)
         {
             EnsureLoaded();
             List<Recipe> l = RecipesOf(area);
@@ -269,6 +269,10 @@ namespace FerroEngrenagem
             for (int i = 0; i < l.Count; i++)
                 if (l[i].GetName() == e.Recipe && l[i].craftingArea == e.Area) { at = i; break; }
             int next = at < 0 ? (step > 0 ? 0 : l.Count - 1) : ((at + step) % l.Count + l.Count) % l.Count;
+            // holding something this machine makes: jump straight to it (49 recipes are a long way to cycle)
+            if (held != null && (at < 0 || l[at].GetName() != held))
+                for (int i = 0; i < l.Count; i++)
+                    if (l[i].GetName() == held) { next = i; break; }
             Recipe r = l[next];
             if (r.GetName() != e.Recipe) Drop(world, p);
             e.Recipe = r.GetName();
@@ -335,7 +339,9 @@ namespace FerroEngrenagem
                 else
                 {
                     BlockValue bv = w.GetBlock(_blockPos);
-                    msg = AutoCraft.Cycle(w, _blockPos, bv.Block.GetBlockName(), _commandName == "fe_recipe_next" ? 1 : -1);
+                    ItemStack hs = _player.inventory.holdingItemStack;
+                    string held = hs == null || hs.IsEmpty() || hs.itemValue.ItemClass == null ? null : hs.itemValue.ItemClass.GetItemName();
+                    msg = AutoCraft.Cycle(w, _blockPos, bv.Block.GetBlockName(), _commandName == "fe_recipe_next" ? 1 : -1, held);
                 }
                 GameManager.ShowTooltip(_player, msg, false, false, 0f);
                 Log.Out(FerroEngrenagemMod.LogPrefix + "autocraft at " + _blockPos + ": " + msg);
@@ -351,6 +357,8 @@ namespace FerroEngrenagem
         public static void Postfix(BlockWorkstation __instance, Vector3i _blockPos, ref string __result)
         {
             if (!AutoCraft.IsMachine(__instance)) return;
+            World w = GameManager.Instance == null ? null : GameManager.Instance.World;
+            if (w != null) BeltMachines.RescueHidden(w, _blockPos, w.GetTileEntity(_blockPos) as TileEntityWorkstation);
             string d = AutoCraft.Describe(_blockPos);
             if (d.Length == 0) return;
             __result = (string.IsNullOrEmpty(__result) ? "" : __result + "\n") + KineticLookController.Escape(d);

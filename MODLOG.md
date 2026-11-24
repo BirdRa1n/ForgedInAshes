@@ -805,3 +805,8 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Mesa de Moldagem (`feCaster`, FeFluid caster): um molde (item), processos `cast` dizem metal/litros/saída/tempo; esfria (2x com água ao lado), solta na esteira da frente ou "Pegar as peças". FluidState ganhou Mold/Made/Count (salvos no FerroEngrenagem_fluids.txt).
 - Modelos feMetalChute (braços FeArm_*.001: PipeArms procura também por prefixo) e feCaster (FeCastMetal, FeCastReady; CasterVisual).
 - Moldes: Cápsula, Ponta, Lingote, Chapa, Tubo, Engrenagem (Torno). Cápsula Bruta → Revestimento de Bala na Prensa de Munição (a Prensa já tinha a receita vanilla da cápsula: regra de duplicata).
+
+## 2026-11-23: teste da F8.1 (log 21-32-13)
+- Funcionou: Funil (baú) → Fundição derrete latão → Calha → Mesa de Moldagem (24x "cast 5x feCasingRaw") → esteira → Prensa de Munição → Funil tirou 16 Revestimentos. Molde de Lingote: 12 lingotes de ferro. Trocar molde ok.
+- Bug: itens sumiam nas máquinas do mod. O ramo "material de forja vai para a entrada" (`InsertWorkstation`) colocava itens com ForgeCategory (Cápsula Bruta, argila...) nos slots de entrada escondidos (as janelas das máquinas do mod não têm entrada): 90 Cápsulas Brutas e 16 argilas perdidas. Corrigido: esse ramo não vale para máquinas fe*; `RescueHidden` devolve o que estiver escondido (cai no chão ao lado da máquina, quando uma esteira entrega ou quando o jogador olha para ela).
+- "Próxima produção" com um item na mão pula direto para a receita dele (a Prensa de Munição tem 49 receitas).
