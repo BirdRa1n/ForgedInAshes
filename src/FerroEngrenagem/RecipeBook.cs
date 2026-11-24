@@ -156,8 +156,18 @@ namespace FerroEngrenagem
         static IEnumerator OpenWhenFree(Block b, EntityPlayerLocal player, List<string> lines, string title)
         {
             LocalPlayerUI ui = LocalPlayerUI.GetUIForPlayer(player);
-            for (int i = 0; i < 90 && ui != null && ui.windowManager != null && ui.windowManager.IsModalWindowOpen(); i++)
+            // wait for the radial (a modal window) to finish closing; never force it (a radial left registered as open
+            // but hidden suppressed every look text afterwards - UiWatchdog.cs)
+            float until = Time.realtimeSinceStartup + 5f;
+            while (ui != null && ui.windowManager != null && ui.windowManager.IsModalWindowOpen() && Time.realtimeSinceStartup < until)
                 yield return null;
+            if (ui == null || ui.windowManager == null) yield break;
+            if (ui.windowManager.IsModalWindowOpen())
+            {
+                GUIWindow m = ui.windowManager.GetModalWindow();
+                Log.Warning(FerroEngrenagemMod.LogPrefix + "window not opened: another modal window is still open (" + (m == null ? "?" : m.Id) + ")");
+                yield break;
+            }
             yield return null;
             yield return null;
             OpenNow(b, player, lines, title);

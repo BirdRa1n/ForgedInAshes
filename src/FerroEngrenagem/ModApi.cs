@@ -26,6 +26,7 @@ namespace FerroEngrenagem
             catch (System.Exception) { Verbose = false; }
             Processes.Load(_modInstance.Path);
             Settings.Load(_modInstance.Path);
+            UiWatchdog.Ensure();
             Log.Out(LogPrefix + "InitMod: code loaded (" + Assembly.GetExecutingAssembly().GetName().Version + ")");
             var harmony = new Harmony(HarmonyId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());

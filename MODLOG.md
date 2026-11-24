@@ -997,3 +997,16 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   **Não verificado de novo no jogo.** Roteiro: `TESTE_GERAL.md` seção 19.
 - Limites conhecidos: sem modelos (tudo 1x1); Queimador não aquece a Fundição (ela segue com combustível); moldes da
   vulcanização viraram escolha de receita; números são proposta para o balanceamento; multiplayer depois.
+
+## 2026-11-24: bug do texto de mira sumindo (e E pegando o bloco)
+
+- Relato: depois de um tempo o texto de mira e o "(E)" somem em todos os blocos e o E pega o item.
+- Log 19:29 sem exceção. Leitura do jogo (IL 3.4.0 b10): `PlayerMoveController.Update` só mostra o texto quando
+  nenhuma janela modal está aberta (`guiOpenThisUpdate = IsModalWindowOpen`); a roda do E (`radial`) é modal. As
+  janelas do mod abrem logo depois de um comando da roda e, depois de 1,5 s (90 quadros), abriam à força com a roda
+  ainda fechando: a roda podia ficar registrada como aberta e escondida, o que esconde todo texto de mira e faz o
+  toque no E executar o primeiro comando (Pegar).
+- Correção: as janelas esperam até 5 s a roda fechar e desistem em vez de forçar; `UiWatchdog.cs` fecha uma roda
+  escondida que ficou aberta sem o E apertado por 1,5 s e registra no log (`ui watchdog: ...`); também registra
+  quando o jogador mira um bloco fe* e a janela do texto está fechada (diagnóstico de outra causa).
+- **Não verificado no jogo.** Se voltar a acontecer, o log dirá qual janela segurou o texto.
