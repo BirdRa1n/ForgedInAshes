@@ -62,16 +62,13 @@ namespace FerroEngrenagem
     [HarmonyPatch(typeof(BlockPowered), "GetBlockActivationCommands")]
     public static class Patch_BlockPowered_Commands_Industrial
     {
-        public static void Postfix(BlockPowered __instance, ref BlockActivationCommand[] __result)
+        public static void Postfix(BlockPowered __instance, EntityAlive _entityFocusing, ref BlockActivationCommand[] __result)
         {
             FluidKind k = Fluids.Kind(__instance);
             List<BlockActivationCommand> add = new List<BlockActivationCommand>();
-            if (k == FluidKind.Processor)
-            {
-                add.Add(new BlockActivationCommand("fe_put", "loot_sort", true, false, null));
-                add.Add(new BlockActivationCommand(ProcessMachine.PickCommand, "tool", true, false, null));
-                add.Add(new BlockActivationCommand("fe_cast_take", "hand", true, false, null));
-            }
+            if (k == FluidKind.Processor) add.AddRange(ProcessMachine.Commands(null));
+            else if (k == FluidKind.Valve) add.Add(new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null));
+            else if (FeUi.HasConfig(__instance)) add.Add(new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null));
             else if (k == FluidKind.Caster)
             {
                 add.Add(new BlockActivationCommand("fe_cast_take", "loot_sort", true, false, null));
@@ -85,6 +82,7 @@ namespace FerroEngrenagem
                 __result = add.ToArray();
             }
             RecipeBook.AddCommand(__instance, ref __result);
+            if (k != FluidKind.None) FeUi.AddNetCommand(_entityFocusing, ref __result);
         }
     }
 
@@ -100,10 +98,11 @@ namespace FerroEngrenagem
                 __result = true;
                 return false;
             }
-            if (_commandName != "fe_put" && _commandName != "fe_cast_take" && _commandName != "fe_mold" && _commandName != "fe_melt"
-                && _commandName != ProcessMachine.PickCommand)
-                return true;
             World w = _world as World;
+            if (w != null && FeUi.HandleCommand(_commandName, w, _blockPos, _blockValue, _player)) { __result = true; return false; }
+            if (_commandName != "fe_put" && _commandName != "fe_cast_take" && _commandName != "fe_mold" && _commandName != "fe_melt"
+                && !ProcessMachine.IsCommand(_commandName))
+                return true;
             __result = true;
             if (w == null) return false;
             Vector3i p = Fluids.ParentOf(w, _blockPos, _blockValue);

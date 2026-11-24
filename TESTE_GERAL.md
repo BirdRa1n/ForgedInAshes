@@ -265,3 +265,41 @@ No fim, feche o jogo e peça para ler o log (`Player.log` quando aberto direto p
 4. **Gerador a Carvão:** pegue e coloque de novo (agora 2×2); o fio liga em cima do dínamo; queimando, o volante e o
    dínamo giram.
 5. **Ícones:** Manivela, Gerador a Carvão, Baú de Esteira, Motor a Carvão e Motor a Gasolina com ícone próprio.
+
+## 19. Cadeia completa (D12, PLANO_CADEIA.md) — sem modelos novos (reusam modelos do mod, ícone tingido)
+
+Use o modo criativo para pegar os blocos (busca "fe" ou o nome em português). Ao entrar e sair do mundo, o log não
+deve ter `ERR`/`EXC` com `FeUi`, `fePicker` ou `XUiV_TextList`.
+
+1. **Painel da Máquina:** toque E no Triturador / Lavadora / Biodigestor: abre o painel (receita, barra de progresso,
+   estoque, produtos, fluidos). Botões: Receita, Pôr item da mão, Retirar produtos, Ligar/Desligar.
+2. **Seletor de Receita:** botão Receita (ou segure E > Escolher receita): lista com ícones; escolher fecha a janela.
+   Nas bancadas do mod (Montadora, Torno...): segure E > Escolher receita = receita fixa sem fabricar à mão.
+3. **Montadora com baús:** receita fixa ligada + baús encostados (ou encostados em baús encostados, até 16) com os
+   ingredientes: ela puxa tudo de uma vez e fabrica sozinha (log: `took the ingredients of ... from N linked crate(s)`).
+4. **Gás e pressão:** Motor a Vapor -> Cano -> Manômetro (atrás) e Tanque de Gás: o cano mostra "Pressão X bar";
+   acima de 4 bar com cano comum: "VAZANDO". Compressor (eixo do lado) entre duas redes sobe para o valor dele.
+5. **Tanques:** dois Tanques de Líquido encostados dividem o conteúdo (olhe os dois).
+6. **Válvulas:** Registro (configurações: aberto / fechado / por sinal), Retenção, Reguladora (- / +), Separador
+   (Modo), Alívio. Manômetro dá sinal: encoste uma Embreagem nele, ela solta quando o sinal liga.
+7. **Sinais:** Alavanca de Sinal encostada num Registro em "por sinal" ou numa Comporta de Esteira (a esteira para).
+   Receptor de Sinal ligado por fio a um interruptor vanilla faz o mesmo.
+8. **Esteiras:** Divisor (Modo: 2:1, só frente...), Esteira Contadora (sinal a cada N), Braço Mecânico (elétrico,
+   pega de um baú atrás e põe na máquina da frente; filtro = item da mão nas configurações). Funil: quantidade e filtro.
+9. **Estações em linha:** Prensa em Linha em cima de uma esteira com Cápsula Bruta passando: a cápsula para no meio,
+   vira Revestimento e segue. Sequência da 9mm: Bico Dosador (pólvora no estoque) -> Encaixador (pontas) ->
+   Crimpadora (escolha 9mm no painel).
+10. **Petróleo:** Xisto -> Triturador -> Retorta de Xisto (com Queimador a Gás encostado, aceso com carvão) ->
+    óleo cru (em cima) -> Torre de Destilação (base + Seções empilhadas, Queimador encostado) -> gasolina na seção 3
+    -> Envasadora = latas. Gás de xisto -> Torre de Lavagem (água embaixo) -> ácido + enxofre + gás combustível.
+11. **Borracha:** Sangrador de Seiva com as costas num carvalho (ou Seringueira plantada) -> látex -> Tanque de
+    Coagulação (+ ácido) -> Calandra (água) -> Secador -> Misturador Químico (negro de fumo + enxofre) -> Prensa de
+    Vulcanização (vapor a 3 bar pelo Compressor) -> Pneu. Roda na Garagem: pneu + aro + cubo.
+12. **Vidro / plástico:** areia na Fundição = vidro fundido; Mesa de Moldagem com Molde de Pote / Lente / Béquer.
+    Nafta + gás a 6 bar no Reator de Polimerização = polímero fundido (Calha) -> Injetora com Molde de Pellet.
+13. **Cozinha Industrial:** Queimador encostado, água atrás, escolha uma receita da fogueira: faz 4 de cada vez.
+14. **Guia de Produção:** fabrique o Manual do Engenheiro (inventário, 2 papéis), use (clique esquerdo): índice,
+    filtro por letra (< >), clique num item: como fazer e onde é usado. Chave de Engenheiro na mão + segure E num
+    cano/eixo/esteira > Rede: Painel de Rede.
+15. **Config:** `Data/fe_settings.xml` VanillaShortcuts="expensive" traz de volta os atalhos removidos (latas de
+    gasolina do xisto, óleo, cola, tinta, papel, pote) a 3x o custo (log: `added N fallback recipe(s)`).

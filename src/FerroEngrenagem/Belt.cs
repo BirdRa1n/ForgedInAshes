@@ -268,6 +268,7 @@ namespace FerroEngrenagem
         {
             TorqueNet net = Kinetic.Get(world, pos);
             if (net == null || !net.Running || !net.Machines.ContainsKey(pos)) return 0f;
+            if (Logistics.IsGate(bv.Block) && Logistics.GateShut(world, pos)) return 0f;
             return Fluids.Prop(bv.Block, "FeBeltSpeed", 1f) * net.MachineSpeed(pos);
         }
 
@@ -277,6 +278,7 @@ namespace FerroEngrenagem
         public static List<Vector3i> ExitsFor(World world, Vector3i pos, BlockValue bv, ItemStack st)
         {
             List<Vector3i> outs = Exits(world, pos, bv);
+            if (Logistics.IsSplitter(bv.Block)) return Logistics.Filter(pos, bv, outs);
             if (!IsFilter(bv.Block)) return outs;
             string filter = BeltStore.Filter(pos);
             if (filter == null) return outs;
@@ -296,6 +298,12 @@ namespace FerroEngrenagem
         {
             List<Vector3i> outs = ExitsFor(world, pos, bv, it.Stack);
             if (outs.Count == 0) { it.HasExit = false; return; }
+            if (Logistics.IsSplitter(bv.Block))
+            {
+                it.Exit = Sub(Logistics.Pick(world, pos, bv, outs), pos);
+                it.HasExit = true;
+                return;
+            }
             int k;
             turn.TryGetValue(pos, out k);
             turn[pos] = k + 1;
@@ -362,6 +370,18 @@ namespace FerroEngrenagem
                 }
                 t += "\n" + sb.ToString();
             }
+            if (Logistics.IsSplitter(bv.Block)) t += "\n" + string.Format(Kinetic.Text("feSplitInfo", "Splitter: front : each side = {0}"), Logistics.Ratio(pos));
+            if (Logistics.IsCounter(bv.Block)) t += "\n" + string.Format(Kinetic.Text("feCounterInfo", "Counter: {0} / {1} (a signal every {1} items)"), Logistics.CounterCount(pos), Logistics.CounterN(pos));
+            if (Logistics.IsGate(bv.Block))
+            {
+                t += "\n" + (LogicStore.Field(pos, "inv") == "1" ? Kinetic.Text("feGateInv", "Gate: runs only while it gets a signal")
+                                                                 : Kinetic.Text("feGateInfo", "Gate: stops while it gets a signal"));
+                if (Logistics.GateShut(world, pos)) t += "\n" + Kinetic.Text("feGateShut", "SHUT");
+            }
+            Vector3i st;
+            BlockValue sbv;
+            if (Inline.StationAt(world, pos, out st, out sbv))
+                t += "\n" + string.Format(Kinetic.Text("feBeltStation", "Station above: {0}"), sbv.Block.GetLocalizedBlockName());
             if (v <= 0f) t += "\n" + Kinetic.Text("feBeltStopped", "Stopped: no torque (put a shaft on the left or right of any belt of the line)");
             return t;
         }
@@ -616,7 +636,18 @@ namespace FerroEngrenagem
             next = Time.time + Step;
             BeltStore.EnsureLoaded();
             tick++;
-            if (Time.time >= nextAbsorb) { nextAbsorb = Time.time + 0.5f; Absorb(world); BeltStore.PruneFilters(world); Funnel.TickAll(world); AutoCraft.TickAll(world); FluidDevices.TickAll(world); }
+            if (Time.time >= nextAbsorb)
+            {
+                nextAbsorb = Time.time + 0.5f;
+                Absorb(world);
+                BeltStore.PruneFilters(world);
+                Funnel.TickAll(world);
+                AutoCraft.TickAll(world);
+                FluidDevices.TickAll(world);
+                Logistics.TickArms(world);
+                Signals.Tick(world);
+            }
+            if (Time.time >= nextSave) LogicStore.Save();
             Move(world, Step);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
         }
@@ -679,11 +710,25 @@ namespace FerroEngrenagem
                 if (v <= 0f) continue;
                 items.Sort(delegate (BeltItem a, BeltItem b) { return b.P.CompareTo(a.P); });   // front first
                 float limit = 1f;
+                Vector3i station;
+                BlockValue sbv;
+                bool hasStation = Inline.StationAt(world, pos, out station, out sbv);
                 for (int i = 0; i < items.Count; i++)
                 {
                     BeltItem it = items[i];
                     if (it.Moved == tick) { limit = it.P - Belt.Gap; continue; }
                     float reach = it.P + v * dt;
+                    // D12: an in-line station above holds the items it works on in the middle of the belt
+                    if (hasStation && it.P <= 0.5f + 0.001f && reach > 0.5f && Inline.Wants(world, station, sbv, it.Stack))
+                    {
+                        reach = 0.5f;
+                        if (it.P >= 0.5f - 0.01f && Inline.Work(world, pos, station, sbv, it, dt))
+                        {
+                            changed = true;
+                            if (it.Stack.count <= 0) { items.RemoveAt(i); i--; continue; }
+                            Belt.ChooseExit(world, pos, bv, it);
+                        }
+                    }
                     if (i == 0 && reach >= 1f && Pass(world, pos, bv, it, reach - 1f))
                     {
                         items.RemoveAt(i);
@@ -715,12 +760,21 @@ namespace FerroEngrenagem
             for (int k = 0; k < outs.Count; k++)
             {
                 Vector3i to = outs[(start + k) % outs.Count];
+                int cnt = it.Stack.count;
                 if (machine && to == mcell)
                 {
-                    if (BeltMachines.Insert(world, mparent, it.Stack)) return true;   // all of it went in
+                    if (BeltMachines.Insert(world, mparent, it.Stack))   // all of it went in
+                    {
+                        if (Logistics.IsCounter(bv.Block)) Logistics.Counted(world, from, cnt);
+                        return true;
+                    }
                     continue;                                                         // the rest waits at the end
                 }
-                if (TryPass(world, from, to, it, over)) return true;
+                if (TryPass(world, from, to, it, over))
+                {
+                    if (Logistics.IsCounter(bv.Block)) Logistics.Counted(world, from, cnt);
+                    return true;
+                }
             }
             return false;
         }
@@ -773,7 +827,8 @@ namespace FerroEngrenagem
         {
             if (b == null) return false;
             if (IsStorage(b)) return true;
-            if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor || Fluids.Kind(b) == FluidKind.Smelter) return true;
+            if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor || Fluids.Kind(b) == FluidKind.Smelter
+                || Fluids.Kind(b) == FluidKind.Burner) return true;
             if (b is BlockPowerSource && Industrial.AltFuel(b) != null) return true;
             if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
             return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
@@ -931,6 +986,14 @@ namespace FerroEngrenagem
                 st.count -= m;
                 BeltStore.MarkDirty();
                 Note(world, parent, "melted " + m + "x " + mname);
+                return st.count <= 0;
+            }
+            if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Burner)
+            {
+                int bt = FluidControl.BurnerInsert(world, parent, st);
+                if (bt <= 0) return false;
+                st.count -= bt;
+                BeltStore.MarkDirty();
                 return st.count <= 0;
             }
             if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Processor)
@@ -1543,10 +1606,19 @@ namespace FerroEngrenagem
                                                                            Vector3i _blockPos, EntityAlive _entityFocusing)
         {
             BlockActivationCommand[] b = base.GetBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
+            if (Logistics.IsSplitter(this) || Logistics.IsGate(this) || Logistics.IsCounter(this))
+            {
+                BlockActivationCommand[] c = new BlockActivationCommand[b.Length + 1];
+                c[0] = new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null);
+                b.CopyTo(c, 1);
+                return c;
+            }
             if (!Belt.IsFilter(this)) return b;
             BlockActivationCommand[] r = new BlockActivationCommand[b.Length + 1];
             r[0] = new BlockActivationCommand("fe_filter", "loot_sort", true, false, null);
             b.CopyTo(r, 1);
+            System.Array.Resize(ref r, r.Length + 1);
+            r[r.Length - 1] = new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null);
             return r;
         }
 
@@ -1639,7 +1711,7 @@ namespace FerroEngrenagem
             return null;
         }
 
-        static ItemStack Take(TileEntity te, int amount)
+        static ItemStack Take(TileEntity te, int amount, string filter)
         {
             if (te.IsUserAccessing()) return null;
             TileEntityWorkstation ws = te as TileEntityWorkstation;
@@ -1650,6 +1722,7 @@ namespace FerroEngrenagem
                 for (int i = 0; i < outp.Length; i++)
                 {
                     if (outp[i] == null || outp[i].IsEmpty()) continue;
+                    if (filter.Length > 0 && (outp[i].itemValue.ItemClass == null || outp[i].itemValue.ItemClass.GetItemName() != filter)) continue;
                     int n = Mathf.Min(amount, outp[i].count);
                     ItemStack got = new ItemStack(outp[i].itemValue.Clone(), n);
                     outp[i].count -= n;
@@ -1668,6 +1741,7 @@ namespace FerroEngrenagem
             {
                 ItemStack slot = grid[i];
                 if (slot == null || slot.IsEmpty()) continue;
+                if (filter.Length > 0 && (slot.itemValue.ItemClass == null || slot.itemValue.ItemClass.GetItemName() != filter)) continue;
                 int n = Mathf.Min(amount, slot.count);
                 ItemStack got = new ItemStack(slot.itemValue.Clone(), n);
                 ItemStack rest = slot.Clone();
@@ -1699,8 +1773,8 @@ namespace FerroEngrenagem
                     foreach (BeltItem o in items) if (o.P < entry + Belt.Gap) blocked = true;
                     if (blocked) continue;
                 }
-                int amount = (int)Fluids.Prop(bv.Block, "FeFunnelAmount", 16f);
-                ItemStack got = Take(src, amount);
+                int amount = Logistics.Amount(pos, (int)Fluids.Prop(bv.Block, "FeFunnelAmount", 16f));
+                ItemStack got = Take(src, amount, LogicStore.Field(pos, "f"));
                 if (got == null || got.IsEmpty()) continue;
                 BeltItem it = BeltStore.Add(dst, got, entry);
                 Belt.ChooseExit(world, dst, world.GetBlock(dst), it);
@@ -1720,6 +1794,9 @@ namespace FerroEngrenagem
             if (src == null) t = Kinetic.Text("feFunnelNoSource", "Nothing to take from: put a crate or a machine behind it");
             else t = string.Format(Kinetic.Text("feFunnelFrom", "Takes from: {0}"), src.blockValue.Block.GetLocalizedBlockName());
             if (src != null && !ok) t += "\n" + Kinetic.Text("feFunnelNoBelt", "No belt in front taking items from it");
+            string ff = LogicStore.Field(pos, "f");
+            t += "\n" + string.Format(Kinetic.Text("feFunnelSet", "{0} at a time, filter: {1}"),
+                Logistics.Amount(pos, (int)Fluids.Prop(bv.Block, "FeFunnelAmount", 16f)), ff.Length == 0 ? "-" : ProcessMachine.ItemName(ff));
             return t;
         }
     }
@@ -1802,6 +1879,30 @@ namespace FerroEngrenagem
             if (_blockValue.ischild) return;
             BeltStore.EnsureLoaded();
             if (BeltStore.Funnels.Add(_blockPos)) BeltStore.MarkDirty();
+        }
+
+        // D12: settings (amount, filter) - tap E; hold E: take
+        public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos, EntityAlive _entityFocusing)
+        {
+            return true;
+        }
+
+        public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos, EntityAlive _entityFocusing)
+        {
+            return new BlockActivationCommand[]
+            {
+                new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null),
+                new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null)
+            };
+        }
+
+        public override bool OnBlockActivated(string _commandName, WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
+        {
+            World w = _world as World;
+            if (w != null && FeUi.HandleCommand(_commandName, w, _blockPos, _blockValue, _player)) return true;
+            if (_commandName != "take") return false;
+            takeItemWithTimer(_blockPos, _blockValue, _player, 1f);
+            return true;
         }
 
         public override void OnBlockRemoved(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)

@@ -29,4 +29,368 @@
 			</rect>
 		</window>
 	</append>
+	<!-- BEGIN D12 windows (gen by hand, see FeUi.cs) -->
+	<append xpath="/windows">
+		<window name="feMachine" width="1100" height="700" pos="-550,350" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeMachine, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_wrench"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="654" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="1076" height="560" font_size="24" />
+				<button depth="3" name="feMBtnPick" pos="8,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-608" width="210" height="32" justify="center" text="Receita" font_size="24" />
+				<button depth="3" name="feMBtnPut" pos="226,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="226,-608" width="210" height="32" justify="center" text="Pôr item da mão" font_size="24" />
+				<button depth="3" name="feMBtnTake" pos="444,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="444,-608" width="210" height="32" justify="center" text="Retirar produtos" font_size="24" />
+				<button depth="3" name="feMBtnOnOff" pos="662,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="662,-608" width="210" height="32" justify="center" text="{feonoff}" font_size="24" />
+				<button depth="3" name="feMBtnClose" pos="880,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="880,-608" width="210" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="fePicker" width="1100" height="640" pos="-550,320" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FePicker, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_book"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="594" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<button depth="3" name="fePRow0" pos="8,-8" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv0}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi0}" pos="14,-10" size="36,36" foregroundlayer="true" visible="{fepv0}"/>
+				<label depth="5" pos="58,-16" width="1020" height="30" text="{fept0}" font_size="22" />
+				<button depth="3" name="fePRow1" pos="8,-52" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv1}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi1}" pos="14,-54" size="36,36" foregroundlayer="true" visible="{fepv1}"/>
+				<label depth="5" pos="58,-60" width="1020" height="30" text="{fept1}" font_size="22" />
+				<button depth="3" name="fePRow2" pos="8,-96" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv2}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi2}" pos="14,-98" size="36,36" foregroundlayer="true" visible="{fepv2}"/>
+				<label depth="5" pos="58,-104" width="1020" height="30" text="{fept2}" font_size="22" />
+				<button depth="3" name="fePRow3" pos="8,-140" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv3}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi3}" pos="14,-142" size="36,36" foregroundlayer="true" visible="{fepv3}"/>
+				<label depth="5" pos="58,-148" width="1020" height="30" text="{fept3}" font_size="22" />
+				<button depth="3" name="fePRow4" pos="8,-184" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv4}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi4}" pos="14,-186" size="36,36" foregroundlayer="true" visible="{fepv4}"/>
+				<label depth="5" pos="58,-192" width="1020" height="30" text="{fept4}" font_size="22" />
+				<button depth="3" name="fePRow5" pos="8,-228" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv5}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi5}" pos="14,-230" size="36,36" foregroundlayer="true" visible="{fepv5}"/>
+				<label depth="5" pos="58,-236" width="1020" height="30" text="{fept5}" font_size="22" />
+				<button depth="3" name="fePRow6" pos="8,-272" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv6}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi6}" pos="14,-274" size="36,36" foregroundlayer="true" visible="{fepv6}"/>
+				<label depth="5" pos="58,-280" width="1020" height="30" text="{fept6}" font_size="22" />
+				<button depth="3" name="fePRow7" pos="8,-316" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv7}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi7}" pos="14,-318" size="36,36" foregroundlayer="true" visible="{fepv7}"/>
+				<label depth="5" pos="58,-324" width="1020" height="30" text="{fept7}" font_size="22" />
+				<button depth="3" name="fePRow8" pos="8,-360" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv8}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi8}" pos="14,-362" size="36,36" foregroundlayer="true" visible="{fepv8}"/>
+				<label depth="5" pos="58,-368" width="1020" height="30" text="{fept8}" font_size="22" />
+				<button depth="3" name="fePRow9" pos="8,-404" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv9}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi9}" pos="14,-406" size="36,36" foregroundlayer="true" visible="{fepv9}"/>
+				<label depth="5" pos="58,-412" width="1020" height="30" text="{fept9}" font_size="22" />
+				<label depth="4" pos="450,-548" width="200" height="32" justify="center" text="{fepage}" font_size="24" />
+				<button depth="3" name="fePPrev" pos="8,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-548" width="180" height="32" justify="center" text="&lt;&lt;" font_size="24" />
+				<button depth="3" name="fePNext" pos="716,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="716,-548" width="180" height="32" justify="center" text="&gt;&gt;" font_size="24" />
+				<button depth="3" name="fePClose" pos="912,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="912,-548" width="180" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feConfig" width="900" height="520" pos="-450,260" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeConfig, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_tool"/>
+				<label style="header.name" text="{fetitle}" width="800" />
+			</rect>
+			<rect name="content" pos="0,-46" height="474" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="900" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="876" height="380" font_size="24" />
+				<button depth="3" name="feCMinus" pos="8,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-428" width="170" height="32" justify="center" text="-" font_size="24" />
+				<button depth="3" name="feCPlus" pos="186,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="186,-428" width="170" height="32" justify="center" text="+" font_size="24" />
+				<button depth="3" name="feCMode" pos="364,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="364,-428" width="170" height="32" justify="center" text="Modo" font_size="24" />
+				<button depth="3" name="feCHand" pos="542,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="542,-428" width="170" height="32" justify="center" text="Item da mão" font_size="24" />
+				<button depth="3" name="feCClose" pos="720,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="720,-428" width="170" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feNetwork" width="1100" height="700" pos="-550,350" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeNetwork, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_electric_power"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="654" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="1076" height="560" font_size="22" />
+				<button depth="3" name="feNClose" pos="912,-602" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="912,-608" width="180" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feGuide" width="1200" height="860" pos="-600,430" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeGuide, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_book"/>
+				<label style="header.name" text="{fetitle}" width="1100" />
+			</rect>
+			<rect name="content" pos="0,-46" height="814" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1200" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-12" width="140" height="30" text="Letra:" font_size="24" />
+				<button depth="3" name="feGLetterBack" pos="120,-6" width="60" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="120,-12" width="60" height="32" justify="center" text="&lt;" font_size="24" />
+				<label depth="4" pos="186,-12" width="80" height="30" justify="center" text="{feletter}" font_size="26" />
+				<button depth="3" name="feGLetter" pos="270,-6" width="60" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="270,-12" width="60" height="32" justify="center" text="&gt;" font_size="24" />
+				<label depth="3" pos="12,-48" text="{febody}" width="1176" height="200" font_size="22" />
+				<button depth="3" name="feGRow0" pos="8,-256" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv0}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi0}" pos="14,-258" size="36,36" foregroundlayer="true" visible="{fegv0}"/>
+				<label depth="5" pos="58,-264" width="1120" height="30" text="{fegt0}" font_size="22" />
+				<button depth="3" name="feGRow1" pos="8,-300" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv1}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi1}" pos="14,-302" size="36,36" foregroundlayer="true" visible="{fegv1}"/>
+				<label depth="5" pos="58,-308" width="1120" height="30" text="{fegt1}" font_size="22" />
+				<button depth="3" name="feGRow2" pos="8,-344" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv2}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi2}" pos="14,-346" size="36,36" foregroundlayer="true" visible="{fegv2}"/>
+				<label depth="5" pos="58,-352" width="1120" height="30" text="{fegt2}" font_size="22" />
+				<button depth="3" name="feGRow3" pos="8,-388" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv3}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi3}" pos="14,-390" size="36,36" foregroundlayer="true" visible="{fegv3}"/>
+				<label depth="5" pos="58,-396" width="1120" height="30" text="{fegt3}" font_size="22" />
+				<button depth="3" name="feGRow4" pos="8,-432" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv4}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi4}" pos="14,-434" size="36,36" foregroundlayer="true" visible="{fegv4}"/>
+				<label depth="5" pos="58,-440" width="1120" height="30" text="{fegt4}" font_size="22" />
+				<button depth="3" name="feGRow5" pos="8,-476" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv5}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi5}" pos="14,-478" size="36,36" foregroundlayer="true" visible="{fegv5}"/>
+				<label depth="5" pos="58,-484" width="1120" height="30" text="{fegt5}" font_size="22" />
+				<button depth="3" name="feGRow6" pos="8,-520" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv6}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi6}" pos="14,-522" size="36,36" foregroundlayer="true" visible="{fegv6}"/>
+				<label depth="5" pos="58,-528" width="1120" height="30" text="{fegt6}" font_size="22" />
+				<button depth="3" name="feGRow7" pos="8,-564" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv7}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi7}" pos="14,-566" size="36,36" foregroundlayer="true" visible="{fegv7}"/>
+				<label depth="5" pos="58,-572" width="1120" height="30" text="{fegt7}" font_size="22" />
+				<button depth="3" name="feGRow8" pos="8,-608" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv8}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi8}" pos="14,-610" size="36,36" foregroundlayer="true" visible="{fegv8}"/>
+				<label depth="5" pos="58,-616" width="1120" height="30" text="{fegt8}" font_size="22" />
+				<button depth="3" name="feGRow9" pos="8,-652" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv9}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi9}" pos="14,-654" size="36,36" foregroundlayer="true" visible="{fegv9}"/>
+				<label depth="5" pos="58,-660" width="1120" height="30" text="{fegt9}" font_size="22" />
+				<button depth="3" name="feGRow10" pos="8,-696" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv10}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi10}" pos="14,-698" size="36,36" foregroundlayer="true" visible="{fegv10}"/>
+				<label depth="5" pos="58,-704" width="1120" height="30" text="{fegt10}" font_size="22" />
+				<button depth="3" name="feGRow11" pos="8,-740" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv11}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi11}" pos="14,-742" size="36,36" foregroundlayer="true" visible="{fegv11}"/>
+				<label depth="5" pos="58,-748" width="1120" height="30" text="{fegt11}" font_size="22" />
+				<label depth="4" pos="500,-768" width="200" height="32" justify="center" text="{fepage}" font_size="24" />
+				<button depth="3" name="feGPrev" pos="8,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-768" width="150" height="32" justify="center" text="&lt;&lt;" font_size="24" />
+				<button depth="3" name="feGIndex" pos="166,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="166,-768" width="150" height="32" justify="center" text="Índice" font_size="24" />
+				<button depth="3" name="feGHand" pos="324,-762" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="324,-768" width="170" height="32" justify="center" text="Item da mão" font_size="24" />
+				<button depth="3" name="feGBack" pos="696,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="696,-768" width="150" height="32" justify="center" text="Voltar" font_size="24" />
+				<button depth="3" name="feGNext" pos="884,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="884,-768" width="150" height="32" justify="center" text="&gt;&gt;" font_size="24" />
+				<button depth="3" name="feGClose" pos="1042,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="1042,-768" width="150" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+	</append>
+	<!-- END D12 windows -->
+	<!-- BEGIN D12 windows (tools/gen_ui.py, controllers in FeUi.cs) -->
+	<append xpath="/windows">
+		<window name="feMachine" width="1100" height="700" pos="-550,350" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeMachine, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_wrench"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="654" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="1076" height="560" font_size="24" />
+				<button depth="3" name="feMBtnPick" pos="8,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-608" width="210" height="32" justify="center" text="Receita" font_size="24" />
+				<button depth="3" name="feMBtnPut" pos="226,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="226,-608" width="210" height="32" justify="center" text="Pôr item da mão" font_size="24" />
+				<button depth="3" name="feMBtnTake" pos="444,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="444,-608" width="210" height="32" justify="center" text="Retirar produtos" font_size="24" />
+				<button depth="3" name="feMBtnOnOff" pos="662,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="662,-608" width="210" height="32" justify="center" text="{feonoff}" font_size="24" />
+				<button depth="3" name="feMBtnClose" pos="880,-602" width="210" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="880,-608" width="210" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="fePicker" width="1100" height="640" pos="-550,320" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FePicker, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_book"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="594" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<button depth="3" name="fePRow0" pos="8,-8" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv0}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi0}" pos="14,-10" size="36,36" foregroundlayer="true" visible="{fepv0}"/>
+				<label depth="5" pos="58,-16" width="1020" height="30" text="{fept0}" font_size="22" />
+				<button depth="3" name="fePRow1" pos="8,-52" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv1}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi1}" pos="14,-54" size="36,36" foregroundlayer="true" visible="{fepv1}"/>
+				<label depth="5" pos="58,-60" width="1020" height="30" text="{fept1}" font_size="22" />
+				<button depth="3" name="fePRow2" pos="8,-96" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv2}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi2}" pos="14,-98" size="36,36" foregroundlayer="true" visible="{fepv2}"/>
+				<label depth="5" pos="58,-104" width="1020" height="30" text="{fept2}" font_size="22" />
+				<button depth="3" name="fePRow3" pos="8,-140" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv3}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi3}" pos="14,-142" size="36,36" foregroundlayer="true" visible="{fepv3}"/>
+				<label depth="5" pos="58,-148" width="1020" height="30" text="{fept3}" font_size="22" />
+				<button depth="3" name="fePRow4" pos="8,-184" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv4}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi4}" pos="14,-186" size="36,36" foregroundlayer="true" visible="{fepv4}"/>
+				<label depth="5" pos="58,-192" width="1020" height="30" text="{fept4}" font_size="22" />
+				<button depth="3" name="fePRow5" pos="8,-228" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv5}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi5}" pos="14,-230" size="36,36" foregroundlayer="true" visible="{fepv5}"/>
+				<label depth="5" pos="58,-236" width="1020" height="30" text="{fept5}" font_size="22" />
+				<button depth="3" name="fePRow6" pos="8,-272" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv6}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi6}" pos="14,-274" size="36,36" foregroundlayer="true" visible="{fepv6}"/>
+				<label depth="5" pos="58,-280" width="1020" height="30" text="{fept6}" font_size="22" />
+				<button depth="3" name="fePRow7" pos="8,-316" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv7}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi7}" pos="14,-318" size="36,36" foregroundlayer="true" visible="{fepv7}"/>
+				<label depth="5" pos="58,-324" width="1020" height="30" text="{fept7}" font_size="22" />
+				<button depth="3" name="fePRow8" pos="8,-360" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv8}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi8}" pos="14,-362" size="36,36" foregroundlayer="true" visible="{fepv8}"/>
+				<label depth="5" pos="58,-368" width="1020" height="30" text="{fept8}" font_size="22" />
+				<button depth="3" name="fePRow9" pos="8,-404" width="1084" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fepv9}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fepi9}" pos="14,-406" size="36,36" foregroundlayer="true" visible="{fepv9}"/>
+				<label depth="5" pos="58,-412" width="1020" height="30" text="{fept9}" font_size="22" />
+				<label depth="4" pos="450,-548" width="200" height="32" justify="center" text="{fepage}" font_size="24" />
+				<button depth="3" name="fePPrev" pos="8,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-548" width="180" height="32" justify="center" text="&lt;&lt;" font_size="24" />
+				<button depth="3" name="fePNext" pos="716,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="716,-548" width="180" height="32" justify="center" text="&gt;&gt;" font_size="24" />
+				<button depth="3" name="fePClose" pos="912,-542" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="912,-548" width="180" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feConfig" width="900" height="520" pos="-450,260" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeConfig, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_tool"/>
+				<label style="header.name" text="{fetitle}" width="800" />
+			</rect>
+			<rect name="content" pos="0,-46" height="474" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="900" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="876" height="380" font_size="24" />
+				<button depth="3" name="feCMinus" pos="8,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-428" width="170" height="32" justify="center" text="-" font_size="24" />
+				<button depth="3" name="feCPlus" pos="186,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="186,-428" width="170" height="32" justify="center" text="+" font_size="24" />
+				<button depth="3" name="feCMode" pos="364,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="364,-428" width="170" height="32" justify="center" text="Modo" font_size="24" />
+				<button depth="3" name="feCHand" pos="542,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="542,-428" width="170" height="32" justify="center" text="Item da mão" font_size="24" />
+				<button depth="3" name="feCClose" pos="720,-422" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="720,-428" width="170" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feNetwork" width="1100" height="700" pos="-550,350" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeNetwork, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_electric_power"/>
+				<label style="header.name" text="{fetitle}" width="1000" />
+			</rect>
+			<rect name="content" pos="0,-46" height="654" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1100" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-10" text="{febody}" width="1076" height="560" font_size="22" />
+				<button depth="3" name="feNClose" pos="912,-602" width="180" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="912,-608" width="180" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+		<window name="feGuide" width="1200" height="860" pos="-600,430" anchor="Center" depth="15" cursor_area="true"
+		        controller="FerroEngrenagem.FeGuide, FerroEngrenagem">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_book"/>
+				<label style="header.name" text="{fetitle}" width="1100" />
+			</rect>
+			<rect name="content" pos="0,-46" height="814" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1200" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<label depth="3" pos="12,-12" width="140" height="30" text="Letra:" font_size="24" />
+				<button depth="3" name="feGLetterBack" pos="120,-6" width="60" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="120,-12" width="60" height="32" justify="center" text="&lt;" font_size="24" />
+				<label depth="4" pos="186,-12" width="80" height="30" justify="center" text="{feletter}" font_size="26" />
+				<button depth="3" name="feGLetter" pos="270,-6" width="60" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="270,-12" width="60" height="32" justify="center" text="&gt;" font_size="24" />
+				<label depth="3" pos="12,-48" text="{febody}" width="1176" height="200" font_size="22" />
+				<button depth="3" name="feGRow0" pos="8,-256" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv0}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi0}" pos="14,-258" size="36,36" foregroundlayer="true" visible="{fegv0}"/>
+				<label depth="5" pos="58,-264" width="1120" height="30" text="{fegt0}" font_size="22" />
+				<button depth="3" name="feGRow1" pos="8,-300" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv1}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi1}" pos="14,-302" size="36,36" foregroundlayer="true" visible="{fegv1}"/>
+				<label depth="5" pos="58,-308" width="1120" height="30" text="{fegt1}" font_size="22" />
+				<button depth="3" name="feGRow2" pos="8,-344" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv2}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi2}" pos="14,-346" size="36,36" foregroundlayer="true" visible="{fegv2}"/>
+				<label depth="5" pos="58,-352" width="1120" height="30" text="{fegt2}" font_size="22" />
+				<button depth="3" name="feGRow3" pos="8,-388" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv3}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi3}" pos="14,-390" size="36,36" foregroundlayer="true" visible="{fegv3}"/>
+				<label depth="5" pos="58,-396" width="1120" height="30" text="{fegt3}" font_size="22" />
+				<button depth="3" name="feGRow4" pos="8,-432" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv4}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi4}" pos="14,-434" size="36,36" foregroundlayer="true" visible="{fegv4}"/>
+				<label depth="5" pos="58,-440" width="1120" height="30" text="{fegt4}" font_size="22" />
+				<button depth="3" name="feGRow5" pos="8,-476" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv5}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi5}" pos="14,-478" size="36,36" foregroundlayer="true" visible="{fegv5}"/>
+				<label depth="5" pos="58,-484" width="1120" height="30" text="{fegt5}" font_size="22" />
+				<button depth="3" name="feGRow6" pos="8,-520" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv6}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi6}" pos="14,-522" size="36,36" foregroundlayer="true" visible="{fegv6}"/>
+				<label depth="5" pos="58,-528" width="1120" height="30" text="{fegt6}" font_size="22" />
+				<button depth="3" name="feGRow7" pos="8,-564" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv7}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi7}" pos="14,-566" size="36,36" foregroundlayer="true" visible="{fegv7}"/>
+				<label depth="5" pos="58,-572" width="1120" height="30" text="{fegt7}" font_size="22" />
+				<button depth="3" name="feGRow8" pos="8,-608" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv8}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi8}" pos="14,-610" size="36,36" foregroundlayer="true" visible="{fegv8}"/>
+				<label depth="5" pos="58,-616" width="1120" height="30" text="{fegt8}" font_size="22" />
+				<button depth="3" name="feGRow9" pos="8,-652" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv9}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi9}" pos="14,-654" size="36,36" foregroundlayer="true" visible="{fegv9}"/>
+				<label depth="5" pos="58,-660" width="1120" height="30" text="{fegt9}" font_size="22" />
+				<button depth="3" name="feGRow10" pos="8,-696" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv10}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi10}" pos="14,-698" size="36,36" foregroundlayer="true" visible="{fegv10}"/>
+				<label depth="5" pos="58,-704" width="1120" height="30" text="{fegt10}" font_size="22" />
+				<button depth="3" name="feGRow11" pos="8,-740" width="1184" height="40" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fegv11}"/>
+				<sprite depth="5" atlas="ItemIconAtlas" sprite="{fegi11}" pos="14,-742" size="36,36" foregroundlayer="true" visible="{fegv11}"/>
+				<label depth="5" pos="58,-748" width="1120" height="30" text="{fegt11}" font_size="22" />
+				<label depth="4" pos="500,-768" width="200" height="32" justify="center" text="{fepage}" font_size="24" />
+				<button depth="3" name="feGPrev" pos="8,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-768" width="150" height="32" justify="center" text="&lt;&lt;" font_size="24" />
+				<button depth="3" name="feGIndex" pos="166,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="166,-768" width="150" height="32" justify="center" text="Índice" font_size="24" />
+				<button depth="3" name="feGHand" pos="324,-762" width="170" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="324,-768" width="170" height="32" justify="center" text="Item da mão" font_size="24" />
+				<button depth="3" name="feGBack" pos="696,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="696,-768" width="150" height="32" justify="center" text="Voltar" font_size="24" />
+				<button depth="3" name="feGNext" pos="884,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="884,-768" width="150" height="32" justify="center" text="&gt;&gt;" font_size="24" />
+				<button depth="3" name="feGClose" pos="1042,-762" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="1042,-768" width="150" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
+	</append>
+	<!-- END D12 windows -->
 </configs>

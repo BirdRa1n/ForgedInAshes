@@ -19,7 +19,7 @@ from lxml import etree
 import fe_common as fe
 
 FILE = fe.MOD_DIR / "Data" / "fe_processes.xml"
-KINDS = {"melt", "cast", "press", "turn", "crush", "wash", "mix", "dry", "distill", "spin", "assemble", "sequence"}
+KINDS = {"melt", "cast", "press", "turn", "crush", "wash", "mix", "dry", "distill", "spin", "assemble", "sequence", "boil"}
 BASE_FLUIDS = set()
 
 
@@ -36,7 +36,7 @@ def main():
     problems = []
     items_tree, _ = fe.patched("items.xml")
     blocks_tree, _ = fe.patched("blocks.xml")
-    game_items = {e.get("name") for e in items_tree.iter("item")}
+    game_items = {e.get("name") for e in items_tree.iter("item")} | {e.get("name") for e in blocks_tree.iter("block")}
     game_blocks = {e.get("name") for e in blocks_tree.iter("block")}
     fluids = {f: False for f in base_fluids()}
 

@@ -25,6 +25,7 @@ namespace FerroEngrenagem
             try { Verbose = System.IO.File.Exists(System.IO.Path.Combine(_modInstance.Path, "debug.txt")); }
             catch (System.Exception) { Verbose = false; }
             Processes.Load(_modInstance.Path);
+            Settings.Load(_modInstance.Path);
             Log.Out(LogPrefix + "InitMod: code loaded (" + Assembly.GetExecutingAssembly().GetName().Version + ")");
             var harmony = new Harmony(HarmonyId);
             harmony.PatchAll(Assembly.GetExecutingAssembly());

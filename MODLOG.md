@@ -973,3 +973,27 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   de cima; pré-visualização real ao colocar (`BeltPreviewPatch`, Harmony em `RenderDisplacedCube.update0`, com
   `Belt.SetVirtual` para a vizinhança enxergar a esteira que ainda não existe). `BeltShape` dividido em `BeltLook`
   (cálculo) e `BeltParts` (peças). HD antigo do Suporte removido; `build_feHD.py` não gera mais o Suporte.
+## 2026-11-24: D12 aplicada (cadeia completa, sem modelos novos)
+
+- Pedido: "faça tudo de uma vez, mas não precisa fazer os modelos 3D". Fases F9.0-F9.11 do PLANO_CADEIA.md em código e
+  dados; os blocos novos reusam modelos do mod (ícone = ícone do modelo com tinta). Tamanhos 1x1.
+- C#: `Processes.cs` (2 fluidos de entrada, 3 de saída, subproduto com chance, pressão mínima, calor, registro de
+  fluidos `<fluid class item per>`); `ProcessMachine.cs` reescrito (entradas atrás/embaixo, saídas em cima/direita/
+  esquerda, torre de destilação com seções, liga/desliga, produtos em `FluidState.Out`, colunas novas no
+  fluids.txt: Tanks, Out, Off); `FluidNetwork.cs` (gás com bar: tanques de gás, pressão das fontes, cano FeMaxBar
+  4/12, vazamento; tanques encostados dividem o conteúdo); `FluidControl.cs` (Registro, Retenção, Reguladora,
+  Separador, Alívio, Compressor, Manômetro, Queimador a Gás, Sangrador de Seiva); `Signals.cs` (alavanca, receptor,
+  manômetro, contador -> registro, comporta, embreagem; `FerroEngrenagem_logic.txt`); `Logistics.cs` (divisor,
+  comporta, contador, Braço Mecânico); `Inline.cs` (estações sobre a esteira); `AutoCraft.cs` (baús ligados até 16,
+  escolher receita); `FeUi.cs` + `tools/gen_ui.py` (Painel da Máquina, Seletor de Receita, Configurações, Painel de
+  Rede, Guia de Produção, Manual e Chave de Engenheiro); `Settings.cs` (`Data/fe_settings.xml`, fallback x3).
+- Dados: `tools/gen_chain.py` -> 97 itens, 55 blocos (incl. Seringueira em 5 estágios), 164 processos (Cozinha
+  Industrial gerada das receitas da fogueira x4), 85 receitas, 222 receitas do jogo com peças da cadeia, 10 remoções
+  de atalho. `tools/check_coverage.py`: 559/559 itens do jogo ainda fabricáveis, 16/16 itens só-loot com rota.
+- Validadores: check_xpath 773/0, check_processes 205/0, check_phase3 23/23, check_coverage 0 faltando. DLL compila.
+- Teste do usuário (log 19:16): spam de `NullReferenceException` no binding `fetitle` do fePicker (o jogo pede os
+  bindings ao carregar, sem mundo) e `XUiV_TextList.Cleanup` ao sair (o `<textfield>` numa janela do mod).
+  Corrigido: bindings protegidos (vazios sem mundo / em erro) e busca por texto trocada por filtro de letra.
+  **Não verificado de novo no jogo.** Roteiro: `TESTE_GERAL.md` seção 19.
+- Limites conhecidos: sem modelos (tudo 1x1); Queimador não aquece a Fundição (ela segue com combustível); moldes da
+  vulcanização viraram escolha de receita; números são proposta para o balanceamento; multiplayer depois.

@@ -1,6 +1,6 @@
 # Plano da cadeia completa: todos os itens do jogo pelo mod (proposta D12, pedido do usuário 2026-11-24)
 
-**Status: PROPOSTA.** Nada daqui foi aplicado. O usuário lê, marca o que entra e responde as decisões da seção 11.
+**Status: APLICADA em 2026-11-24 (sem modelos 3D), com as recomendações da seção 11.** Falta o teste no jogo (TESTE_GERAL.md 19).
 
 Este plano continua o [PLANO_CRAFT.md](PLANO_CRAFT.md) (D11), que já trouxe a metalurgia, a química da pólvora e o
 arquivo de processos. Ele junta as fases F8.3 a F8.11 que faltavam e acrescenta o que foi pedido agora:

@@ -36,7 +36,8 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor }
+    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor,
+                            GasTank, Valve, Gauge, Burner, Tapper, TowerSection }
 
     public class FluidPort
     {
@@ -60,7 +61,17 @@ namespace FerroEngrenagem
         public string Made = "";   // F8.1 Casting Table: the item its finished casts are
         public int Count;          // F8.1 Casting Table: finished casts waiting to leave
         public string Stock = "";  // F8.2 process machine: ingredients inside ("item=n,...")
-        public string Pick = "";   // process machine: the recipe the player chose ("" = automatic, first ready)
+        public string Pick = "";   // process machine: the recipe the player chose ("" = automatic, first ready);
+                                   // D12 valves / gauges: their setting
+        // D12 (saved): extra fluid buffers "slot=fluid:litres,..." (process machines: in1, out0..out2), products
+        // waiting "item=n,..." and the machine switched off
+        public string Tanks = "";
+        public string Out = "";
+        public bool Off;
+        // D12 (runtime): pressure of the network at its ports (bar), the pressure it offers at, signal, heat asked
+        public float Bar, InBar, OutBar;
+        public bool Sig;
+        public float HeatAsk;
     }
 
     public class FluidNet
@@ -70,6 +81,11 @@ namespace FerroEngrenagem
         public string Fluid = "";
         public bool Blocked;
         public float FlowPerMin;
+        public float Pressure;     // D12: bar (gases)
+        public float MaxBar = 99f; // D12: the weakest pipe of the network
+        public bool Leak;          // D12: pressure above what its pipes stand: gas escapes
+        public float Volume;       // D12: litres of gas tanks at 1 bar
+        public float Stored;       // litres in its tanks
     }
 
     public static class Fluids
@@ -88,6 +104,15 @@ namespace FerroEngrenagem
         public static bool IsMetal(string f)
         {
             return f != null && f.StartsWith("molten_", System.StringComparison.Ordinal);
+        }
+
+        /// <summary>D12: gases (steam, shale gas, fuel gas, compressed air) have a pressure.</summary>
+        public static bool IsGas(string f)
+        {
+            if (string.IsNullOrEmpty(f)) return false;
+            if (f == Steam) return true;
+            FluidDef d;
+            return Processes.FluidDefs.TryGetValue(f, out d) && d.Class == "gas";
         }
 
         /// <summary>Pipes and Metal Chutes: the blocks a network runs through.</summary>
@@ -109,6 +134,8 @@ namespace FerroEngrenagem
         public static string FluidOfItem(string item, out float litres)
         {
             litres = 0f;
+            foreach (FluidDef d in Processes.FluidDefs.Values)
+                if (d.Item == item && d.Per > 0f) { litres = d.Per; return d.Name; }
             for (int i = 0; i < ItemFluids.GetLength(0); i++)
                 if (ItemFluids[i, 1] == item)
                 {
@@ -122,6 +149,12 @@ namespace FerroEngrenagem
         public static string ItemOfFluid(string fluid, out float litres)
         {
             litres = 0f;
+            FluidDef fd;
+            if (fluid != null && Processes.FluidDefs.TryGetValue(fluid, out fd) && fd.Item != null && fd.Per > 0f)
+            {
+                litres = fd.Per;
+                return fd.Item;
+            }
             for (int i = 0; i < ItemFluids.GetLength(0); i++)
                 if (ItemFluids[i, 0] == fluid)
                 {
@@ -163,6 +196,12 @@ namespace FerroEngrenagem
                     case "smelter": k = FluidKind.Smelter; break;
                     case "caster": k = FluidKind.Caster; break;
                     case "processor": k = FluidKind.Processor; break;
+                    case "gastank": k = FluidKind.GasTank; break;
+                    case "valve": k = FluidKind.Valve; break;
+                    case "gauge": k = FluidKind.Gauge; break;
+                    case "burner": k = FluidKind.Burner; break;
+                    case "tapper": k = FluidKind.Tapper; break;
+                    case "towersection": k = FluidKind.TowerSection; break;
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -206,6 +245,7 @@ namespace FerroEngrenagem
             switch (k)
             {
                 case FluidKind.Tank:
+                case FluidKind.GasTank:
                     foreach (Vector3i d in Dirs)
                     {
                         l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = d, Out = true, Fluid = "" });
@@ -253,11 +293,28 @@ namespace FerroEngrenagem
                     }
                     break;
                 case FluidKind.Processor:
-                    // F8.2: the fluid its processes use comes in at its back
+                    // F8.2 / D12: its fluid inputs (back, bottom) and outputs (top, right, left; a tower base: right
+                    // and left) - ProcessMachine.FluidPorts
+                    ProcessMachine.FluidPorts(world, pos, bv, l);
+                    break;
+                case FluidKind.Valve:
+                    FluidControl.Ports(world, pos, bv, l);
+                    break;
+                case FluidKind.Gauge:
+                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = "" });
+                    break;
+                case FluidKind.Burner:
+                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = "",
+                                          Accepts = FluidControl.BurnerFuels });
+                    break;
+                case FluidKind.Tapper:
+                    l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = FluidControl.Latex });
+                    break;
+                case FluidKind.TowerSection:
                     {
-                        string fin = ProcessMachine.FluidIn(bv.Block);
-                        if (fin != null)
-                            l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = fin });
+                        FluidState ts = FluidStore.Get(pos);
+                        foreach (Vector3i d in Dirs)
+                            if (d.y == 0) l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = d, Out = true, Fluid = ts.Fluid });
                     }
                     break;
                 case FluidKind.SteamEngine:
@@ -407,6 +464,8 @@ namespace FerroEngrenagem
             if (f == MoltenLead) return Text("feFluidMoltenLead", "Molten Lead");
             if (f == MoltenIron) return Text("feFluidMoltenIron", "Molten Iron");
             if (f == MoltenSteel) return Text("feFluidMoltenSteel", "Molten Steel");
+            FluidDef d;
+            if (!string.IsNullOrEmpty(f) && Processes.FluidDefs.TryGetValue(f, out d)) return Text("feFluid_" + f, d.Text);
             return Text("feFluidNone", "empty");
         }
     }
@@ -454,6 +513,9 @@ namespace FerroEngrenagem
                     }
                     if (t.Length >= 10) s.Stock = t[9];
                     if (t.Length >= 11) s.Pick = t[10];
+                    if (t.Length >= 12) s.Tanks = t[11];
+                    if (t.Length >= 13) s.Out = t[12];
+                    if (t.Length >= 14) s.Off = t[13] == "1";
                     states[p] = s;
                 }
             }
@@ -476,7 +538,8 @@ namespace FerroEngrenagem
                       .Append(s.Amount.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
                       .Append(s.Steam.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
                       .Append(s.Mold).Append(';').Append(s.Made).Append(';').Append(s.Count).Append(';')
-                      .Append(s.Stock).Append(';').Append(s.Pick).Append('\n');
+                      .Append(s.Stock).Append(';').Append(s.Pick).Append(';').Append(s.Tanks).Append(';')
+                      .Append(s.Out).Append(';').Append(s.Off ? "1" : "0").Append('\n');
                 }
                 File.WriteAllText(loadedFor, sb.ToString());
                 dirty = false;
@@ -566,7 +629,9 @@ namespace FerroEngrenagem
             // 1. production of this tick
             Dictionary<FluidPort, float> offer = new Dictionary<FluidPort, float>();
             Dictionary<FluidPort, float> demand = new Dictionary<FluidPort, float>();
+            Dictionary<FluidPort, float> offerBar = new Dictionary<FluidPort, float>();
             List<FluidPort> tankPorts = new List<FluidPort>();
+            List<FluidPort> readers = new List<FluidPort>();
             foreach (Vector3i p in FluidStore.Devices)
             {
                 if (!Loaded(world, p)) continue;
@@ -574,6 +639,7 @@ namespace FerroEngrenagem
                 FluidKind k = Fluids.Kind(bv.Block);
                 FluidState s = FluidStore.Get(p);
                 s.LastFlow = 0f;
+                if (k == FluidKind.Tapper) FluidControl.TapperProduce(world, p, bv, s, dt);
                 List<FluidPort> devPorts = Fluids.Ports(world, p);
                 int metalOuts = 0;
                 if (k == FluidKind.Smelter)
@@ -591,7 +657,22 @@ namespace FerroEngrenagem
                             demand[port] = MetalWorks.CasterDemand(world, p, bv, s, dt);
                             break;
                         case FluidKind.Processor:
-                            demand[port] = ProcessMachine.Demand(world, p, bv, s);
+                            if (port.Out) { offer[port] = ProcessMachine.Offer(port, s); offerBar[port] = Fluids.Prop(bv.Block, "FeOutBar", 2f); }
+                            else demand[port] = ProcessMachine.Demand(world, p, bv, s, port);
+                            break;
+                        case FluidKind.Valve:
+                            if (port.Out) { offer[port] = FluidControl.ValveOffer(world, p, bv, s, dt); offerBar[port] = s.OutBar; }
+                            else demand[port] = FluidControl.ValveDemand(world, p, bv, s, dt);
+                            break;
+                        case FluidKind.Gauge:
+                            readers.Add(port);
+                            break;
+                        case FluidKind.Burner:
+                            demand[port] = FluidControl.BurnerDemand(bv, s, dt);
+                            break;
+                        case FluidKind.Tapper:
+                        case FluidKind.TowerSection:
+                            if (s.Amount > 0.01f && s.Fluid.Length > 0) { offer[port] = s.Amount; offerBar[port] = 1.5f; }
                             break;
                         case FluidKind.MechPump:
                         case FluidKind.ElecPump:
@@ -602,10 +683,11 @@ namespace FerroEngrenagem
                             else demand[port] = CondenserIntake(world, p, bv, s) * dt / 60f;
                             break;
                         case FluidKind.SteamEngine:
-                            if (port.Out) offer[port] = s.Steam;
+                            if (port.Out) { offer[port] = s.Steam; offerBar[port] = Fluids.Prop(bv.Block, "FeOutBar", 2f); }
                             else demand[port] = Mathf.Max(0f, Fluids.Prop(bv.Block, "FeWaterTank", 2000f) - s.Amount);
                             break;
                         case FluidKind.Tank:
+                        case FluidKind.GasTank:
                             tankPorts.Add(port);
                             break;
                         case FluidKind.Filler:
@@ -625,6 +707,7 @@ namespace FerroEngrenagem
             List<FluidPort> all = new List<FluidPort>(offer.Keys);
             all.AddRange(demand.Keys);
             all.AddRange(tankPorts);
+            all.AddRange(readers);
             foreach (FluidPort start in all)
             {
                 if (done.Contains(start)) continue;
@@ -637,16 +720,21 @@ namespace FerroEngrenagem
                 if (!members.Contains(start)) members.Add(start);
                 foreach (FluidPort m in members) done.Add(m);
                 foreach (Vector3i pp in net.Pipes) NetByPipe[pp] = net;
-                Flow(world, net, members, offer, demand, dt);
+                Flow(world, net, members, offer, demand, offerBar, dt);
             }
 
-            // 3. the machines turn what they received into their products (and engines run)
+            // 3. joined tanks share their content (communicating vessels, Create-like multi-block tanks)
+            FluidControl.EqualizeTanks(world);
+
+            // 4. the machines turn what they received into their products (and engines run)
             foreach (Vector3i p in FluidStore.Devices)
             {
                 if (!Loaded(world, p)) continue;
                 BlockValue bv = world.GetBlock(p);
                 FluidKind k = Fluids.Kind(bv.Block);
                 if (k == FluidKind.SteamEngine) SteamEngine.Run(world, p, bv, FluidStore.Get(p), dt);
+                else if (k == FluidKind.Burner) FluidControl.BurnerTick(world, p, bv, FluidStore.Get(p), dt);
+                else if (k == FluidKind.Gauge) FluidControl.GaugeTick(world, p, bv, FluidStore.Get(p));
             }
             FluidStore.MarkDirty();
         }
@@ -684,23 +772,30 @@ namespace FerroEngrenagem
         }
 
         // Move fluid inside one network.
+        // D12: gases have a pressure. With gas tanks in the network it is what they hold / their volume at 1 bar; without,
+        // it is the pressure the sources push at, lower when they cannot cover the demand. Sources stop filling the
+        // tanks at their own pressure; demands that ask a minimum pressure get nothing below it; a network above what
+        // its weakest pipe stands (FeMaxBar) leaks.
         static void Flow(World world, FluidNet net, List<FluidPort> members, Dictionary<FluidPort, float> offer,
-                         Dictionary<FluidPort, float> demand, float dt)
+                         Dictionary<FluidPort, float> demand, Dictionary<FluidPort, float> offerBar, float dt)
         {
             // which fluid?
             HashSet<string> fluids = new HashSet<string>();
             List<FluidPort> offers = new List<FluidPort>(), demands = new List<FluidPort>(), tanks = new List<FluidPort>();
+            List<FluidPort> gauges = new List<FluidPort>();
             foreach (FluidPort m in members)
             {
-                if (Fluids.Kind(world.GetBlock(m.Owner).Block) == FluidKind.Tank)
+                FluidKind mk = Fluids.Kind(world.GetBlock(m.Owner).Block);
+                if (mk == FluidKind.Tank || mk == FluidKind.GasTank)
                 {
                     if (m.Out) tanks.Add(m);   // one entry per tank side is enough (Out ports)
                     FluidState ts = FluidStore.Get(m.Owner);
                     if (ts.Amount > 0.01f && ts.Fluid.Length > 0) fluids.Add(ts.Fluid);
                     continue;
                 }
+                if (mk == FluidKind.Gauge) { gauges.Add(m); continue; }
                 float v;
-                if (offer.TryGetValue(m, out v)) { offers.Add(m); if (v > 0.0001f) fluids.Add(m.Fluid); }
+                if (offer.TryGetValue(m, out v)) { offers.Add(m); if (v > 0.0001f && m.Fluid.Length > 0) fluids.Add(m.Fluid); }
                 if (demand.ContainsKey(m)) demands.Add(m);
             }
             // a tank reached through several sides counts once
@@ -708,32 +803,82 @@ namespace FerroEngrenagem
             HashSet<Vector3i> tankOwners = new HashSet<Vector3i>();
             foreach (FluidPort t in tanks) if (tankOwners.Add(t.Owner)) uniqueTanks.Add(t);
 
-            if (fluids.Count > 1) { net.Blocked = true; return; }
+            foreach (Vector3i pp in net.Pipes) net.MaxBar = Mathf.Min(net.MaxBar, Fluids.Prop(world.GetBlock(pp).Block, "FeMaxBar", 4f));
+
+            if (fluids.Count > 1) { net.Blocked = true; Readers(world, gauges, net); return; }
             string fluid = fluids.Count == 1 ? new List<string>(fluids)[0] : "";
             net.Fluid = fluid;
+            bool gas = Fluids.IsGas(fluid);
 
-            float O = 0f, D = 0f;
-            foreach (FluidPort o in offers) if (o.Fluid == fluid || fluid.Length == 0) O += offer[o];
-            List<FluidPort> wanted = new List<FluidPort>();
+            // tanks that can take this fluid: liquid tanks hold liquids, gas tanks gases
+            List<FluidPort> useTanks = new List<FluidPort>();
+            float vol = 0f, stored = 0f;
+            foreach (FluidPort t in uniqueTanks)
+            {
+                FluidKind tk = Fluids.Kind(world.GetBlock(t.Owner).Block);
+                if (fluid.Length > 0 && (tk == FluidKind.GasTank) != gas) continue;
+                FluidState ts = FluidStore.Get(t.Owner);
+                if (ts.Amount > 0.01f && ts.Fluid != fluid) continue;
+                useTanks.Add(t);
+                vol += Fluids.Prop(world.GetBlock(t.Owner).Block, "FeFluidCapacity", 4000f);
+                stored += ts.Amount;
+            }
+
+            float O = 0f, srcBar = 0f;
+            foreach (FluidPort o in offers)
+                if (o.Fluid == fluid || fluid.Length == 0)
+                {
+                    O += offer[o];
+                    float b;
+                    if (offer[o] > 0.0001f && offerBar.TryGetValue(o, out b)) srcBar = Mathf.Max(srcBar, b);
+                }
+            if (gas && srcBar <= 0f && O > 0f) srcBar = 1f;
+
+            // demand that wants this fluid (pressure checked below)
+            float Dall = 0f;
+            List<FluidPort> want0 = new List<FluidPort>();
             float bl;
             foreach (FluidPort d in demands)
                 if (d.Fluid == fluid || fluid.Length == 0 ||
-                    (d.Accepts != null ? (d.Fluid.Length == 0 && System.Array.IndexOf(d.Accepts, fluid) >= 0)
+                    (d.Accepts != null ? (d.Fluid.Length == 0 && (System.Array.IndexOf(d.Accepts, fluid) >= 0 || System.Array.IndexOf(d.Accepts, "*") >= 0))
                                        : (d.Fluid.Length == 0 && Fluids.ItemOfFluid(fluid, out bl) != null)))
-                { D += demand[d]; wanted.Add(d); }
+                { Dall += demand[d]; want0.Add(d); }
+
+            float P = 0f;
+            if (gas)
+            {
+                if (vol > 0f) P = stored / vol;
+                else P = Dall > 0f ? srcBar * Mathf.Clamp01(O / Dall) : (O > 0f ? srcBar : 0f);
+            }
+            net.Pressure = P;
+            net.Volume = vol;
+
+            float D = 0f;
+            List<FluidPort> wanted = new List<FluidPort>();
+            foreach (FluidPort d in want0)
+            {
+                FluidState ds = FluidStore.Get(d.Owner);
+                ds.InBar = P;
+                float need = FluidControl.MinBar(world, d);
+                if (gas && need > 0f && P + 0.001f < need) { ds.Note = "pressure"; continue; }
+                D += demand[d];
+                wanted.Add(d);
+            }
 
             float direct = Mathf.Min(O, D);
             float spareOffer = O - direct, missing = D - direct;
 
-            // tanks: absorb the spare offer, cover the missing demand
+            // tanks: absorb the spare offer (gas: only up to the sources' pressure and the tank's rating), cover the
+            // missing demand
             float tankIn = 0f, tankOut = 0f;
             if (fluid.Length > 0)
             {
-                foreach (FluidPort t in uniqueTanks)
+                foreach (FluidPort t in useTanks)
                 {
                     FluidState ts = FluidStore.Get(t.Owner);
-                    if (ts.Amount > 0.01f && ts.Fluid != fluid) continue;
-                    float cap = Fluids.Prop(world.GetBlock(t.Owner).Block, "FeFluidCapacity", 4000f);
+                    Block tb = world.GetBlock(t.Owner).Block;
+                    float cap = Fluids.Prop(tb, "FeFluidCapacity", 4000f);
+                    if (gas) cap *= Mathf.Min(srcBar > 0f ? srcBar : P, Fluids.Prop(tb, "FeMaxBar", 10f));
                     if (spareOffer > 0f)
                     {
                         float put = Mathf.Min(spareOffer, cap - ts.Amount);
@@ -751,6 +896,17 @@ namespace FerroEngrenagem
             // what the offers really gave and the demands really got
             float given = direct + tankIn;            // taken from the offers
             float received = direct + tankOut;        // delivered to the demands
+            if (gas && P > net.MaxBar + 0.01f)
+            {
+                // above what the pipes stand: it leaks (a fifth of what moves and 2% of the tanks per tick)
+                net.Leak = true;
+                received *= 0.8f;
+                foreach (FluidPort t in useTanks)
+                {
+                    FluidState ts = FluidStore.Get(t.Owner);
+                    ts.Amount *= 0.98f;
+                }
+            }
             foreach (FluidPort o in offers)
             {
                 if (O <= 0f) break;
@@ -764,6 +920,26 @@ namespace FerroEngrenagem
                 Got(world, d, share, dt, fluid);
             }
             net.FlowPerMin = Mathf.Max(given, received) / dt * 60f;
+            stored = 0f;
+            foreach (FluidPort t in useTanks) stored += FluidStore.Get(t.Owner).Amount;
+            net.Stored = stored;
+            if (gas && vol > 0f) net.Pressure = stored / vol;
+            Readers(world, gauges, net);
+        }
+
+        // gauges read the network they are on
+        static void Readers(World world, List<FluidPort> gauges, FluidNet net)
+        {
+            foreach (FluidPort g in gauges)
+            {
+                FluidState gs = FluidStore.Get(g.Owner);
+                gs.Fluid = net.Fluid;
+                gs.Bar = net.Pressure;
+                gs.LastFlow = net.FlowPerMin;
+                gs.Amount = net.Stored;
+                gs.Steam = net.Volume;
+                gs.Note = net.Blocked ? "blocked" : net.Leak ? "leak" : "";
+            }
         }
 
         // An offer port gave `amount` litres.
@@ -772,11 +948,13 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(o.Owner);
             FluidKind k = Fluids.Kind(world.GetBlock(o.Owner).Block);
             if (k == FluidKind.Condenser || k == FluidKind.SteamEngine) s.Steam = Mathf.Max(0f, s.Steam - amount);
-            else if (k == FluidKind.Filler || k == FluidKind.Smelter)
+            else if (k == FluidKind.Filler || k == FluidKind.Smelter || k == FluidKind.Tapper || k == FluidKind.TowerSection
+                     || k == FluidKind.Valve)
             {
                 s.Amount = Mathf.Max(0f, s.Amount - amount);
                 if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
             }
+            else if (k == FluidKind.Processor) ProcessMachine.Took(o, s, amount);
             s.LastFlow += amount / dt * 60f;
         }
 
@@ -787,9 +965,18 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(d.Owner);
             FluidKind k = Fluids.Kind(bv.Block);
             if (k == FluidKind.SteamEngine) { s.Amount += amount; s.Fluid = Fluids.Water; }
-            else if (k == FluidKind.Caster || k == FluidKind.Processor)
+            else if (k == FluidKind.Processor)
+            {
+                if (amount > 0f && fluid.Length > 0) { ProcessMachine.Got(d, s, amount, fluid); s.LastFlow += amount / dt * 60f; }
+            }
+            else if (k == FluidKind.Caster || k == FluidKind.Valve)
             {
                 if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
+                if (k == FluidKind.Valve) FluidControl.ValveGot(world, d.Owner, bv, s);
+            }
+            else if (k == FluidKind.Burner)
+            {
+                if (amount > 0f) { FluidControl.BurnerGot(bv, s, amount); s.LastFlow += amount / dt * 60f; }
             }
             else if (k == FluidKind.Bottler || k == FluidKind.Refinery)
             {
@@ -803,7 +990,6 @@ namespace FerroEngrenagem
             }
         }
     }
-
     // ------------------------------------------------------------------ pipe and tank blocks
     [UnityEngine.Scripting.Preserve]
     public class BlockFeFluid : Block
@@ -848,6 +1034,7 @@ namespace FerroEngrenagem
         {
             BlockActivationCommand[] r = Commands(_world, _blockPos);
             RecipeBook.AddCommand(this, ref r);
+            FeUi.AddNetCommand(_entityFocusing, ref r);
             return r;
         }
 
@@ -855,17 +1042,15 @@ namespace FerroEngrenagem
         {
             BlockActivationCommand take = new BlockActivationCommand("take", "hand", Pickup.CanBuildHere(_world, _blockPos), false, null);
             FluidKind k = Fluids.Kind(this);
+            if (k == FluidKind.Valve || k == FluidKind.Gauge)
+                return new BlockActivationCommand[] { new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null), take };
+            if (k == FluidKind.Burner)
+                return new BlockActivationCommand[] { new BlockActivationCommand("fe_put", "loot_sort", true, false, null), take };
             if (k == FluidKind.Filler)
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_pour", "loot_sort", true, false, null), take };
             if (k == FluidKind.Bottler)
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_bottle", "loot_sort", true, false, null), take };
-            if (k == FluidKind.Processor)
-                return new BlockActivationCommand[]
-                {
-                    new BlockActivationCommand("fe_put", "loot_sort", true, false, null),
-                    new BlockActivationCommand(ProcessMachine.PickCommand, "tool", true, false, null),
-                    new BlockActivationCommand("fe_cast_take", "hand", true, false, null), take
-                };
+            if (k == FluidKind.Processor) return ProcessMachine.Commands(take);
             if (k == FluidKind.Caster)
                 return new BlockActivationCommand[]
                 {
@@ -910,9 +1095,16 @@ namespace FerroEngrenagem
                     : string.Format(Kinetic.Text("feBottled", "Took {0}x {1}"), st.count, st.itemValue.ItemClass.GetLocalizedItemName()), false, false, 0f);
                 return true;
             }
-            if (Fluids.Kind(this) == FluidKind.Processor && (_commandName == "fe_put" || _commandName == "fe_cast_take" || _commandName == ProcessMachine.PickCommand) && w != null)
+            if (w != null && FeUi.HandleCommand(_commandName, w, _blockPos, _blockValue, _player)) return true;
+            if (Fluids.Kind(this) == FluidKind.Processor && ProcessMachine.IsCommand(_commandName) && w != null)
             {
-                GameManager.ShowTooltip(_player, ProcessMachine.Activate(w, Fluids.ParentOf(w, _blockPos, _blockValue), _commandName, _player), false, false, 0f);
+                string pm = ProcessMachine.Activate(w, Fluids.ParentOf(w, _blockPos, _blockValue), _commandName, _player);
+                if (pm != null) GameManager.ShowTooltip(_player, pm, false, false, 0f);
+                return true;
+            }
+            if (Fluids.Kind(this) == FluidKind.Burner && _commandName == "fe_put" && w != null)
+            {
+                GameManager.ShowTooltip(_player, FluidControl.BurnerPutHeld(w, _blockPos, _player), false, false, 0f);
                 return true;
             }
             if ((_commandName == "fe_mold" || _commandName == "fe_cast_take") && w != null)
@@ -932,7 +1124,9 @@ namespace FerroEngrenagem
             FluidKind k = Fluids.Kind(this);
             string hint = k == FluidKind.Filler ? Kinetic.Text("feHintPour", "{0} pour the item in your hand - hold {0}: take")
                         : k == FluidKind.Bottler ? Kinetic.Text("feHintBottle", "{0} take the bottled items - hold {0}: take")
-                        : k == FluidKind.Processor ? Kinetic.Text("feHintProc", "{0} put the item in your hand - hold {0}: take the products or take")
+                        : k == FluidKind.Processor ? Kinetic.Text("feHintPanel", "{0} panel - hold {0}: put, recipe, take")
+                        : k == FluidKind.Valve || k == FluidKind.Gauge ? Kinetic.Text("feHintConfig", "{0} settings - hold {0}: take")
+                        : k == FluidKind.Burner ? Kinetic.Text("feHintBurner", "{0} put the fuel in your hand - hold {0}: take")
                         : k == FluidKind.Caster ? Kinetic.Text("feHintCaster", "{0} take the casts - hold {0}: change the mold (the one in your hand) or take")
                         : Kinetic.Text("feHintTake", "Hold {0} to take");
             return KineticLookController.Escape(FluidText.Describe(_blockPos, _blockValue, true)) + "\n" + hint;
@@ -961,8 +1155,15 @@ namespace FerroEngrenagem
                         return (name + "\n" + Fluids.Text("feFluidIdle", "No flow")).Trim();
                     if (net.Blocked)
                         return (name + "\n" + Fluids.Text("feFluidBlocked", "BLOCKED: two different fluids in this pipe")).Trim();
-                    return (name + "\n" + string.Format(Fluids.Text("feFluidFlow", "{0}: {1} L/min"),
-                        Fluids.FluidName(net.Fluid), Mathf.RoundToInt(net.FlowPerMin))).Trim();
+                    {
+                        string t = name + "\n" + string.Format(Fluids.Text("feFluidFlow", "{0}: {1} L/min"),
+                            Fluids.FluidName(net.Fluid), Mathf.RoundToInt(net.FlowPerMin));
+                        if (Fluids.IsGas(net.Fluid))
+                            t += "\n" + string.Format(Fluids.Text("fePipeBar", "Pressure {0} bar (this pipe stands {1})"),
+                                net.Pressure.ToString("0.0", CultureInfo.InvariantCulture), Mathf.RoundToInt(Fluids.Prop(bv.Block, "FeMaxBar", 4f)));
+                        if (net.Leak) t += "\n" + Fluids.Text("fePipeLeak", "LEAKING: the pressure is above what the pipes stand (use High Pressure Pipes)");
+                        return t.Trim();
+                    }
                 }
                 case FluidKind.Filler:
                 case FluidKind.Bottler:
@@ -986,6 +1187,20 @@ namespace FerroEngrenagem
                     if (s.Note == "power") t += "\n" + Fluids.Text("feFluidNoPower", "No power: wire it to a power source");
                     return t.Trim();
                 }
+                case FluidKind.GasTank:
+                    {
+                        float cap = Fluids.Prop(bv.Block, "FeFluidCapacity", 2000f);
+                        return (name + "\n" + string.Format(Fluids.Text("feGasStored", "{0}: {1} L = {2} bar (max {3})"),
+                            Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),
+                            (s.Amount / Mathf.Max(1f, cap)).ToString("0.0", CultureInfo.InvariantCulture),
+                            Mathf.RoundToInt(Fluids.Prop(bv.Block, "FeMaxBar", 10f)))).Trim();
+                    }
+                case FluidKind.Valve:
+                case FluidKind.Gauge:
+                case FluidKind.Burner:
+                case FluidKind.Tapper:
+                case FluidKind.TowerSection:
+                    return (name + "\n" + FluidControl.Describe(world, owner, bv, s)).Trim();
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
                         Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),

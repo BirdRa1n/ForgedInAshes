@@ -170,6 +170,7 @@ namespace FerroEngrenagem
                 if (ws == null || r == null || ws.IsUserAccessing()) continue;
                 RecipeQueueItem[] q = ws.Queue;
                 if (!QueueEmpty(q)) continue;
+                PullLinked(world, p, r, e);
                 bool all = true;
                 foreach (ItemStack ing in r.ingredients)
                 {
@@ -200,6 +201,173 @@ namespace FerroEngrenagem
                 dirty = true;
             }
             foreach (Vector3i p in gone) { Drop(world, p); entries.Remove(p); dirty = true; }
+        }
+
+        // ------------------------------------------------------------ D12 / N09: crates linked to the machine
+        static readonly Vector3i[] Dirs6 =
+        {
+            new Vector3i(1, 0, 0), new Vector3i(-1, 0, 0), new Vector3i(0, 1, 0),
+            new Vector3i(0, -1, 0), new Vector3i(0, 0, 1), new Vector3i(0, 0, -1)
+        };
+
+        static TEFeatureStorage StorageAt(World world, Vector3i c, out TileEntityComposite tc)
+        {
+            tc = null;
+            BlockValue bv = world.GetBlock(c);
+            if (bv.isair || bv.ischild) return null;
+            tc = world.GetTileEntity(c) as TileEntityComposite;
+            return tc == null ? null : tc.GetFeature<TEFeatureStorage>();
+        }
+
+        const int MaxCrates = 16;
+
+        /// <summary>Crates touching the machine, and crates touching those (up to MaxCrates).</summary>
+        public static List<Vector3i> LinkedCrates(World world, Vector3i machine)
+        {
+            List<Vector3i> found = new List<Vector3i>();
+            HashSet<Vector3i> seen = new HashSet<Vector3i>();
+            Queue<Vector3i> q = new Queue<Vector3i>();
+            // the machine's own cells (multiblocks: every cell whose parent is the machine)
+            List<Vector3i> cells = new List<Vector3i>();
+            for (int dx = -2; dx <= 2; dx++)
+                for (int dy = 0; dy <= 2; dy++)
+                    for (int dz = -2; dz <= 2; dz++)
+                    {
+                        Vector3i c = new Vector3i(machine.x + dx, machine.y + dy, machine.z + dz);
+                        BlockValue cb = world.GetBlock(c);
+                        if (c == machine || (cb.ischild && Fluids.ParentOf(world, c, cb) == machine)) cells.Add(c);
+                    }
+            foreach (Vector3i c in cells) seen.Add(c);
+            foreach (Vector3i c in cells)
+                foreach (Vector3i d in Dirs6)
+                {
+                    Vector3i n = new Vector3i(c.x + d.x, c.y + d.y, c.z + d.z);
+                    if (seen.Contains(n)) continue;
+                    seen.Add(n);
+                    TileEntityComposite tc;
+                    if (StorageAt(world, n, out tc) != null) q.Enqueue(n);
+                }
+            while (q.Count > 0 && found.Count < MaxCrates)
+            {
+                Vector3i c = q.Dequeue();
+                found.Add(c);
+                foreach (Vector3i d in Dirs6)
+                {
+                    Vector3i n = new Vector3i(c.x + d.x, c.y + d.y, c.z + d.z);
+                    if (seen.Contains(n)) continue;
+                    seen.Add(n);
+                    TileEntityComposite tc;
+                    if (StorageAt(world, n, out tc) != null) q.Enqueue(n);
+                }
+            }
+            return found;
+        }
+
+        /// <summary>Fill the store from the linked crates, only when the whole recipe is there (never half of it).</summary>
+        static void PullLinked(World world, Vector3i p, Recipe r, Entry e)
+        {
+            Block b = world.GetBlock(p).Block;
+            if (b.Properties != null && b.Properties.Contains("FeLinkCrates") && !b.Properties.GetBool("FeLinkCrates")) return;
+            Dictionary<string, int> missing = new Dictionary<string, int>();
+            foreach (ItemStack ing in r.ingredients)
+            {
+                if (ing.itemValue.ItemClass == null || ing.count <= 0) continue;
+                string n = ing.itemValue.ItemClass.GetItemName();
+                int have;
+                e.Store.TryGetValue(n, out have);
+                int miss = ing.count - have;
+                if (miss > 0) missing[n] = (missing.ContainsKey(n) ? missing[n] : 0) + miss;
+            }
+            if (missing.Count == 0) return;
+            List<Vector3i> crates = LinkedCrates(world, p);
+            if (crates.Count == 0) return;
+            Dictionary<string, int> avail = new Dictionary<string, int>();
+            foreach (Vector3i c in crates)
+            {
+                TileEntityComposite tc;
+                TEFeatureStorage st = StorageAt(world, c, out tc);
+                if (st == null || st.ItemGrid == null) continue;
+                if (tc.IsUserAccessing()) return;   // a player is using one: wait
+                ItemStackGrid g = st.ItemGrid;
+                for (int i = 0; i < g.Length; i++)
+                {
+                    ItemStack it = g[i];
+                    if (it == null || it.IsEmpty() || it.itemValue.ItemClass == null) continue;
+                    string n = it.itemValue.ItemClass.GetItemName();
+                    if (!missing.ContainsKey(n)) continue;
+                    avail[n] = (avail.ContainsKey(n) ? avail[n] : 0) + it.count;
+                }
+            }
+            foreach (KeyValuePair<string, int> kv in missing)
+            {
+                int a;
+                if (!avail.TryGetValue(kv.Key, out a) || a < kv.Value) return;
+            }
+            foreach (KeyValuePair<string, int> kv in missing)
+            {
+                int left = kv.Value;
+                foreach (Vector3i c in crates)
+                {
+                    if (left <= 0) break;
+                    TileEntityComposite tc;
+                    TEFeatureStorage st = StorageAt(world, c, out tc);
+                    if (st == null || st.ItemGrid == null) continue;
+                    ItemStackGrid g = st.ItemGrid;
+                    for (int i = 0; i < g.Length && left > 0; i++)
+                    {
+                        ItemStack it = g[i];
+                        if (it == null || it.IsEmpty() || it.itemValue.ItemClass == null || it.itemValue.ItemClass.GetItemName() != kv.Key) continue;
+                        int n = Mathf.Min(left, it.count);
+                        ItemStack rest = it.Clone();
+                        rest.count -= n;
+                        st.UpdateSlot(i, rest.count > 0 ? rest : ItemStack.Empty.Clone());
+                        tc.SetModified();
+                        left -= n;
+                    }
+                }
+                int have;
+                e.Store.TryGetValue(kv.Key, out have);
+                e.Store[kv.Key] = have + kv.Value - left;
+            }
+            dirty = true;
+            BeltMachines.Note(world, p, "took the ingredients of " + r.GetName() + " from " + crates.Count + " linked crate(s)");
+        }
+
+        /// <summary>D12 Recipe Picker: the recipes of this machine.</summary>
+        public static List<Recipe> Recipes(Block b)
+        {
+            return RecipesOf(b.GetBlockName());
+        }
+
+        public static string Current(Vector3i p)
+        {
+            EnsureLoaded();
+            Entry e;
+            return entries.TryGetValue(p, out e) && e.On ? e.Recipe : "";
+        }
+
+        /// <summary>Choose a recipe by name (null = off).</summary>
+        public static string Choose(World world, Vector3i p, Block b, string recipe)
+        {
+            EnsureLoaded();
+            Entry e;
+            if (!entries.TryGetValue(p, out e)) { e = new Entry(); entries[p] = e; }
+            if (recipe == null)
+            {
+                Drop(world, p);
+                e.On = false;
+                dirty = true;
+                return Kinetic.Text("feAutoOff", "Fixed recipe off");
+            }
+            Recipe r = null;
+            foreach (Recipe x in RecipesOf(b.GetBlockName())) if (x.GetName() == recipe) { r = x; break; }
+            if (r == null) return Kinetic.Text("feAutoNone", "This machine has no recipes");
+            if (r.GetName() != e.Recipe) Drop(world, p);
+            e.Recipe = r.GetName();
+            e.Area = r.craftingArea ?? "";
+            e.On = true;
+            dirty = true;
+            return string.Format(Kinetic.Text("feAutoOn", "Fixed recipe: {0}"), Localization.Get(e.Recipe, false));
         }
 
         static void Drop(World world, Vector3i p)
@@ -318,7 +486,8 @@ namespace FerroEngrenagem
             __result.CopyTo(r, 0);
             r[__result.Length] = new BlockActivationCommand("fe_autocraft", "electric_switch", true, false, null);
             // F8.0 (N10): choose the production without crafting it by hand first
-            System.Array.Resize(ref r, r.Length + 2);
+            System.Array.Resize(ref r, r.Length + 3);
+            r[r.Length - 3] = new BlockActivationCommand(FeUi.CraftPickCommand, "tool", true, false, null);
             r[r.Length - 2] = new BlockActivationCommand("fe_recipe_next", "loot_sort", true, false, null);
             r[r.Length - 1] = new BlockActivationCommand("fe_recipe_prev", "loot_sort", true, false, null);
             __result = r;
@@ -336,9 +505,10 @@ namespace FerroEngrenagem
                 __result = true;
                 return false;
             }
+            World w = _world as World;
+            if (w != null && FeUi.HandleCommand(_commandName, w, _blockPos, w.GetBlock(_blockPos), _player)) { __result = true; return false; }
             if (_commandName != "fe_autocraft" && _commandName != "fe_recipe_next" && _commandName != "fe_recipe_prev")
                 return true;
-            World w = _world as World;
             if (w != null)
             {
                 string msg;
