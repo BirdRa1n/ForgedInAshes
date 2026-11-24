@@ -96,3 +96,11 @@ Antes de começar:
    - a Prensa e a Serralheria sobem e descem;
    - a Serraria, o Torno e o Laboratório giram rápido;
    - o Tear, a Misturadora e o braço da Robótica giram devagar.
+
+## 7. Escolher produção (F8.0)
+
+1. Numa máquina do mod (por exemplo a Prensa), segure E e escolha "Próxima produção".
+   - Aparece "Produção 1/N: <item>" e a receita fixa liga sem fabricar à mão.
+   - "Próxima produção" e "Produção anterior" percorrem a lista; ao trocar, os ingredientes guardados caem no chão.
+2. Leve os ingredientes por esteira: a máquina fabrica sozinha, como na parte 4.
+3. No log, ao abrir o jogo, aparece `[FerroEngrenagem] processes: 0 active, 10 planned`.

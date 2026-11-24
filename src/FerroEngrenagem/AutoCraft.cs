@@ -244,6 +244,41 @@ namespace FerroEngrenagem
             return string.Format(Kinetic.Text("feAutoOn", "Fixed recipe: {0}"), Localization.Get(e.Recipe, false));
         }
 
+        /// <summary>F8.0 (N10, "Choose production"): the recipes of this machine's craft area, in a stable order.</summary>
+        static List<Recipe> RecipesOf(string area)
+        {
+            List<Recipe> l = new List<Recipe>();
+            List<Recipe> all = CraftingManager.GetAllRecipes();
+            if (all == null) return l;
+            foreach (Recipe r in all)
+                if (r != null && r.craftingArea == area && !l.Contains(r)) l.Add(r);
+            l.Sort(delegate (Recipe a, Recipe b) { return string.CompareOrdinal(a.GetName(), b.GetName()); });
+            return l;
+        }
+
+        /// <summary>Radial commands "next / previous production": pick the recipe without crafting it by hand first.
+        /// Turns the fixed recipe on; a different recipe drops the ingredients stored for the old one.</summary>
+        public static string Cycle(World world, Vector3i p, string area, int step)
+        {
+            EnsureLoaded();
+            List<Recipe> l = RecipesOf(area);
+            if (l.Count == 0) return Kinetic.Text("feAutoNone", "This machine has no recipes");
+            Entry e;
+            if (!entries.TryGetValue(p, out e)) { e = new Entry(); entries[p] = e; }
+            int at = -1;
+            for (int i = 0; i < l.Count; i++)
+                if (l[i].GetName() == e.Recipe && l[i].craftingArea == e.Area) { at = i; break; }
+            int next = at < 0 ? (step > 0 ? 0 : l.Count - 1) : ((at + step) % l.Count + l.Count) % l.Count;
+            Recipe r = l[next];
+            if (r.GetName() != e.Recipe) Drop(world, p);
+            e.Recipe = r.GetName();
+            e.Area = r.craftingArea ?? "";
+            e.On = true;
+            dirty = true;
+            return string.Format(Kinetic.Text("feAutoPick", "Production {0}/{1}: {2}"), next + 1, l.Count,
+                                 Localization.Get(e.Recipe, false));
+        }
+
         public static string Describe(Vector3i p)
         {
             EnsureLoaded();
@@ -277,6 +312,10 @@ namespace FerroEngrenagem
             BlockActivationCommand[] r = new BlockActivationCommand[__result.Length + 1];
             __result.CopyTo(r, 0);
             r[__result.Length] = new BlockActivationCommand("fe_autocraft", "electric_switch", true, false, null);
+            // F8.0 (N10): choose the production without crafting it by hand first
+            System.Array.Resize(ref r, r.Length + 2);
+            r[r.Length - 2] = new BlockActivationCommand("fe_recipe_next", "loot_sort", true, false, null);
+            r[r.Length - 1] = new BlockActivationCommand("fe_recipe_prev", "loot_sort", true, false, null);
             __result = r;
         }
     }
@@ -286,11 +325,18 @@ namespace FerroEngrenagem
     {
         public static bool Prefix(string _commandName, WorldBase _world, Vector3i _blockPos, EntityPlayerLocal _player, ref bool __result)
         {
-            if (_commandName != "fe_autocraft") return true;
+            if (_commandName != "fe_autocraft" && _commandName != "fe_recipe_next" && _commandName != "fe_recipe_prev")
+                return true;
             World w = _world as World;
             if (w != null)
             {
-                string msg = AutoCraft.Toggle(w, _blockPos);
+                string msg;
+                if (_commandName == "fe_autocraft") msg = AutoCraft.Toggle(w, _blockPos);
+                else
+                {
+                    BlockValue bv = w.GetBlock(_blockPos);
+                    msg = AutoCraft.Cycle(w, _blockPos, bv.Block.GetBlockName(), _commandName == "fe_recipe_next" ? 1 : -1);
+                }
                 GameManager.ShowTooltip(_player, msg, false, false, 0f);
                 Log.Out(FerroEngrenagemMod.LogPrefix + "autocraft at " + _blockPos + ": " + msg);
             }

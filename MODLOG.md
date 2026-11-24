@@ -790,3 +790,10 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Tirar uma Esteira com Filtro deixava o item flutuando: o filtro é apagado ao remover o bloco, filtros órfãos são limpos (`PruneFilters`) e o desenho ignora posições sem filtro.
 - Funil: funciona nos dois sentidos (`Funnel.Route`: baú/máquina de um lado, esteira do outro), registra-se de novo ao olhar para ele e loga `belt -> feFunnel at ...: took ...`.
 - Salvar com itens nas esteiras: confirmado no jogo.
+
+## 2026-11-23: F8.0 (craft em cadeia, D11 aprovado)
+- `tools/craft_matrix.py`: as 600 receitas do jogo recebem um modelo de cadeia (0 sem modelo) → `tools/out/craft_matrix.csv`.
+- `Mods/FerroEngrenagem/Data/fe_processes.xml` (fora de Config/, para o jogo não tratar como patch): fluidos, máquinas, itens e processos. A linha da bala 9mm está toda como `planned`. `Processes.cs` lê o arquivo no InitMod; `tools/check_processes.py` valida.
+- Painel de receita (N10): comandos "Próxima produção" / "Produção anterior" (`AutoCraft.Cycle`, receitas da craft_area = nome do bloco via `CraftingManager.GetAllRecipes()`).
+- Site de tutoriais: `tools/gen_site.py` → `site/` (estático; Vercel com Root Directory = site). Gerado dos dados do mod: página por item fe*, por máquina e por `<chain>`.
+- Nota: no pt-BR do jogo, `resourceBulletCasing` se chama "Revestimento de balas".

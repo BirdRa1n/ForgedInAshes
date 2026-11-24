@@ -240,7 +240,7 @@ script (fase F8.0) lista receita por receita com o modelo e os produtos intermed
 
 | Fase | Entrega | Prova no jogo |
 |---|---|---|
-| **F8.0** | Arquivo de processos, validador, planilha de cobertura (`tools/craft_matrix.py` → CSV com as ~600 receitas e o modelo de cada uma), painel de receita (N10) | Painel abre e escolhe receita; validador passa |
+| **F8.0** [feito, falta teste] | Arquivo de processos, validador, planilha de cobertura (`tools/craft_matrix.py` → CSV com as ~600 receitas e o modelo de cada uma), painel de receita (N10) | Painel abre e escolhe receita; validador passa |
 | **F8.1** | Metalurgia: Fundição como fonte de fluido, Calha, Mesa de Moldagem, moldes de Cápsula, Ponta, Lingote, Chapa, Tubo e Engrenagem, revestimento | Latão vira cápsula bruta; molde errado recusa; sem revestimento recusa |
 | **F8.2** | Química: Triturador, Lavadora, Secador, uso da Misturadora | Carvão + salitre viram pólvora sem a mão do jogador |
 | **F8.3** | Montadora com baús ligados + Prensa em Linha | **Bala 9mm** sai sozinha da linha completa (exemplo 4.1) |
@@ -271,6 +271,9 @@ commit próprios.
 | D11-7 | Loot de peças intermediárias (cápsulas, pontas, pólvora) | manter / reduzir | Fica para o balanceamento |
 
 ---
+
+**Aprovado pelo usuário (2026-11-23):** as recomendações de D11-1 a D11-4 valem como decididas. D11-5 a D11-7
+ficam com a recomendação até o balanceamento.
 
 ## 9. Próximo passo
 
