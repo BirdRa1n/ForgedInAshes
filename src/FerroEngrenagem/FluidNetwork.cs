@@ -60,6 +60,7 @@ namespace FerroEngrenagem
         public string Made = "";   // F8.1 Casting Table: the item its finished casts are
         public int Count;          // F8.1 Casting Table: finished casts waiting to leave
         public string Stock = "";  // F8.2 process machine: ingredients inside ("item=n,...")
+        public string Pick = "";   // process machine: the recipe the player chose ("" = automatic, first ready)
     }
 
     public class FluidNet
@@ -451,6 +452,7 @@ namespace FerroEngrenagem
                         s.Count = int.Parse(t[8]);
                     }
                     if (t.Length >= 10) s.Stock = t[9];
+                    if (t.Length >= 11) s.Pick = t[10];
                     states[p] = s;
                 }
             }
@@ -473,7 +475,7 @@ namespace FerroEngrenagem
                       .Append(s.Amount.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
                       .Append(s.Steam.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
                       .Append(s.Mold).Append(';').Append(s.Made).Append(';').Append(s.Count).Append(';')
-                      .Append(s.Stock).Append('\n');
+                      .Append(s.Stock).Append(';').Append(s.Pick).Append('\n');
                 }
                 File.WriteAllText(loadedFor, sb.ToString());
                 dirty = false;
@@ -860,6 +862,7 @@ namespace FerroEngrenagem
                 return new BlockActivationCommand[]
                 {
                     new BlockActivationCommand("fe_put", "loot_sort", true, false, null),
+                    new BlockActivationCommand(ProcessMachine.PickCommand, "tool", true, false, null),
                     new BlockActivationCommand("fe_cast_take", "hand", true, false, null), take
                 };
             if (k == FluidKind.Caster)
@@ -906,9 +909,9 @@ namespace FerroEngrenagem
                     : string.Format(Kinetic.Text("feBottled", "Took {0}x {1}"), st.count, st.itemValue.ItemClass.GetLocalizedItemName()), false, false, 0f);
                 return true;
             }
-            if (Fluids.Kind(this) == FluidKind.Processor && (_commandName == "fe_put" || _commandName == "fe_cast_take") && w != null)
+            if (Fluids.Kind(this) == FluidKind.Processor && (_commandName == "fe_put" || _commandName == "fe_cast_take" || _commandName == ProcessMachine.PickCommand) && w != null)
             {
-                GameManager.ShowTooltip(_player, ProcessMachine.Activate(w, _blockPos, _commandName, _player), false, false, 0f);
+                GameManager.ShowTooltip(_player, ProcessMachine.Activate(w, Fluids.ParentOf(w, _blockPos, _blockValue), _commandName, _player), false, false, 0f);
                 return true;
             }
             if ((_commandName == "fe_mold" || _commandName == "fe_cast_take") && w != null)

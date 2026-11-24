@@ -1397,6 +1397,38 @@ def model_biodigester(col):
     return [to_object(bm, "feBiodigester_Base", bevel=0.003)]
 
 
+def model_biodigester_big(col):
+    """Industrial Biodigester: 1 wide x 2 high (parent = bottom cell). A tall green digester with bands and a sight
+    glass, the torque shaft through gear boxes on the bottom sides, a chain case up to a top gear head turning the
+    stirrer (FeSpin, vertical), water in at the back, the chute in front."""
+    bm = bmesh.new()
+    box(bm, (0.92, 0.92, 0.06), (0, 0, 0.03), IRON)
+    cyl(bm, 0.40, 1.55, (0, 0.04, 0.86), "Z", PAINT, segs=32)                         # tank
+    for z in (0.16, 0.55, 0.95, 1.35):
+        cyl(bm, 0.415, 0.04, (0, 0.04, z), "Z", IRON, segs=32)                        # bands
+    cyl(bm, 0.40, 0.22, (0, 0.04, 1.74), "Z", PAINT, segs=32, r2=0.16)                # dome
+    box(bm, (0.12, 0.02, 0.90), (0.20, -0.33, 0.95), GLASS)                            # sight glass
+    box(bm, (0.09, 0.02, 0.55), (0.20, -0.34, 0.75), RUST)                             # the mash level
+    for sx in (-1, 1):
+        box(bm, (0.12, 0.16, 0.18), (sx * 0.42, 0, C), RUST)                           # gear boxes on the shaft
+    box(bm, (0.08, 0.12, 1.30), (0.44, 0, 1.18), IRON)                                 # chain case up the side
+    box(bm, (0.30, 0.20, 0.14), (0.30, 0.04, 1.86), IRON)                              # top gear head
+    cyl(bm, 0.05, 0.16, (-0.25, 0.25, 1.86), "Z", STEEL, segs=10)                      # gas valve
+    cyl(bm, 0.07, 0.03, (-0.25, 0.25, 1.95), "Z", RED, segs=10)
+    inlet_stub(bm, (0, 0.5, C), "Y", 1, IN)
+    out_chute(bm)
+    out = [to_object(bm, "feBiodigesterBig_Base", bevel=0.003)]
+    out.append(drive_shaft())
+    st = bmesh.new()                                                                 # stirrer head on top
+    cyl(st, 0.03, 0.20, (0, 0.10, 0), "Y", STEEL, segs=8)
+    for k in range(4):
+        a = math.pi * k / 2
+        box(st, (0.24 * abs(math.cos(a)) + 0.03, 0.04, 0.24 * abs(math.sin(a)) + 0.03),
+            (0.12 * math.cos(a), 0.05, 0.12 * math.sin(a)), BRASS)
+    out.append(to_object(st, "FeSpin_x0.5_Stirrer", location=(0, 0.04, 1.99), rotation=AX_UP, bevel=0.001))
+    return out
+
+
 # ---------------------------------------------------------------- production machines (phase 6)
 # Footprints: 1x1 = x -0.5..0.5; 2 wide (MultiBlockDim 2,2,1) = x -1..1 (the game shifts an even width by half a
 # block, so the model is centred); 3 wide = x -1.5..1.5. Depth 1 (y -0.5..0.5), height up to the block count.
@@ -1822,6 +1854,7 @@ MODELS = {
     "feCasterElectric": model_caster_electric,
     "feRetortKiln": model_retort_kiln,
     "feBiodigester": model_biodigester,
+    "feBiodigesterBig": model_biodigester_big,
     "feM_Foundry": model_m_foundry,
     "feM_Press": model_m_press,
     "feM_Lathe": model_m_lathe,

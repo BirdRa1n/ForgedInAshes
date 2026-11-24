@@ -162,3 +162,10 @@ Pegue no criativo: Triturador, Lavadora, Misturador Químico, Secador a Vapor; C
 - [ ] Olhar para o Biodigestor / Triturador: o texto aparece em tamanho normal (não minúsculo).
 - [ ] Segurar E em uma máquina (Triturador, Mesa de Moldagem, Fundição, Torno): opção "Receitas" abre a janela com a lista; << e >> trocam a página; OK ou Esc fecha.
 - [ ] Barra e inventário: blocos e itens do mod com ícones próprios (moldes com a cavidade laranja, pós, biocombustível verde).
+
+## 12. Escolher receita e Biodigestor Industrial
+- [ ] Texto de foco do Biodigestor/Triturador em tamanho normal (a correção da seção 11 só vale agora: a pasta XUi estava errada).
+- [ ] Segurar E > Receitas abre a janela (no log: `recipe book ... window=True`).
+- [ ] Segurar E > Escolher receita no Biodigestor: cicla as receitas e volta para "automática"; o texto de foco mostra a escolhida.
+- [ ] Com "Terra Nitrosa (carne podre + ossos)" escolhida: carne crua na esteira não entra; carne podre + ossos entram e saem Terra Nitrosa.
+- [ ] Biodigestor Industrial (Montador): 2 blocos de altura, eixo na lateral com torque, água por trás; esteiras por qualquer lado; carne crua + ossos -> 2 Terra Nitrosa; agitador gira no topo.

@@ -304,3 +304,8 @@ feRecipesCraft,UI,Text,,,,"Crafting recipes ({0})",,,,,,,,,"Receitas de fabrica�
 feRecipesMold,UI,Text,,,,"mold {0}",,,,,,,,,"molde {0}",,,,
 feRecipesTorque,UI,Text,,,,"torque {0}",,,,,,,,,"torque {0}",,,,
 feProcCount,UI,Text,,,,"{0} recipes (hold E: Recipes)",,,,,,,,,"{0} receitas (segure E: Receitas)",,,,
+feBiodigesterBig,blocks,Block,,,,"Industrial Biodigester",,,,,,,,,"Biodigestor Industrial",,,,
+feBiodigesterBigDesc,blocks,Block,,,,"A two-block-tall stirred digester for automation: a shaft on its left or right side (64 UT), water in at its back, belts in on any side, products out of the chute in front. Double batches, and Raw Meat (with or without Bones) goes straight to Nitre Earth or Organic Mash. Hold E: Choose recipe.",,,,,,,,,"Um digestor com agitador, de dois blocos de altura, para automação: eixo na esquerda ou na direita (64 UT), água por trás, esteiras entram por qualquer lado e os produtos saem pela calha da frente. Lotes dobrados, e Carne Crua (com ou sem Ossos) vira direto Terra Nitrosa ou Mosto Orgânico. Segure E: Escolher receita.",,,,
+blockcommand_fe_proc_pick,UI,Radial blockcommand,,,,"Choose recipe",,,,,,,,,"Escolher receita",,,,
+feProcAuto,UI,Text,,,,"Recipe: automatic (the first one it has everything for)",,,,,,,,,"Receita: automática (a primeira que tiver tudo)",,,,
+feProcPicked,UI,Text,,,,"Recipe: {0}",,,,,,,,,"Receita: {0}",,,,

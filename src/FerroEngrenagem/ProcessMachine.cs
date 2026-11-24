@@ -65,10 +65,25 @@ namespace FerroEngrenagem
             FluidStore.MarkDirty();
         }
 
-        static int Need(Block b, string item)
+        /// <summary>The recipe the player chose with "Choose recipe" (null = automatic).</summary>
+        public static Process Picked(Block b, FluidState s)
+        {
+            if (s == null || string.IsNullOrEmpty(s.Pick)) return null;
+            foreach (Process p in Of(b)) if (p.Id == s.Pick) return p;
+            return null;
+        }
+
+        /// <summary>The processes it may run now: only the chosen one, or all of them (automatic).</summary>
+        static List<Process> Allowed(Block b, FluidState s)
+        {
+            Process pk = Picked(b, s);
+            return pk != null ? new List<Process> { pk } : Of(b);
+        }
+
+        static int Need(Block b, FluidState s, string item)
         {
             int n = 0;
-            foreach (Process p in Of(b))
+            foreach (Process p in Allowed(b, s))
                 for (int i = 0; i < p.Inputs.Length; i++)
                     if (p.Inputs[i] == item) n = Mathf.Max(n, p.Counts[i]);
             return n;
@@ -80,11 +95,11 @@ namespace FerroEngrenagem
             if (st == null || st.IsEmpty() || st.itemValue.ItemClass == null) return 0;
             Block b = world.GetBlock(p).Block;
             string name = st.itemValue.ItemClass.GetItemName();
-            int need = Need(b, name);
-            if (need <= 0) return 0;
             FluidStore.EnsureLoaded();
-            if (!FluidStore.Devices.Contains(p)) FluidStore.Register(p);
             FluidState s = FluidStore.Get(p);
+            int need = Need(b, s, name);
+            if (need <= 0) return 0;
+            if (!FluidStore.Devices.Contains(p)) FluidStore.Register(p);
             Dictionary<string, int> d = Stock(s);
             int have;
             d.TryGetValue(name, out have);
@@ -136,10 +151,11 @@ namespace FerroEngrenagem
         {
             Dictionary<string, int> d = Stock(s);
             Process run = null;
-            foreach (Process pr in Of(bv.Block))
+            List<Process> allowed = Allowed(bv.Block, s);
+            foreach (Process pr in allowed)
                 if (pr.Id == s.Mold && Ready(pr, d, s)) { run = pr; break; }
             if (run == null)
-                foreach (Process pr in Of(bv.Block))
+                foreach (Process pr in allowed)
                     if (Ready(pr, d, s)) { run = pr; break; }
             if (run == null)
             {
@@ -203,6 +219,9 @@ namespace FerroEngrenagem
             if (ps.Count == 0) return Kinetic.Text("feProcNone", "No processes for this machine");
             // the full list is in the recipe book (hold E -> Recipes): the look text stays short and readable
             sb.Append(string.Format(Kinetic.Text("feProcCount", "{0} recipes (hold E: Recipes)"), ps.Count));
+            Process pk = Picked(bv.Block, s);
+            sb.Append("\n").Append(pk == null ? Kinetic.Text("feProcAuto", "Recipe: automatic (the first one it has everything for)")
+                                              : string.Format(Kinetic.Text("feProcPicked", "Recipe: {0}"), Label(pk)));
             if (d.Count > 0)
             {
                 List<string> st = new List<string>();
@@ -225,10 +244,38 @@ namespace FerroEngrenagem
         }
 
         /// <summary>Radial commands: fe_put (the item in hand) and fe_cast_take (the products).</summary>
+        /// <summary>"2x Bone + 10x Rotting Flesh -> 1x Nitre Earth".</summary>
+        public static string Label(Process pr)
+        {
+            List<string> ins = new List<string>();
+            for (int i = 0; i < pr.Inputs.Length; i++) ins.Add(pr.Counts[i] + "x " + ItemName(pr.Inputs[i]));
+            if (pr.FluidIn != null) ins.Add(Mathf.RoundToInt(pr.Liters) + " L " + Fluids.FluidName(pr.FluidIn));
+            return pr.OutCount + "x " + ItemName(pr.Output) + " (" + string.Join(" + ", ins.ToArray()) + ")";
+        }
+
+        public const string PickCommand = "fe_proc_pick";
+
+        /// <summary>Choose recipe: automatic -> 1st -> 2nd -> ... -> automatic.</summary>
+        static string Cycle(Block b, FluidState s)
+        {
+            List<Process> ps = Of(b);
+            int i = -1;
+            for (int k = 0; k < ps.Count; k++) if (ps[k].Id == s.Pick) i = k;
+            i++;
+            s.Pick = i < ps.Count ? ps[i].Id : "";
+            s.Steam = 0f;
+            FluidStore.MarkDirty();
+            Process pk = Picked(b, s);
+            return pk == null ? Kinetic.Text("feProcAuto", "Recipe: automatic (the first one it has everything for)")
+                              : string.Format(Kinetic.Text("feProcPicked", "Recipe: {0}"), Label(pk));
+        }
+
         public static string Activate(World world, Vector3i p, string cmd, EntityPlayerLocal player)
         {
             FluidStore.EnsureLoaded();
+            if (!FluidStore.Devices.Contains(p)) FluidStore.Register(p);
             FluidState s = FluidStore.Get(p);
+            if (cmd == PickCommand) return Cycle(world.GetBlock(p).Block, s);
             if (cmd == "fe_cast_take")
             {
                 if (s.Count <= 0 || string.IsNullOrEmpty(s.Made)) return Kinetic.Text("feProcNothing", "Nothing made yet");

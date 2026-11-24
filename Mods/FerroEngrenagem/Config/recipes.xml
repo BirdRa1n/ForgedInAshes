@@ -187,6 +187,12 @@
 			<ingredient name="feResourceGear" count="4"/>
 			<ingredient name="fePipe" count="2"/>
 		</recipe>
+		<recipe name="feBiodigesterBig" count="1" craft_area="feAssembler" craft_time="60" always_unlocked="true">
+			<ingredient name="feBiodigester" count="2"/>
+			<ingredient name="feResourceGear" count="6"/>
+			<ingredient name="feResourceIronPlate" count="16"/>
+			<ingredient name="feResourceIronShaft" count="2"/>
+		</recipe>
 		<recipe name="feWasher" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
 			<ingredient name="feResourceIronPlate" count="6"/>
 			<ingredient name="fePipe" count="2"/>

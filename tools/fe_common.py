@@ -34,8 +34,8 @@ PATCH_OPS = {
 MUST_MATCH = PATCH_OPS - {"conditional"}
 
 # Mod Config subfolder -> vanilla Data/Config subfolder.
-# ASSUMPTION (pending check against a working mod): mods put XUi patches in
-# Config/XUi/, which target the in-game XUi (XUi_InGame).
+# Checked in game (2026-11-24 log): the game patches "XUi_InGame/windows" etc., so mods must use
+# Config/XUi_InGame/ (a Config/XUi/ folder is silently ignored).
 SUBDIR_MAP = {"XUi": "XUi_InGame", "XUi_InGame": "XUi_InGame",
               "XUi_Menu": "XUi_Menu", "XUi_Common": "XUi_Common"}
 

@@ -804,6 +804,21 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feChemMixerPrefab"/>
 			<property name="EconomicValue" value="200"/>
 		</block>
+		<block name="feBiodigesterBig">
+			<property name="CustomIcon" value="feBiodigesterBig"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="120"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="MultiBlockDim" value="1,2,1"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feBiodigesterBigDesc"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBiodigesterBigPrefab"/>
+			<property name="EconomicValue" value="700"/>
+		</block>
 		<block name="feWasher">
 			<property name="CustomIcon" value="feWasher"/>
 			<property name="CustomIconTint" value="ffffff"/>

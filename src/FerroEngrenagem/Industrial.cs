@@ -69,6 +69,7 @@ namespace FerroEngrenagem
             if (k == FluidKind.Processor)
             {
                 add.Add(new BlockActivationCommand("fe_put", "loot_sort", true, false, null));
+                add.Add(new BlockActivationCommand(ProcessMachine.PickCommand, "tool", true, false, null));
                 add.Add(new BlockActivationCommand("fe_cast_take", "hand", true, false, null));
             }
             else if (k == FluidKind.Caster)
@@ -99,7 +100,8 @@ namespace FerroEngrenagem
                 __result = true;
                 return false;
             }
-            if (_commandName != "fe_put" && _commandName != "fe_cast_take" && _commandName != "fe_mold" && _commandName != "fe_melt")
+            if (_commandName != "fe_put" && _commandName != "fe_cast_take" && _commandName != "fe_mold" && _commandName != "fe_melt"
+                && _commandName != ProcessMachine.PickCommand)
                 return true;
             World w = _world as World;
             __result = true;

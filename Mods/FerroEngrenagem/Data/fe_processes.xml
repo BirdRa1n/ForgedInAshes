@@ -36,6 +36,7 @@
 	<machine name="feCasterElectric" text="Moldadora Industrial"/>
 	<machine name="feRetortKiln" text="Forno de Retorta"/>
 	<machine name="feBiodigester" text="Biodigestor"/>
+	<machine name="feBiodigesterBig" text="Biodigestor Industrial"/>
 	<machine name="feRefinery" text="Refinaria"/>
 	<machine name="feInlinePress" text="Prensa em Linha" planned="true"/>
 
@@ -157,6 +158,32 @@
 	<process id="mash_potato" kind="mix" machine="feBiodigester" input="foodCropPotato" count="12"
 	         fluid_in="water" liters="20" output="feBioMash" out_count="1" time="300"
 	         text="Batata fermenta em Mosto Orgânico."/>
+	<!-- Industrial Biodigester (torque 64, 2 blocks tall, belts on any side): double batches, and raw meat goes straight
+	     to Nitre Earth / Organic Mash -->
+	<process id="nitre_flesh_big" kind="mix" machine="feBiodigesterBig" input="foodRottingFlesh,resourceBone" count="20,8"
+	         fluid_in="water" liters="40" output="feNitreEarth" out_count="2" time="360" torque="64"
+	         text="Com ossos, a carne podre vira Terra Nitrosa (lote dobrado)."/>
+	<process id="nitre_meat_big" kind="mix" machine="feBiodigesterBig" input="foodRawMeat,resourceBone" count="20,8"
+	         fluid_in="water" liters="50" output="feNitreEarth" out_count="2" time="540" torque="64"
+	         text="Só no Industrial: carne crua com ossos vira Terra Nitrosa direto (apodrece e nitrifica no mesmo tanque)."/>
+	<process id="nitre_crops_big" kind="mix" machine="feBiodigesterBig" input="foodCropCorn,resourceBone" count="30,8"
+	         fluid_in="water" liters="40" output="feNitreEarth" out_count="2" time="480" torque="64"
+	         text="Milho com ossos vira Terra Nitrosa (lote dobrado)."/>
+	<process id="rot_meat_big" kind="mix" machine="feBiodigesterBig" input="foodRawMeat" count="10"
+	         fluid_in="water" liters="10" output="foodRottingFlesh" out_count="10" time="180" torque="64"
+	         text="Apodrece a carne crua (lote dobrado)."/>
+	<process id="mash_flesh_big" kind="mix" machine="feBiodigesterBig" input="foodRottingFlesh" count="20"
+	         fluid_in="water" liters="40" output="feBioMash" out_count="2" time="360" torque="64"
+	         text="Carne podre fermenta em Mosto Orgânico (lote dobrado)."/>
+	<process id="mash_meat_big" kind="mix" machine="feBiodigesterBig" input="foodRawMeat" count="20"
+	         fluid_in="water" liters="50" output="feBioMash" out_count="2" time="540" torque="64"
+	         text="Só no Industrial: carne crua fermenta direto em Mosto Orgânico."/>
+	<process id="mash_corn_big" kind="mix" machine="feBiodigesterBig" input="foodCropCorn" count="24"
+	         fluid_in="water" liters="40" output="feBioMash" out_count="2" time="300" torque="64"
+	         text="Milho fermenta em Mosto Orgânico (lote dobrado)."/>
+	<process id="mash_potato_big" kind="mix" machine="feBiodigesterBig" input="foodCropPotato" count="24"
+	         fluid_in="water" liters="40" output="feBioMash" out_count="2" time="300" torque="64"
+	         text="Batata fermenta em Mosto Orgânico (lote dobrado)."/>
 	<process id="wash_nitre_earth" kind="wash" machine="feWasher" input="feNitreEarth" count="1"
 	         fluid_in="water" liters="10" output="resourcePotassiumNitratePowder" out_count="4" time="6"
 	         text="A Lavadora tira o salitre da Terra Nitrosa (lixiviação)."/>

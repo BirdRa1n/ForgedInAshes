@@ -160,6 +160,7 @@ namespace FerroEngrenagem
                 return new BlockActivationCommand[]
                 {
                     new BlockActivationCommand("fe_put", "loot_sort", true, false, null),
+                    new BlockActivationCommand(ProcessMachine.PickCommand, "tool", true, false, null),
                     new BlockActivationCommand("fe_cast_take", "hand", true, false, null), take
                 };
             return new BlockActivationCommand[] { take };
@@ -184,9 +185,9 @@ namespace FerroEngrenagem
                 Log.Out(FerroEngrenagemMod.LogPrefix + GetBlockName() + " at " + _blockPos + " -> setting " + nbv.meta);
                 return true;
             }
-            if ((_commandName == "fe_put" || _commandName == "fe_cast_take") && _world is World)
+            if ((_commandName == "fe_put" || _commandName == "fe_cast_take" || _commandName == ProcessMachine.PickCommand) && _world is World)
             {
-                GameManager.ShowTooltip(_player, ProcessMachine.Activate((World)_world, _blockPos, _commandName, _player), false, false, 0f);
+                GameManager.ShowTooltip(_player, ProcessMachine.Activate((World)_world, Fluids.ParentOf((World)_world, _blockPos, _blockValue), _commandName, _player), false, false, 0f);
                 return true;
             }
             if (_commandName != "take") return false;
