@@ -1,0 +1,16 @@
+{
+ "nome": "feSignalLever",
+ "config": "F:\\IA\\fe_blender\\configs\\feSignalLever.json",
+ "triangulos_antes": 448,
+ "triangulos_depois": 144,
+ "atlas": 1024,
+ "arquivos": [
+  "feSignalLever_Albedo.png",
+  "feSignalLever_Normal.png",
+  "feSignalLever_MetallicSmoothness.png",
+  "feSignalLever_Roughness.png",
+  "feSignalLever_HD.fbx",
+  "feSignalLever_HD.blend"
+ ],
+ "segundos": 16.4
+}

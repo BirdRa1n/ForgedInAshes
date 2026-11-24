@@ -1,0 +1,16 @@
+{
+ "nome": "feJuicePress",
+ "config": "F:\\IA\\fe_blender\\configs\\feJuicePress.json",
+ "triangulos_antes": 7608,
+ "triangulos_depois": 2832,
+ "atlas": 1024,
+ "arquivos": [
+  "feJuicePress_Albedo.png",
+  "feJuicePress_Normal.png",
+  "feJuicePress_MetallicSmoothness.png",
+  "feJuicePress_Roughness.png",
+  "feJuicePress_HD.fbx",
+  "feJuicePress_HD.blend"
+ ],
+ "segundos": 17.3
+}

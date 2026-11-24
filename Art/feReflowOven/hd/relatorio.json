@@ -1,0 +1,16 @@
+{
+ "nome": "feReflowOven",
+ "config": "F:\\IA\\fe_blender\\configs\\feReflowOven.json",
+ "triangulos_antes": 1996,
+ "triangulos_depois": 556,
+ "atlas": 1024,
+ "arquivos": [
+  "feReflowOven_Albedo.png",
+  "feReflowOven_Normal.png",
+  "feReflowOven_MetallicSmoothness.png",
+  "feReflowOven_Roughness.png",
+  "feReflowOven_HD.fbx",
+  "feReflowOven_HD.blend"
+ ],
+ "segundos": 17.8
+}

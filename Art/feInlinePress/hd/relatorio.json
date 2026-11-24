@@ -1,0 +1,16 @@
+{
+ "nome": "feInlinePress",
+ "config": "F:\\IA\\fe_blender\\configs\\feInlinePress.json",
+ "triangulos_antes": 4076,
+ "triangulos_depois": 1436,
+ "atlas": 1024,
+ "arquivos": [
+  "feInlinePress_Albedo.png",
+  "feInlinePress_Normal.png",
+  "feInlinePress_MetallicSmoothness.png",
+  "feInlinePress_Roughness.png",
+  "feInlinePress_HD.fbx",
+  "feInlinePress_HD.blend"
+ ],
+ "segundos": 19.3
+}

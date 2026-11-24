@@ -31,6 +31,8 @@ public static class FeBuild
         "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
         "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
         "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDuct", "feConveyorStand", "feCoalGenerator", "feCoalEngine", "feGasEngine", "feBeltCrate", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
+        // D12 (Art/feHD/build_feHD.py, D12_MODELS)
+        "fePipeHP", "feValveShutoff", "feValveCheck", "feValveRegulator", "feValveSeparator", "feValveRelief", "feGauge", "feCompressor", "feTankLiquid", "feTankGas", "feGasBurner", "feSapTapper", "feTowerSection", "feDistillTower", "feShaleRetort", "feCracker", "feGasScrubber", "fePolymerReactor", "feCoagTank", "feCalender", "feVulcanizer", "feSteelConverter", "feSpringCoiler", "feTemperFurnace", "feSpinner", "feTannery", "feFermenter", "feCentrifuge", "feAutoclave", "feCookerIndustrial", "feMill", "feJuicePress", "feCanner", "feInjector", "feGasMotor", "feInlinePress", "feDoser", "feInserter", "feCrimper", "feWireDrawer", "feGrinder", "feBender", "feWelder", "feReflowOven", "feMechArm", "feSignalLever", "feSignalReceiver", "feBeltSplitter", "feBeltGate", "feBeltCounter",
         "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"
     };
 
@@ -104,7 +106,7 @@ public static class FeBuild
     static readonly System.Collections.Generic.Dictionary<string, Vector3> WireFallback =
         new System.Collections.Generic.Dictionary<string, Vector3> { { "feCoalGenerator", new Vector3(-0.42f, 1.30f, 0f) } };
 
-    static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem", "FeBeltDrive", "FeSpin_BeltDrive" };
+    static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem", "FeBeltDrive", "FeSpin_BeltDrive", "FeReach", "FePiston_Inline", "FeSpin_x6_Inline", "FeBeltExtra", "FeLever_BeltGate" };
     static readonly string[] HdMaps = { "Albedo", "Normal", "MetallicSmoothness", "Emission" };
 
     static Material SaveMat(Material m, string name)

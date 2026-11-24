@@ -1,0 +1,16 @@
+{
+ "nome": "feDoser",
+ "config": "F:\\IA\\fe_blender\\configs\\feDoser.json",
+ "triangulos_antes": 2908,
+ "triangulos_depois": 1012,
+ "atlas": 1024,
+ "arquivos": [
+  "feDoser_Albedo.png",
+  "feDoser_Normal.png",
+  "feDoser_MetallicSmoothness.png",
+  "feDoser_Roughness.png",
+  "feDoser_HD.fbx",
+  "feDoser_HD.blend"
+ ],
+ "segundos": 17.1
+}

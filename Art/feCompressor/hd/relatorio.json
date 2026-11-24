@@ -1,0 +1,16 @@
+{
+ "nome": "feCompressor",
+ "config": "F:\\IA\\fe_blender\\configs\\feCompressor.json",
+ "triangulos_antes": 7412,
+ "triangulos_depois": 3012,
+ "atlas": 1024,
+ "arquivos": [
+  "feCompressor_Albedo.png",
+  "feCompressor_Normal.png",
+  "feCompressor_MetallicSmoothness.png",
+  "feCompressor_Roughness.png",
+  "feCompressor_HD.fbx",
+  "feCompressor_HD.blend"
+ ],
+ "segundos": 16.9
+}

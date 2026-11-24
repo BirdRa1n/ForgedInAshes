@@ -1,8 +1,8 @@
 {
  "nome": "feFunnel",
  "config": "F:\\IA\\fe_blender\\configs\\feFunnel.json",
- "triangulos_antes": 2572,
- "triangulos_depois": 716,
+ "triangulos_antes": 2616,
+ "triangulos_depois": 728,
  "atlas": 1024,
  "arquivos": [
   "feFunnel_Albedo.png",
@@ -12,5 +12,5 @@
   "feFunnel_HD.fbx",
   "feFunnel_HD.blend"
  ],
- "segundos": 17.9
+ "segundos": 18.6
 }

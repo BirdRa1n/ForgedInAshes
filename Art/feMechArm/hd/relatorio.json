@@ -1,0 +1,16 @@
+{
+ "nome": "feMechArm",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechArm.json",
+ "triangulos_antes": 1196,
+ "triangulos_depois": 452,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechArm_Albedo.png",
+  "feMechArm_Normal.png",
+  "feMechArm_MetallicSmoothness.png",
+  "feMechArm_Roughness.png",
+  "feMechArm_HD.fbx",
+  "feMechArm_HD.blend"
+ ],
+ "segundos": 15.7
+}

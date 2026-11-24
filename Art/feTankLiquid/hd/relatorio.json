@@ -1,0 +1,16 @@
+{
+ "nome": "feTankLiquid",
+ "config": "F:\\IA\\fe_blender\\configs\\feTankLiquid.json",
+ "triangulos_antes": 2320,
+ "triangulos_depois": 1000,
+ "atlas": 1024,
+ "arquivos": [
+  "feTankLiquid_Albedo.png",
+  "feTankLiquid_Normal.png",
+  "feTankLiquid_MetallicSmoothness.png",
+  "feTankLiquid_Roughness.png",
+  "feTankLiquid_HD.fbx",
+  "feTankLiquid_HD.blend"
+ ],
+ "segundos": 13.2
+}

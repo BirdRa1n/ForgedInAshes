@@ -1,0 +1,16 @@
+{
+ "nome": "feTankGas",
+ "config": "F:\\IA\\fe_blender\\configs\\feTankGas.json",
+ "triangulos_antes": 3024,
+ "triangulos_depois": 1244,
+ "atlas": 1024,
+ "arquivos": [
+  "feTankGas_Albedo.png",
+  "feTankGas_Normal.png",
+  "feTankGas_MetallicSmoothness.png",
+  "feTankGas_Roughness.png",
+  "feTankGas_HD.fbx",
+  "feTankGas_HD.blend"
+ ],
+ "segundos": 16.7
+}

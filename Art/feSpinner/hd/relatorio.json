@@ -1,0 +1,16 @@
+{
+ "nome": "feSpinner",
+ "config": "F:\\IA\\fe_blender\\configs\\feSpinner.json",
+ "triangulos_antes": 5000,
+ "triangulos_depois": 1828,
+ "atlas": 1024,
+ "arquivos": [
+  "feSpinner_Albedo.png",
+  "feSpinner_Normal.png",
+  "feSpinner_MetallicSmoothness.png",
+  "feSpinner_Roughness.png",
+  "feSpinner_HD.fbx",
+  "feSpinner_HD.blend"
+ ],
+ "segundos": 23.5
+}

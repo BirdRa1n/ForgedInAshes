@@ -1,0 +1,16 @@
+{
+ "nome": "feValveCheck",
+ "config": "F:\\IA\\fe_blender\\configs\\feValveCheck.json",
+ "triangulos_antes": 2668,
+ "triangulos_depois": 1004,
+ "atlas": 1024,
+ "arquivos": [
+  "feValveCheck_Albedo.png",
+  "feValveCheck_Normal.png",
+  "feValveCheck_MetallicSmoothness.png",
+  "feValveCheck_Roughness.png",
+  "feValveCheck_HD.fbx",
+  "feValveCheck_HD.blend"
+ ],
+ "segundos": 15.2
+}

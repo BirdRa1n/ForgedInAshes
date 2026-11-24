@@ -1,0 +1,16 @@
+{
+ "nome": "feCrimper",
+ "config": "F:\\IA\\fe_blender\\configs\\feCrimper.json",
+ "triangulos_antes": 3504,
+ "triangulos_depois": 1320,
+ "atlas": 1024,
+ "arquivos": [
+  "feCrimper_Albedo.png",
+  "feCrimper_Normal.png",
+  "feCrimper_MetallicSmoothness.png",
+  "feCrimper_Roughness.png",
+  "feCrimper_HD.fbx",
+  "feCrimper_HD.blend"
+ ],
+ "segundos": 19.9
+}

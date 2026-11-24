@@ -1,0 +1,16 @@
+{
+ "nome": "feVulcanizer",
+ "config": "F:\\IA\\fe_blender\\configs\\feVulcanizer.json",
+ "triangulos_antes": 4516,
+ "triangulos_depois": 1668,
+ "atlas": 1024,
+ "arquivos": [
+  "feVulcanizer_Albedo.png",
+  "feVulcanizer_Normal.png",
+  "feVulcanizer_MetallicSmoothness.png",
+  "feVulcanizer_Roughness.png",
+  "feVulcanizer_HD.fbx",
+  "feVulcanizer_HD.blend"
+ ],
+ "segundos": 17.3
+}

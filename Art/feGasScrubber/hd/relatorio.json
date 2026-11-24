@@ -1,0 +1,16 @@
+{
+ "nome": "feGasScrubber",
+ "config": "F:\\IA\\fe_blender\\configs\\feGasScrubber.json",
+ "triangulos_antes": 3192,
+ "triangulos_depois": 1200,
+ "atlas": 1024,
+ "arquivos": [
+  "feGasScrubber_Albedo.png",
+  "feGasScrubber_Normal.png",
+  "feGasScrubber_MetallicSmoothness.png",
+  "feGasScrubber_Roughness.png",
+  "feGasScrubber_HD.fbx",
+  "feGasScrubber_HD.blend"
+ ],
+ "segundos": 12.8
+}

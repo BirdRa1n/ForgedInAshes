@@ -1,0 +1,16 @@
+{
+ "nome": "feTowerSection",
+ "config": "F:\\IA\\fe_blender\\configs\\feTowerSection.json",
+ "triangulos_antes": 6624,
+ "triangulos_depois": 2528,
+ "atlas": 1024,
+ "arquivos": [
+  "feTowerSection_Albedo.png",
+  "feTowerSection_Normal.png",
+  "feTowerSection_MetallicSmoothness.png",
+  "feTowerSection_Roughness.png",
+  "feTowerSection_HD.fbx",
+  "feTowerSection_HD.blend"
+ ],
+ "segundos": 13.2
+}

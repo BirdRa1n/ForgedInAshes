@@ -19,7 +19,7 @@ BLOCKS = {
     "feM_Foundry": ["feFoundry"], "feM_Lathe": ["feLathe"], "feM_Ammo": ["feAmmoPress"],
 }
 HIDE = ("fePreview", "FePour", "FeFx", "FeDuctSide", "FeDuctHatch", "FeDuctBoot", "FeDuctRamp", "FeDuctCapF", "FeCurve",
-        "FeJunction", "FeBeltChute", "FeFunnelSpoutDuct", "FeLevelGas")
+        "FeJunction", "FeBeltChute", "FeFunnelSpoutDuct", "FeLevelGas", "FeReach")
 HIDE_EXACT = ("FeFunnelSpout",)
 
 

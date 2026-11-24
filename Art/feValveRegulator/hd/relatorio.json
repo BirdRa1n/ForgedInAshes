@@ -1,0 +1,16 @@
+{
+ "nome": "feValveRegulator",
+ "config": "F:\\IA\\fe_blender\\configs\\feValveRegulator.json",
+ "triangulos_antes": 3236,
+ "triangulos_depois": 1316,
+ "atlas": 1024,
+ "arquivos": [
+  "feValveRegulator_Albedo.png",
+  "feValveRegulator_Normal.png",
+  "feValveRegulator_MetallicSmoothness.png",
+  "feValveRegulator_Roughness.png",
+  "feValveRegulator_HD.fbx",
+  "feValveRegulator_HD.blend"
+ ],
+ "segundos": 15.9
+}

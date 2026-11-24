@@ -1,0 +1,16 @@
+{
+ "nome": "feSpringCoiler",
+ "config": "F:\\IA\\fe_blender\\configs\\feSpringCoiler.json",
+ "triangulos_antes": 7772,
+ "triangulos_depois": 2780,
+ "atlas": 1024,
+ "arquivos": [
+  "feSpringCoiler_Albedo.png",
+  "feSpringCoiler_Normal.png",
+  "feSpringCoiler_MetallicSmoothness.png",
+  "feSpringCoiler_Roughness.png",
+  "feSpringCoiler_HD.fbx",
+  "feSpringCoiler_HD.blend"
+ ],
+ "segundos": 19.0
+}

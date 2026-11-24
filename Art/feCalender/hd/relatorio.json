@@ -1,0 +1,16 @@
+{
+ "nome": "feCalender",
+ "config": "F:\\IA\\fe_blender\\configs\\feCalender.json",
+ "triangulos_antes": 6108,
+ "triangulos_depois": 2196,
+ "atlas": 1024,
+ "arquivos": [
+  "feCalender_Albedo.png",
+  "feCalender_Normal.png",
+  "feCalender_MetallicSmoothness.png",
+  "feCalender_Roughness.png",
+  "feCalender_HD.fbx",
+  "feCalender_HD.blend"
+ ],
+ "segundos": 21.5
+}

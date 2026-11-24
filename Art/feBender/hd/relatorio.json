@@ -1,0 +1,16 @@
+{
+ "nome": "feBender",
+ "config": "F:\\IA\\fe_blender\\configs\\feBender.json",
+ "triangulos_antes": 3920,
+ "triangulos_depois": 1360,
+ "atlas": 1024,
+ "arquivos": [
+  "feBender_Albedo.png",
+  "feBender_Normal.png",
+  "feBender_MetallicSmoothness.png",
+  "feBender_Roughness.png",
+  "feBender_HD.fbx",
+  "feBender_HD.blend"
+ ],
+ "segundos": 20.0
+}

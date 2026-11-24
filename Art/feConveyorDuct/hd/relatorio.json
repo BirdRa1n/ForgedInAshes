@@ -1,8 +1,8 @@
 {
  "nome": "feConveyorDuct",
  "config": "F:\\IA\\fe_blender\\configs\\feConveyorDuct.json",
- "triangulos_antes": 6856,
- "triangulos_depois": 2216,
+ "triangulos_antes": 7752,
+ "triangulos_depois": 2472,
  "atlas": 1024,
  "arquivos": [
   "feConveyorDuct_Albedo.png",
@@ -12,5 +12,5 @@
   "feConveyorDuct_HD.fbx",
   "feConveyorDuct_HD.blend"
  ],
- "segundos": 33.6
+ "segundos": 35.0
 }

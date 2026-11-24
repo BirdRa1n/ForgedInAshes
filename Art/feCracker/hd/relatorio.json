@@ -1,0 +1,16 @@
+{
+ "nome": "feCracker",
+ "config": "F:\\IA\\fe_blender\\configs\\feCracker.json",
+ "triangulos_antes": 3508,
+ "triangulos_depois": 1396,
+ "atlas": 1024,
+ "arquivos": [
+  "feCracker_Albedo.png",
+  "feCracker_Normal.png",
+  "feCracker_MetallicSmoothness.png",
+  "feCracker_Roughness.png",
+  "feCracker_HD.fbx",
+  "feCracker_HD.blend"
+ ],
+ "segundos": 12.7
+}

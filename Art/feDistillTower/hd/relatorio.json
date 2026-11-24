@@ -1,0 +1,16 @@
+{
+ "nome": "feDistillTower",
+ "config": "F:\\IA\\fe_blender\\configs\\feDistillTower.json",
+ "triangulos_antes": 6588,
+ "triangulos_depois": 2484,
+ "atlas": 1024,
+ "arquivos": [
+  "feDistillTower_Albedo.png",
+  "feDistillTower_Normal.png",
+  "feDistillTower_MetallicSmoothness.png",
+  "feDistillTower_Roughness.png",
+  "feDistillTower_HD.fbx",
+  "feDistillTower_HD.blend"
+ ],
+ "segundos": 16.6
+}

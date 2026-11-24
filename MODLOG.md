@@ -1010,3 +1010,36 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   escondida que ficou aberta sem o E apertado por 1,5 s e registra no log (`ui watchdog: ...`); também registra
   quando o jogador mira um bloco fe* e a janela do texto está fechada (diagnóstico de outra causa).
 - **Não verificado no jogo.** Se voltar a acontecer, o log dirá qual janela segurou o texto.
+
+## 2026-11-24: esteira do Harrison texturizada + modelos próprios para os 50 blocos do D12
+
+- Pull do colega (esteira reimaginada, baixa: lona a 0,175). `Art/feConveyor/split_for_hd.py` separa o
+  `feConveyor.blend` dele em um `_src.blend` por bloco (feConveyor, feConveyorRamp, feConveyorDown,
+  feConveyorStand), nomes mantidos (Belt.cs e ConveyorStand.cs acham as peças pelo nome). Texturizados no tema
+  7DTD (`F:\IA\fe_blender\configs\feConveyor*.json`: ferro pintado, ferrugem, aço, borracha nova (textura
+  `borracha`), pintura laranja gasta).
+- Os 50 blocos do D12 deixaram de reusar modelos de outras máquinas. `Art/feHD/build_feHD.py` (`D12_MODELS`) faz um
+  modelo para cada um seguindo o contrato da função dele:
+  - Válvulas / Compressor: entrada atrás (verde), saída na frente (laranja), Registro com volante e fio
+    (`WireOffset`), Alívio com chaminé de alívio (`FeFx_Steam_1`), Reguladora e Compressor com manômetro
+    (`FeNeedle_*`), Manômetro com mostrador grande e lâmpada de sinal (`feHD_Glow`).
+  - Tanques: Líquido (bocais nas 4 faces, coluna de nível `FeSurface_r0.70_Level`), Gás (cilindro deitado, faixas,
+    manômetro `FeNeedle_Bar`).
+  - Queimador (chama `FeFx_Fire_1`, brilho), Sangrador (costas na árvore, gotejar `FeFx_Drip_1`, látex no balde,
+    saída na frente), Torre (base com fornalha + seção empilhável com saídas nos 4 lados e escada).
+  - 20 processadores: entrada atrás a 0,5, calha baixa na frente para a esteira nova (0,24), eixo de torque de lado
+    (`FeSpin_DriveShaft`) nos que usam torque, fio nos elétricos; partes animadas: rolos da Calandra, mó do
+    Moinho, fusos da Fiadeira, carretel e mandril da Enroladeira, rotor da Centrífuga, pá do Tanque de Coagulação,
+    prato da Prensa de Suco e da Vulcanização (`FePiston`), superfícies de líquido (tanino, óleo de têmpera,
+    panelas), Injetora com `FeCastMetal` / `FeCastReady` como a Mesa de Moldagem.
+  - Estações em linha (ficam no bloco de cima da esteira): pórtico com pernas até o chão da esteira
+    (`FeReach_*`), ferramenta que desce (`FePiston_Inline*`), rebolo da Esmerilhadeira (`FeSpin_x6_InlineWheel`,
+    faíscas), tocha da Soldadora, capô aquecido do Forno de Refusão. FeBuild deixa `FeReach`, `FePiston_Inline`,
+    `FeSpin_x6_Inline` fora do colisor (não invadem o bloco da esteira).
+  - Divisor / Comporta / Contadora: a esteira do Harrison + peças nossas (`FeBeltExtra_*`, fora do colisor). A
+    aba da Comporta (`FeLever_BeltGate`) desce quando segura os itens.
+  - Braço Mecânico (torre `FeArmYaw` que gira de trás para a frente), Alavanca de Sinal (`FeLever_Signal`),
+    Receptor (lâmpada), Motor a Gás (o motor a gás com dois cilindros de gás).
+  - Materiais novos: `feHD_Red` (volantes, cilindros) e `feHD_Leather` (couros).
+- `blocks.xml`: os 50 apontam para `<bloco>Prefab`; ícones próprios (`render_icons_hd.py`, `apply_icons.py`).
+- Seringueira (5 estágios) continua com as árvores do jogo (é planta, não máquina).

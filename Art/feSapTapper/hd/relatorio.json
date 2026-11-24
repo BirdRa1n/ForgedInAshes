@@ -1,0 +1,16 @@
+{
+ "nome": "feSapTapper",
+ "config": "F:\\IA\\fe_blender\\configs\\feSapTapper.json",
+ "triangulos_antes": 2360,
+ "triangulos_depois": 912,
+ "atlas": 1024,
+ "arquivos": [
+  "feSapTapper_Albedo.png",
+  "feSapTapper_Normal.png",
+  "feSapTapper_MetallicSmoothness.png",
+  "feSapTapper_Roughness.png",
+  "feSapTapper_HD.fbx",
+  "feSapTapper_HD.blend"
+ ],
+ "segundos": 13.3
+}

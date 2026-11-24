@@ -1,0 +1,16 @@
+{
+ "nome": "feValveRelief",
+ "config": "F:\\IA\\fe_blender\\configs\\feValveRelief.json",
+ "triangulos_antes": 2948,
+ "triangulos_depois": 1276,
+ "atlas": 1024,
+ "arquivos": [
+  "feValveRelief_Albedo.png",
+  "feValveRelief_Normal.png",
+  "feValveRelief_MetallicSmoothness.png",
+  "feValveRelief_Roughness.png",
+  "feValveRelief_HD.fbx",
+  "feValveRelief_HD.blend"
+ ],
+ "segundos": 12.2
+}

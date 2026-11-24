@@ -1,0 +1,16 @@
+{
+ "nome": "feCentrifuge",
+ "config": "F:\\IA\\fe_blender\\configs\\feCentrifuge.json",
+ "triangulos_antes": 4528,
+ "triangulos_depois": 1656,
+ "atlas": 1024,
+ "arquivos": [
+  "feCentrifuge_Albedo.png",
+  "feCentrifuge_Normal.png",
+  "feCentrifuge_MetallicSmoothness.png",
+  "feCentrifuge_Roughness.png",
+  "feCentrifuge_HD.fbx",
+  "feCentrifuge_HD.blend"
+ ],
+ "segundos": 15.6
+}

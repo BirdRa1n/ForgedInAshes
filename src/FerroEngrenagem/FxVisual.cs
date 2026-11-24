@@ -65,6 +65,11 @@ namespace FerroEngrenagem
         float pressure;
         readonly List<Surface> surfaces = new List<Surface>();
         float fill, fillNow, workSpeed;
+        float needleGoal = -1f;                    // >= 0: the needles show this (tanks, gauge, valves)
+        Transform armYaw;                          // FeArmYaw: the Mechanical Arm's turret (swings back <-> front)
+        Quaternion armYaw0;
+        bool armOn;
+        float armPeriod = 1f, armT;
         bool working, dripping;
         Renderer castMetal;
         Transform lever;                 // FeLever_*: the Clutch lever (thrown one way engaged, the other released)
@@ -107,6 +112,7 @@ namespace FerroEngrenagem
             if (t.name.StartsWith("feCoalGenerator") || FindName(t, "feCoalGen_Crank")) return true;
             foreach (Transform c in t.GetComponentsInChildren<Transform>(true))
                 if (c.name.StartsWith("FeLever", System.StringComparison.Ordinal) || c.name.StartsWith("FeWorkSpin", System.StringComparison.Ordinal) ||
+                    c.name.StartsWith("FeArmYaw", System.StringComparison.Ordinal) || c.name.StartsWith("FeNeedle", System.StringComparison.Ordinal) ||
                     c.name.StartsWith("FeSurface", System.StringComparison.Ordinal)) return true;
             foreach (Renderer r in t.GetComponentsInChildren<Renderer>(true))
                 foreach (Material m in r.sharedMaterials)
@@ -132,6 +138,7 @@ namespace FerroEngrenagem
             steam.Clear(); smoke.Clear(); sparks.Clear(); fire.Clear(); splash.Clear(); dust.Clear();
             drip.Clear(); spray.Clear(); bubbles.Clear(); workSpins.Clear(); surfaces.Clear();
             needles.Clear(); needles0.Clear(); pressure = 0f;
+            armYaw = null; armOn = false; armT = 0f;
             castMetal = null;
             lever = null;
             foreach (Renderer r in GetComponentsInChildren<Renderer>(true))
@@ -156,6 +163,11 @@ namespace FerroEngrenagem
                 if (fuelGen && (t.name.EndsWith("_Crank", System.StringComparison.Ordinal) ||
                                 t.name.EndsWith("_DynamoRotor", System.StringComparison.Ordinal)))
                     workSpins.Add(new WorkSpin { T = t, Mult = t.name.EndsWith("_Crank", System.StringComparison.Ordinal) ? 1.5f : -3f });
+                if (armYaw == null && t.name.StartsWith("FeArmYaw", System.StringComparison.Ordinal))
+                {
+                    armYaw = t;
+                    armYaw0 = t.localRotation;
+                }
                 if (t.name.StartsWith("FeWorkSpin", System.StringComparison.Ordinal))
                 {
                     WorkSpin w = new WorkSpin { T = t };
@@ -258,6 +270,8 @@ namespace FerroEngrenagem
                 case "mash": return new Color(0.22f, 0.15f, 0.06f, 0.97f);            // digester mash
                 case "slurry": return new Color(0.16f, 0.16f, 0.15f, 0.95f);          // coal + nitre slurry
                 case "washwater": return new Color(0.30f, 0.28f, 0.20f, 0.85f);       // muddy wash water
+                case "latex": return new Color(0.92f, 0.90f, 0.82f, 0.95f);
+                case "crude_oil": return new Color(0.04f, 0.03f, 0.02f, 0.97f);
                 case "": return new Color(0.05f, 0.06f, 0.06f, 0.90f);                 // empty glass
                 default: return new Color(0.35f, 0.40f, 0.30f, 0.80f);
             }
@@ -275,7 +289,22 @@ namespace FerroEngrenagem
             heatGoal = 0f; glowGoal = 0f; flowSpeed = 0f;
             pouring = steaming = smoking = sparking = burning = dusting = false;
             working = dripping = false;
-            if (lever != null) leverGoal = BlockFeKinetic.Engaged(bv) ? 1f : -1f;
+            needleGoal = -1f;
+            if (lever != null)
+            {
+                // D12: the Signal Lever follows its own state, the Belt Gate's bar comes down while it stops the belt
+                string sk = Signals.Kind(bv.Block);
+                if (sk == "lever") leverGoal = Signals.Emits(world, owner) ? 1f : -1f;
+                else if (Logistics.IsGate(bv.Block)) leverGoal = Signals.Active(world, owner) ? 1f : -1f;
+                else leverGoal = BlockFeKinetic.Engaged(bv) ? 1f : -1f;
+            }
+            if (Signals.Kind(bv.Block) == "receiver") glowGoal = Signals.Emits(world, owner) ? 1f : 0f;
+            if (armYaw != null)
+            {
+                TileEntityPowered ate = world.GetTileEntity(owner) as TileEntityPowered;
+                armOn = ate != null && ate.IsPowered;
+                armPeriod = Mathf.Max(0.5f, Fluids.Prop(bv.Block, "FeArmSeconds", 1f));
+            }
             if (fuelGen)
             {
                 TileEntityPowerSource gte = world.GetTileEntity(owner) as TileEntityPowerSource;
@@ -355,6 +384,37 @@ namespace FerroEngrenagem
                     steaming = s.LastFlow > 0.01f;
                     dripping = s.LastFlow > 0.01f || s.Steam > 0.5f;          // condensate running to the receiver
                     break;
+                case FluidKind.Burner:
+                    burning = s.Steam > 0.5f;                                   // heat stored = lit
+                    glowGoal = burning ? 1f : 0f;
+                    smoking = burning;
+                    break;
+                case FluidKind.Tapper:
+                    dripping = s.LastFlow > 0.01f || s.Amount > 0.01f;
+                    fluid = "latex";
+                    break;
+                case FluidKind.Tank:
+                case FluidKind.GasTank:
+                {
+                    float tcap = Fluids.Prop(bv.Block, "FeFluidCapacity", 2000f);
+                    fill = tcap > 0f ? Mathf.Clamp01(s.Amount / tcap) : 0f;
+                    fluid = s.Amount > 0.01f ? s.Fluid : "";
+                    needleGoal = kind == FluidKind.GasTank ? Mathf.Clamp01(s.Amount / Mathf.Max(1f, tcap) / Fluids.Prop(bv.Block, "FeMaxBar", 10f)) : fill;
+                    break;
+                }
+                case FluidKind.Gauge:
+                    needleGoal = s.Bar > 0.01f ? Mathf.Clamp01(s.Bar / 12f) : Mathf.Clamp01(s.LastFlow / 600f);
+                    glowGoal = Signals.Emits(world, owner) ? 1f : 0f;
+                    fluid = s.Fluid;
+                    break;
+                case FluidKind.Valve:
+                    fluid = s.Amount > 0.01f ? s.Fluid : "";
+                    steaming = FluidControl.ValveType(bv.Block) == "alivio" && s.LastFlow > 0.01f;   // relief venting
+                    needleGoal = Mathf.Clamp01(s.Bar / 12f);
+                    break;
+                case FluidKind.TowerSection:
+                    fluid = s.Fluid;
+                    break;
                 case FluidKind.Processor:
                     // working = its progress (FluidState.Steam) moved since the last look
                     working = s.Steam > 0f && Mathf.Abs(s.Steam - lastProgress) > 0.001f;
@@ -368,7 +428,10 @@ namespace FerroEngrenagem
                     fluid = bn.Contains("Biodigester") ? "mash" : (bn.Contains("ChemMixer") ? "slurry"
                           : (bn.Contains("Washer") ? "washwater" : (s.Fluid.Length > 0 ? s.Fluid : Fluids.Water)));
                     if (fill <= 0.01f && !working) fluid = "";
-                    burning = working && fluid == "mash";                         // the biogas flare
+                    bool heat = bv.Block.Properties != null && (bv.Block.Properties.Contains("FeHeat") || bv.Block.Properties.Contains("FeTower"));
+                    burning = working && (fluid == "mash" || heat);               // biogas flare / heated machines
+                    sparking = working;                                           // grinder, welder (if they have sparks)
+                    glowGoal = working && heat ? 1f : 0f;
                     break;
                 default:
                     steaming = smoking = sparking = s.LastFlow > 0.01f;
@@ -452,9 +515,17 @@ namespace FerroEngrenagem
                                                : Mathf.MoveTowards(castHeat, castHeatGoal, 0.5f * dt);
             glowNow = Mathf.MoveTowards(glowNow, glowGoal, dt);
             workSpeed = Mathf.MoveTowards(workSpeed, working ? 1f : 0f, 0.8f * dt);           // spins up / runs down
+            if (armYaw != null && armOn)
+            {
+                // the arm swings from behind (pick) to the front (place) and back once per transfer period
+                armT += dt / armPeriod;
+                float yaw = 90f - 180f * (0.5f - 0.5f * Mathf.Cos(armT * Mathf.PI * 2f));
+                armYaw.localRotation = armYaw0 * Quaternion.AngleAxis(yaw - 90f, Vector3.forward);
+            }
             if (needles.Count > 0)
             {
-                pressure = Mathf.MoveTowards(pressure, working ? 0.6f : 0.12f * fill, 0.3f * dt);
+                float goalP = needleGoal >= 0f ? needleGoal : (working ? 0.6f : 0.12f * fill);
+                pressure = Mathf.MoveTowards(pressure, goalP, 0.3f * dt);
                 float shake = working ? 1.5f * Mathf.Sin(Time.time * 19f) : 0f;
                 for (int i = 0; i < needles.Count; i++)
                     if (needles[i] != null)

@@ -1,0 +1,16 @@
+{
+ "nome": "feShaleRetort",
+ "config": "F:\\IA\\fe_blender\\configs\\feShaleRetort.json",
+ "triangulos_antes": 4252,
+ "triangulos_depois": 1724,
+ "atlas": 1024,
+ "arquivos": [
+  "feShaleRetort_Albedo.png",
+  "feShaleRetort_Normal.png",
+  "feShaleRetort_MetallicSmoothness.png",
+  "feShaleRetort_Roughness.png",
+  "feShaleRetort_HD.fbx",
+  "feShaleRetort_HD.blend"
+ ],
+ "segundos": 13.3
+}

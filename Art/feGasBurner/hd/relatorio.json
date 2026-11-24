@@ -1,0 +1,16 @@
+{
+ "nome": "feGasBurner",
+ "config": "F:\\IA\\fe_blender\\configs\\feGasBurner.json",
+ "triangulos_antes": 4104,
+ "triangulos_depois": 1328,
+ "atlas": 1024,
+ "arquivos": [
+  "feGasBurner_Albedo.png",
+  "feGasBurner_Normal.png",
+  "feGasBurner_MetallicSmoothness.png",
+  "feGasBurner_Roughness.png",
+  "feGasBurner_HD.fbx",
+  "feGasBurner_HD.blend"
+ ],
+ "segundos": 13.8
+}

@@ -303,3 +303,25 @@ deve ter `ERR`/`EXC` com `FeUi`, `fePicker` ou `XUiV_TextList`.
     cano/eixo/esteira > Rede: Painel de Rede.
 15. **Config:** `Data/fe_settings.xml` VanillaShortcuts="expensive" traz de volta os atalhos removidos (latas de
     gasolina do xisto, óleo, cola, tinta, papel, pote) a 3x o custo (log: `added N fallback recipe(s)`).
+
+## 20. Modelos próprios dos blocos do D12
+
+Coloque cada bloco (criativo, busca "fe") e confira: modelo próprio (não mais um cano / tanque / prensa repetido),
+ícone próprio no inventário, sem piscar ao andar em volta.
+
+1. **Canos e válvulas:** Cano de Alta Pressão liga os braços como o cano comum. Válvulas: flange verde atrás
+   (entrada), laranja na frente (saída). Alívio solta vapor pela chaminé quando passa de pressão.
+2. **Manômetro:** o ponteiro do mostrador sobe com a pressão (ou vazão); a lâmpada em cima acende quando dá sinal.
+3. **Tanques:** Líquido: a coluna no visor sobe com o conteúdo. Gás: o ponteiro sobe com a carga.
+4. **Queimador:** aceso = chama na boca da fornalha, brilho e um pouco de fumaça.
+5. **Sangrador:** costas na árvore, pinga no balde enquanto produz.
+6. **Processadores:** calha da frente cai em cima da esteira nova (baixa); os de torque têm eixo dos dois lados e as
+   peças giram só enquanto trabalham (Calandra: rolos; Moinho: mó; Fiadeira: fusos; Centrífuga: rotor; Prensa de
+   Suco / Vulcanização: prato sobe e desce). Retorta, Conversor, Têmpera: fogo / faíscas / brilho trabalhando.
+7. **Estações em linha:** em cima de uma esteira, as pernas chegam ao chão da esteira, a ferramenta desce sem
+   encostar nos itens e o jogador não esbarra nas pernas (fora do colisor). Esmerilhadeira e Soldadora: faíscas.
+8. **Esteiras de logística:** Divisor, Comporta e Contadora são a esteira nova com as peças em cima; curvas e
+   junções continuam funcionando. Comporta: a aba desce quando segura os itens e sobe quando libera.
+9. **Braço Mecânico:** com energia, a torre gira de trás (pega) para a frente (põe) a cada transferência.
+10. **Alavanca de Sinal:** a alavanca vira para um lado ligada e para o outro desligada. Receptor: lâmpada acesa
+    quando passa o sinal.

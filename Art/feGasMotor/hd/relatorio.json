@@ -1,0 +1,16 @@
+{
+ "nome": "feGasMotor",
+ "config": "F:\\IA\\fe_blender\\configs\\feGasMotor.json",
+ "triangulos_antes": 8216,
+ "triangulos_depois": 3072,
+ "atlas": 1024,
+ "arquivos": [
+  "feGasMotor_Albedo.png",
+  "feGasMotor_Normal.png",
+  "feGasMotor_MetallicSmoothness.png",
+  "feGasMotor_Roughness.png",
+  "feGasMotor_HD.fbx",
+  "feGasMotor_HD.blend"
+ ],
+ "segundos": 21.2
+}

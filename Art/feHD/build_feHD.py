@@ -50,10 +50,12 @@ MATS = {
     "feHD_Liquid":    ((0.10, 0.30, 0.45), 0.03, 0.00, 0),
     "feHD_Gas":       ((0.90, 0.92, 0.95), 0.60, 0.00, 0),
     "feHD_Glow":      ((1.00, 0.35, 0.05), 0.50, 0.00, 6.0),
+    "feHD_Red":       ((0.45, 0.07, 0.05), 0.65, 0.20, 0),    # handwheels, gas bottles, pressure bands
+    "feHD_Leather":   ((0.36, 0.22, 0.12), 0.85, 0.00, 0),    # hides
 }
 MI = {n: i for i, n in enumerate(MATS)}
 (IRON, CAST, STEEL, RUST, PAINT, HAZ, BRICK, SOOT, SAND, BRASS, COPPER, WOOD, GLASS, IN, OUT,
- MOLTEN, LIQUID, GAS, GLOW) = range(len(MATS))
+ MOLTEN, LIQUID, GAS, GLOW, RED, LEATHER) = range(len(MATS))
 
 AXIS = {"Z": Matrix.Identity(4), "Y": Matrix.Rotation(math.pi / 2, 4, "X"), "X": Matrix.Rotation(math.pi / 2, 4, "Y")}
 
@@ -1351,21 +1353,13 @@ def model_conveyor_duct():
     box(bt, (0.36, 0.12, 0.22), (0, -0.56, DZC), SOOT)
     box(bt, (0.38, 0.02, 0.24), (0, -0.53, DZC), STEEL)      # clamp band
     out.append(to_object(bt, "FeDuctBoot", bevel=0.004))
-    rp = bmesh.new()                                         # rises from the split to the belt surface in front
-    p0, p1 = Vector((0, DUCT_SPLIT, DZC)), Vector((0, -0.50, 0.60))
-    d = p1 - p0
-    m = Matrix.Translation((p0 + p1) / 2) @ d.to_track_quat("Y", "Z").to_matrix().to_4x4()
-    for size, off, mat in (((DUCT_W, d.length + 0.04, 0.03), (0, 0, -0.145), IRON),
-                           ((DUCT_W, d.length + 0.04, 0.03), (0, 0, 0.145), PAINT),
-                           ((0.02, d.length + 0.04, 0.28), (DUCT_W / 2 - 0.01, 0, 0), PAINT),
-                           ((0.02, d.length + 0.04, 0.28), (-DUCT_W / 2 + 0.01, 0, 0), PAINT)):
-        r = bmesh.ops.create_cube(rp, size=1.0, calc_uvs=True)
-        _fin(rp, mat, m @ Matrix.Translation(off) @ Matrix.Diagonal((*size, 1)), r["verts"])
-    box(rp, (DUCT_W, 0.14, 0.03), (0, -0.56, 0.75), PAINT)                          # hood over the drop
+    rp = bmesh.new()                    # onto an open (low, 0.175 m) belt in front: the straight end of the duct
+    duct_tube(rp, -0.5, DUCT_SPLIT)     # plus a transfer lip over the belt and rubber skirts at its sides
+    duct_collar(rp, -0.48)
+    box(rp, (0.36, 0.12, 0.012), (0, -0.55, DUCT_Z0 + 0.10), STEEL)                  # lip, just over the lona
     for sx in (-1, 1):
-        box(rp, (0.02, 0.14, 0.16), (sx * (DUCT_W / 2 - 0.01), -0.56, 0.68), PAINT)
-    box(rp, (0.36, 0.10, 0.02), (0, -0.55, 0.62), STEEL)                            # lip over the belt
-    box(rp, (DUCT_W + 0.06, 0.08, DUCT_Z0 + 0.1), (0, DUCT_SPLIT, (DUCT_Z0 + 0.1) / 2), IRON)   # support
+        box(rp, (0.012, 0.12, 0.10), (sx * 0.18, -0.55, DUCT_Z0 + 0.15), SOOT)       # skirts
+    box(rp, (0.38, 0.12, 0.02), (0, -0.55, DUCT_Z1 - 0.02), PAINT)                   # hood
     out.append(to_object(rp, "FeDuctRamp", bevel=0.003))
     ht = bmesh.new()                                         # hatch: a chute up to the top face for a funnel above
     box(ht, (0.30, 0.30, 0.03), (0, 0.0, DUCT_Z1 + 0.015), CAST)
@@ -1442,7 +1436,8 @@ def model_funnel():
         if lip:
             box(bm, (w + 0.06, 0.03, h + 0.06), lip, CAST)
         out.append(to_object(bm, name, bevel=0.002))
-    chute("FeFunnelSpoutBelt", (0, 0.03, HZ), (0, -0.50, HZ - 0.02))
+    # the low belt (Harrison, 2026-11-24): the lona is at 0.175 m, so the spout drops to just over it
+    chute("FeFunnelSpoutBelt", (0, 0.03, HZ), (0, -0.50, 0.27), w=0.30, h=0.16, lip=(0, -0.485, 0.27))
     chute("FeFunnelSpoutDuct", (0, 0.03, HZ), (0, -0.49, DZC), w=0.34, h=0.20, closed=True, lip=(0, -0.485, DZC))
     chute("FeFunnelSpout", (0, 0.03, HZ), (0, -0.49, 0.50), w=0.26, h=0.20, closed=True, lip=(0, -0.485, 0.50))
     return out
@@ -2428,6 +2423,1171 @@ def model_belt_crate():
 
 
 
+# ================================================================ D12 blocks (PLANO_CADEIA.md section 7), all 1 x 1
+# Contracts (src/FerroEngrenagem): valves / compressor: fluid IN at the back (Blender +Y), OUT at the front (-Y), at
+# 0.5; gauge / burner: port at the back; tapper: latex OUT at the front (its back hugs the tree); tanks: any face;
+# tower section: 4 sides; processors: fluid in at the back (0.5), products onto the LOW belt in front (lona 0.175);
+# torque machines: drive shaft across (Blender X) at 0.5; powered blocks: a WireOffset; in-line stations sit on the
+# block ABOVE a belt: their FeReach_* parts hang down to it (kept out of the collider by FeBuild).
+LOW = 0.24                                                     # chute lip over the low belt in front
+
+
+def d12_base(b, w=0.90, h=0.05, mat=IRON, stripe=True):
+    box(b, (w, w, h), (0, 0, h / 2), mat)
+    if stripe:
+        hazard(b, w - 0.02, (0, -w / 2 - 0.004, h / 2), "X", h=h * 0.8, n=12)
+
+
+def back_in(b, z=C, ring_mat=None):
+    cyl(b, PIPE_R, 0.20, (0, 0.40, z), "Y", STEEL, segs=16)
+    flange(b, (0, 0.485, z), "Y", ring_mat if ring_mat is not None else IN)
+
+
+def front_out(b, z=C):
+    cyl(b, PIPE_R, 0.20, (0, -0.40, z), "Y", STEEL, segs=16)
+    flange(b, (0, -0.485, z), "Y", OUT)
+
+
+def low_chute(b):
+    box(b, (0.32, 0.20, 0.025), (0, -0.40, LOW), STEEL)
+    for sx in (-1, 1):
+        box(b, (0.02, 0.20, 0.08), (sx * 0.17, -0.40, LOW + 0.04), STEEL)
+    box(b, (0.34, 0.03, 0.03), (0, -0.495, LOW + 0.05), OUT)
+
+
+def drive_x(objs, gear_r=0.0):
+    """Torque shaft across the block (Blender X) at 0.5, spinning (KineticSpinner)."""
+    sh = bmesh.new()
+    shaft_end(sh, 0.0, -0.5)
+    shaft_end(sh, 0.0, 0.5)
+    if gear_r:
+        gear(sh, gear_r, 0.04, 16, (0, 0.40, 0), "Y", BRASS)
+    objs.append(to_object(sh, "FeSpin_DriveShaft", location=(0, 0, C), rotation=(0, 0, -math.pi / 2), bevel=0.002))
+
+
+def side_bearings(b, w=0.18, z=C):
+    for sx in (-1, 1):
+        box(b, (0.12, w, z - 0.05), (sx * 0.40, 0, (z - 0.05) / 2 + 0.05), CAST)
+        cyl(b, 0.07, 0.13, (sx * 0.40, 0, z), "X", CAST, segs=16)
+
+
+def axial_pipe(b):
+    """Pipe through the block along Y at 0.5 with flanges at both faces (in = back, green; out = front, orange)."""
+    cyl(b, PIPE_R, 0.96, (0, 0, C), "Y", STEEL, segs=16)
+    flange(b, (0, 0.485, C), "Y", IN)
+    flange(b, (0, -0.485, C), "Y", OUT)
+
+
+def arrow_on_top(b, z, y0=0.10, mat=OUT):
+    for k, w in enumerate((0.10, 0.07, 0.04)):
+        box(b, (w, 0.025, 0.008), (0, y0 - 0.035 * k - 0.06, z), mat)
+
+
+# ---------------------------------------------------------------- pipes, valves, gauge, compressor
+def model_pipe_hp():
+    """High-pressure pipe: thick steel, a forged cross with heavy bolting and red pressure bands; arms like fePipe."""
+    core = bmesh.new()
+    box(core, (0.28, 0.28, 0.28), (0, 0, 0), STEEL)
+    for v in ARM_DIRS.values():
+        cyl(core, PIPE_R + 0.02, 0.03, Vector(v) * 0.14, _axname(v), CAST, segs=18)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            for sz in (-1, 1):
+                cyl(core, 0.013, 0.014, (sx * 0.11, sy * 0.11, sz * 0.145), "Z", STEEL, segs=6)
+    box(core, (0.12, 0.012, 0.06), (0, -0.142, 0.06), OUT)                               # "12 bar" plate
+    root = bpy.data.objects.new("fePipeHP_Base", None)
+    out = [root, to_object(core, "fePipe_Core", location=(0, 0, C), bevel=0.004)]
+    for n, v in ARM_DIRS.items():
+        bm = bmesh.new()
+        vv = Vector(v)
+        ax = _axname(v)
+        cyl(bm, PIPE_R + 0.008, 0.36, vv * 0.31, ax, STEEL, segs=18)
+        for t in (0.22, 0.38):
+            cyl(bm, PIPE_R + 0.016, 0.025, vv * t, ax, RED, segs=18)
+        flange(bm, vv * 0.485, ax, bolts=8)
+        out.append(to_object(bm, n, location=(0, 0, C), bevel=0.002))
+    return out
+
+
+def valve_common(b):
+    box(b, (0.30, 0.76, 0.04), (0, 0, 0.02), IRON)                                     # skid under both saddles
+    for sy in (-0.30, 0.30):
+        box(b, (0.10, 0.06, C - 0.10), (0, sy, (C - 0.10) / 2 + 0.04), IRON)          # pipe saddles
+    axial_pipe(b)
+
+
+def model_valve_shutoff():
+    """Shut-off valve (gate valve): body, bonnet, rising stem and a handwheel; a signal can open / close it."""
+    objs = []
+    b = bmesh.new()
+    valve_common(b)
+    box(b, (0.22, 0.20, 0.22), (0, 0, C), CAST)
+    bolt_circle(b, 8, 0.10, (0, 0, C + 0.115), "Z", STEEL, r=0.009, d=0.02)
+    cyl(b, 0.07, 0.16, (0, 0, C + 0.19), "Z", CAST, segs=16)                             # bonnet
+    cyl(b, 0.015, 0.16, (0, 0, C + 0.33), "Z", STEEL, segs=8)                            # stem
+    ring(b, 0.12, 0.10, 0.025, (0, 0, C + 0.40), "Z", RED, segs=20)                 # handwheel
+    for k in range(4):
+        box(b, (0.22, 0.015, 0.015), (0, 0, C + 0.40), RED, Matrix.Rotation(k * math.pi / 4, 4, "Z"))
+    box(b, (0.08, 0.06, 0.06), (0.14, 0, C + 0.10), CAST)                                # signal actuator box
+    objs.append(to_object(b, "feValveShutoff_Base", bevel=0.003))
+    wire(objs, (0.14, 0, C + 0.16))
+    return objs
+
+
+def model_valve_check():
+    b = bmesh.new()
+    valve_common(b)
+    cyl(b, 0.13, 0.26, (0, 0, C), "Y", CAST, segs=20)                                    # swing-check body
+    box(b, (0.20, 0.16, 0.08), (0, 0.02, C + 0.13), CAST)                                # cover
+    bolt_circle(b, 6, 0.08, (0, 0.02, C + 0.17), "Z", STEEL, r=0.008, d=0.015)
+    arrow_on_top(b, C + 0.175)
+    return [to_object(b, "feValveCheck_Base", bevel=0.003)]
+
+
+def model_valve_regulator(objs_name="feValveRegulator"):
+    objs = []
+    b = bmesh.new()
+    valve_common(b)
+    box(b, (0.20, 0.22, 0.20), (0, 0, C), CAST)
+    cyl(b, 0.15, 0.06, (0, 0, C + 0.14), "Z", PAINT, segs=24)                            # diaphragm housing
+    cyl(b, 0.16, 0.02, (0, 0, C + 0.175), "Z", CAST, segs=24)
+    cyl(b, 0.04, 0.12, (0, 0, C + 0.24), "Z", CAST, segs=12)                             # spring bonnet
+    cyl(b, 0.012, 0.10, (0, 0, C + 0.33), "Z", BRASS, segs=8)                            # adjusting screw
+    box(b, (0.06, 0.012, 0.012), (0, 0, C + 0.385), BRASS)
+    gauge(objs, b, (0.13, -0.12, C + 0.10), "FeNeedle_Out", r=0.04)
+    objs.insert(0, to_object(b, objs_name + "_Base", bevel=0.003))
+    return objs
+
+
+def model_valve_separator():
+    """Fluid separator: a filter canister with a sight glass (the chosen fluid shows) and a selector dial."""
+    b = bmesh.new()
+    valve_common(b)
+    cyl(b, 0.13, 0.34, (0, 0, C + 0.06), "Z", CAST, segs=22)
+    cyl(b, 0.14, 0.03, (0, 0, C + 0.24), "Z", STEEL, segs=22)
+    bolt_circle(b, 8, 0.12, (0, 0, C + 0.255), "Z", STEEL, r=0.007, d=0.012)
+    box(b, (0.05, 0.02, 0.18), (0, -0.13, C + 0.06), IRON)
+    box(b, (0.03, 0.024, 0.15), (0, -0.131, C + 0.06), LIQUID)                          # sight glass
+    cyl(b, 0.05, 0.02, (0.13, 0, C + 0.12), "X", BRASS, segs=14)                         # selector
+    box(b, (0.006, 0.03, 0.008), (0.141, 0, C + 0.14), OUT)
+    return [to_object(b, "feValveSeparator_Base", bevel=0.003)]
+
+
+def model_valve_relief():
+    """Relief valve: only an inlet (back); a spring bonnet and a vent pipe up that blows while it relieves."""
+    objs = []
+    b = bmesh.new()
+    box(b, (0.30, 0.76, 0.04), (0, 0.04, 0.02), IRON)
+    box(b, (0.10, 0.06, C - 0.10), (0, 0.30, (C - 0.10) / 2 + 0.04), IRON)
+    cyl(b, PIPE_R, 0.50, (0, 0.25, C), "Y", STEEL, segs=16)
+    flange(b, (0, 0.485, C), "Y", IN)
+    cyl(b, 0.09, 0.16, (0, 0, C), "Y", CAST, segs=18)
+    cyl(b, 0.07, 0.20, (0, 0, C + 0.17), "Z", RED, segs=16)                         # spring housing
+    for k in range(5):
+        ring(b, 0.075, 0.06, 0.012, (0, 0, C + 0.09 + k * 0.035), "Z", STEEL, segs=14)
+    cyl(b, 0.01, 0.12, (0.08, 0, C + 0.22), "X", STEEL, segs=6)                          # test lever
+    pipe_run(b, [(0, -0.05, C), (0, -0.20, C), (0, -0.20, 0.96)], r=0.04)               # vent stack
+    cyl(b, 0.05, 0.04, (0, -0.20, 0.98), "Z", CAST, segs=12)
+    objs.append(to_object(b, "feValveRelief_Base", bevel=0.003))
+    objs.append(empty("FeFx_Steam_1", (0, -0.20, 1.0)))
+    return objs
+
+
+def model_gauge_block():
+    """Pressure / flow gauge on a stand: reads the pipe at its back, big dial (FeNeedle_Gauge) facing the front, a
+    signal lamp on top (FeGlow while it signals)."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b, w=0.40, h=0.04, stripe=False)
+    cyl(b, PIPE_R, 0.30, (0, 0.35, C), "Y", STEEL, segs=16)
+    flange(b, (0, 0.485, C), "Y", IN)
+    box(b, (0.06, 0.06, C + 0.10), (0, 0.12, (C + 0.10) / 2), IRON)                     # post
+    pipe_run(b, [(0, 0.20, C), (0, 0.05, C), (0, 0.05, C + 0.12)], r=0.012, mat=BRASS)
+    cyl(b, 0.16, 0.05, (0, 0.0, C + 0.18), "Y", CAST, segs=28)
+    gauge(objs, b, (0, -0.03, C + 0.18), "FeNeedle_Gauge", r=0.14)
+    cyl(b, 0.035, 0.05, (0, 0.02, C + 0.38), "Z", GLOW, segs=12)                         # signal lamp
+    cyl(b, 0.04, 0.012, (0, 0.02, C + 0.35), "Z", STEEL, segs=12)
+    objs.insert(0, to_object(b, "feGauge_Base", bevel=0.003))
+    return objs
+
+
+def model_compressor():
+    """Compressor (torque across X): a twin-cylinder V block on a receiver; gas in at the back, out at the front."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b)
+    side_bearings(b)
+    box(b, (0.46, 0.40, 0.30), (0, 0, 0.30), CAST)                                       # crankcase
+    for sx in (-1, 1):                                                                    # V cylinders
+        rot = Matrix.Rotation(sx * 0.6, 4, "Y")
+        r = bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=18, radius1=0.08, radius2=0.08,
+                                  depth=0.24, calc_uvs=True)
+        _fin(b, PAINT, Matrix.Translation((sx * 0.13, 0, 0.58)) @ rot, r["verts"])
+        for k in range(5):
+            r = bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=18, radius1=0.095, radius2=0.095,
+                                      depth=0.012, calc_uvs=True)
+            _fin(b, STEEL, Matrix.Translation((sx * 0.13, 0, 0.58)) @ rot @ Matrix.Translation((0, 0, -0.08 + k * 0.04)), r["verts"])
+    pipe_run(b, [(0, 0.40, C), (0, 0.22, C), (0, 0.15, 0.62)], r=0.03)
+    pipe_run(b, [(-0.20, 0, 0.74), (0, -0.10, 0.80), (0, -0.30, C)], r=0.03)
+    back_in(b)
+    front_out(b)
+    gauge(objs, b, (0.24, -0.22, 0.66), "FeNeedle_Out", r=0.05)
+    objs.insert(0, to_object(b, "feCompressor_Base", bevel=0.003))
+    drive_x(objs)
+    return objs
+
+
+# ---------------------------------------------------------------- tanks
+def model_tank_liquid():
+    """Liquid tank (joins its neighbours): riveted cylinder, nozzles on every face, a tall level glass with the fluid
+    column (FeSurface_r0.70_Level, hidden in the tank when empty)."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b, stripe=False)
+    cyl(b, 0.42, 0.86, (0, 0, 0.48), "Z", PAINT, segs=32)
+    for z in (0.12, 0.48, 0.84):
+        cyl(b, 0.428, 0.035, (0, 0, z), "Z", IRON, segs=32)
+    cyl(b, 0.40, 0.04, (0, 0, 0.93), "Z", CAST, segs=32)
+    cyl(b, 0.10, 0.06, (0, 0, 0.97), "Z", CAST, segs=16)                                 # manhole
+    for v in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        ax = "X" if v[0] else "Y"
+        cyl(b, 0.05, 0.10, (v[0] * 0.45, v[1] * 0.45, C), ax, STEEL, segs=12)            # nozzles
+    for x in (-0.27, 0.27):
+        for y in (-0.27, 0.27):
+            box(b, (0.05, 0.05, 0.10), (x, y, 0.08), IRON)
+    LX, LY = 0.18, -0.405
+    for z in (0.14, 0.86):
+        box(b, (0.06, 0.05, 0.05), (LX, LY, z), BRASS)
+    for k in range(3):
+        a = 2 * math.pi * k / 3
+        cyl(b, 0.004, 0.70, (LX + 0.022 * math.cos(a), LY - 0.02 + 0.022 * math.sin(a), 0.50), "Z", STEEL, segs=6)
+    objs.append(to_object(b, "feTankLiquid_Base", bevel=0.003))
+    col = bmesh.new()
+    box(col, (0.02, 0.02, 0.72), (0, 0, -0.36), LIQUID)
+    objs.append(to_object(col, "FeSurface_r0.70_Level", location=(LX, LY - 0.02, 0.16)))
+    return objs
+
+
+def model_tank_gas():
+    """Gas tank: a horizontal pressure cylinder with dished ends on saddles, pressure gauge (FeNeedle_Bar), relief
+    valve, hazard stripes, nozzles on every face."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b)
+    cyl(b, 0.34, 0.80, (0, 0, C + 0.02), "Y", PAINT, segs=32)
+    for s_ in (-1, 1):
+        cyl(b, 0.34, 0.06, (0, s_ * 0.43, C + 0.02), "Y", PAINT, segs=32, r2=0.24)
+        box(b, (0.56, 0.10, C - 0.20), (0, s_ * 0.26, (C - 0.20) / 2 + 0.05), CAST)
+    for y in (-0.15, 0.15):
+        cyl(b, 0.345, 0.05, (0, y, C + 0.02), "Y", HAZ, segs=32)
+    for v in ((1, 0, 0), (-1, 0, 0)):
+        cyl(b, 0.05, 0.14, (v[0] * 0.43, 0, C), "X", STEEL, segs=12)
+    cyl(b, 0.05, 0.10, (0, 0, 0.92), "Z", STEEL, segs=12)
+    cyl(b, 0.03, 0.08, (0.12, 0.10, 0.90), "Z", RED, segs=10)                       # relief
+    gauge(objs, b, (-0.15, -0.36, C + 0.24), "FeNeedle_Bar", r=0.06)
+    objs.insert(0, to_object(b, "feTankGas_Base", bevel=0.003))
+    return objs
+
+
+# ---------------------------------------------------------------- heat, sap
+def model_gas_burner():
+    """Gas burner (heats the machines it touches): a firebox with a ribbon burner behind a grate, gas train with a
+    valve at the back; flames (FeFx_Fire), glow and a little smoke while lit."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b)
+    plate(b, (0.80, 0.70, 0.62), (0, 0.04, 0.36), CAST, "-Y", n=6)
+    box(b, (0.60, 0.02, 0.30), (0, -0.31, 0.34), SOOT)                                   # firebox mouth
+    for k in range(7):
+        box(b, (0.015, 0.03, 0.30), (-0.27 + k * 0.09, -0.335, 0.34), IRON)              # grate bars
+    box(b, (0.56, 0.03, 0.03), (0, -0.352, 0.21), GLOW)                                  # ribbon burner (glows lit)
+    box(b, (0.60, 0.05, 0.03), (0, -0.345, 0.18), CAST)
+    for k in range(6):
+        cyl(b, 0.012, 0.02, (-0.22 + k * 0.088, -0.352, 0.232), "Z", BRASS, segs=6)
+    box(b, (0.84, 0.74, 0.05), (0, 0.04, 0.69), IRON)
+    pipe_run(b, [(0, 0.40, C), (0, 0.30, C), (0.25, 0.30, C), (0.25, 0.30, 0.30)], r=0.025)
+    cyl(b, PIPE_R, 0.10, (0, 0.45, C), "Y", STEEL, segs=16)
+    flange(b, (0, 0.485, C), "Y", IN)
+    ring(b, 0.05, 0.04, 0.01, (0.25, 0.36, C + 0.04), "Y", RED, segs=12)            # gas cock
+    objs.append(to_object(b, "feGasBurner_Base", bevel=0.003))
+    objs.append(empty("FeFx_Fire_1", (0, -0.32, 0.25)))
+    objs.append(empty("FeFx_Smoke_1", (0, 0.04, 0.72)))
+    return objs
+
+
+def model_sap_tapper():
+    """Sap tapper: its back hugs the tree trunk; a spile and a channel drip latex (FeFx_Drip) into a bucket with a
+    latex surface (FeLiquid), drained by a pipe out of the front."""
+    objs = []
+    b = bmesh.new()
+    for z in (0.35, 0.75):                                                                # strap round the trunk
+        box(b, (0.70, 0.03, 0.04), (0, 0.48, z), RUST)
+    box(b, (0.30, 0.04, 0.50), (0, 0.45, 0.55), WOOD)                                    # back board
+    cyl(b, 0.02, 0.16, (0, 0.37, 0.80), "Y", STEEL, segs=8)                             # spile
+    box(b, (0.06, 0.14, 0.03), (0, 0.30, 0.78), STEEL, Matrix.Rotation(0.3, 4, "X"))     # channel
+    cyl(b, 0.14, 0.24, (0, 0.20, 0.42), "Z", STEEL, segs=20, r2=0.12)                   # bucket
+    ring(b, 0.145, 0.13, 0.02, (0, 0.20, 0.54), "Z", IRON, segs=20)
+    cyl(b, 0.125, 0.01, (0, 0.20, 0.50), "Z", LIQUID, segs=20)                           # latex in it
+    box(b, (0.05, 0.05, 0.30), (0, 0.20, 0.15), IRON)
+    pipe_run(b, [(0, 0.10, 0.34), (0, -0.20, 0.34), (0, -0.20, C), (0, -0.40, C)], r=0.03)
+    flange(b, (0, -0.485, C), "Y", OUT)
+    objs.append(to_object(b, "feSapTapper_Base", bevel=0.003))
+    objs.append(empty("FeFx_Drip_1", (0, 0.24, 0.74)))
+    return objs
+
+
+# ---------------------------------------------------------------- distillation tower
+def tower_shell(b, z0, z1, r=0.38):
+    cyl(b, r, z1 - z0, (0, 0, (z0 + z1) / 2), "Z", PAINT, segs=32)
+    for z in (z0 + 0.02, z1 - 0.02):
+        cyl(b, r + 0.025, 0.04, (0, 0, z), "Z", CAST, segs=32)
+        bolt_circle(b, 12, r + 0.012, (0, 0, z + (0.022 if z > (z0 + z1) / 2 else -0.022)), "Z", STEEL, r=0.008, d=0.012)
+
+
+def model_tower_section():
+    """Distillation tower section (stacks on the base): a flanged column segment with a tray, its fraction drawn off
+    on all four sides (nozzles + flanges), a ladder and a level window."""
+    b = bmesh.new()
+    tower_shell(b, 0.0, 1.0)
+    for v in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)):
+        vv = Vector(v)
+        ax = "X" if v[0] else "Y"
+        cyl(b, PIPE_R, 0.14, vv * 0.43 + Vector((0, 0, C)), ax, STEEL, segs=16)
+        flange(b, vv * 0.485 + Vector((0, 0, C)), ax, OUT)
+    box(b, (0.10, 0.012, 0.20), (0.22, -0.32, 0.72), IRON)                                # window
+    box(b, (0.07, 0.014, 0.16), (0.22, -0.321, 0.72), GLASS)
+    for sx in (-1, 1):
+        box(b, (0.02, 0.02, 1.0), (-0.30 + sx * 0.10, -0.33, 0.5), STEEL)                # ladder rails
+    for k in range(5):
+        box(b, (0.20, 0.02, 0.02), (-0.30, -0.33, 0.10 + k * 0.20), STEEL)
+    return [to_object(b, "feTowerSection_Base", bevel=0.003)]
+
+
+def model_distill_tower():
+    """Distillation tower base: the reboiler (heated by a burner beside it), the feed in at the back, the bottom
+    fraction out on both sides, a sight window and the first column flange on top for the sections."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b)
+    tower_shell(b, 0.05, 1.0)
+    box(b, (0.30, 0.02, 0.18), (0, -0.38, 0.30), SOOT)                                    # firebox window
+    box(b, (0.24, 0.022, 0.04), (0, -0.381, 0.25), GLOW)
+    for sx in (-1, 1):
+        cyl(b, PIPE_R, 0.14, (sx * 0.43, 0, C), "X", STEEL, segs=16)
+        flange(b, (sx * 0.485, 0, C), "X", OUT)
+    back_in(b)
+    gauge(objs, b, (0.20, -0.36, 0.70), "FeNeedle_Temp", r=0.05)
+    objs.insert(0, to_object(b, "feDistillTower_Base", bevel=0.003))
+    objs.append(empty("FeFx_Fire_1", (0, -0.40, 0.27)))
+    return objs
+
+
+# ---------------------------------------------------------------- processors
+def proc_frame(b, torque=False):
+    d12_base(b)
+    back_in(b)
+    low_chute(b)
+    if torque:
+        side_bearings(b)
+
+
+def model_shale_retort():
+    """Shale retort (heated): a brick-lined retort drum, the feed hopper, a condenser coil to the oil outlet and the
+    gas off-take; glow and fire while it cooks."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    box(b, (0.70, 0.55, 0.50), (0, 0.05, 0.32), BRICK)
+    for z in (0.12, 0.54):
+        box(b, (0.74, 0.59, 0.04), (0, 0.05, z), IRON)
+    cyl(b, 0.20, 0.62, (0, 0.05, 0.72), "X", CAST, segs=22)                               # retort drum
+    for x in (-0.28, 0.28):
+        cyl(b, 0.215, 0.04, (x, 0.05, 0.72), "X", STEEL, segs=22)
+    box(b, (0.22, 0.02, 0.14), (0, -0.23, 0.30), SOOT)
+    box(b, (0.18, 0.022, 0.03), (0, -0.231, 0.26), GLOW)
+    for k in range(6):                                                                     # condenser coil
+        ring(b, 0.07, 0.055, 0.015, (0.30, -0.20, 0.55 + k * 0.035), "Z", COPPER, segs=14)
+    pipe_run(b, [(0.20, 0.05, 0.90), (0.30, -0.20, 0.90), (0.30, -0.20, 0.52)], r=0.025)
+    pipe_run(b, [(-0.20, 0.05, 0.90), (-0.20, 0.05, 1.0)], r=0.03)
+    objs.append(to_object(b, "feShaleRetort_Base", bevel=0.003))
+    objs.append(empty("FeFx_Fire_1", (0, -0.25, 0.25)))
+    objs.append(empty("FeFx_Smoke_1", (-0.20, 0.05, 1.0)))
+    return objs
+
+
+def model_cracker():
+    """Catalytic cracker (400 W): an insulated reactor column with heater bands, a catalyst hopper and a cyclone."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    cyl(b, 0.22, 0.80, (-0.10, 0.05, 0.48), "Z", STEEL, segs=26)
+    for k in range(5):
+        cyl(b, 0.235, 0.03, (-0.10, 0.05, 0.15 + k * 0.15), "Z", COPPER, segs=26)        # heater bands
+    cyl(b, 0.12, 0.30, (0.26, 0.10, 0.62), "Z", PAINT, segs=18, r2=0.04)                 # cyclone
+    pipe_run(b, [(-0.10, 0.05, 0.90), (0.26, 0.10, 0.90), (0.26, 0.10, 0.78)], r=0.03)
+    box(b, (0.16, 0.16, 0.12), (0.26, 0.20, 0.30), CAST)                                 # control box
+    box(b, (0.10, 0.012, 0.06), (0.26, 0.115, 0.32), GLOW)
+    objs.append(to_object(b, "feCracker_Base", bevel=0.003))
+    wire(objs, (0.26, 0.20, 0.38))
+    return objs
+
+
+def model_gas_scrubber():
+    """Gas scrubber: a packed column with a water spray at the top (FeFx_Spray) and an acid sump with its level."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    cyl(b, 0.22, 0.82, (0, 0.05, 0.50), "Z", PAINT, segs=26)
+    for z in (0.20, 0.50, 0.80):
+        cyl(b, 0.232, 0.03, (0, 0.05, z), "Z", IRON, segs=26)
+    box(b, (0.08, 0.012, 0.40), (0.15, -0.165, 0.50), IRON)
+    box(b, (0.05, 0.014, 0.36), (0.15, -0.166, 0.50), GLASS)
+    pipe_run(b, [(0, 0.40, C), (0.25, 0.30, C), (0.25, 0.30, 0.94), (0, 0.05, 0.94)], r=0.025)
+    objs.append(to_object(b, "feGasScrubber_Base", bevel=0.003))
+    objs.append(empty("FeFx_Spray_1", (0, 0.05, 0.88)))
+    return objs
+
+
+def model_polymer_reactor():
+    """Polymerisation reactor (300 W, 6 bar): a jacketed pressure vessel with a domed head, agitator motor on top,
+    two gauges and a bursting disc."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    cyl(b, 0.28, 0.56, (0, 0.05, 0.42), "Z", STEEL, segs=28)
+    cyl(b, 0.30, 0.40, (0, 0.05, 0.40), "Z", PAINT, segs=28)                              # jacket
+    cyl(b, 0.28, 0.14, (0, 0.05, 0.77), "Z", STEEL, segs=28, r2=0.14)                    # domed head
+    objs.append(to_object(b, "fePolymerReactor_Base", bevel=0.003))
+    m = bmesh.new()
+    finned_frame(m, 0.07, 0.14, 0.0, 0.0)
+    objs.append(to_object(m, "fePolymerReactor_Motor", location=(0, 0.05, 0.95), rotation=AX_UP, bevel=0.002))
+    b2 = bmesh.new()
+    gauge(objs, b2, (0.20, -0.20, 0.70), "FeNeedle_Bar", r=0.045)
+    cyl(b2, 0.03, 0.05, (-0.18, 0.05, 0.86), "Z", RED, segs=10)                    # bursting disc
+    objs.append(to_object(b2, "fePolymerReactor_Fittings", bevel=0.002))
+    wire(objs, (0, 0.05, 1.03))
+    return objs
+
+
+def open_tank(b, r, z0, z1, mat=STEEL, x=0.0, y=0.05):
+    ring(b, r, r - 0.02, z1 - z0, (x, y, (z0 + z1) / 2), "Z", mat, segs=28)
+    cyl(b, r - 0.02, 0.02, (x, y, z0 + 0.01), "Z", SOOT, segs=28)
+    ring(b, r + 0.015, r - 0.015, 0.03, (x, y, z1), "Z", CAST, segs=28)
+
+
+def model_coag_tank():
+    """Coagulation tank: an open trough where latex and acid set; a slow paddle (FeWorkSpin) and the latex surface."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    for sx in (-1, 1):
+        box(b, (0.03, 0.70, 0.36), (sx * 0.36, 0.04, 0.42), WOOD)
+    for sy in (-1, 1):
+        box(b, (0.72, 0.03, 0.36), (0, 0.04 + sy * 0.35, 0.42), WOOD)
+    box(b, (0.72, 0.70, 0.03), (0, 0.04, 0.25), WOOD)
+    for z in (0.30, 0.56):
+        box(b, (0.76, 0.74, 0.03), (0, 0.04, z), RUST)
+    for sx in (-1, 1):
+        box(b, (0.04, 0.04, 0.40), (sx * 0.30, 0.04, 0.75), IRON)
+    box(b, (0.64, 0.05, 0.04), (0, 0.04, 0.94), IRON)
+    objs.append(to_object(b, "feCoagTank_Base", bevel=0.003))
+    pd = bmesh.new()
+    cyl(pd, 0.015, 0.40, (0, 0.20, 0), "Y", STEEL, segs=8)
+    for k in range(4):
+        box(pd, (0.10, 0.05, 0.012), (0.06, 0.36, 0), WOOD, Matrix.Rotation(k * math.pi / 2, 4, "Y"))
+    objs.append(to_object(pd, "FeWorkSpin_x0.3_Paddle", location=(0, 0.04, 0.94), rotation=AX_UP, bevel=0.001))
+    sf = bmesh.new()
+    box(sf, (0.68, 0.012, 0.66), (0, 0, 0), LIQUID)
+    objs.append(to_object(sf, "FeSurface_r0.20_Latex", location=(0, 0.04, 0.30), rotation=AX_UP))
+    return objs
+
+
+def model_calender():
+    """Calender (torque): three stacked chilled rolls in heavy cast side frames (they turn), a feed table at the back
+    and the sheet leaving at the front."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    for sx in (-1, 1):
+        plate(b, (0.08, 0.40, 0.80), (sx * 0.30, 0.05, 0.50), PAINT, "+X" if sx > 0 else "-X", n=4)
+    box(b, (0.50, 0.24, 0.03), (0, 0.32, 0.62), STEEL)                                    # feed table
+    box(b, (0.50, 0.03, 0.40), (0, -0.20, 0.42), CAST)
+    objs.append(to_object(b, "feCalender_Base", bevel=0.003))
+    drive_x(objs, gear_r=0.10)
+    for k, z in enumerate((0.58, 0.74, 0.90)):
+        r = bmesh.new()
+        cyl(r, 0.075, 0.52, (0, 0, 0), "Y", STEEL, segs=20)
+        name = "FeSpin_x2_Roll%d" % k if k != 1 else "FeSpin_x2_Rev_Roll1"
+        objs.append(to_object(r, name, location=(0, 0.05, z), rotation=(0, 0, -math.pi / 2), bevel=0.001))
+    return objs
+
+
+def model_vulcanizer():
+    """Vulcanising press (torque + 3 bar steam): a four-column press with heated platens; the upper platen moves
+    (FePiston), steam leaks from it while it works."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    box(b, (0.60, 0.50, 0.08), (0, 0.04, 0.30), CAST)                                     # lower platen
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            cyl(b, 0.03, 0.70, (sx * 0.24, 0.04 + sy * 0.18, 0.62), "Z", STEEL, segs=10)
+    box(b, (0.62, 0.50, 0.10), (0, 0.04, 0.95), CAST)                                     # crown
+    cyl(b, 0.10, 0.16, (0, 0.04, 0.86), "Z", PAINT, segs=18)                             # ram cylinder
+    pipe_run(b, [(0, 0.40, C), (0.30, 0.30, 0.40)], r=0.02)
+    objs.append(to_object(b, "feVulcanizer_Base", bevel=0.003))
+    drive_x(objs)
+    pl = bmesh.new()
+    box(pl, (0.56, 0.08, 0.44), (0, 0.04, 0), CAST)
+    cyl(pl, 0.04, 0.10, (0, -0.05, 0), "Y", STEEL, segs=10)
+    objs.append(to_object(pl, "FePiston_Platen", location=(0, 0.04, 0.62), rotation=AX_UP, bevel=0.002))
+    objs.append(empty("FeFx_Steam_1", (0.28, 0.04, 0.62)))
+    return objs
+
+
+def model_steel_converter():
+    """Steel converter (heat + air): a Bessemer-style pear vessel on trunnions, refractory mouth glowing, an air
+    blast pipe; sparks fly while it blows."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    for sx in (-1, 1):
+        box(b, (0.08, 0.20, 0.60), (sx * 0.38, 0.05, 0.35), CAST)                         # trunnion stands
+        cyl(b, 0.06, 0.10, (sx * 0.34, 0.05, 0.62), "X", STEEL, segs=14)
+    cyl(b, 0.28, 0.40, (0, 0.05, 0.50), "Z", CAST, segs=26, r2=0.30)                     # vessel
+    cyl(b, 0.30, 0.22, (0, 0.05, 0.81), "Z", CAST, segs=26, r2=0.14)                     # cone
+    ring(b, 0.15, 0.10, 0.04, (0, 0.05, 0.93), "Z", BRICK, segs=20)
+    cyl(b, 0.10, 0.02, (0, 0.05, 0.92), "Z", MOLTEN, segs=20)
+    pipe_run(b, [(0.38, 0.05, 0.62), (0.38, 0.30, 0.62), (0.38, 0.30, 0.20), (0, 0.30, 0.20)], r=0.035)
+    objs.append(to_object(b, "feSteelConverter_Base", bevel=0.003))
+    objs.append(empty("FeFx_Sparks_1", (0, 0.05, 0.95)))
+    objs.append(empty("FeFx_Smoke_1", (0, 0.05, 0.98)))
+    return objs
+
+
+def model_spring_coiler():
+    """Spring coiler (torque): a wire spool feeding a turning mandrel (FeSpin) with a guide; springs in a tray."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    box(b, (0.56, 0.40, 0.28), (0, 0.05, 0.28), PAINT)
+    for sx in (-1, 1):
+        box(b, (0.04, 0.10, 0.30), (sx * 0.20, 0.25, 0.55), IRON)
+    box(b, (0.12, 0.10, 0.08), (0.18, -0.05, 0.60), CAST)                                 # wire guide
+    for k in range(3):
+        ring(b, 0.03, 0.022, 0.05, (-0.18 + k * 0.07, -0.25, 0.46), "Y", STEEL, segs=10)
+    box(b, (0.30, 0.14, 0.04), (-0.12, -0.25, 0.42), STEEL)
+    objs.append(to_object(b, "feSpringCoiler_Base", bevel=0.003))
+    drive_x(objs, gear_r=0.09)
+    sp = bmesh.new()                                                                       # spool across, turning
+    cyl(sp, 0.12, 0.04, (0, -0.10, 0), "Y", WOOD, segs=18)
+    cyl(sp, 0.12, 0.04, (0, 0.10, 0), "Y", WOOD, segs=18)
+    cyl(sp, 0.08, 0.16, (0, 0, 0), "Y", COPPER, segs=18)
+    objs.append(to_object(sp, "FeSpin_x0.5_Spool", location=(0, 0.25, 0.72), rotation=(0, 0, -math.pi / 2), bevel=0.001))
+    md = bmesh.new()
+    cyl(md, 0.025, 0.30, (0, 0, 0), "Y", STEEL, segs=10)
+    for k in range(8):
+        ring(md, 0.04, 0.03, 0.012, (0, -0.10 + k * 0.025, 0), "Y", STEEL, segs=10)
+    objs.append(to_object(md, "FeSpin_x3_Mandrel", location=(0, -0.05, 0.60), rotation=(0, 0, -math.pi / 2), bevel=0.001))
+    return objs
+
+
+def model_temper_furnace():
+    """Tempering furnace (heat + oil): a brick box furnace with a door and a quench oil tank beside it."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    box(b, (0.50, 0.60, 0.56), (-0.16, 0.05, 0.34), BRICK)
+    box(b, (0.54, 0.64, 0.04), (-0.16, 0.05, 0.64), IRON)
+    plate(b, (0.30, 0.04, 0.28), (-0.16, -0.27, 0.34), CAST, "-Y", n=3)
+    box(b, (0.24, 0.02, 0.03), (-0.16, -0.295, 0.42), GLOW)
+    cyl(b, 0.08, 0.30, (-0.16, 0.10, 0.82), "Z", IRON, segs=14)
+    open_tank(b, 0.15, 0.10, 0.45, mat=STEEL, x=0.28, y=0.10)
+    objs.append(to_object(b, "feTemperFurnace_Base", bevel=0.003))
+    sf = bmesh.new()
+    cyl(sf, 0.13, 0.01, (0, 0, 0), "Y", LIQUID, segs=20)
+    objs.append(to_object(sf, "FeSurface_r0.18_Oil", location=(0.28, 0.10, 0.22), rotation=AX_UP))
+    objs.append(empty("FeFx_Fire_1", (-0.16, -0.30, 0.30)))
+    objs.append(empty("FeFx_Smoke_1", (-0.16, 0.10, 0.98)))
+    return objs
+
+
+def model_spinner():
+    """Spinning frame (torque): a row of spindles (they turn fast), a fibre creel above and the drafting rollers."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    box(b, (0.60, 0.30, 0.30), (0, 0.10, 0.30), WOOD)
+    for sx in (-1, 1):
+        box(b, (0.04, 0.04, 0.50), (sx * 0.28, 0.20, 0.68), WOOD)
+    box(b, (0.60, 0.04, 0.04), (0, 0.20, 0.92), WOOD)
+    for k in range(4):
+        cyl(b, 0.05, 0.08, (-0.18 + k * 0.12, 0.20, 0.86), "Z", COPPER, segs=12)           # fibre bobbins (creel)
+    objs.append(to_object(b, "feSpinner_Base", bevel=0.003))
+    drive_x(objs)
+    for k in range(4):
+        sp = bmesh.new()
+        cyl(sp, 0.012, 0.22, (0, -0.11, 0), "Y", STEEL, segs=8)
+        cyl(sp, 0.03, 0.10, (0, -0.12, 0), "Y", COPPER, segs=10)
+        objs.append(to_object(sp, "FeSpin_x6_Spindle%d" % k, location=(-0.18 + k * 0.12, -0.02, 0.46), rotation=AX_UP, bevel=0.001))
+    return objs
+
+
+def model_tannery():
+    """Tannery: two wooden vats (tan liquor, FeSurface) with hides draped over a beam."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    for x in (-0.20, 0.20):
+        open_tank(b, 0.18, 0.06, 0.55, mat=WOOD, x=x, y=0.08)
+        for z in (0.15, 0.45):
+            ring(b, 0.188, 0.175, 0.025, (x, 0.08, z), "Z", RUST, segs=24)
+    box(b, (0.80, 0.04, 0.04), (0, 0.08, 0.80), WOOD)
+    for sx in (-1, 1):
+        box(b, (0.04, 0.04, 0.80), (sx * 0.40, 0.08, 0.40), WOOD)
+    for x in (-0.25, 0.05, 0.28):
+        box(b, (0.16, 0.012, 0.26), (x, 0.06, 0.67), LEATHER)                       # hides
+    objs.append(to_object(b, "feTannery_Base", bevel=0.003))
+    for i, x in enumerate((-0.20, 0.20)):
+        sf = bmesh.new()
+        cyl(sf, 0.16, 0.01, (0, 0, 0), "Y", LIQUID, segs=20)
+        objs.append(to_object(sf, "FeSurface_r0.30_Liquor%d" % i, location=(x, 0.08, 0.20), rotation=AX_UP))
+    return objs
+
+
+def model_fermenter():
+    """Fermenter: a closed vessel with an airlock bubbling (FeFx_Bubbles), a sight glass and a temperature gauge."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    cyl(b, 0.30, 0.70, (0, 0.06, 0.43), "Z", STEEL, segs=28)
+    cyl(b, 0.30, 0.10, (0, 0.06, 0.83), "Z", STEEL, segs=28, r2=0.10)
+    for z in (0.20, 0.50, 0.74):
+        cyl(b, 0.31, 0.03, (0, 0.06, z), "Z", IRON, segs=28)
+    cyl(b, 0.02, 0.10, (0, 0.06, 0.92), "Z", STEEL, segs=8)
+    cyl(b, 0.04, 0.08, (0, 0.06, 0.99), "Z", GLASS, segs=12)                             # airlock
+    box(b, (0.06, 0.012, 0.40), (0.16, -0.245, 0.45), IRON)
+    gauge(objs, b, (-0.14, -0.255, 0.60), "FeNeedle_Temp", r=0.045)
+    objs.insert(0, to_object(b, "feFermenter_Base", bevel=0.003))
+    objs.append(empty("FeFx_Bubbles_1", (0, 0.06, 1.02)))
+    return objs
+
+
+def model_centrifuge():
+    """Centrifuge (electric): a heavy drum under a clamped lid on an anti-vibration base; the rotor turns fast
+    (FeWorkSpin) under a window."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    box(b, (0.66, 0.60, 0.20), (0, 0.05, 0.20), CAST)
+    for x in (-0.25, 0.25):
+        for y in (-0.18, 0.28):
+            cyl(b, 0.05, 0.08, (x, y, 0.07), "Z", SOOT, segs=10)                          # rubber mounts
+    ring(b, 0.27, 0.24, 0.36, (0, 0.05, 0.48), "Z", STEEL, segs=28)
+    cyl(b, 0.24, 0.02, (0, 0.05, 0.31), "Z", SOOT, segs=28)
+    ring(b, 0.28, 0.14, 0.04, (0, 0.05, 0.68), "Z", CAST, segs=28)                        # lid ring (window)
+    for k in range(4):
+        a = k * math.pi / 2 + math.pi / 4
+        box(b, (0.04, 0.04, 0.10), (0.27 * math.cos(a), 0.05 + 0.27 * math.sin(a), 0.68), STEEL)   # clamps
+    box(b, (0.16, 0.10, 0.12), (0.26, 0.30, 0.38), CAST)
+    box(b, (0.10, 0.012, 0.05), (0.26, 0.249, 0.40), GLOW)
+    objs.append(to_object(b, "feCentrifuge_Base", bevel=0.003))
+    ro = bmesh.new()
+    cyl(ro, 0.04, 0.30, (0, 0.15, 0), "Y", STEEL, segs=10)
+    for k in range(6):
+        a_ = k * math.pi / 3
+        box(ro, (0.20, 0.03, 0.04), (0.10 * math.cos(a_), 0.04, 0.10 * math.sin(a_)), STEEL, Matrix.Rotation(-a_, 4, "Y"))
+        cyl(ro, 0.03, 0.08, (0.19 * math.cos(a_), 0.06, 0.19 * math.sin(a_)), "Y", BRASS, segs=8)
+    objs.append(to_object(ro, "FeWorkSpin_x8_Rotor", location=(0, 0.05, 0.66), rotation=AX_UP, bevel=0.001))
+    wire(objs, (0.26, 0.30, 0.46))
+    return objs
+
+
+def model_autoclave():
+    """Autoclave (3 bar steam): a horizontal pressure vessel with a hinged quick-opening door and its locking
+    wheel, a safety valve, gauge and steam trap."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    cyl(b, 0.28, 0.66, (0, 0.08, 0.50), "Y", STEEL, segs=30)
+    for y in (-0.10, 0.20, 0.38):
+        cyl(b, 0.29, 0.03, (0, y, 0.50), "Y", IRON, segs=30)
+    cyl(b, 0.30, 0.06, (0, -0.25, 0.50), "Y", CAST, segs=30)                              # door
+    bolt_circle(b, 12, 0.27, (0, -0.28, 0.50), "Y", STEEL, r=0.012, d=0.03)
+    ring(b, 0.12, 0.10, 0.02, (0, -0.30, 0.50), "Y", RED, segs=18)                   # locking wheel
+    for k in range(3):
+        box(b, (0.22, 0.015, 0.015), (0, -0.30, 0.50), RED, Matrix.Rotation(k * math.pi / 3, 4, "Y"))
+    for sx in (-1, 1):
+        box(b, (0.10, 0.50, 0.24), (sx * 0.20, 0.08, 0.15), CAST)
+    cyl(b, 0.03, 0.12, (0.10, 0.20, 0.82), "Z", RED, segs=10)
+    gauge(objs, b, (-0.18, -0.30, 0.78), "FeNeedle_Bar", r=0.045)
+    objs.insert(0, to_object(b, "feAutoclave_Base", bevel=0.003))
+    objs.append(empty("FeFx_Steam_1", (0.10, 0.20, 0.90)))
+    return objs
+
+
+def model_cooker_industrial():
+    """Industrial cooker (heat): two steam kettles with lids and a stirring paddle, a steam manifold and gauge."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    box(b, (0.84, 0.50, 0.40), (0, 0.10, 0.25), PAINT)
+    for x in (-0.20, 0.20):
+        open_tank(b, 0.17, 0.45, 0.72, mat=STEEL, x=x, y=0.10)
+    pipe_run(b, [(0, 0.40, C), (-0.38, 0.36, C), (0.38, 0.36, C)], r=0.025)
+    box(b, (0.30, 0.04, 0.20), (0.20, 0.22, 0.86), STEEL, Matrix.Rotation(-0.6, 4, "X"))   # open lid
+    objs.append(to_object(b, "feCookerIndustrial_Base", bevel=0.003))
+    for i, x in enumerate((-0.20, 0.20)):
+        sf = bmesh.new()
+        cyl(sf, 0.15, 0.01, (0, 0, 0), "Y", LIQUID, segs=20)
+        objs.append(to_object(sf, "FeSurface_r0.18_Spin_Pot%d" % i, location=(x, 0.10, 0.50), rotation=AX_UP))
+    objs.append(empty("FeFx_Steam_1", (-0.20, 0.10, 0.74)))
+    objs.append(empty("FeFx_Steam_2", (0.20, 0.10, 0.74)))
+    return objs
+
+
+def model_mill():
+    """Grain mill (torque): a millstone pair under a wooden hopper (the runner stone turns), meal spout to the front."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    box(b, (0.60, 0.56, 0.30), (0, 0.05, 0.30), WOOD)
+    cyl(b, 0.27, 0.10, (0, 0.05, 0.50), "Z", CAST, segs=26)                               # bed stone
+    ring(b, 0.30, 0.27, 0.22, (0, 0.05, 0.60), "Z", WOOD, segs=26)                        # tun
+    for k, (w, z) in enumerate(((0.36, 0.95), (0.26, 0.88), (0.16, 0.81))):
+        for s_ in (-1, 1):
+            box(b, (0.02, w, 0.08), (s_ * w / 2, 0.05, z), WOOD)
+            box(b, (w, 0.02, 0.08), (0, 0.05 + s_ * w / 2, z), WOOD)
+    objs.append(to_object(b, "feMill_Base", bevel=0.003))
+    drive_x(objs, gear_r=0.10)
+    rs = bmesh.new()
+    cyl(rs, 0.25, 0.10, (0, 0, 0), "Y", CAST, segs=26)
+    cyl(rs, 0.05, 0.11, (0, 0, 0), "Y", SOOT, segs=12)
+    for k in range(8):
+        a_ = k * math.pi / 4
+        box(rs, (0.20, 0.11, 0.008), (0.12 * math.cos(a_), 0, 0.12 * math.sin(a_)), SOOT, Matrix.Rotation(-a_, 4, "Y"))
+    objs.append(to_object(rs, "FeSpin_x0.5_Runner", location=(0, 0.05, 0.60), rotation=AX_UP, bevel=0.002))
+    return objs
+
+
+def model_juice_press():
+    """Juice press (torque): a slatted basket under a screw head (the press plate goes down: FePiston), a pan and
+    the juice spout."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b, torque=True)
+    box(b, (0.60, 0.56, 0.24), (0, 0.05, 0.22), CAST)
+    cyl(b, 0.26, 0.03, (0, 0.05, 0.35), "Z", STEEL, segs=26)                              # pan
+    for k in range(16):                                                                   # slatted basket
+        a = 2 * math.pi * k / 16
+        box(b, (0.03, 0.02, 0.34), (0.20 * math.cos(a), 0.05 + 0.20 * math.sin(a), 0.54), WOOD,
+            Matrix.Rotation(a, 4, "Z"))
+    for z in (0.42, 0.66):
+        ring(b, 0.215, 0.20, 0.02, (0, 0.05, z), "Z", RUST, segs=24)
+    for sx in (-1, 1):
+        box(b, (0.05, 0.08, 0.60), (sx * 0.30, 0.05, 0.62), CAST)
+    box(b, (0.66, 0.10, 0.08), (0, 0.05, 0.94), CAST)
+    objs.append(to_object(b, "feJuicePress_Base", bevel=0.003))
+    drive_x(objs)
+    pp = bmesh.new()
+    cyl(pp, 0.18, 0.04, (0, 0, 0), "Y", WOOD, segs=22)
+    cyl(pp, 0.025, 0.24, (0, -0.12, 0), "Y", STEEL, segs=10)                             # screw
+    for k in range(8):
+        ring(pp, 0.035, 0.024, 0.01, (0, -0.04 - k * 0.025, 0), "Y", STEEL, segs=10)
+    objs.append(to_object(pp, "FePiston_Plate", location=(0, 0.05, 0.70), rotation=AX_UP, bevel=0.001))
+    return objs
+
+
+def model_canner():
+    """Canner (steam): a can track, the filling head and the seamer chuck (it turns while it works)."""
+    objs = []
+    b = bmesh.new()
+    proc_frame(b)
+    box(b, (0.80, 0.50, 0.40), (0, 0.10, 0.25), PAINT)
+    box(b, (0.70, 0.12, 0.02), (0, -0.05, 0.46), STEEL)                                  # can track
+    for k in range(5):
+        cyl(b, 0.035, 0.07, (-0.28 + k * 0.14, -0.05, 0.50), "Z", STEEL, segs=12)         # cans
+    box(b, (0.16, 0.16, 0.30), (-0.18, 0.12, 0.62), CAST)                                 # filler
+    cyl(b, 0.05, 0.10, (-0.18, 0.12, 0.82), "Z", STEEL, segs=12)
+    box(b, (0.06, 0.20, 0.40), (0.20, 0.20, 0.65), CAST)                                  # seamer column
+    box(b, (0.16, 0.22, 0.06), (0.20, 0.05, 0.82), CAST)
+    objs.append(to_object(b, "feCanner_Base", bevel=0.003))
+    ch = bmesh.new()
+    cyl(ch, 0.045, 0.06, (0, 0, 0), "Y", STEEL, segs=14)
+    box(ch, (0.012, 0.06, 0.10), (0.05, 0, 0), BRASS)
+    objs.append(to_object(ch, "FeWorkSpin_x3_Seamer", location=(0.20, -0.05, 0.62), rotation=AX_UP, bevel=0.001))
+    objs.append(empty("FeFx_Steam_1", (-0.18, 0.12, 0.88)))
+    return objs
+
+
+def model_injector():
+    """Injection moulding machine (electric caster): hopper, heated barrel with bands, the clamp unit with the mould;
+    FeCastMetal (the polymer filling the mould) and FeCastReady (parts waiting), like the Casting Table."""
+    objs = []
+    b = bmesh.new()
+    d12_base(b)
+    back_in(b)
+    low_chute(b)
+    box(b, (0.80, 0.50, 0.30), (0, 0.10, 0.20), PAINT)
+    cyl(b, 0.06, 0.46, (0.10, 0.10, 0.48), "X", STEEL, segs=16)                           # barrel
+    for k in range(4):
+        cyl(b, 0.072, 0.03, (-0.06 + k * 0.08, 0.10, 0.48), "X", COPPER, segs=16)        # heater bands
+    for k, (w, z) in enumerate(((0.20, 0.78), (0.14, 0.70), (0.08, 0.62))):              # hopper
+        for s_ in (-1, 1):
+            box(b, (0.02, w, 0.08), (0.24 + s_ * w / 2, 0.10, z), PAINT)
+            box(b, (w, 0.02, 0.08), (0.24, 0.10 + s_ * w / 2, z), PAINT)
+    for sy in (-1, 1):
+        cyl(b, 0.02, 0.36, (-0.26, 0.10 + sy * 0.12, 0.48), "X", STEEL, segs=8)          # tie bars
+    box(b, (0.06, 0.34, 0.26), (-0.10, 0.10, 0.48), CAST)                                 # fixed platen
+    box(b, (0.06, 0.34, 0.26), (-0.40, 0.10, 0.48), CAST)
+    box(b, (0.14, 0.24, 0.02), (-0.24, 0.0, 0.44), SAND)                                  # mould cavity floor
+    objs.append(to_object(b, "feInjector_Base", bevel=0.003))
+    m = bmesh.new()
+    box(m, (0.12, 0.22, 0.04), (0, 0, 0.02), MOLTEN)
+    objs.append(to_object(m, "FeCastMetal", location=(-0.24, 0.0, 0.455)))
+    rd = bmesh.new()
+    for k in range(3):
+        box(rd, (0.08, 0.06, 0.03), (-0.08 + k * 0.08, 0, 0.015), CAST)
+    objs.append(to_object(rd, "FeCastReady", location=(-0.10, -0.38, LOW + 0.02)))
+    wire(objs, (0.30, 0.30, 0.40))
+    return objs
+
+
+def model_gas_motor():
+    """Gas Motor: the gas engine on a skid with two gas bottles strapped to it (it burns gas canisters)."""
+    objs = model_gas_engine()
+    objs[0].name = objs[0].data.name = "feGasMotor_Base"
+    b = bmesh.new()
+    for x in (-0.36, -0.22):
+        cyl(b, 0.06, 0.50, (x, 0.34, 0.30), "Z", RED, segs=16)
+        cyl(b, 0.06, 0.06, (x, 0.34, 0.58), "Z", RED, segs=16, r2=0.02)
+        cyl(b, 0.015, 0.05, (x, 0.34, 0.63), "Z", BRASS, segs=8)
+    box(b, (0.30, 0.02, 0.03), (-0.29, 0.27, 0.40), RUST)                                 # strap
+    pipe_run(b, [(-0.36, 0.34, 0.65), (-0.10, 0.20, 0.65), (0.10, 0.08, C + 0.06)], r=0.008, mat=COPPER)
+    objs.append(to_object(b, "feGasMotor_Bottles", bevel=0.002))
+    return objs
+
+
+# ---------------------------------------------------------------- in-line stations (sit on the block above a belt)
+def inline_frame(b, objs, name, powered=False, torque=True):
+    """A gantry over the belt below: a deck at the bottom of this block, a housing above it, legs hanging down to
+    the belt's floor (FeReach_*, not in the collider) and a torque shaft across at 0.5 when it needs torque."""
+    box(b, (0.90, 0.70, 0.05), (0, 0, 0.025), CAST)
+    hazard(b, 0.88, (0, -0.354, 0.025), "X", h=0.04, n=12)
+    if torque:
+        side_bearings(b, z=C)
+    lg = bmesh.new()
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(lg, (0.045, 0.045, 1.0), (sx * 0.47, sy * 0.32, -0.50), IRON)
+            box(lg, (0.08, 0.10, 0.02), (sx * 0.47, sy * 0.32, -0.99), IRON)
+        beam(lg, (sx * 0.47, -0.32, -0.95), (sx * 0.47, 0.32, -0.10), 0.025, 0.025, RUST)
+    objs.append(to_object(lg, "FeReach_Legs", bevel=0.002))
+    if powered:
+        wire(objs, (0.30, 0.25, 0.60))
+
+
+def inline_tool(objs, name, tool_bm, torque=True):
+    """The working head: it moves up / down over the belt (FePiston via KineticSpinner with torque; FeWorkSpin
+    otherwise)."""
+    nm = ("FePiston_Inline" if torque else "FeReach_Head_") + name
+    objs.append(to_object(tool_bm, nm, location=(0, 0, 0.05), rotation=AX_UP, bevel=0.0015))
+
+
+def tool_ram(w=0.18, reach=0.70, head=None):
+    t = bmesh.new()
+    cyl(t, 0.03, reach, (0, reach / 2, 0), "Y", STEEL, segs=12)                           # down (local +Y = down)
+    box(t, (w, 0.06, w), (0, reach, 0), CAST)
+    if head:
+        head(t, reach)
+    return t
+
+
+def model_inline_press():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "InlinePress")
+    box(b, (0.40, 0.36, 0.40), (0, 0.04, 0.30), PAINT)
+    cyl(b, 0.16, 0.10, (0, 0.04, 0.56), "Z", CAST, segs=20)
+    objs.insert(0, to_object(b, "feInlinePress_Base", bevel=0.003))
+    drive_x(objs, gear_r=0.10)
+    inline_tool(objs, "Ram", tool_ram(0.22, 0.62, lambda t, r: box(t, (0.24, 0.03, 0.24), (0, r + 0.04, 0), STEEL)))
+    return objs
+
+
+def model_doser():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Doser", torque=False)
+    cyl(b, 0.18, 0.40, (0, 0.04, 0.40), "Z", GLASS, segs=20, r2=0.10)                    # dosing hopper
+    cyl(b, 0.19, 0.03, (0, 0.04, 0.60), "Z", CAST, segs=20)
+    box(b, (0.30, 0.30, 0.12), (0, 0.04, 0.12), CAST)
+    pipe_run(b, [(0, 0.45, C), (0, 0.30, C), (0, 0.15, 0.40)], r=0.025)
+    back_in(b)
+    objs.insert(0, to_object(b, "feDoser_Base", bevel=0.003))
+    nz = bmesh.new()
+    cyl(nz, 0.02, 0.80, (0, 0.40, 0), "Y", STEEL, segs=10)
+    cyl(nz, 0.04, 0.06, (0, 0.80, 0), "Y", BRASS, segs=10, r2=0.01)
+    objs.append(to_object(nz, "FeReach_Nozzle", location=(0, 0.04, 0.06), rotation=AX_UP, bevel=0.001))
+    objs.append(empty("FeFx_Drip_1", (0, 0.04, -0.76)))
+    return objs
+
+
+def model_inserter():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Inserter")
+    box(b, (0.40, 0.40, 0.30), (0, 0.06, 0.25), PAINT)
+    cyl(b, 0.10, 0.40, (0.22, 0.20, 0.55), "Z", GLASS, segs=16)                          # parts magazine
+    objs.insert(0, to_object(b, "feInserter_Base", bevel=0.003))
+    drive_x(objs)
+    inline_tool(objs, "Pick", tool_ram(0.10, 0.62, lambda t, r: [box(t, (0.02, 0.08, 0.08), (s * 0.04, r + 0.05, 0), STEEL) for s in (-1, 1)]))
+    return objs
+
+
+def model_crimper():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Crimper")
+    box(b, (0.36, 0.36, 0.34), (0, 0.04, 0.27), PAINT)
+    ring(b, 0.12, 0.08, 0.06, (0, 0.04, 0.48), "Z", CAST, segs=16)
+    objs.insert(0, to_object(b, "feCrimper_Base", bevel=0.003))
+    drive_x(objs)
+    inline_tool(objs, "Die", tool_ram(0.12, 0.62, lambda t, r: ring(t, 0.06, 0.035, 0.06, (0, r + 0.04, 0), "Y", STEEL, segs=12)))
+    return objs
+
+
+def model_wire_drawer():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "WireDrawer")
+    box(b, (0.50, 0.40, 0.30), (0, 0.06, 0.24), PAINT)
+    for x in (-0.15, 0.0, 0.15):
+        box(b, (0.08, 0.10, 0.10), (x, -0.20, 0.10), CAST)                                # draw dies
+    objs.insert(0, to_object(b, "feWireDrawer_Base", bevel=0.003))
+    drive_x(objs)
+    cp = bmesh.new()
+    cyl(cp, 0.14, 0.08, (0, 0, 0), "Y", STEEL, segs=22)
+    cyl(cp, 0.16, 0.015, (0, -0.04, 0), "Y", CAST, segs=22)
+    objs.append(to_object(cp, "FeSpin_x1_Capstan", location=(0, 0.06, 0.48), rotation=AX_UP, bevel=0.001))
+    return objs
+
+
+def model_grinder():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Grinder")
+    box(b, (0.30, 0.30, 0.30), (0.20, 0.10, 0.25), PAINT)
+    ring(b, 0.20, 0.12, 0.10, (0, 0.04, -0.55), "Y", HAZ, segs=24)                        # wheel guard (low)
+    objs.insert(0, to_object(b, "feGrinder_Base", bevel=0.003))
+    drive_x(objs)
+    gw = bmesh.new()
+    cyl(gw, 0.17, 0.05, (0, 0, 0), "Y", SAND, segs=24)
+    cyl(gw, 0.04, 0.07, (0, 0, 0), "Y", STEEL, segs=10)
+    objs.append(to_object(gw, "FeSpin_x6_InlineWheel", location=(0, 0.04, -0.55), bevel=0.001))
+    sh = bmesh.new()
+    box(sh, (0.04, 0.04, 0.58), (0, 0.10, -0.27), STEEL)
+    objs.append(to_object(sh, "FeReach_Drop", bevel=0.001))
+    objs.append(empty("FeFx_Sparks_1", (0, -0.14, -0.70)))
+    return objs
+
+
+def model_bender():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Bender")
+    box(b, (0.60, 0.36, 0.34), (0, 0.04, 0.27), PAINT)
+    objs.insert(0, to_object(b, "feBender_Base", bevel=0.003))
+    drive_x(objs, gear_r=0.10)
+    inline_tool(objs, "Punch", tool_ram(0.10, 0.62, lambda t, r: box(t, (0.50, 0.06, 0.03), (0, r + 0.04, 0), STEEL)))
+    return objs
+
+
+def model_welder():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "Welder", powered=True, torque=False)
+    box(b, (0.40, 0.40, 0.36), (0.10, 0.08, 0.23), PAINT)                                  # transformer
+    for k in range(5):
+        box(b, (0.012, 0.36, 0.30), (0.31, 0.08 - 0.15 + k * 0.075, 0.23), IRON)
+    pipe_run(b, [(-0.10, 0.10, 0.30), (-0.10, 0.10, 0.06)], r=0.02, mat=SOOT)
+    objs.insert(0, to_object(b, "feWelder_Base", bevel=0.003))
+    tr = bmesh.new()
+    cyl(tr, 0.02, 0.66, (0, 0.33, 0), "Y", SOOT, segs=8)                                   # cable down
+    cyl(tr, 0.03, 0.10, (0, 0.70, 0), "Y", BRASS, segs=10, r2=0.01)                       # torch
+    objs.append(to_object(tr, "FeReach_Torch", location=(-0.10, 0.10, 0.06), rotation=AX_UP, bevel=0.001))
+    objs.append(empty("FeFx_Sparks_1", (-0.10, 0.10, -0.74)))
+    return objs
+
+
+def model_reflow_oven():
+    objs = []
+    b = bmesh.new()
+    inline_frame(b, objs, "ReflowOven", powered=True, torque=False)
+    plate(b, (0.60, 0.40, 0.20), (0, 0.04, 0.15), PAINT, "-Y", n=4)
+    box(b, (0.30, 0.012, 0.06), (0, -0.165, 0.18), GLOW)
+    hd = bmesh.new()                                                                       # heated hood over the belt
+    box(hd, (0.64, 0.50, 0.04), (0, 0, -0.55), CAST)
+    for sx in (-1, 1):
+        box(hd, (0.04, 0.50, 0.26), (sx * 0.30, 0, -0.68), CAST)
+    for k in range(5):
+        box(hd, (0.56, 0.02, 0.015), (0, -0.20 + k * 0.10, -0.575), GLOW)               # heater elements
+    objs.insert(0, to_object(b, "feReflowOven_Base", bevel=0.003))
+    objs.append(to_object(hd, "FeReach_Hood", bevel=0.002))
+    return objs
+
+
+# ---------------------------------------------------------------- logistics and signals
+def model_mech_arm():
+    """Mechanical Arm (electric): a turret (FeArmYaw) with a two-link arm and a claw; it swings from behind (pick)
+    to the front (place) once per transfer."""
+    objs = []
+    b = bmesh.new()
+    cyl(b, 0.30, 0.06, (0, 0, 0.03), "Z", CAST, segs=24)
+    cyl(b, 0.18, 0.14, (0, 0, 0.13), "Z", PAINT, segs=22)
+    hazard(b, 0.40, (0, -0.30, 0.03), "X", h=0.04, n=8)
+    objs.append(to_object(b, "feMechArm_Base", bevel=0.003))
+    a = bmesh.new()                                     # built Z up, then turned so its local +Y is up
+    cyl(a, 0.15, 0.10, (0, 0, 0.05), "Z", CAST, segs=20)
+    box(a, (0.10, 0.10, 0.36), (0, 0, 0.28), PAINT)                                        # upper post
+    beam(a, (0, 0, 0.44), (0, -0.40, 0.54), 0.06, 0.06, PAINT)                            # boom
+    beam(a, (0, -0.40, 0.54), (0, -0.44, 0.30), 0.05, 0.05, STEEL)                        # forearm
+    for s_ in (-1, 1):
+        box(a, (0.015, 0.05, 0.10), (s_ * 0.04, -0.44, 0.24), STEEL)                      # claw
+    cyl(a, 0.04, 0.12, (0, 0, 0.44), "X", BRASS, segs=12)
+    bmesh.ops.transform(a, matrix=Matrix.Rotation(-math.pi / 2, 4, "X"), verts=a.verts)
+    objs.append(to_object(a, "FeArmYaw", location=(0, 0, 0.20), rotation=(math.pi / 2, 0, 0), bevel=0.002))
+    wire(objs, (0.18, 0.10, 0.22))
+    return objs
+
+
+def model_signal_lever():
+    objs = []
+    b = bmesh.new()
+    box(b, (0.30, 0.20, 0.10), (0, 0, 0.05), CAST)
+    box(b, (0.10, 0.012, 0.03), (-0.08, -0.105, 0.06), IN)
+    box(b, (0.10, 0.012, 0.03), (0.08, -0.105, 0.06), OUT)
+    for sx in (-1, 1):
+        box(b, (0.015, 0.08, 0.06), (sx * 0.035, 0, 0.13), IRON)
+    cyl(b, 0.012, 0.09, (0, 0, 0.14), "X", STEEL, segs=8)
+    objs.append(to_object(b, "feSignalLever_Base", bevel=0.002))
+    lv = bmesh.new()
+    box(lv, (0.025, 0.025, 0.22), (0, 0, 0.11), HAZ)
+    cyl(lv, 0.03, 0.05, (0, 0, 0.23), "Y", WOOD, segs=12)
+    objs.append(to_object(lv, "FeLever_Signal", location=(0, 0, 0.14), bevel=0.002))
+    return objs
+
+
+def model_signal_receiver():
+    """Signal Receiver: a junction box with a relay and a lamp (lit while it passes the signal on); wire on top."""
+    objs = []
+    b = bmesh.new()
+    plate(b, (0.34, 0.30, 0.34), (0, 0, 0.17), PAINT, "-Y", n=3)
+    box(b, (0.30, 0.02, 0.26), (0, -0.155, 0.18), CAST)
+    cyl(b, 0.04, 0.03, (0.08, -0.17, 0.26), "Y", GLOW, segs=12)                           # lamp
+    ring(b, 0.05, 0.04, 0.02, (0.08, -0.17, 0.26), "Y", BRASS, segs=12)
+    box(b, (0.08, 0.02, 0.06), (-0.08, -0.17, 0.12), BRASS)
+    insulator(b, 0, 0, 0.34, n=2)
+    objs.append(to_object(b, "feSignalReceiver_Base", bevel=0.002))
+    wire(objs, (0, 0, 0.44))
+    return objs
+
+
+# ---------------------------------------------------------------- belt logistics: Harrison's belt + our parts
+BELT_SRC = os.path.join(ART, "feConveyor", "hd", "feConveyor_src.blend")
+BT = 0.18                                                       # belt top (Belt.Top)
+
+
+def belt_base(name):
+    """The low belt's own parts (Belt.cs finds them by name), under an empty root; our additions go on top. Parts
+    named FeBeltExtra_* / FeLever_BeltGate are left out of the collider (FeBuild.OptionalParts)."""
+    with bpy.data.libraries.load(BELT_SRC, link=False) as (src, dst):
+        dst.objects = list(src.objects)
+    root = bpy.data.objects.new(name + "_Base", None)
+    return [root] + [o for o in dst.objects if o is not None]
+
+
+def model_belt_splitter():
+    """Belt Splitter: a belt with a diverter cabinet on its right side; a pivoting deflector blade over the belt and
+    arrows on the cabinet (it sends items left and right in turn)."""
+    objs = belt_base("feBeltSplitter")
+    b = bmesh.new()
+    box(b, (0.10, 0.40, 0.30), (0.46, 0.0, BT + 0.14), PAINT)                     # cabinet on the right rail
+    hazard(b, 0.38, (0.405, 0.0, BT + 0.26), "Y", h=0.04, n=6)
+    cyl(b, 0.05, 0.10, (0.46, 0.0, BT + 0.33), "Z", CAST, segs=14)               # actuator
+    cyl(b, 0.012, 0.10, (0.30, 0.0, BT + 0.34), "X", STEEL, segs=8)
+    for s_ in (-1, 1):
+        for k, w in enumerate((0.06, 0.04, 0.02)):
+            box(b, (0.008, 0.02, w), (0.512, s_ * (0.06 + 0.025 * k), BT + 0.14), OUT if s_ < 0 else IN)
+    beam(b, (0.42, 0.0, BT + 0.34), (0.0, 0.0, BT + 0.34), 0.03, 0.03, IRON)    # boom over the belt
+    cyl(b, 0.015, 0.10, (0.0, 0.0, BT + 0.29), "Z", STEEL, segs=8)              # blade pivot
+    box(b, (0.02, 0.42, 0.10), (0.0, -0.10, BT + 0.06), STEEL, Matrix.Rotation(0.35, 4, "Z"))   # deflector blade
+    objs.append(to_object(b, "FeBeltExtra_Splitter", bevel=0.002))
+    return objs
+
+
+def model_belt_gate():
+    """Belt Gate: a belt with a gantry over it; the stop flap (FeLever_BeltGate) comes down across the belt while
+    the gate holds the items (Signals.Active) and swings up when it lets them pass."""
+    objs = belt_base("feBeltGate")
+    b = bmesh.new()
+    for sx in (-1, 1):
+        box(b, (0.05, 0.08, 0.50), (sx * 0.47, 0.0, BT + 0.20), IRON)
+        box(b, (0.10, 0.12, 0.02), (sx * 0.47, 0.0, BT - 0.04), IRON)
+    box(b, (1.0, 0.08, 0.06), (0.0, 0.0, BT + 0.46), PAINT)
+    hazard(b, 0.96, (0.0, -0.045, BT + 0.46), "X", h=0.04, n=12)
+    box(b, (0.14, 0.12, 0.12), (0.38, 0.0, BT + 0.55), CAST)                       # signal actuator
+    cyl(b, 0.03, 0.03, (0.38, -0.06, BT + 0.56), "Y", GLOW, segs=10)
+    objs.append(to_object(b, "FeBeltExtra_Gantry", bevel=0.002))
+    fl = bmesh.new()                                                                # hangs from its axle (pivot)
+    cyl(fl, 0.015, 0.84, (0, 0, 0), "X", STEEL, segs=8)
+    box(fl, (0.80, 0.02, 0.30), (0, 0, -0.16), RED)
+    for k in range(4):
+        box(fl, (0.10, 0.024, 0.06), (-0.30 + k * 0.20, 0, -0.27), HAZ)
+    bmesh.ops.transform(fl, matrix=Matrix.Rotation(math.radians(-35), 4, "X"), verts=fl.verts)   # +1 = straight down
+    objs.append(to_object(fl, "FeLever_BeltGate", location=(0.0, 0.0, BT + 0.42), bevel=0.002))
+    return objs
+
+
+def model_belt_counter():
+    """Belt Counter: a belt with an arch carrying a light-eye pair and a counter box with number drums."""
+    objs = belt_base("feBeltCounter")
+    b = bmesh.new()
+    for sx in (-1, 1):
+        box(b, (0.05, 0.06, 0.36), (sx * 0.47, 0.10, BT + 0.14), IRON)
+        box(b, (0.06, 0.05, 0.05), (sx * 0.44, 0.10, BT + 0.08), CAST)            # light eyes
+        cyl(b, 0.015, 0.02, (sx * 0.41, 0.10, BT + 0.08), "X", GLOW, segs=10)
+    box(b, (1.0, 0.06, 0.05), (0.0, 0.10, BT + 0.33), IRON)
+    box(b, (0.30, 0.12, 0.14), (0.0, 0.10, BT + 0.42), PAINT)                     # counter box
+    box(b, (0.24, 0.012, 0.06), (0.0, 0.036, BT + 0.43), IRON)
+    for k in range(4):
+        cyl(b, 0.025, 0.05, (-0.09 + k * 0.06, 0.04, BT + 0.43), "X", WOOD if k % 2 else STEEL, segs=10)
+    cyl(b, 0.02, 0.05, (0.17, 0.04, BT + 0.47), "Y", RED, segs=10)                # reset button
+    objs.append(to_object(b, "FeBeltExtra_Counter", bevel=0.002))
+    return objs
+
+
+D12_MODELS = {
+    "fePipeHP": model_pipe_hp, "feValveShutoff": model_valve_shutoff, "feValveCheck": model_valve_check,
+    "feValveRegulator": model_valve_regulator, "feValveSeparator": model_valve_separator,
+    "feValveRelief": model_valve_relief, "feGauge": model_gauge_block, "feCompressor": model_compressor,
+    "feTankLiquid": model_tank_liquid, "feTankGas": model_tank_gas, "feGasBurner": model_gas_burner,
+    "feSapTapper": model_sap_tapper, "feTowerSection": model_tower_section, "feDistillTower": model_distill_tower,
+    "feShaleRetort": model_shale_retort, "feCracker": model_cracker, "feGasScrubber": model_gas_scrubber,
+    "fePolymerReactor": model_polymer_reactor, "feCoagTank": model_coag_tank, "feCalender": model_calender,
+    "feVulcanizer": model_vulcanizer, "feSteelConverter": model_steel_converter, "feSpringCoiler": model_spring_coiler,
+    "feTemperFurnace": model_temper_furnace, "feSpinner": model_spinner, "feTannery": model_tannery,
+    "feFermenter": model_fermenter, "feCentrifuge": model_centrifuge, "feAutoclave": model_autoclave,
+    "feCookerIndustrial": model_cooker_industrial, "feMill": model_mill, "feJuicePress": model_juice_press,
+    "feCanner": model_canner, "feInjector": model_injector, "feGasMotor": model_gas_motor,
+    "feInlinePress": model_inline_press, "feDoser": model_doser, "feInserter": model_inserter,
+    "feCrimper": model_crimper, "feWireDrawer": model_wire_drawer, "feGrinder": model_grinder,
+    "feBender": model_bender, "feWelder": model_welder, "feReflowOven": model_reflow_oven,
+    "feMechArm": model_mech_arm, "feSignalLever": model_signal_lever, "feSignalReceiver": model_signal_receiver,
+    "feBeltSplitter": model_belt_splitter, "feBeltGate": model_belt_gate, "feBeltCounter": model_belt_counter,
+}
+
+
 MODELS = {
     "feCoalEngine": model_coal_engine,
     "feGasEngine": model_gas_engine,
@@ -2461,6 +3621,7 @@ MODELS = {
     "feMetalChute": model_metal_chute,
     "feCaster": model_caster,
     "feM_Foundry": model_m_foundry,
+    **D12_MODELS,
 }
 
 
@@ -2474,6 +3635,8 @@ def build(name):
         col.objects.link(ob)
     root = objs[0]
     for ob in objs[1:]:
+        if ob.parent is not None:                  # parts loaded with their own hierarchy keep it
+            continue
         ob.parent = root
         ob.matrix_parent_inverse = root.matrix_world.inverted()
     bpy.context.view_layer.update()

@@ -1,0 +1,16 @@
+{
+ "nome": "feMill",
+ "config": "F:\\IA\\fe_blender\\configs\\feMill.json",
+ "triangulos_antes": 6240,
+ "triangulos_depois": 2304,
+ "atlas": 1024,
+ "arquivos": [
+  "feMill_Albedo.png",
+  "feMill_Normal.png",
+  "feMill_MetallicSmoothness.png",
+  "feMill_Roughness.png",
+  "feMill_HD.fbx",
+  "feMill_HD.blend"
+ ],
+ "segundos": 17.6
+}

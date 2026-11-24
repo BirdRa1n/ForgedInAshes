@@ -1,0 +1,16 @@
+{
+ "nome": "feConveyor",
+ "config": "F:\\IA\\fe_blender\\configs\\feConveyor.json",
+ "triangulos_antes": 6996,
+ "triangulos_depois": 6996,
+ "atlas": 1024,
+ "arquivos": [
+  "feConveyor_Albedo.png",
+  "feConveyor_Normal.png",
+  "feConveyor_MetallicSmoothness.png",
+  "feConveyor_Roughness.png",
+  "feConveyor_HD.fbx",
+  "feConveyor_HD.blend"
+ ],
+ "segundos": 56.7
+}

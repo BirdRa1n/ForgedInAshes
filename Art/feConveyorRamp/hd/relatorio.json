@@ -1,0 +1,16 @@
+{
+ "nome": "feConveyorRamp",
+ "config": "F:\\IA\\fe_blender\\configs\\feConveyorRamp.json",
+ "triangulos_antes": 2268,
+ "triangulos_depois": 2268,
+ "atlas": 1024,
+ "arquivos": [
+  "feConveyorRamp_Albedo.png",
+  "feConveyorRamp_Normal.png",
+  "feConveyorRamp_MetallicSmoothness.png",
+  "feConveyorRamp_Roughness.png",
+  "feConveyorRamp_HD.fbx",
+  "feConveyorRamp_HD.blend"
+ ],
+ "segundos": 26.1
+}

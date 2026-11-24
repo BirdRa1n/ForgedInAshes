@@ -1,0 +1,16 @@
+{
+ "nome": "feTannery",
+ "config": "F:\\IA\\fe_blender\\configs\\feTannery.json",
+ "triangulos_antes": 5740,
+ "triangulos_depois": 2548,
+ "atlas": 1024,
+ "arquivos": [
+  "feTannery_Albedo.png",
+  "feTannery_Normal.png",
+  "feTannery_MetallicSmoothness.png",
+  "feTannery_Roughness.png",
+  "feTannery_HD.fbx",
+  "feTannery_HD.blend"
+ ],
+ "segundos": 12.5
+}

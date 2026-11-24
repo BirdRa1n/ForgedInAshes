@@ -1,0 +1,16 @@
+{
+ "nome": "feCookerIndustrial",
+ "config": "F:\\IA\\fe_blender\\configs\\feCookerIndustrial.json",
+ "triangulos_antes": 4376,
+ "triangulos_depois": 1840,
+ "atlas": 1024,
+ "arquivos": [
+  "feCookerIndustrial_Albedo.png",
+  "feCookerIndustrial_Normal.png",
+  "feCookerIndustrial_MetallicSmoothness.png",
+  "feCookerIndustrial_Roughness.png",
+  "feCookerIndustrial_HD.fbx",
+  "feCookerIndustrial_HD.blend"
+ ],
+ "segundos": 13.1
+}

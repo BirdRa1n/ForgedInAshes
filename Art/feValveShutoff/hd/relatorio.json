@@ -1,0 +1,16 @@
+{
+ "nome": "feValveShutoff",
+ "config": "F:\\IA\\fe_blender\\configs\\feValveShutoff.json",
+ "triangulos_antes": 3272,
+ "triangulos_depois": 1240,
+ "atlas": 1024,
+ "arquivos": [
+  "feValveShutoff_Albedo.png",
+  "feValveShutoff_Normal.png",
+  "feValveShutoff_MetallicSmoothness.png",
+  "feValveShutoff_Roughness.png",
+  "feValveShutoff_HD.fbx",
+  "feValveShutoff_HD.blend"
+ ],
+ "segundos": 14.5
+}

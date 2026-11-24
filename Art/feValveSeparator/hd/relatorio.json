@@ -1,0 +1,16 @@
+{
+ "nome": "feValveSeparator",
+ "config": "F:\\IA\\fe_blender\\configs\\feValveSeparator.json",
+ "triangulos_antes": 3056,
+ "triangulos_depois": 1176,
+ "atlas": 1024,
+ "arquivos": [
+  "feValveSeparator_Albedo.png",
+  "feValveSeparator_Normal.png",
+  "feValveSeparator_MetallicSmoothness.png",
+  "feValveSeparator_Roughness.png",
+  "feValveSeparator_HD.fbx",
+  "feValveSeparator_HD.blend"
+ ],
+ "segundos": 14.9
+}

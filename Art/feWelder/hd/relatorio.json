@@ -1,0 +1,16 @@
+{
+ "nome": "feWelder",
+ "config": "F:\\IA\\fe_blender\\configs\\feWelder.json",
+ "triangulos_antes": 1600,
+ "triangulos_depois": 448,
+ "atlas": 1024,
+ "arquivos": [
+  "feWelder_Albedo.png",
+  "feWelder_Normal.png",
+  "feWelder_MetallicSmoothness.png",
+  "feWelder_Roughness.png",
+  "feWelder_HD.fbx",
+  "feWelder_HD.blend"
+ ],
+ "segundos": 18.3
+}

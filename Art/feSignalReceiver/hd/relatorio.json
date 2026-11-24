@@ -1,0 +1,16 @@
+{
+ "nome": "feSignalReceiver",
+ "config": "F:\\IA\\fe_blender\\configs\\feSignalReceiver.json",
+ "triangulos_antes": 1116,
+ "triangulos_depois": 404,
+ "atlas": 1024,
+ "arquivos": [
+  "feSignalReceiver_Albedo.png",
+  "feSignalReceiver_Normal.png",
+  "feSignalReceiver_MetallicSmoothness.png",
+  "feSignalReceiver_Roughness.png",
+  "feSignalReceiver_HD.fbx",
+  "feSignalReceiver_HD.blend"
+ ],
+ "segundos": 12.0
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feTemperFurnace",
+ "config": "F:\\IA\\fe_blender\\configs\\feTemperFurnace.json",
+ "triangulos_antes": 3516,
+ "triangulos_depois": 1372,
+ "atlas": 1024,
+ "arquivos": [
+  "feTemperFurnace_Albedo.png",
+  "feTemperFurnace_Normal.png",
+  "feTemperFurnace_MetallicSmoothness.png",
+  "feTemperFurnace_Roughness.png",
+  "feTemperFurnace_HD.fbx",
+  "feTemperFurnace_HD.blend"
+ ],
+ "segundos": 14.4
+}
