@@ -24,6 +24,9 @@
 			<property name="WorkstationWindow" value="workstation_forge_nosmelting"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feFoundryDesc"/>
+			<!-- F8.1: melts scrap / ingots into molten metal for Metal Chutes (MetalWorks.cs) -->
+			<property name="FeFluid" value="smelter"/>
+			<property name="FeMetalBuffer" value="200"/>
 			<property name="CustomIcon" value="forge"/>
 			<property name="CustomIconTint" value="ffb080"/>
 			<property name="WorkstationIcon" value="ui_game_symbol_forge"/>
@@ -753,6 +756,27 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidBottlerPrefab"/>
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="120"/>
+		</block>
+		<!-- F8.1 (PLANO_CRAFT.md): Metal Chute, a pipe for molten metal only, and the Casting Table (MetalWorks.cs) -->
+		<block name="feMetalChute">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="chute"/>
+			<property name="DescriptionKey" value="feMetalChuteDesc"/>
+			<property name="CustomIcon" value="pipeSmall1x1"/>
+			<property name="CustomIconTint" value="ff7020"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMetalChutePrefab"/>
+			<property name="EconomicValue" value="20"/>
+		</block>
+		<block name="feCaster">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="caster"/>
+			<property name="FeFluidRate" value="300"/>
+			<property name="DescriptionKey" value="feCasterDesc"/>
+			<property name="CustomIcon" value="workbench"/>
+			<property name="CustomIconTint" value="ff9050"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
 		</block>
 		<block name="feMechPump">
 			<property name="Extends" value="feShaft"/>

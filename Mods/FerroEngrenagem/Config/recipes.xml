@@ -149,6 +149,43 @@
 			<ingredient name="fePipe" count="2"/>
 			<ingredient name="feResourceGear" count="2"/>
 		</recipe>
+		<!-- F8.1 metallurgy (PLANO_CRAFT.md) -->
+		<recipe name="feMetalChute" count="4" craft_area="feFoundry" craft_time="20" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="2"/>
+			<ingredient name="resourceClayLump" count="2"/>
+		</recipe>
+		<recipe name="feCaster" count="1" craft_area="feMetalShop" craft_time="40" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="20"/>
+			<ingredient name="resourceClayLump" count="10"/>
+			<ingredient name="feResourceIronPlate" count="4"/>
+		</recipe>
+		<recipe name="feMoldCasing" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="resourceScrapBrass" count="4"/>
+		</recipe>
+		<recipe name="feMoldBulletTip" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="resourceScrapLead" count="4"/>
+		</recipe>
+		<recipe name="feMoldIngot" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="resourceClayLump" count="6"/>
+		</recipe>
+		<recipe name="feMoldPlate" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="feResourceIronPlate" count="2"/>
+		</recipe>
+		<recipe name="feMoldPipe" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="resourceMetalPipe" count="1"/>
+		</recipe>
+		<recipe name="feMoldGear" count="1" craft_area="feLathe" craft_time="30" always_unlocked="true">
+			<ingredient name="resourceForgedIron" count="8"/>
+			<ingredient name="feResourceGear" count="1"/>
+		</recipe>
+		<recipe name="resourceBulletCasing" count="1" craft_area="feAmmoPress" craft_time="1" always_unlocked="true">
+			<ingredient name="feCasingRaw" count="1"/>
+		</recipe>
 		<recipe name="feFluidBottler" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
 			<ingredient name="feResourceIronPlate" count="6"/>
 			<ingredient name="fePipe" count="2"/>

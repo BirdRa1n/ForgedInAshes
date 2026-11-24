@@ -36,7 +36,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery }
+    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster }
 
     public class FluidPort
     {
@@ -45,6 +45,8 @@ namespace FerroEngrenagem
         public Vector3i Dir;       // outward direction
         public bool Out;           // true = offers fluid, false = takes fluid
         public string Fluid;       // fluid it handles
+        public bool Metal;         // F8.1: molten metal port (joins Metal Chutes only, never pipes)
+        public string[] Accepts;   // F8.1: a demand port taking any of these (the Casting Table's mold metals)
     }
 
     public class FluidState
@@ -54,6 +56,9 @@ namespace FerroEngrenagem
         public float Steam;        // steam buffer (engines) / condensed water buffer (condensers)
         public float LastFlow;     // L/min moved last tick (readout)
         public string Note = "";   // readout: why it does not run
+        public string Mold = "";   // F8.1 Casting Table: the mold in it
+        public string Made = "";   // F8.1 Casting Table: the item its finished casts are
+        public int Count;          // F8.1 Casting Table: finished casts waiting to leave
     }
 
     public class FluidNet
@@ -72,6 +77,22 @@ namespace FerroEngrenagem
         public const string Oil = "oil";
         public const string Gasoline = "gasoline";
         public const string Lubricant = "lubricant";
+        // F8.1 (PLANO_CRAFT.md): molten metals. They run in Metal Chutes only (a pipe never carries them).
+        public const string MoltenBrass = "molten_brass";
+        public const string MoltenLead = "molten_lead";
+        public const string MoltenIron = "molten_iron";
+        public const string MoltenSteel = "molten_steel";
+
+        public static bool IsMetal(string f)
+        {
+            return f != null && f.StartsWith("molten_", System.StringComparison.Ordinal);
+        }
+
+        /// <summary>Pipes and Metal Chutes: the blocks a network runs through.</summary>
+        public static bool IsConduit(FluidKind k)
+        {
+            return k == FluidKind.Pipe || k == FluidKind.Chute;
+        }
 
         // D9: fluids that are also items (the Filler pours the items in, the Bottler and the Refinery turn the fluid
         // back into items): fluid, item, litres per item
@@ -136,6 +157,9 @@ namespace FerroEngrenagem
                     case "filler": k = FluidKind.Filler; break;
                     case "bottler": k = FluidKind.Bottler; break;
                     case "refinery": k = FluidKind.Refinery; break;
+                    case "chute": k = FluidKind.Chute; break;
+                    case "smelter": k = FluidKind.Smelter; break;
+                    case "caster": k = FluidKind.Caster; break;
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -204,6 +228,27 @@ namespace FerroEngrenagem
                     l.Add(new FluidPort { Owner = pos, Cell = Add(pos, new Vector3i(0, 1, 0)), Dir = Rot(bv, Vector3.back), Out = false, Fluid = Steam });
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.forward), Out = true, Fluid = Water });
                     break;
+                case FluidKind.Smelter:
+                    // F8.1 Foundry (2 wide x 2 high, parent = bottom cell, the other bottom cell at local -X): molten
+                    // metal leaves through any outer side of its bottom layer that has a Metal Chute
+                    {
+                        FluidState ss = FluidStore.Get(pos);
+                        Vector3i other = Add(pos, Rot(bv, Vector3.left));
+                        foreach (Vector3 side in new Vector3[] { Vector3.right, Vector3.forward, Vector3.back })
+                            l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, side), Out = true, Fluid = ss.Fluid, Metal = true });
+                        foreach (Vector3 side in new Vector3[] { Vector3.left, Vector3.forward, Vector3.back })
+                            l.Add(new FluidPort { Owner = pos, Cell = other, Dir = Rot(bv, side), Out = true, Fluid = ss.Fluid, Metal = true });
+                    }
+                    break;
+                case FluidKind.Caster:
+                    // F8.1 Casting Table: metal in at its back; takes the metals its mold accepts
+                    {
+                        FluidState cs = FluidStore.Get(pos);
+                        l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false,
+                                              Fluid = cs.Amount > 0.01f ? cs.Fluid : "", Metal = true,
+                                              Accepts = MetalWorks.MoldMetals(cs.Mold) });
+                    }
+                    break;
                 case FluidKind.SteamEngine:
                     // parent = bottom centre cell (vanilla multiblock layout: x/z -1..1, y 0..1). Water in under the
                     // centre and on the left, right and back of the bottom layer; steam out over the top centre.
@@ -239,11 +284,17 @@ namespace FerroEngrenagem
         public static bool PortConnected(World world, FluidPort p)
         {
             Vector3i n = Add(p.Cell, p.Dir);
-            return HasPortAt(world, n, Neg(p.Dir));
+            return HasPortAt(world, n, Neg(p.Dir), p.Metal);
         }
 
         /// <summary>Does a device cell have a port facing dir (for pipe connections and the arms of pipe models)?</summary>
         public static bool HasPortAt(World world, Vector3i cell, Vector3i dir)
+        {
+            return HasPortAt(world, cell, dir, false);
+        }
+
+        /// <summary>metal: asked for a Metal Chute (molten metal ports) instead of a pipe.</summary>
+        public static bool HasPortAt(World world, Vector3i cell, Vector3i dir, bool metal)
         {
             BlockValue bv = world.GetBlock(cell);
             FluidKind k = Kind(bv.Block);
@@ -256,14 +307,14 @@ namespace FerroEngrenagem
                 {
                     if (Mathf.Abs(dev.x - cell.x) > 2 || Mathf.Abs(dev.y - cell.y) > 2 || Mathf.Abs(dev.z - cell.z) > 2) continue;
                     foreach (FluidPort p in Ports(world, dev))
-                        if (p.Cell == cell && p.Dir == dir) return true;
+                        if (p.Cell == cell && p.Dir == dir && p.Metal == metal) return true;
                 }
                 return false;
             }
-            if (k == FluidKind.Pipe) return true;
+            if (IsConduit(k)) return k == (metal ? FluidKind.Chute : FluidKind.Pipe);
             Vector3i owner = ParentOf(world, cell, bv);
             foreach (FluidPort p in Ports(world, owner))
-                if (p.Cell == cell && p.Dir == dir) return true;
+                if (p.Cell == cell && p.Dir == dir && p.Metal == metal) return true;
             return false;
         }
 
@@ -274,14 +325,16 @@ namespace FerroEngrenagem
             FluidNet net = new FluidNet();
             Vector3i first = Add(start.Cell, start.Dir);
             BlockValue fb = world.GetBlock(first);
-            if (Kind(fb.Block) != FluidKind.Pipe)
+            FluidKind want = start.Metal ? FluidKind.Chute : FluidKind.Pipe;
+            FluidKind fk = Kind(fb.Block);
+            if (fk != want)
             {
-                // device facing device directly
+                // device facing device directly (a conduit of the other sort leads nowhere)
                 net.Ports.Add(start);
                 Vector3i owner = ParentOf(world, first, fb);
-                if (Kind(fb.Block) != FluidKind.None)
+                if (fk != FluidKind.None && !IsConduit(fk))
                     foreach (FluidPort p in Ports(world, owner))
-                        if (p.Cell == first && p.Dir == Neg(start.Dir)) net.Ports.Add(p);
+                        if (p.Cell == first && p.Dir == Neg(start.Dir) && p.Metal == start.Metal) net.Ports.Add(p);
                 return net;
             }
             Queue<Vector3i> open = new Queue<Vector3i>();
@@ -297,15 +350,15 @@ namespace FerroEngrenagem
                     BlockValue nb = world.GetBlock(n);
                     FluidKind nk = Kind(nb.Block);
                     if (nk == FluidKind.None) continue;
-                    if (nk == FluidKind.Pipe)
+                    if (IsConduit(nk))
                     {
-                        if (net.Pipes.Add(n)) open.Enqueue(n);
+                        if (nk == want && net.Pipes.Add(n)) open.Enqueue(n);
                         continue;
                     }
                     Vector3i owner = ParentOf(world, n, nb);
                     foreach (FluidPort port in Ports(world, owner))
                     {
-                        if (port.Cell != n || port.Dir != Neg(d)) continue;
+                        if (port.Cell != n || port.Dir != Neg(d) || port.Metal != start.Metal) continue;
                         string key = port.Owner + "|" + port.Cell + "|" + port.Dir + "|" + port.Out;
                         if (seenPorts.Add(key)) net.Ports.Add(port);
                     }
@@ -338,6 +391,10 @@ namespace FerroEngrenagem
             if (f == Oil) return Text("feFluidOil", "Oil");
             if (f == Gasoline) return Text("feFluidGasoline", "Gasoline");
             if (f == Lubricant) return Text("feFluidLubricant", "Lubricant");
+            if (f == MoltenBrass) return Text("feFluidMoltenBrass", "Molten Brass");
+            if (f == MoltenLead) return Text("feFluidMoltenLead", "Molten Lead");
+            if (f == MoltenIron) return Text("feFluidMoltenIron", "Molten Iron");
+            if (f == MoltenSteel) return Text("feFluidMoltenSteel", "Molten Steel");
             return Text("feFluidNone", "empty");
         }
     }
@@ -377,6 +434,12 @@ namespace FerroEngrenagem
                     s.Fluid = t[3];
                     s.Amount = float.Parse(t[4], CultureInfo.InvariantCulture);
                     s.Steam = float.Parse(t[5], CultureInfo.InvariantCulture);
+                    if (t.Length >= 9)
+                    {
+                        s.Mold = t[6];
+                        s.Made = t[7];
+                        s.Count = int.Parse(t[8]);
+                    }
                     states[p] = s;
                 }
             }
@@ -397,7 +460,8 @@ namespace FerroEngrenagem
                     FluidState s = Get(p);
                     sb.Append(p.x).Append(';').Append(p.y).Append(';').Append(p.z).Append(';').Append(s.Fluid).Append(';')
                       .Append(s.Amount.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
-                      .Append(s.Steam.ToString("0.###", CultureInfo.InvariantCulture)).Append('\n');
+                      .Append(s.Steam.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
+                      .Append(s.Mold).Append(';').Append(s.Made).Append(';').Append(s.Count).Append('\n');
                 }
                 File.WriteAllText(loadedFor, sb.ToString());
                 dirty = false;
@@ -495,10 +559,22 @@ namespace FerroEngrenagem
                 FluidKind k = Fluids.Kind(bv.Block);
                 FluidState s = FluidStore.Get(p);
                 s.LastFlow = 0f;
-                foreach (FluidPort port in Fluids.Ports(world, p))
+                List<FluidPort> devPorts = Fluids.Ports(world, p);
+                int metalOuts = 0;
+                if (k == FluidKind.Smelter)
+                    foreach (FluidPort port in devPorts) if (Fluids.PortConnected(world, port)) metalOuts++;
+                foreach (FluidPort port in devPorts)
                 {
                     switch (k)
                     {
+                        case FluidKind.Smelter:
+                            // the metal it holds, shared among the sides that have a chute
+                            if (s.Amount > 0.01f && s.Fluid.Length > 0 && metalOuts > 0 && Fluids.PortConnected(world, port))
+                                offer[port] = s.Amount / metalOuts;
+                            break;
+                        case FluidKind.Caster:
+                            demand[port] = MetalWorks.CasterDemand(world, p, bv, s, dt);
+                            break;
                         case FluidKind.MechPump:
                         case FluidKind.ElecPump:
                             offer[port] = PumpRate(world, p, bv, s) * dt / 60f;
@@ -623,7 +699,9 @@ namespace FerroEngrenagem
             List<FluidPort> wanted = new List<FluidPort>();
             float bl;
             foreach (FluidPort d in demands)
-                if (d.Fluid == fluid || fluid.Length == 0 || (d.Fluid.Length == 0 && Fluids.ItemOfFluid(fluid, out bl) != null))
+                if (d.Fluid == fluid || fluid.Length == 0 ||
+                    (d.Accepts != null ? (d.Fluid.Length == 0 && System.Array.IndexOf(d.Accepts, fluid) >= 0)
+                                       : (d.Fluid.Length == 0 && Fluids.ItemOfFluid(fluid, out bl) != null)))
                 { D += demand[d]; wanted.Add(d); }
 
             float direct = Mathf.Min(O, D);
@@ -676,7 +754,7 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(o.Owner);
             FluidKind k = Fluids.Kind(world.GetBlock(o.Owner).Block);
             if (k == FluidKind.Condenser || k == FluidKind.SteamEngine) s.Steam = Mathf.Max(0f, s.Steam - amount);
-            else if (k == FluidKind.Filler)
+            else if (k == FluidKind.Filler || k == FluidKind.Smelter)
             {
                 s.Amount = Mathf.Max(0f, s.Amount - amount);
                 if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
@@ -691,6 +769,10 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(d.Owner);
             FluidKind k = Fluids.Kind(bv.Block);
             if (k == FluidKind.SteamEngine) { s.Amount += amount; s.Fluid = Fluids.Water; }
+            else if (k == FluidKind.Caster)
+            {
+                if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
+            }
             else if (k == FluidKind.Bottler || k == FluidKind.Refinery)
             {
                 if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
@@ -719,7 +801,7 @@ namespace FerroEngrenagem
                                           PlatformUserIdentifierAbs _addedByPlayer)
         {
             base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue, _addedByPlayer);
-            if (!_blockValue.ischild && Fluids.Kind(this) != FluidKind.Pipe) FluidStore.Register(_blockPos);
+            if (!_blockValue.ischild && !Fluids.IsConduit(Fluids.Kind(this))) FluidStore.Register(_blockPos);
         }
 
         public override void OnBlockRemoved(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
@@ -733,6 +815,7 @@ namespace FerroEngrenagem
         {
             base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
             PipeArms.Attach(_ebcd, _blockPos);
+            if (Fluids.Kind(this) == FluidKind.Caster) CasterVisual.Attach(_ebcd, _blockPos);
         }
 
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,
@@ -751,6 +834,12 @@ namespace FerroEngrenagem
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_pour", "loot_sort", true, false, null), take };
             if (k == FluidKind.Bottler)
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_bottle", "loot_sort", true, false, null), take };
+            if (k == FluidKind.Caster)
+                return new BlockActivationCommand[]
+                {
+                    new BlockActivationCommand("fe_cast_take", "loot_sort", true, false, null),
+                    new BlockActivationCommand("fe_mold", "tool", true, false, null), take
+                };
             return new BlockActivationCommand[] { take };
         }
 
@@ -784,6 +873,11 @@ namespace FerroEngrenagem
                     : string.Format(Kinetic.Text("feBottled", "Took {0}x {1}"), st.count, st.itemValue.ItemClass.GetLocalizedItemName()), false, false, 0f);
                 return true;
             }
+            if ((_commandName == "fe_mold" || _commandName == "fe_cast_take") && w != null)
+            {
+                GameManager.ShowTooltip(_player, MetalWorks.Activate(w, _blockPos, _commandName, _player), false, false, 0f);
+                return true;
+            }
             if (_commandName != "take") return false;
             float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 2f;
             takeItemWithTimer(_blockPos, _blockValue, _player, delay);
@@ -796,6 +890,7 @@ namespace FerroEngrenagem
             FluidKind k = Fluids.Kind(this);
             string hint = k == FluidKind.Filler ? Kinetic.Text("feHintPour", "{0} pour the item in your hand - hold {0}: take")
                         : k == FluidKind.Bottler ? Kinetic.Text("feHintBottle", "{0} take the bottled items - hold {0}: take")
+                        : k == FluidKind.Caster ? Kinetic.Text("feHintCaster", "{0} take the casts - hold {0}: change the mold (the one in your hand) or take")
                         : Kinetic.Text("feHintTake", "Hold {0} to take");
             return KineticLookController.Escape(FluidText.Describe(_blockPos, _blockValue, true)) + "\n" + hint;
         }
@@ -816,6 +911,7 @@ namespace FerroEngrenagem
             switch (k)
             {
                 case FluidKind.Pipe:
+                case FluidKind.Chute:
                 {
                     FluidNet net;
                     if (!FluidTicker.NetByPipe.TryGetValue(pos, out net))
@@ -837,6 +933,8 @@ namespace FerroEngrenagem
                     else t += "\n" + Fluids.Text("feRefineryFluidInfo", "Fluid in at its back: used as ingredients of its fixed recipe");
                     return t.Trim();
                 }
+                case FluidKind.Caster:
+                    return (name + "\n" + MetalWorks.DescribeCaster(world, owner, bv, s)).Trim();
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
                         Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),
@@ -967,7 +1065,12 @@ namespace FerroEngrenagem
             a.pos = pos;
             a.next = 0f;
             a.reported = false;
-            for (int i = 0; i < 6; i++) a.arms[i] = Find(ebcd.transform, Names[i]);
+            for (int i = 0; i < 6; i++)
+            {
+                // Blender renames a second "FeArm_PX" in the same .blend (the Metal Chute) to "FeArm_PX.001"
+                a.arms[i] = Find(ebcd.transform, Names[i]);
+                if (a.arms[i] == null) a.arms[i] = FindPrefix(ebcd.transform, Names[i] + ".");
+            }
             // diagnostic: a pipe next to a device (the Condenser steam inlet never reported its arms)
             World world = GameManager.Instance == null ? null : GameManager.Instance.World;
             if (world != null)
@@ -975,7 +1078,7 @@ namespace FerroEngrenagem
                 {
                     Vector3i n = new Vector3i(pos.x + Dirs6[i].x, pos.y + Dirs6[i].y, pos.z + Dirs6[i].z);
                     FluidKind nk = Fluids.Kind(world.GetBlock(n).Block);
-                    if (nk == FluidKind.None || nk == FluidKind.Pipe) continue;
+                    if (nk == FluidKind.None || Fluids.IsConduit(nk)) continue;
                     Log.Out(FerroEngrenagemMod.LogPrefix + "pipe arms attached at " + pos + " (next to " + world.GetBlock(n).Block.GetBlockName()
                             + " at " + n + ") active=" + ebcd.transform.gameObject.activeInHierarchy
                             + " enabled=" + a.enabled + " arms found=" + Found(a.arms));
@@ -1007,6 +1110,17 @@ namespace FerroEngrenagem
             return null;
         }
 
+        static Transform FindPrefix(Transform t, string n)
+        {
+            if (t.name.StartsWith(n, System.StringComparison.Ordinal)) return t;
+            for (int i = 0; i < t.childCount; i++)
+            {
+                Transform r = FindPrefix(t.GetChild(i), n);
+                if (r != null) return r;
+            }
+            return null;
+        }
+
         void Update()
         {
             if (Time.time < next) return;
@@ -1021,13 +1135,14 @@ namespace FerroEngrenagem
                 Vector3 w = transform.TransformDirection(Local[i]);
                 Vector3i d = new Vector3i(Mathf.RoundToInt(w.x), Mathf.RoundToInt(w.y), Mathf.RoundToInt(w.z));
                 Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
-                bool on = Fluids.HasPortAt(world, n, new Vector3i(-d.x, -d.y, -d.z));
+                bool on = Fluids.HasPortAt(world, n, new Vector3i(-d.x, -d.y, -d.z),
+                                           Fluids.Kind(world.GetBlock(pos).Block) == FluidKind.Chute);
                 if (first)
                 {
                     // diagnostic, once per pipe: every arm that faces a device (not a pipe)
                     BlockValue nbv = world.GetBlock(n);
                     FluidKind nk = Fluids.Kind(nbv.Block);
-                    if (nk != FluidKind.None && nk != FluidKind.Pipe)
+                    if (nk != FluidKind.None && !Fluids.IsConduit(nk))
                         Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " faces " + nbv.Block.GetBlockName()
                                 + (nbv.ischild ? " (child)" : "") + " at " + n + " via " + Names[i] + " dir " + d
                                 + ": port=" + on + " arm=" + (arms[i] == null ? "MISSING" : (arms[i].gameObject.activeSelf ? "shown" : "hidden"))
@@ -1038,7 +1153,7 @@ namespace FerroEngrenagem
                 {
                     arms[i].gameObject.SetActive(on);
                     Block nb = world.GetBlock(n).Block;
-                    if (Fluids.Kind(nb) != FluidKind.Pipe && Fluids.Kind(nb) != FluidKind.None)
+                    if (!Fluids.IsConduit(Fluids.Kind(nb)) && Fluids.Kind(nb) != FluidKind.None)
                         Log.Out(FerroEngrenagemMod.LogPrefix + "pipe at " + pos + " arm " + Names[i] + " -> " + n + " ("
                                 + nb.GetBlockName() + ") " + (on ? "ON" : "OFF") + " arm world pos "
                                 + arms[i].position.ToString("F2"));
@@ -1097,6 +1212,11 @@ namespace FerroEngrenagem
                 if (world.GetChunkFromWorldPos(p) == null) continue;
                 BlockValue bv = world.GetBlock(p);
                 FluidKind k = Fluids.Kind(bv.Block);
+                if (k == FluidKind.Caster)
+                {
+                    MetalWorks.TickCaster(world, p, bv, FluidStore.Get(p));
+                    continue;
+                }
                 if (k == FluidKind.Bottler)
                 {
                     Vector3i f = Fluids.Rot(bv, Vector3.forward);

@@ -754,12 +754,18 @@ namespace FerroEngrenagem
             if (ic == null) return false;
             string name = ic.GetItemName();
             int took = 0;
+            string meltWhy;
             ItemStack[] fuel = te.Fuel;
             ItemStack[] input = te.Input;
             if (fuel != null && fuel.Length > 0 && ItemClass.GetFuelValue(st.itemValue) > 0)
             {
                 took = Fill(fuel, st.count, st, 0, fuel.Length);
                 if (took > 0) te.Fuel = fuel;
+            }
+            else if (MetalWorks.IsSmelter(world.GetBlock(p).Block) &&
+                     (took = MetalWorks.Melt(world, p, te, st, out meltWhy)) > 0)
+            {
+                // F8.1: the Foundry melts it into its metal buffer
             }
             else if (input != null && te.InputSlotCount > 0 && ic.MadeOfMaterial != null &&
                      !string.IsNullOrEmpty(ic.MadeOfMaterial.ForgeCategory))

@@ -60,7 +60,7 @@ Os números (litros, tempos, quantidades) são **propostas**. Eles serão ajusta
 | N01 | **Calha de Metal** | Cano só para metal fundido. Não leva água nem óleo, e o cano comum não leva metal. Visual de calha aberta com o metal brilhando. | rede de fluidos (canos) |
 | N02 | **Mesa de Moldagem** | Recebe metal pela calha e tem um slot de molde. Quando enche a dose do molde, espera esfriar e solta a peça na esteira da frente (ou na mão). Água num cano ao lado acelera o resfriamento. | Envasadora (Bottler) |
 | N03 | **Moldes** (itens) | Cada molde aceita só alguns metais e faz uma peça. Exemplos na seção 4.1. | itens + propriedade `FeMoldMetals` |
-| N04 | **Revestimento de molde** | Argila refratária. Cada molde precisa de revestimento para aceitar o metal e gasta 1 a cada N moldagens. Sem revestimento, a mesa recusa o metal e mostra "Sem revestimento". Mantém o uso da argila (Clay Lump), como no jogo base. | slot extra da Mesa |
+| N04 | ~~Revestimento de molde~~ | **Retirado (usuário, 2026-11-23).** No pt-BR do jogo, "Revestimento de balas" é a cápsula: o pedido era o molde fazer a cápsula. | — |
 | N05 | **Triturador** | Rodas de moer. Consome torque alto. Recebe por esteira, solta na esteira da frente. | esteira + máquina de torque |
 | N06 | **Lavadora** | Tanque com água e peneira. | rede de fluidos + esteira |
 | N07 | **Secador a Vapor** | Estufa ligada ao vapor (Condensadora / Motor a Vapor). | rede de fluidos (vapor) |
@@ -84,7 +84,7 @@ Com o mod, a mesma bala tem três linhas.
 
 **Linha A: cápsula (latão)**
 1. Esteira de sucata de latão → **Fundição**: 1 Sucata de Latão = 10 L de Latão Fundido.
-2. **Calha** → **Mesa de Moldagem** com o **Molde de Cápsula** revestido:
+2. **Calha** → **Mesa de Moldagem** com o **Molde de Cápsula**:
    - 25 L = 5 Cápsulas Brutas, 6 s esfriando (3 s com água);
    - o Molde de Cápsula aceita latão e recusa chumbo e ferro.
 3. Esteira → **Prensa em Linha** (repuxo): Cápsula Bruta → **Cápsula** (`resourceBulletCasing`).
@@ -206,7 +206,7 @@ script (fase F8.0) lista receita por receita com o modelo e os produtos intermed
    (como a Caixa d'Água) e sai pela calha.
    - O metal pode ser escolhido com a receita fixa ("Fundir latão") ou ir na ordem de chegada.
 3. **Mesa de Moldagem.** Um novo `FluidKind.Caster` com uma porta de demanda. Ela aceita só os metais do molde que
-   está no slot, nos moldes com revestimento, e solta a peça como a Envasadora já faz.
+   está no slot e solta a peça como a Envasadora já faz.
 4. **Arquivo de processos `Config/fe_processes.xml`**, lido pelo C#. Uma linha por processo:
 
    ```xml
@@ -241,7 +241,7 @@ script (fase F8.0) lista receita por receita com o modelo e os produtos intermed
 | Fase | Entrega | Prova no jogo |
 |---|---|---|
 | **F8.0** [feito, falta teste] | Arquivo de processos, validador, planilha de cobertura (`tools/craft_matrix.py` → CSV com as ~600 receitas e o modelo de cada uma), painel de receita (N10) | Painel abre e escolhe receita; validador passa |
-| **F8.1** | Metalurgia: Fundição como fonte de fluido, Calha, Mesa de Moldagem, moldes de Cápsula, Ponta, Lingote, Chapa, Tubo e Engrenagem, revestimento | Latão vira cápsula bruta; molde errado recusa; sem revestimento recusa |
+| **F8.1** [feito, falta teste] | Metalurgia: Fundição como fonte de fluido, Calha, Mesa de Moldagem, moldes de Cápsula, Ponta, Lingote, Chapa, Tubo e Engrenagem | Latão vira cápsula bruta; molde errado recusa |
 | **F8.2** | Química: Triturador, Lavadora, Secador, uso da Misturadora | Carvão + salitre viram pólvora sem a mão do jogador |
 | **F8.3** | Montadora com baús ligados + Prensa em Linha | **Bala 9mm** sai sozinha da linha completa (exemplo 4.1) |
 | **F8.4** | Toda a munição (9mm, .44, 7.62, cartucho, flecha, foguete) | Cada uma com a sua linha |
@@ -262,7 +262,7 @@ commit próprios.
 
 | ID | Decisão | Opções | Recomendação |
 |---|---|---|---|
-| D11-1 | O que significa "revestimento" do molde | (a) argila que se gasta a cada N moldagens; (b) o material do molde decide os metais (molde de argila: chumbo e latão; molde de aço: ferro) | **As duas:** o material decide o metal, e o revestimento de argila se gasta |
+| D11-1 | O que significa "revestimento" do molde | (a) argila que se gasta a cada N moldagens; (b) o material do molde decide os metais (molde de argila: chumbo e latão; molde de aço: ferro) | **Só (b)**: o material do molde decide o metal; sem revestimento (usuário, 2026-11-23) |
 | D11-2 | Receitas vanilla dos itens avançados | (a) remover; (b) manter muito mais caras (×3) na bancada; (c) uma opção no arquivo de config | **(c)**, com "remover" como padrão |
 | D11-3 | Montadora: como ligar os baús | (a) só os encostados; (b) encostados em cadeia, até 16; (c) por um cabo ou cano de itens | **(b)** agora, **(c)** na logística 2.0 |
 | D11-4 | Montagem em sequência ou montadora simples para a munição | (a) só montadora; (b) as duas, e a sequência rende mais (ex.: 12 balas contra 10) | **(b)** |

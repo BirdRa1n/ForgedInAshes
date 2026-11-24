@@ -104,3 +104,27 @@ Antes de começar:
    - "Próxima produção" e "Produção anterior" percorrem a lista; ao trocar, os ingredientes guardados caem no chão.
 2. Leve os ingredientes por esteira: a máquina fabrica sozinha, como na parte 4.
 3. No log, ao abrir o jogo, aparece `[FerroEngrenagem] processes: 0 active, 10 planned`.
+
+## 8. Metalurgia (F8.1)
+
+Antes: pegue e coloque de novo a Fundição (ela passa a ter o tanque de metal). Fabrique os blocos e moldes no modo
+criativo: Calha de Metal, Mesa de Moldagem e os moldes (Cápsula, Ponta, Lingote, Chapa, Tubo, Engrenagem).
+
+1. **Derreter:**
+   - Ponha combustível (Carvão ou madeira) na Fundição.
+   - Com Sucata de Latão na mão, segure E na Fundição e escolha "Derreter o item da mão". Ou leve a sucata por esteira.
+   - A leitura da Fundição mostra "Latão Fundido: X / 200 L" e o calor.
+2. **Calha:**
+   - Ligue a Calha de Metal em qualquer lado de fora da parte de baixo da Fundição até as costas de uma Mesa de Moldagem.
+   - Os braços da calha se juntam à Fundição e à Mesa; um cano comum ao lado NÃO se liga à calha.
+   - Olhando a calha: "Latão Fundido: X L/min".
+3. **Moldar:**
+   - Segure o Molde de Cápsula, segure E na Mesa e escolha "Trocar o molde". Aparece "Molde: Molde de Cápsula (aceita Latão Fundido)".
+   - O metal enche o molde (o laranja sobe), esfria e aparece "Prontas: 5x Cápsula Bruta" com a pilha de peças.
+   - Com uma esteira na frente da Mesa, as peças saem por ela. Sem esteira, use "Pegar as peças".
+   - Água ao lado da Mesa (Caixa d'Água com água) esfria duas vezes mais rápido.
+4. **Molde errado:** com o Molde de Ponta na Mesa, o latão não entra (a calha fica parada). Chumbo entra.
+5. **Trocar molde com metal dentro:** recusa ("Tem metal no molde").
+6. **Cápsula:** a Cápsula Bruta vira Revestimento de Bala na Prensa de Munição.
+7. **Ferro:** Ferro Forjado derretido + Molde de Chapa = Chapa de Ferro; Molde de Lingote aceita ferro e aço.
+8. Saia e entre: o metal na Fundição, o molde e as peças prontas continuam.

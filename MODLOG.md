@@ -797,3 +797,11 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Painel de receita (N10): comandos "Próxima produção" / "Produção anterior" (`AutoCraft.Cycle`, receitas da craft_area = nome do bloco via `CraftingManager.GetAllRecipes()`).
 - Site de tutoriais: `tools/gen_site.py` → `site/` (estático; Vercel com Root Directory = site). Gerado dos dados do mod: página por item fe*, por máquina e por `<chain>`.
 - Nota: no pt-BR do jogo, `resourceBulletCasing` se chama "Revestimento de balas".
+
+## 2026-11-23: F8.1 metalurgia
+- Revestimento de argila retirado do plano (usuário): no pt-BR do jogo "Revestimento de balas" = cápsula.
+- Metal fundido é fluido (`molten_brass/lead/iron/steel`), só passa por `feMetalChute` (FeFluid chute). `FluidPort.Metal`: a rede a partir de uma porta de metal só anda por calhas e só junta portas de metal; canos e calhas nunca se ligam (`NetFrom`, `HasPortAt(..., metal)`, PipeArms).
+- Fundição (`feFoundry`, FeFluid smelter, FeMetalBuffer 200): derrete o que chega por esteira ou da mão (`fe_melt`) conforme os processos `melt` do fe_processes.xml, queimando o combustível dos slots (1 s de valor de combustível por s de derretimento). Saída de metal em qualquer lado de fora das 2 células de baixo que tenha calha.
+- Mesa de Moldagem (`feCaster`, FeFluid caster): um molde (item), processos `cast` dizem metal/litros/saída/tempo; esfria (2x com água ao lado), solta na esteira da frente ou "Pegar as peças". FluidState ganhou Mold/Made/Count (salvos no FerroEngrenagem_fluids.txt).
+- Modelos feMetalChute (braços FeArm_*.001: PipeArms procura também por prefixo) e feCaster (FeCastMetal, FeCastReady; CasterVisual).
+- Moldes: Cápsula, Ponta, Lingote, Chapa, Tubo, Engrenagem (Torno). Cápsula Bruta → Revestimento de Bala na Prensa de Munição (a Prensa já tinha a receita vanilla da cápsula: regra de duplicata).

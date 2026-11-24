@@ -51,9 +51,10 @@ MATS = {
     "feKin_Glass":   ((0.85, 0.88, 0.85), 0.10, 0.00),
     "feKin_Water":   ((0.10, 0.35, 0.85), 0.05, 0.00),
     "feKin_Gas":     ((0.92, 0.94, 0.96), 0.60, 0.00),
+    "feKin_Molten":  ((1.00, 0.38, 0.05), 0.35, 0.00),
 }
 MI = {name: i for i, name in enumerate(MATS)}
-WOOD, IRON, STEEL, RUST, BRASS, PAINT, IN, OUT, RED, GLASS, WATERC, GASC = (MI[n] for n in MATS)
+WOOD, IRON, STEEL, RUST, BRASS, PAINT, IN, OUT, RED, GLASS, WATERC, GASC, MOLTEN = (MI[n] for n in MATS)
 
 AXIS = {
     "Z": Matrix.Identity(4),
@@ -1125,6 +1126,87 @@ def model_fluid_bottler(col):
     return [to_object(base, "feFluidBottler_Base", bevel=0.003)]
 
 
+# ---------------------------------------------------------------- F8.1 metallurgy
+def chute_arm(bm, v):
+    """One arm of the Metal Chute from the core to the block face along v (Blender axis vector): an open U trough
+    with glowing metal in it; up / down it is a closed square duct (the metal falls through)."""
+    v = Vector(v)
+    mid = v * 0.31
+    L = 0.38
+    if v.z:
+        box(bm, (0.20, 0.20, L), (0, 0, C + mid.z), IRON)
+        box(bm, (0.24, 0.24, 0.04), (0, 0, C + v.z * 0.48), STEEL)
+        return
+    along_x = bool(v.x)
+    size = (L, 0.22, 0.03) if along_x else (0.22, L, 0.03)
+    box(bm, size, (mid.x, mid.y, C - 0.08), IRON)                                   # floor
+    for sgn in (-1, 1):
+        wall = (L, 0.03, 0.14) if along_x else (0.03, L, 0.14)
+        off = (0, sgn * 0.11, 0) if along_x else (sgn * 0.11, 0, 0)
+        box(bm, wall, (mid.x + off[0], mid.y + off[1], C - 0.02), IRON)            # walls
+    metal = (L, 0.17, 0.02) if along_x else (0.17, L, 0.02)
+    box(bm, metal, (mid.x, mid.y, C - 0.055), MOLTEN)                               # the metal
+    lip = (0.03, 0.26, 0.18) if along_x else (0.26, 0.03, 0.18)
+    box(bm, lip, (v.x * 0.485, v.y * 0.485, C - 0.03), STEEL)                       # flange at the face
+
+
+def model_metal_chute(col):
+    """Metal Chute (F8.1): a pipe for molten metal. Core basin at the block centre + six arms named like the pipe's
+    (FeArm_*, shown by PipeArms only toward chutes and metal ports)."""
+    core = bmesh.new()
+    box(core, (0.26, 0.26, 0.04), (0, 0, -0.08), IRON)
+    for sx in (-1, 1):
+        box(core, (0.03, 0.26, 0.14), (sx * 0.125, 0, -0.02), IRON)
+        box(core, (0.26, 0.03, 0.14), (0, sx * 0.125, -0.02), IRON)
+    box(core, (0.22, 0.22, 0.02), (0, 0, -0.055), MOLTEN)
+    root = bpy.data.objects.new("feMetalChute_Base", None)
+    out = [root, to_object(core, "feMetalChute_Core", location=(0, 0, C), bevel=0.003)]
+    names = {"FeArm_PX": (-1, 0, 0), "FeArm_NX": (1, 0, 0), "FeArm_PY": (0, 0, 1), "FeArm_NY": (0, 0, -1),
+             "FeArm_PZ": (0, -1, 0), "FeArm_NZ": (0, 1, 0)}
+    for n, v in names.items():
+        bm = bmesh.new()
+        chute_arm(bm, v)
+        out.append(to_object(bm, n, bevel=0.002))
+    return out
+
+
+def model_caster(col):
+    """Casting Table (F8.1): metal comes in at its back (Blender +Y) through a hopper at chute height; a mold frame
+    on the table; FeCastMetal (pivot at the bottom of the cavity, its height scaled by the fill) and FeCastReady (a
+    stack of casts, shown when there are casts waiting); a chute at its front (Blender -Y) to the belt (0.62)."""
+    base = bmesh.new()
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(base, (0.07, 0.07, 0.52), (sx * 0.38, sy * 0.36, 0.26), IRON)        # legs
+    box(base, (0.84, 0.80, 0.08), (0, 0, 0.56), STEEL)                              # table top
+    box(base, (0.84, 0.06, 0.04), (0, 0.36, 0.12), IRON)
+    box(base, (0.84, 0.06, 0.04), (0, -0.36, 0.12), IRON)
+    # mold frame (cavity 0.40 x 0.30, depth 0.08, bottom at 0.60)
+    box(base, (0.52, 0.06, 0.10), (0, 0.18, 0.65), RUST)
+    box(base, (0.52, 0.06, 0.10), (0, -0.18, 0.65), RUST)
+    box(base, (0.06, 0.30, 0.10), (0.23, 0, 0.65), RUST)
+    box(base, (0.06, 0.30, 0.10), (-0.23, 0, 0.65), RUST)
+    # hopper at the back, at chute height, with a spout over the mold
+    box(base, (0.30, 0.12, 0.04), (0, 0.44, C - 0.08 + 0.02), IRON)
+    for sx in (-1, 1):
+        box(base, (0.03, 0.12, 0.16), (sx * 0.135, 0.44, C), IRON)
+    box(base, (0.12, 0.30, 0.04), (0, 0.30, 0.74), IRON, Matrix.Rotation(-0.5, 4, "X"))   # spout
+    box(base, (0.10, 0.12, 0.30), (0, 0.44, 0.66), IRON)
+    box(base, (0.30, 0.03, 0.03), (0, 0.49, C + 0.06), IN)
+    # chute to the belt in front
+    box(base, (0.34, 0.24, 0.04), (0, -0.40, 0.60), STEEL)
+    box(base, (0.36, 0.03, 0.03), (0, -0.49, 0.64), OUT)
+    out = [to_object(base, "feCaster_Base", bevel=0.003)]
+    metal = bmesh.new()
+    box(metal, (0.40, 0.30, 0.08), (0, 0, 0.04), MOLTEN)                            # z 0..0.08 above its pivot
+    out.append(to_object(metal, "FeCastMetal", location=(0, 0, 0.60)))
+    ready = bmesh.new()
+    for k, (x, y) in enumerate(((-0.10, -0.06), (0.10, -0.06), (0.0, 0.06))):
+        box(ready, (0.16, 0.08, 0.05), (x, y, 0.025 + (0.05 if k == 2 else 0)), STEEL)
+    out.append(to_object(ready, "FeCastReady", location=(0.24, -0.22, 0.60)))
+    return out
+
+
 # ---------------------------------------------------------------- production machines (phase 6)
 # Footprints: 1x1 = x -0.5..0.5; 2 wide (MultiBlockDim 2,2,1) = x -1..1 (the game shifts an even width by half a
 # block, so the model is centred); 3 wide = x -1.5..1.5. Depth 1 (y -0.5..0.5), height up to the block count.
@@ -1540,6 +1622,8 @@ MODELS = {
     "feConveyorDown": model_conveyor_down,
     "feFluidFiller": model_fluid_filler,
     "feFluidBottler": model_fluid_bottler,
+    "feMetalChute": model_metal_chute,
+    "feCaster": model_caster,
     "feM_Foundry": model_m_foundry,
     "feM_Press": model_m_press,
     "feM_Lathe": model_m_lathe,

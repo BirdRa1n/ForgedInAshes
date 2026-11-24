@@ -258,6 +258,105 @@
 			<property name="CustomIconTint" value="8a5a30"/>
 			<property name="DescriptionKey" value="feGunStockDesc"/>
 		</item>
+		<!-- F8.1: molds for the Casting Table (which metal and what they make: Data/fe_processes.xml) -->
+		<item name="feMoldCasing">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceBulletCasing"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldCasingDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldBulletTip">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceBulletTip"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldBulletTipDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldIngot">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceForgedIron"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldIngotDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldPlate">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceForgedSteel"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldPlateDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldPipe">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMetalPipe"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldPipeDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldGear">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceMechanicalParts"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldGearDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feCasingRaw">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="2"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceBulletCasing"/>
+			<property name="CustomIconTint" value="c08040"/>
+			<property name="DescriptionKey" value="feCasingRawDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
 	</append>
 	<!-- END GENERATED by tools/gen_phase3.py -->
 </configs>

@@ -14,49 +14,57 @@
      Names in text="" are Portuguese (the site is in pt-BR). Numbers are proposals until the balancing talk. -->
 <processes>
 	<!-- fluids (D11, section 6.1) -->
-	<fluid name="molten_brass" text="Latão Fundido" planned="true"/>
-	<fluid name="molten_lead" text="Chumbo Fundido" planned="true"/>
-	<fluid name="molten_iron" text="Ferro Fundido" planned="true"/>
-	<fluid name="molten_steel" text="Aço Fundido" planned="true"/>
+	<fluid name="molten_brass" text="Latão Fundido"/>
+	<fluid name="molten_lead" text="Chumbo Fundido"/>
+	<fluid name="molten_iron" text="Ferro Fundido"/>
+	<fluid name="molten_steel" text="Aço Fundido"/>
 
 	<!-- machines: existing ones and the new blocks of PLANO_CRAFT.md section 3 -->
 	<machine name="feFoundry" text="Fundição"/>
 	<machine name="fePress" text="Prensa de Peças"/>
+	<machine name="feAmmoPress" text="Prensa de Munição"/>
 	<machine name="feLathe" text="Torno"/>
 	<machine name="feMixer" text="Misturadora"/>
 	<machine name="feAssembler" text="Montadora"/>
-	<machine name="feCaster" text="Mesa de Moldagem" planned="true"/>
-	<machine name="feMetalChute" text="Calha de Metal" planned="true"/>
+	<machine name="feCaster" text="Mesa de Moldagem"/>
+	<machine name="feMetalChute" text="Calha de Metal"/>
 	<machine name="feCrusher" text="Triturador" planned="true"/>
 	<machine name="feWasher" text="Lavadora" planned="true"/>
 	<machine name="feSteamDryer" text="Secador a Vapor" planned="true"/>
 	<machine name="feInlinePress" text="Prensa em Linha" planned="true"/>
 
 	<!-- new items -->
-	<item name="feMoldCasing" text="Molde de Cápsula" metals="molten_brass" planned="true"/>
-	<item name="feMoldBulletTip" text="Molde de Ponta" metals="molten_lead" planned="true"/>
-	<item name="feMoldLining" text="Revestimento de Argila" planned="true"/>
-	<item name="feCasingRaw" text="Cápsula Bruta" planned="true"/>
+	<item name="feMoldCasing" text="Molde de Cápsula" metals="molten_brass"/>
+	<item name="feMoldBulletTip" text="Molde de Ponta" metals="molten_lead"/>
+	<item name="feMoldIngot" text="Molde de Lingote" metals="molten_iron,molten_steel"/>
+	<item name="feMoldPlate" text="Molde de Chapa" metals="molten_iron"/>
+	<item name="feMoldPipe" text="Molde de Tubo" metals="molten_iron"/>
+	<item name="feMoldGear" text="Molde de Engrenagem" metals="molten_iron"/>
+	<item name="feCasingRaw" text="Cápsula Bruta"/>
 	<item name="feCoalDust" text="Pó de Carvão" planned="true"/>
 	<item name="feNitratePure" text="Salitre Purificado" planned="true"/>
 	<item name="feGunPowderWet" text="Pólvora Úmida" planned="true"/>
 
 	<!-- ammo 9mm (PLANO_CRAFT.md 4.1) -->
 	<process id="melt_brass" kind="melt" machine="feFoundry" input="resourceScrapBrass" count="1"
-	         fluid_out="molten_brass" out_liters="10" time="2" planned="true"
+	         fluid_out="molten_brass" out_liters="10" time="2"
 	         text="A Fundição derrete a sucata de latão que chega pela esteira."/>
 	<process id="cast_casing" kind="cast" machine="feCaster" mold="feMoldCasing" fluid_in="molten_brass" liters="25"
-	         output="feCasingRaw" out_count="5" time="6" planned="true"
-	         text="O latão desce pela Calha até a Mesa de Moldagem com o Molde de Cápsula revestido. Esfria em 6 s (3 s com água ao lado)."/>
+	         output="feCasingRaw" out_count="5" time="6"
+	         text="O latão desce pela Calha até a Mesa de Moldagem com o Molde de Cápsula. Esfria em 6 s (3 s com água ao lado)."/>
 	<process id="press_casing" kind="press" machine="feInlinePress" input="feCasingRaw" count="1"
 	         output="resourceBulletCasing" out_count="1" time="1" torque="64" planned="true"
 	         text="A Prensa em Linha, em cima da esteira, repuxa a cápsula bruta."/>
 	<process id="melt_lead" kind="melt" machine="feFoundry" input="resourceScrapLead" count="1"
-	         fluid_out="molten_lead" out_liters="10" time="2" planned="true"
+	         fluid_out="molten_lead" out_liters="10" time="2"
 	         text="A Fundição derrete a sucata de chumbo."/>
 	<process id="cast_tip" kind="cast" machine="feCaster" mold="feMoldBulletTip" fluid_in="molten_lead" liters="20"
-	         output="resourceBulletTip" out_count="10" time="5" planned="true"
+	         output="resourceBulletTip" out_count="10" time="5"
 	         text="O chumbo vai para uma Mesa de Moldagem com o Molde de Ponta."/>
+	<!-- F8.1: until the in-line press (F8.3) the Ammo Press makes the casing from its recipe list (recipes.xml) -->
+	<process id="press_casing_bench" kind="press" machine="feAmmoPress" input="feCasingRaw" count="1"
+	         output="resourceBulletCasing" out_count="1" time="1"
+	         text="Na Prensa de Munição (receita fixa ou à mão), a cápsula bruta vira o revestimento de bala."/>
 	<process id="crush_coal" kind="crush" machine="feCrusher" input="resourceCoal" count="1"
 	         output="feCoalDust" out_count="2" time="2" torque="128" planned="true"
 	         text="O Triturador mói o carvão."/>
@@ -74,6 +82,36 @@
 	         output="ammo9mmBulletBall" out_count="1" time="2.4" planned="true"
 	         text="A Montadora, ligada aos baús de cápsulas, pontas e pólvora, monta a bala com a receita escolhida."/>
 
+	<!-- F8.1 metallurgy: iron and steel -->
+	<process id="melt_scrap_iron" kind="melt" machine="feFoundry" input="resourceScrapIron" count="1"
+	         fluid_out="molten_iron" out_liters="2" time="1"
+	         text="A Fundição derrete a sucata de ferro (rende pouco)."/>
+	<process id="melt_iron" kind="melt" machine="feFoundry" input="resourceForgedIron" count="1"
+	         fluid_out="molten_iron" out_liters="10" time="2"
+	         text="A Fundição derrete o ferro forjado."/>
+	<process id="melt_steel" kind="melt" machine="feFoundry" input="resourceForgedSteel" count="1"
+	         fluid_out="molten_steel" out_liters="10" time="3"
+	         text="A Fundição derrete o aço forjado."/>
+	<process id="cast_ingot_iron" kind="cast" machine="feCaster" mold="feMoldIngot" fluid_in="molten_iron" liters="10"
+	         output="resourceForgedIron" out_count="1" time="3"
+	         text="O Molde de Lingote transforma o ferro fundido em ferro forjado."/>
+	<process id="cast_ingot_steel" kind="cast" machine="feCaster" mold="feMoldIngot" fluid_in="molten_steel" liters="10"
+	         output="resourceForgedSteel" out_count="1" time="4"
+	         text="O Molde de Lingote também aceita aço fundido."/>
+	<process id="cast_plate" kind="cast" machine="feCaster" mold="feMoldPlate" fluid_in="molten_iron" liters="20"
+	         output="feResourceIronPlate" out_count="1" time="4"
+	         text="O Molde de Chapa faz a chapa de ferro."/>
+	<process id="cast_pipe" kind="cast" machine="feCaster" mold="feMoldPipe" fluid_in="molten_iron" liters="30"
+	         output="resourceMetalPipe" out_count="1" time="5"
+	         text="O Molde de Tubo faz o cano de metal."/>
+	<process id="cast_gear" kind="cast" machine="feCaster" mold="feMoldGear" fluid_in="molten_iron" liters="15"
+	         output="feResourceGear" out_count="1" time="4"
+	         text="O Molde de Engrenagem faz a engrenagem bruta."/>
+
+	<chain product="resourceBulletCasing" text="Revestimento de Bala (cápsula)" phase="F8.1"
+	       steps="melt_brass,cast_casing,press_casing_bench"/>
+	<chain product="resourceBulletTip" text="Ponta de Bala" phase="F8.1" steps="melt_lead,cast_tip"/>
+	<chain product="feResourceIronPlate" text="Chapa de Ferro fundida" phase="F8.1" steps="melt_scrap_iron,cast_plate"/>
 	<chain product="ammo9mmBulletBall" text="Bala 9mm" phase="F8.3"
 	       steps="melt_brass,cast_casing,press_casing,melt_lead,cast_tip,crush_coal,wash_nitrate,mix_powder,dry_powder,assemble_9mm"/>
 </processes>
