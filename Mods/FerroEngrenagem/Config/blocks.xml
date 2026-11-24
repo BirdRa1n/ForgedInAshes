@@ -817,45 +817,6 @@
 			<property name="OnlySimpleRotations" value="true"/>
 			<property name="EconomicValue" value="150"/>
 		</block>
-		<!-- Industrial versions (Industrial.cs): electric, for full automation -->
-		<block name="feInductionFurnace">
-			<property name="Extends" value="feElecPump"/>
-			<property name="RequiredPower" value="250"/>
-			<property name="FeFluid" value="smelter"/>
-			<property name="FeMetalBuffer" value="500"/>
-			<property name="FeMeltSpeed" value="2"/>
-			<property name="FeHeatMax" value="20"/>
-			<property name="MultiBlockDim" value="2,2,1"/>
-			<property name="DisplayType" value="blockMulti"/>
-			<property name="StabilitySupport" value="true"/>
-			<property name="DescriptionKey" value="feInductionFurnaceDesc"/>
-			<property name="CustomIcon" value="forge"/>
-			<property name="CustomIconTint" value="80c0ff"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feInductionFurnacePrefab"/>
-			<property name="EconomicValue" value="1500"/>
-		</block>
-		<block name="feCasterElectric">
-			<property name="Extends" value="feElecPump"/>
-			<property name="RequiredPower" value="60"/>
-			<property name="FeFluid" value="caster"/>
-			<property name="FeFluidRate" value="600"/>
-			<property name="FeCoolFactor" value="4"/>
-			<property name="DescriptionKey" value="feCasterElectricDesc"/>
-			<property name="CustomIcon" value="workbench"/>
-			<property name="CustomIconTint" value="80c0ff"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterElectricPrefab"/>
-			<property name="EconomicValue" value="400"/>
-		</block>
-		<block name="feRetortKiln">
-			<property name="Extends" value="feElecPump"/>
-			<property name="RequiredPower" value="100"/>
-			<property name="FeFluid" value="processor"/>
-			<property name="DescriptionKey" value="feRetortKilnDesc"/>
-			<property name="CustomIcon" value="forge"/>
-			<property name="CustomIconTint" value="606060"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feRetortKilnPrefab"/>
-			<property name="EconomicValue" value="500"/>
-		</block>
 		<!-- Biodigester: rots meat and turns organic matter into Nitre Earth (gunpowder) or Organic Mash (biofuel) -->
 		<block name="feBiodigester">
 			<property name="Extends" value="fePipe"/>
@@ -945,6 +906,45 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCondenserPrefab"/>
 			<property name="EconomicValue" value="600"/>
 			<property name="SortOrder2" value="0005"/>
+		</block>
+		<!-- Industrial versions (Industrial.cs): electric, for full automation -->
+		<block name="feInductionFurnace">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="250"/>
+			<property name="FeFluid" value="smelter"/>
+			<property name="FeMetalBuffer" value="500"/>
+			<property name="FeMeltSpeed" value="2"/>
+			<property name="FeHeatMax" value="20"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="DescriptionKey" value="feInductionFurnaceDesc"/>
+			<property name="CustomIcon" value="forge"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feInductionFurnacePrefab"/>
+			<property name="EconomicValue" value="1500"/>
+		</block>
+		<block name="feCasterElectric">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluid" value="caster"/>
+			<property name="FeFluidRate" value="600"/>
+			<property name="FeCoolFactor" value="4"/>
+			<property name="DescriptionKey" value="feCasterElectricDesc"/>
+			<property name="CustomIcon" value="workbench"/>
+			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterElectricPrefab"/>
+			<property name="EconomicValue" value="400"/>
+		</block>
+		<block name="feRetortKiln">
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="100"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="DescriptionKey" value="feRetortKilnDesc"/>
+			<property name="CustomIcon" value="forge"/>
+			<property name="CustomIconTint" value="606060"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feRetortKilnPrefab"/>
+			<property name="EconomicValue" value="500"/>
 		</block>
 		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
 		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->

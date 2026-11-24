@@ -821,3 +821,7 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Blocos: feInductionFurnace (2x2, 250 W), feCasterElectric (60 W), feRetortKiln (100 W), feBiodigester (água). Itens: feNitreEarth, feBioMash, feBiofuel. Processos: ind_melt_*, retort_wood, nitre_flesh/crops, rot_meat, mash_*, wash_nitre_earth, distill_biofuel (receita da Refinaria).
 - Combustível alternativo nos motores: FeAltFuel/FeAltFuelPer (Motor a Gasolina: 3 Biocombustíveis = 1 unidade), só por esteira.
 - Exportação do Blender: o disco F: deu "Invalid argument"/"cannot save" intermitente ao gravar FBX/PNG; repetir a exportação até "EXPORTED".
+
+## 2026-11-24: crash ao carregar (log 09-01-31)
+- `blocks.xml` falhou: "Could not find Extends block feElecPump". feInductionFurnace/feCasterElectric/feRetortKiln estendiam feElecPump mas estavam antes dele no arquivo; o jogo resolve Extends na ordem do arquivo. Os erros seguintes (items/recipes/loot) eram cascata.
+- Corrigido movendo os três para depois do feCondenser. Nova regra no `check_phase3.py`: Extends (blocos e itens) deve apontar para algo definido antes (23 regras).

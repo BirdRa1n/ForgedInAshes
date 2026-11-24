@@ -130,6 +130,24 @@ def main() -> int:
         keys = {row["Key"] for row in csv.DictReader(fh)}
     rule("every mod block/item has a localized name", [n for n in mod_blocks + mod_items if n not in keys])
 
+    # 6. the game resolves Extends in file order: the base block must come before (2026-11-24 crash)
+    seen, ext_bad = set(), []
+    for b in blocks:
+        for p in b.findall("property"):
+            if p.get("name") == "Extends" and p.get("value") not in seen:
+                ext_bad.append(f"{b.get('name')} extends {p.get('value')} (defined later or missing)")
+        seen.add(b.get("name"))
+    rule("Extends refers to a block defined before it", ext_bad)
+
+    # 7. the same for items (Extends)
+    seen, ext_bad = set(), []
+    for it in items:
+        for p in it.findall("property"):
+            if p.get("name") == "Extends" and p.get("value") not in seen:
+                ext_bad.append(f"{it.get('name')} extends {p.get('value')}")
+        seen.add(it.get("name"))
+    rule("item Extends refers to an item defined before it", ext_bad)
+
     failed = 0
     for title, problems in results:
         ok = not problems
