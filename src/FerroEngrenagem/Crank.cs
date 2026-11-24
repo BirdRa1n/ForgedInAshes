@@ -59,7 +59,7 @@ namespace FerroEngrenagem
                     + FuelPerSecond + " fuel/s of cranking)");
         }
 
-        // Diagnostics while the hold-E crank is being tested in game (throttled).
+        // Rare-case diagnostics (e.g. a crank without a generator power item), throttled.
         static float nextDiag;
         internal static void Diag(string msg)
         {
@@ -79,9 +79,7 @@ namespace FerroEngrenagem
                                                         EntityAlive _entityFocusing)
         {
             bool crouch = _entityFocusing != null && _entityFocusing.IsCrouching;
-            bool result = crouch && base.HasBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
-            Diag("HasBlockActivationCommands crouch=" + crouch + " -> " + result);
-            return result;
+            return crouch && base.HasBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
         }
 
         // Crouch radial (user, 2026-11-22): only "open" (Flywheel slots) and "take". No on/off: cranking turns it
@@ -173,8 +171,14 @@ namespace FerroEngrenagem
 
         public void Drive(float degPerSecond)
         {
+            Drive(degPerSecond, 0.15f);
+        }
+
+        // hold: how long it keeps being driven without a new call (network spins arrive every ~0.2 s).
+        public void Drive(float degPerSecond, float hold)
+        {
             target = degPerSecond;
-            drivenUntil = Time.time + 0.15f;
+            drivenUntil = Mathf.Max(drivenUntil, Time.time + hold);
         }
 
         void Update()
@@ -221,7 +225,9 @@ namespace FerroEngrenagem
     {
         static GameObject host;
 
-        float pendingFuel;       // fractional generator fuel not yet added (kept between frames)
+        const float SendInterval = 0.2f;   // seconds of cranking batched per CrankNet.Turn call
+        float sendSeconds;                 // cranking time not yet sent
+        Vector3i lastPos;
         string prompt;
         LocalPlayerUI promptUi;
 
@@ -245,8 +251,6 @@ namespace FerroEngrenagem
             BlockFeCrank crank;
             Vector3i pos;
             if (!LookingAtCrank(player, out crank, out pos)) return;
-            BlockFeCrank.Diag("controller sees crank at " + pos + " held=" + IsActivateHeld(player)
-                              + " crouch=" + player.IsCrouching);
 
             LocalPlayerUI ui = player.PlayerUI;
             if (ui == null || ui.windowManager == null) return;
@@ -255,9 +259,13 @@ namespace FerroEngrenagem
 
             promptUi = ui;
             TileEntityPowerSource te = gm.World.GetTileEntity(pos) as TileEntityPowerSource;
-            PowerGenerator gen = te == null ? null : te.GetPowerItem() as PowerGenerator;
             if (te == null) return;
-            int pct = gen == null || gen.MaxFuel == 0 ? 0 : Mathf.Clamp(100 * gen.CurrentFuel / gen.MaxFuel, 0, 100);
+            // Fuel: on the server read the generator itself (TileEntityPowerSource.get_MaxFuel casts the raw
+            // PowerItem field to PowerGenerator and throws when it is null or not a generator, IL 3.4.0 b10);
+            // on a client the getters read the synced ClientData, which is safe.
+            int curFuel, maxFuel;
+            ReadFuel(te, out curFuel, out maxFuel);
+            int pct = maxFuel == 0 ? 0 : Mathf.Clamp(100 * curFuel / maxFuel, 0, 100);
             ItemStack battery = CrankSlots.ActiveBattery(te.ItemSlots);
             int batPct = battery == null || battery.itemValue.MaxUseTimes <= 0 ? -1
                 : Mathf.Clamp(100 * CrankSlots.Charge(battery) / battery.itemValue.MaxUseTimes, 0, 100);
@@ -275,16 +283,14 @@ namespace FerroEngrenagem
                 prompt = Text("feCrankTired", "Too tired to turn the Crank");
                 return;
             }
-            if (gen == null)
+            ConnectionManager cm = SingletonMonoBehaviour<ConnectionManager>.Instance;
+            if (cm != null && cm.IsServer && !(te.GetPowerItem() is PowerGenerator))
             {
-                // Either a multiplayer client (the PowerItem lives on the server) or a crank placed by an older
-                // build whose saved power item is not a generator (e.g. the battery-bank test version).
+                // A crank placed by an older build whose saved power item is not a generator.
                 PowerItem item = te.GetPowerItem();
                 BlockFeCrank.Diag("no PowerGenerator at " + pos + " (power item: "
                                   + (item == null ? "none" : item.GetType().Name) + ")");
-                prompt = item == null
-                    ? Text("feCrankClientOnly", "Turning the Crank works only for the host for now")
-                    : Text("feCrankReplace", "Old Crank: pick it up (crouch + E) and place it again");
+                prompt = Text("feCrankReplace", "Old Crank: pick it up (crouch + E) and place it again");
                 return;
             }
 
@@ -293,23 +299,14 @@ namespace FerroEngrenagem
             CrankSpinner spinner = CrankSpinner.At(pos);
             if (spinner != null) spinner.Drive(crank.SpinDegPerSecond);
 
-            pendingFuel += crank.FuelPerSecond * dt;
-            int add = Mathf.FloorToInt(pendingFuel);
-            if (add > 0)
+            // The energy is added on the server (CrankNet.cs): directly when this game is the server, by a
+            // net package from a multiplayer client. Batched every ~0.2 s.
+            if (pos != lastPos) { sendSeconds = 0f; lastPos = pos; }
+            sendSeconds += dt;
+            if (sendSeconds >= SendInterval)
             {
-                pendingFuel -= add;
-                int fuel = Mathf.Min(gen.MaxFuel, gen.CurrentFuel + add);
-                int overflow = gen.CurrentFuel + add - fuel;
-                gen.CurrentFuel = (ushort)fuel;
-                if (!gen.IsOn) gen.IsOn = true;   // vanilla auto-turns it off when the fuel runs out
-                // With the Battery Bank Module, what does not fit in the generator charges the battery
-                // (1 fuel = 1 charge unit; CrankSlots.cs feeds it back when the fuel runs out).
-                int room = CrankSlots.Room(battery);
-                if (overflow > 0 && room > 0)
-                {
-                    battery.itemValue.UseTimes -= Mathf.Min(overflow, room);
-                    te.SetModified();
-                }
+                CrankNet.Turn(pos, sendSeconds);
+                sendSeconds = 0f;
             }
             prompt = batPct < 0
                 ? string.Format(Text("feCrankTurning", "Turning the Crank... {0}% stored"), pct)
@@ -321,6 +318,23 @@ namespace FerroEngrenagem
         void LateUpdate()
         {
             if (prompt != null && promptUi != null) XUiC_InteractionPrompt.SetText(promptUi, prompt);
+        }
+
+        static void ReadFuel(TileEntityPowerSource te, out int cur, out int max)
+        {
+            cur = 0;
+            max = 0;
+            ConnectionManager cm = SingletonMonoBehaviour<ConnectionManager>.Instance;
+            if (cm != null && cm.IsServer)
+            {
+                PowerGenerator gen = te.GetPowerItem() as PowerGenerator;
+                if (gen == null) return;
+                cur = gen.CurrentFuel;
+                max = gen.MaxFuel;
+                return;
+            }
+            cur = te.CurrentFuel;
+            max = te.MaxFuel;
         }
 
         static bool LookingAtCrank(EntityPlayerLocal player, out BlockFeCrank crank, out Vector3i pos)
