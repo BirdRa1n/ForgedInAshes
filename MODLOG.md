@@ -955,3 +955,21 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   jogo só dá por loot/desmanche com rota nova, fluidos 2.0 (líquido/gás, bar, tanques que se juntam, 6 válvulas),
   passagem nas esteiras, 5 janelas XUi, cadeias por grupo, 49 blocos novos, fases F9.0–F9.11, decisões D12-1..11.
 - Só proposta: nada aplicado. Esperando o usuário.
+
+## 2026-11-24: esteira baixa (modelo nosso no lugar do modelo alto da D10)
+- Usuário prefere a nossa esteira (`Art/feConveyor`). `build_feConveyor.py` refeito: um modelo `feConveyor` com
+  todas as formas que o `BeltShape` usa (reta, curva L/R, divisão, batente, trilhos) + `feConveyorRamp` e
+  `feConveyorDown`, todos com a lona a 0,175 m (altura das portas das máquinas, sem calha).
+- `Belt.Top` 0,62 → 0,18. Tração nova: `FeBeltDrive_L/R` + `FeSpin_BeltDrive_L/R` (mancal na altura do eixo e
+  corrente), mostrados só no lado onde encosta um bloco de torque (`BeltShape.ApplyDrive`).
+- Removidos: `Art/feConveyor/hd` (HD do modelo antigo), `feConveyor_HD.mat`, `feConveyorCorner.fbx`.
+  `export_feKinetic.py` e `render_icons.py` (feKinetic) não exportam nem desenham mais as três esteiras e o ícone
+  da Esteira com Filtro; os ícones vêm de `Art/feConveyor/render_icons.py`. Colisor ignora a tração (FeBuild).
+- Pendente: bico do Funil e rampa do Duto ainda a 0,62 m; teste no jogo.
+- Teste do usuário: esteira não entrava em cima do Suporte (o colisor do berço invadia 9 cm a célula de cima;
+  `GameUtils.IsColliderWithinBlock` recusa). FeBuild corta colisores na face da célula quando passam < 0,15 m.
+- Pedidos seguintes: esteiras lado a lado viram uma esteira larga (`FeBeltFill_L/R`); Suporte de Esteira nosso
+  (`ConveyorStand.cs`, classe `FeConveyorStand`) com forma reta, curva L/R, divisão e berço de Duto, seguindo a esteira
+  de cima; pré-visualização real ao colocar (`BeltPreviewPatch`, Harmony em `RenderDisplacedCube.update0`, com
+  `Belt.SetVirtual` para a vizinhança enxergar a esteira que ainda não existe). `BeltShape` dividido em `BeltLook`
+  (cálculo) e `BeltParts` (peças). HD antigo do Suporte removido; `build_feHD.py` não gera mais o Suporte.

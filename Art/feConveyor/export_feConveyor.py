@@ -1,25 +1,29 @@
-"""Saves feConveyor.blend and exports feConveyor.fbx and feConveyorCorner.fbx.
+"""Saves Art/feConveyor/feConveyor.blend and exports one FBX per piece built by build_feConveyor.py:
+Art/feConveyor/feConveyor.fbx, Art/feConveyorRamp/feConveyorRamp.fbx, Art/feConveyorDown/feConveyorDown.fbx.
 
-Each FBX holds one piece with its root (<P>_Frame) at the origin; the corner is
-moved back from its display offset only for the export. FBX settings aim at Unity
-(Y up, -Z forward baked into the meshes); the import result is NOT verified yet.
+Each piece is moved back from its display offset for the export. Same FBX settings as every other model of the
+mod (Unity: Y up, -Z forward, transform baked); Art/UnityProject/Assets/Editor/FeBuild.cs picks them up.
 """
+import os
+
 import bpy
 
-DIR = r"E:\ModGameDev\ForgedInAshes\Art\feConveyor"
-bpy.ops.wm.save_as_mainfile(filepath=DIR + r"\feConveyor.blend")
+ART = r"E:\ModGameDev\ForgedInAshes\Art"
+PIECES = (("feConveyor", 0.0), ("feConveyorRamp", 1.6), ("feConveyorDown", 3.2), ("feConveyorStand", 4.8))
 
-for prefix in ("feConveyor", "feConveyorCorner"):
-    root = bpy.data.objects[prefix + "_Frame"]
-    saved = root.location.copy()
-    root.location = (0, 0, 0)
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ART, "feConveyor", "feConveyor.blend"))
+for name, dx in PIECES:
+    objs = list(bpy.data.collections[name].objects)
+    for o in objs:
+        o.location.x -= dx
     bpy.context.view_layer.update()
-    objs = [o for o in bpy.data.objects if o.name.startswith(prefix + "_")]
     for o in bpy.context.view_layer.objects:
         o.select_set(o in objs)
-    bpy.context.view_layer.objects.active = root
+    bpy.context.view_layer.objects.active = objs[0]
+    d = os.path.join(ART, name)
+    os.makedirs(d, exist_ok=True)
     bpy.ops.export_scene.fbx(
-        filepath=f"{DIR}\\{prefix}.fbx",
+        filepath=os.path.join(d, name + ".fbx"),
         use_selection=True,
         object_types={"MESH", "EMPTY"},
         apply_unit_scale=True,
@@ -32,6 +36,7 @@ for prefix in ("feConveyor", "feConveyorCorner"):
         add_leaf_bones=False,
         bake_anim=False,
     )
-    root.location = saved
-    print("exported", prefix, sorted(o.name for o in objs))
+    for o in objs:
+        o.location.x += dx
+    print("exported", name, sorted(o.name for o in objs))
 bpy.context.view_layer.update()

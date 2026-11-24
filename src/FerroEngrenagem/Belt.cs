@@ -53,10 +53,35 @@ namespace FerroEngrenagem
     {
         public const int Capacity = 4;
         public const float Gap = 0.25f;
-        public const float Top = 0.62f;    // height of the belt surface above the block's floor
+        // height of the belt surface above the block's floor. 0.18 (user, 2026-11-24: our low belt, Art/feConveyor):
+        // the belt runs at the bottom of the machines' port openings (0.14-0.36), so it plugs straight into them.
+        public const float Top = 0.18f;
         static readonly Vector3i Up = new Vector3i(0, 1, 0);
         static readonly Vector3i[] Flat = { new Vector3i(1, 0, 0), new Vector3i(-1, 0, 0), new Vector3i(0, 0, 1), new Vector3i(0, 0, -1) };
         static readonly Dictionary<Vector3i, int> turn = new Dictionary<Vector3i, int>();
+
+        // Placement preview (BeltPreviewPatch): a belt that is not there yet, seen by the neighbour logic as if it were.
+        // Main thread only, set and cleared around one BeltLook.Evaluate.
+        static bool hasVirtual;
+        static Vector3i virtualPos;
+        static BlockValue virtualBv;
+
+        public static void SetVirtual(Vector3i pos, BlockValue bv)
+        {
+            hasVirtual = true;
+            virtualPos = pos;
+            virtualBv = bv;
+        }
+
+        public static void ClearVirtual()
+        {
+            hasVirtual = false;
+        }
+
+        public static BlockValue Get(World world, Vector3i p)
+        {
+            return hasVirtual && p == virtualPos ? virtualBv : world.GetBlock(p);
+        }
 
         public static bool Is(Block b)
         {
@@ -85,7 +110,7 @@ namespace FerroEngrenagem
         public static bool FedFrom(World world, Vector3i pos, Vector3i d)
         {
             Vector3i c = Add(pos, d);
-            BlockValue cb = world.GetBlock(c);
+            BlockValue cb = Get(world, c);
             if (Is(cb.Block)) return Outputs(world, c, cb).Contains(pos);
             if (cb.Block is BlockFeFunnel)
             {
@@ -136,7 +161,7 @@ namespace FerroEngrenagem
         /// <summary>Does the belt at target take items travelling in (horizontal) direction dir?</summary>
         public static bool Accepts(World world, Vector3i target, Vector3i dir)
         {
-            BlockValue t = world.GetBlock(target);
+            BlockValue t = Get(world, target);
             if (!Is(t.Block)) return false;
             Vector3i tf = Front(t);
             if (IsRamp(t.Block)) return tf == dir;        // a ramp only from its back
@@ -146,7 +171,7 @@ namespace FerroEngrenagem
         /// <summary>Where an item coming in direction dir starts on the target: its start, or its middle (side).</summary>
         public static float EntryP(World world, Vector3i target, Vector3i dir)
         {
-            return Front(world.GetBlock(target)) == dir ? 0f : 0.5f;
+            return Front(Get(world, target)) == dir ? 0f : 0.5f;
         }
 
         /// <summary>The belts this belt gives items to (absolute positions).</summary>
@@ -166,7 +191,7 @@ namespace FerroEngrenagem
             {
                 // nothing in front at this level: a down ramp one block below in front, pointing the same way
                 Vector3i dc = Sub(fc, Up);
-                BlockValue db = world.GetBlock(dc);
+                BlockValue db = Get(world, dc);
                 if (IsDown(db.Block) && Front(db) == f) l.Add(dc);
             }
             if (IsDown(bv.Block)) return l;
@@ -174,7 +199,7 @@ namespace FerroEngrenagem
             foreach (Vector3i s in new Vector3i[] { left, Neg(left) })
             {
                 Vector3i c = Add(pos, s);
-                BlockValue cb = world.GetBlock(c);
+                BlockValue cb = Get(world, c);
                 // pointing away from us: a curve / split (a ramp beside is not one: it takes only from its back)
                 if (Is(cb.Block) && !IsRamp(cb.Block) && Front(cb) == s) l.Add(c);
             }
@@ -190,7 +215,7 @@ namespace FerroEngrenagem
             if (IsRamp(bv.Block)) return false;
             Vector3i f = Front(bv);
             Vector3i c = Add(pos, f);
-            BlockValue cb = world.GetBlock(c);
+            BlockValue cb = Get(world, c);
             if (BeltMachines.AnySide(cb.Block))                                               // any side
             {
                 cell = c;
@@ -222,7 +247,7 @@ namespace FerroEngrenagem
                 foreach (Vector3i c in new Vector3i[] { Add(pos, h), Add(Sub(pos, Up), h), Add(Add(pos, Up), h) })
                 {
                     if (l.Contains(c)) continue;
-                    BlockValue cb = world.GetBlock(c);
+                    BlockValue cb = Get(world, c);
                     if (!Is(cb.Block)) continue;
                     if (Outputs(world, c, cb).Contains(pos)) l.Add(c);
                 }
@@ -235,7 +260,7 @@ namespace FerroEngrenagem
         {
             Vector3i axis = Kinetic.Axis(bv);
             if (d != axis && d != Neg(axis)) return false;
-            return !Is(world.GetBlock(Add(pos, d)).Block);
+            return !Is(Get(world, Add(pos, d)).Block);
         }
 
         /// <summary>Blocks per second the belt at pos moves now (0 = stopped).</summary>
@@ -1145,81 +1170,178 @@ namespace FerroEngrenagem
         }
     }
 
-    // The belt's own model: rails open where another belt joins on that side, the end stop shows when nothing is in
-    // front, the curve guide on a turning side; the surface "FeBeltSlats" slides along the travel (up the slope on a
-    // ramp) by one slat spacing, over and over.
-    public class BeltShape : MonoBehaviour
+    // The belt's own model (Art/feConveyor): rails open where another belt joins on that side, the end stop shows
+    // when nothing is in front, the curve on a turning side, the junction table on a split; a belt running beside
+    // another one the same way fills the gap between them (one wide belt, user 2026-11-24); the drive shows on a side
+    // where a torque block touches the belt. The cleats ("FeBeltSlats", and the fill cleats) slide along the travel
+    // (up the slope on a ramp) by one cleat spacing, over and over.
+    //
+    // BeltLook.Evaluate works out the look of a belt at a position from its neighbours, and BeltParts shows it on a
+    // model: the placed belt (BeltShape, every 0.5 s) and the placement preview (BeltPreviewPatch, the ghost shows
+    // what the belt will look like once placed there).
+    public class BeltLook
     {
-        const float Spacing = 0.125f;
-        const float CurveStep = 10f;   // degrees between the slats of a curve
-        Vector3i pos;
-        Transform slats, bed, railL, railR, end, setL, setR, cslL, cslR, rollF, rollB, junction, posts, wedge;
-        Transform chute;                                                     // open belt: chute down into a port
-        Transform capF, capB, wallL, wallR, sideL, sideR, boot, ramp, hatch, frontSeg; // duct
-        bool closed;
-        Vector3 basePos, slide;
-        Quaternion baseL, baseR;
-        float speed, offset, angle, next;
-        int mode;   // 0 straight, 1 curve left, 2 curve right, 3 junction (2 or 3 outputs)
+        public bool Closed, Ramp;
+        public int Mode;                       // 0 straight, 1 curve left, 2 curve right, 3 junction (2 or 3 outputs)
+        public bool OpenL, OpenR, Front, Both, Chute;
+        public bool FillL, FillR;              // a belt beside running the same way: one wide belt
+        public bool DriveL, DriveR;            // a torque block on that side
+        public bool DuctOpenB, DuctTop;        // duct: fed from behind / a funnel on top
+        public int DuctFront;                  // duct front: 0 cap, 1 open, 2 machine (boot), 3 ramp up onto a belt
 
-        public static void Attach(BlockEntityData ebcd, Vector3i pos, Block block)
+        static bool TorqueAt(World world, Vector3i p)
         {
-            if (ebcd == null || ebcd.transform == null || GameManager.IsDedicatedServer) return;
-            BeltShape s = ebcd.transform.GetComponent<BeltShape>();
-            if (s == null) s = ebcd.transform.gameObject.AddComponent<BeltShape>();
-            Transform t = ebcd.transform;
-            s.pos = pos;
-            s.slats = Find(t, "FeBeltSlats");
-            s.bed = Find(t, "FeBeltBed");
-            s.railL = Find(t, "FeRail_L");
-            s.railR = Find(t, "FeRail_R");
-            s.end = Find(t, "FeBeltEnd");
-            s.setL = Find(t, "FeCurveSet_L");
-            s.setR = Find(t, "FeCurveSet_R");
-            s.cslL = Find(t, "FeCurveSlats_L");
-            s.cslR = Find(t, "FeCurveSlats_R");
-            s.rollF = Find(t, "FeSpin_BeltRollerFront");
-            s.rollB = Find(t, "FeSpin_BeltRollerBack");
-            s.junction = Find(t, "FeJunction");
-            s.posts = Find(t, "FeJunctionPosts");
-            s.wedge = Find(t, "FeJunctionWedge");
-            s.chute = Find(t, "FeBeltChute");
-            s.capF = Find(t, "FeDuctCapF");
-            s.capB = Find(t, "FeDuctCapB");
-            s.wallL = Find(t, "FeDuctWall_L");
-            s.wallR = Find(t, "FeDuctWall_R");
-            s.sideL = Find(t, "FeDuctSide_L");
-            s.sideR = Find(t, "FeDuctSide_R");
-            s.boot = Find(t, "FeDuctBoot");
-            s.ramp = Find(t, "FeDuctRamp");
-            s.hatch = Find(t, "FeDuctHatch");
-            s.frontSeg = Find(t, "FeDuctFront");
-            s.closed = Belt.IsClosed(block);
-            if (s.slats != null) s.basePos = s.slats.localPosition;
-            if (s.cslL != null) s.baseL = s.cslL.localRotation;
-            if (s.cslR != null) s.baseR = s.cslR.localRotation;
-            s.slide = Belt.IsDown(block) ? (Vector3.forward - Vector3.up)
-                    : Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
-            s.next = 0f;
-            if (s.closed) s.ApplyDuct(false, false, false, false, false, 0);
-            else if (!Belt.IsRamp(block)) s.Apply(0, false, false, false, false, false);
-            Show(s.chute, false);
+            KineticKind k = Kinetic.Kind(Belt.Get(world, p).Block);
+            return k != KineticKind.None && k != KineticKind.Conveyor;
         }
 
-        // Duct: open sides / ends where something joins, caps elsewhere; front: 0 nothing (cap), 1 duct or other
-        // belt end (open mouth), 2 machine (boot into its port), 3 open belt (ramp up to the belt surface)
-        void ApplyDuct(bool openL, bool openR, bool openB, bool top, bool unused, int front)
+        static Vector3i At(Vector3i p, Vector3i d)
         {
-            Show(wallL, !openL);
-            Show(sideL, openL);
-            Show(wallR, !openR);
-            Show(sideR, openR);
-            Show(capB, !openB);
-            Show(hatch, top);
-            Show(capF, front == 0);
-            Show(boot, front == 2);
-            Show(ramp, front == 3);
-            Show(frontSeg, front != 3);                                     // the ramp replaces the front part
+            return new Vector3i(p.x + d.x, p.y + d.y, p.z + d.z);
+        }
+
+        static bool SameWay(World world, Vector3i p, Vector3i front)
+        {
+            BlockValue b = Belt.Get(world, p);
+            return Belt.Is(b.Block) && !Belt.IsRamp(b.Block) && !Belt.IsClosed(b.Block) && Belt.Front(b) == front;
+        }
+
+        public static BeltLook Evaluate(World world, Vector3i pos, BlockValue bv)
+        {
+            BeltLook k = new BeltLook();
+            k.Closed = Belt.IsClosed(bv.Block);
+            k.Ramp = Belt.IsRamp(bv.Block);
+            Vector3i l = Belt.Left(bv), f = Belt.Front(bv);
+            Vector3i nl = new Vector3i(-l.x, -l.y, -l.z), nf = new Vector3i(-f.x, -f.y, -f.z);
+            Vector3i pl = At(pos, l), pr = At(pos, nl), pf = At(pos, f);
+            if (!k.Closed)
+            {
+                k.DriveL = TorqueAt(world, pl);
+                k.DriveR = TorqueAt(world, pr);
+            }
+            if (k.Ramp) return k;
+            List<Vector3i> exits = Belt.Exits(world, pos, bv);
+            if (k.Closed)
+            {
+                if (exits.Contains(pf))
+                {
+                    Block fb = Belt.Get(world, pf).Block;
+                    k.DuctFront = !Belt.Is(fb) ? 2 : (Belt.IsClosed(fb) ? 1 : 3);
+                }
+                else if (exits.Contains(new Vector3i(pf.x, pf.y - 1, pf.z))) k.DuctFront = 3;   // down ramp ahead
+                k.OpenL = exits.Contains(pl) || Belt.FedFrom(world, pos, l);
+                k.OpenR = exits.Contains(pr) || Belt.FedFrom(world, pos, nl);
+                k.DuctOpenB = Belt.FedFrom(world, pos, nf);
+                k.DuctTop = Belt.FedFrom(world, pos, new Vector3i(0, 1, 0));
+                return k;
+            }
+            List<Vector3i> links = Belt.Links(world, pos, bv);
+            bool outL = exits.Contains(pl), outR = exits.Contains(pr), outF = exits.Contains(pf);
+            k.Mode = exits.Count >= 2 ? 3 : outL ? 1 : outR ? 2 : 0;
+            k.OpenL = links.Contains(pl);
+            k.OpenR = links.Contains(pr);
+            k.Front = outF;
+            k.Both = outL && outR && !outF;
+            Block front = Belt.Get(world, pf).Block;
+            k.Chute = outF && (!Belt.Is(front) || Belt.IsClosed(front));
+            if (k.Mode == 0)
+            {
+                k.FillL = !k.OpenL && SameWay(world, pl, f);
+                k.FillR = !k.OpenR && SameWay(world, pr, f);
+            }
+            return k;
+        }
+    }
+
+    public class BeltParts
+    {
+        public Transform slats, bed, railL, railR, end, setL, setR, cslL, cslR, rollF, rollB, junction, posts, wedge;
+        public Transform chute;                                                    // open belt: chute into a port
+        public Transform driveL, driveR, hubL, hubR;                               // bearing stand + coupling
+        public Transform fillL, fillR, fillSlatsL, fillSlatsR;                     // wide belt (a belt beside)
+        public Transform capF, capB, wallL, wallR, sideL, sideR, boot, ramp, hatch, frontSeg; // duct
+
+        public static BeltParts Of(Transform t)
+        {
+            BeltParts p = new BeltParts();
+            p.slats = Find(t, "FeBeltSlats");
+            p.bed = Find(t, "FeBeltBed");
+            p.railL = Find(t, "FeRail_L");
+            p.railR = Find(t, "FeRail_R");
+            p.end = Find(t, "FeBeltEnd");
+            p.setL = Find(t, "FeCurveSet_L");
+            p.setR = Find(t, "FeCurveSet_R");
+            p.cslL = Find(t, "FeCurveSlats_L");
+            p.cslR = Find(t, "FeCurveSlats_R");
+            p.rollF = Find(t, "FeSpin_BeltRollerFront");
+            p.rollB = Find(t, "FeSpin_BeltRollerBack");
+            p.junction = Find(t, "FeJunction");
+            p.posts = Find(t, "FeJunctionPosts");
+            p.wedge = Find(t, "FeJunctionWedge");
+            p.chute = Find(t, "FeBeltChute");
+            p.driveL = Find(t, "FeBeltDrive_L");
+            p.driveR = Find(t, "FeBeltDrive_R");
+            p.hubL = Find(t, "FeSpin_BeltDrive_L");
+            p.hubR = Find(t, "FeSpin_BeltDrive_R");
+            p.fillL = Find(t, "FeBeltFill_L");
+            p.fillR = Find(t, "FeBeltFill_R");
+            p.fillSlatsL = Find(t, "FeBeltFillSlats_L");
+            p.fillSlatsR = Find(t, "FeBeltFillSlats_R");
+            p.capF = Find(t, "FeDuctCapF");
+            p.capB = Find(t, "FeDuctCapB");
+            p.wallL = Find(t, "FeDuctWall_L");
+            p.wallR = Find(t, "FeDuctWall_R");
+            p.sideL = Find(t, "FeDuctSide_L");
+            p.sideR = Find(t, "FeDuctSide_R");
+            p.boot = Find(t, "FeDuctBoot");
+            p.ramp = Find(t, "FeDuctRamp");
+            p.hatch = Find(t, "FeDuctHatch");
+            p.frontSeg = Find(t, "FeDuctFront");
+            return p;
+        }
+
+        public void Apply(BeltLook k)
+        {
+            Show(driveL, k.DriveL);
+            Show(hubL, k.DriveL);
+            Show(driveR, k.DriveR);
+            Show(hubR, k.DriveR);
+            if (k.Ramp) return;                                            // a ramp has no other looks
+            if (k.Closed)
+            {
+                Show(wallL, !k.OpenL);
+                Show(sideL, k.OpenL);
+                Show(wallR, !k.OpenR);
+                Show(sideR, k.OpenR);
+                Show(capB, !k.DuctOpenB);
+                Show(hatch, k.DuctTop);
+                Show(capF, k.DuctFront == 0);
+                Show(boot, k.DuctFront == 2);
+                Show(ramp, k.DuctFront == 3);
+                Show(frontSeg, k.DuctFront != 3);                         // the ramp replaces the front part
+                return;
+            }
+            int m = k.Mode;
+            bool straight = m == 0, junc = m == 3;
+            Show(slats, straight);
+            Show(bed, straight);
+            Show(rollF, straight);
+            Show(rollB, straight);
+            Show(setL, m == 1);
+            Show(cslL, m == 1);
+            Show(setR, m == 2);
+            Show(cslR, m == 2);
+            Show(junction, junc);
+            Show(posts, junc);
+            Show(wedge, junc && k.Both);
+            Show(railL, (straight || junc) && !k.OpenL && !k.FillL);
+            Show(railR, (straight || junc) && !k.OpenR && !k.FillR);
+            Show(end, (straight || junc) && !k.Front);
+            Show(fillL, k.FillL);
+            Show(fillSlatsL, k.FillL);
+            Show(fillR, k.FillR);
+            Show(fillSlatsR, k.FillR);
+            Show(chute, k.Chute);
         }
 
         static Transform Find(Transform t, string n)
@@ -1252,31 +1374,48 @@ namespace FerroEngrenagem
             return null;
         }
 
-        static void Show(Transform t, bool on)
+        public static void Show(Transform t, bool on)
         {
             if (t != null && t.gameObject.activeSelf != on) t.gameObject.SetActive(on);
         }
+    }
 
-        // openL / openR: another belt joins on that side; front: something takes the items in front;
-        // both: it splits to both sides only (the V divider)
-        void Apply(int m, bool openL, bool openR, bool front, bool both, bool unused)
+    public class BeltShape : MonoBehaviour
+    {
+        const float Spacing = 0.125f;
+        const float CurveStep = 10f;   // degrees between the slats of a curve
+        Vector3i pos;
+        BeltParts parts;
+        bool closed;
+        Vector3 basePos, baseFillL, baseFillR, slide;
+        Quaternion baseL, baseR;
+        float speed, offset, angle, next;
+        int mode;
+
+        /// <summary>The look shown now (the Conveyor Stand under it follows it).</summary>
+        public BeltLook Look { get; private set; }
+
+        public static void Attach(BlockEntityData ebcd, Vector3i pos, Block block)
         {
-            mode = m;
-            bool straight = m == 0, junc = m == 3;
-            Show(slats, straight);
-            Show(bed, straight);
-            Show(rollF, straight);
-            Show(rollB, straight);
-            Show(setL, m == 1);
-            Show(cslL, m == 1);
-            Show(setR, m == 2);
-            Show(cslR, m == 2);
-            Show(junction, junc);
-            Show(posts, junc);
-            Show(wedge, junc && both);
-            Show(railL, (straight || junc) && !openL);
-            Show(railR, (straight || junc) && !openR);
-            Show(end, (straight || junc) && !front);
+            if (ebcd == null || ebcd.transform == null || GameManager.IsDedicatedServer) return;
+            BeltShape s = ebcd.transform.GetComponent<BeltShape>();
+            if (s == null) s = ebcd.transform.gameObject.AddComponent<BeltShape>();
+            s.pos = pos;
+            s.parts = BeltParts.Of(ebcd.transform);
+            s.closed = Belt.IsClosed(block);
+            BeltParts p = s.parts;
+            if (p.slats != null) s.basePos = p.slats.localPosition;
+            if (p.fillSlatsL != null) s.baseFillL = p.fillSlatsL.localPosition;
+            if (p.fillSlatsR != null) s.baseFillR = p.fillSlatsR.localPosition;
+            if (p.cslL != null) s.baseL = p.cslL.localRotation;
+            if (p.cslR != null) s.baseR = p.cslR.localRotation;
+            s.slide = Belt.IsDown(block) ? (Vector3.forward - Vector3.up)
+                    : Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
+            s.next = 0f;
+            BeltLook start = new BeltLook();
+            start.Closed = s.closed;
+            start.Ramp = Belt.IsRamp(block);
+            p.Apply(start);
         }
 
         void Update()
@@ -1288,45 +1427,12 @@ namespace FerroEngrenagem
                 if (world != null)
                 {
                     BlockValue bv = world.GetBlock(pos);
+                    if (!Belt.Is(bv.Block)) return;
                     speed = Belt.Speed(world, pos, bv);
-                    if (closed)
-                    {
-                        Vector3i l = Belt.Left(bv), f = Belt.Front(bv);
-                        List<Vector3i> exits = Belt.Exits(world, pos, bv);
-                        Vector3i pf = new Vector3i(pos.x + f.x, pos.y, pos.z + f.z);
-                        int front = 0;
-                        if (exits.Contains(pf))
-                        {
-                            Block fb = world.GetBlock(pf).Block;
-                            front = !Belt.Is(fb) ? 2 : (Belt.IsClosed(fb) ? 1 : 3);
-                        }
-                        else if (exits.Contains(new Vector3i(pf.x, pf.y - 1, pf.z))) front = 3;   // down ramp ahead
-                        Vector3i nl = new Vector3i(-l.x, -l.y, -l.z), nf = new Vector3i(-f.x, -f.y, -f.z);
-                        Vector3i pl = new Vector3i(pos.x + l.x, pos.y, pos.z + l.z);
-                        Vector3i pr = new Vector3i(pos.x - l.x, pos.y, pos.z - l.z);
-                        bool openL = exits.Contains(pl) || Belt.FedFrom(world, pos, l);
-                        bool openR = exits.Contains(pr) || Belt.FedFrom(world, pos, nl);
-                        ApplyDuct(openL, openR, Belt.FedFrom(world, pos, nf), Belt.FedFrom(world, pos, new Vector3i(0, 1, 0)),
-                                  false, front);
-                    }
-                    else if (!Belt.IsRamp(bv.Block))
-                    {
-                        List<Vector3i> links = Belt.Links(world, pos, bv);
-                        List<Vector3i> exits = Belt.Exits(world, pos, bv);
-                        Vector3i l = Belt.Left(bv), f = Belt.Front(bv);
-                        Vector3i pl = new Vector3i(pos.x + l.x, pos.y, pos.z + l.z);
-                        Vector3i pr = new Vector3i(pos.x - l.x, pos.y, pos.z - l.z);
-                        Vector3i pf = new Vector3i(pos.x + f.x, pos.y, pos.z + f.z);
-                        bool outL = exits.Contains(pl), outR = exits.Contains(pr), outF = exits.Contains(pf);
-                        int m = 0;
-                        if (exits.Count >= 2) m = 3;
-                        else if (outL) m = 1;
-                        else if (outR) m = 2;
-                        Apply(m, links.Contains(pl), links.Contains(pr), outF, outL && outR && !outF, false);
-                        // into a machine or a duct: the belt ends in a chute down to the port height
-                        Block fb = world.GetBlock(pf).Block;
-                        Show(chute, outF && (!Belt.Is(fb) || Belt.IsClosed(fb)));
-                    }
+                    BeltLook k = BeltLook.Evaluate(world, pos, bv);
+                    parts.Apply(k);
+                    mode = k.Mode;
+                    Look = k;
                 }
             }
             if (speed <= 0f || closed) return;   // nothing moves you can see in a duct
@@ -1334,13 +1440,74 @@ namespace FerroEngrenagem
             {
                 // the slats turn around the back corner: radius 0.5 m, so speed / 0.5 rad/s
                 angle = Mathf.Repeat(angle + speed / 0.5f * Mathf.Rad2Deg * Time.deltaTime, CurveStep);
-                if (mode == 1 && cslL != null) cslL.localRotation = baseL * Quaternion.Euler(0f, -angle, 0f);
-                if (mode == 2 && cslR != null) cslR.localRotation = baseR * Quaternion.Euler(0f, angle, 0f);
+                if (mode == 1 && parts.cslL != null) parts.cslL.localRotation = baseL * Quaternion.Euler(0f, -angle, 0f);
+                if (mode == 2 && parts.cslR != null) parts.cslR.localRotation = baseR * Quaternion.Euler(0f, angle, 0f);
                 return;
             }
-            if (mode == 3 || slats == null) return;   // the junction table does not move
+            if (mode == 3 || parts.slats == null) return;   // the junction table does not move
             offset = Mathf.Repeat(offset + speed * Time.deltaTime, Spacing);
-            slats.localPosition = basePos + slide * offset;
+            parts.slats.localPosition = basePos + slide * offset;
+            if (parts.fillSlatsL != null) parts.fillSlatsL.localPosition = baseFillL + slide * offset;
+            if (parts.fillSlatsR != null) parts.fillSlatsR.localPosition = baseFillR + slide * offset;
+        }
+    }
+
+    // Placement preview (user, 2026-11-24: "quero uma pre-visualizacao real de como ficara"): the game's ghost
+    // (RenderDisplacedCube.transformBlockPreview, made by ItemClassBlock.CreateMesh from the block's prefab) shows
+    // every part of the model at once. While the player holds a belt (or a Conveyor Stand), work out the look it
+    // would have at the focused position, with the rotation in hand, as if it were already there (Belt.Virtual), and
+    // show only those parts on the ghost.
+    [HarmonyLib.HarmonyPatch(typeof(RenderDisplacedCube), "update0")]
+    public static class BeltPreviewPatch
+    {
+        static Transform lastPreview;
+        static BeltParts lastParts;
+        static StandParts lastStand;
+        static Vector3i lastPos;
+        static int lastRot = -1;
+        static float nextEval;
+
+        // the private fields come in by Harmony's ___name injection (C# 5: no ref-return field accessors)
+        static void Postfix(World _world, Transform ___transformBlockPreview, BlockValue ___focusTransformBlockValue,
+                            Vector3i ___focusTransformPosition)
+        {
+            try
+            {
+                Transform t = ___transformBlockPreview;
+                if (t == null || _world == null) return;
+                BlockValue bv = ___focusTransformBlockValue;
+                Block b = bv.Block;
+                bool belt = Belt.Is(b), stand = b is BlockFeConveyorStand;
+                if (!belt && !stand) return;
+                Vector3i pos = ___focusTransformPosition;
+                if (t != lastPreview)
+                {
+                    lastPreview = t;
+                    lastParts = belt ? BeltParts.Of(t) : null;
+                    lastStand = stand ? StandParts.Of(t) : null;
+                    lastRot = -1;
+                }
+                if (pos == lastPos && bv.rotation == lastRot && Time.time < nextEval) return;
+                lastPos = pos;
+                lastRot = bv.rotation;
+                nextEval = Time.time + 0.25f;
+                if (belt)
+                {
+                    BeltLook k;
+                    Belt.SetVirtual(pos, bv);
+                    try { k = BeltLook.Evaluate(_world, pos, bv); }
+                    finally { Belt.ClearVirtual(); }
+                    lastParts.Apply(k);
+                }
+                else
+                {
+                    lastStand.Apply(_world, new Vector3i(pos.x, pos.y + 1, pos.z), bv);
+                }
+            }
+            catch (System.Exception e)
+            {
+                if (FerroEngrenagemMod.Verbose) Log.Warning(FerroEngrenagemMod.LogPrefix + "belt preview: " + e.Message);
+            }
         }
     }
 

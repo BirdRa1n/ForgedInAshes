@@ -2438,7 +2438,7 @@ MODELS = {
     "feChemMixer": model_chem_mixer,
     "feWasher": model_washer,
     "feConveyorDuct": model_conveyor_duct,
-    "feConveyorStand": model_conveyor_stand,
+    # "feConveyorStand": our stand with the belt's shapes now (Art/feConveyor/build_feConveyor.py)
     "feFunnel": model_funnel,
     "feElectricMotor": model_electric_motor,
     "feElectricMotor2": model_electric_motor2,

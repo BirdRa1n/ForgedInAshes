@@ -104,7 +104,7 @@ public static class FeBuild
     static readonly System.Collections.Generic.Dictionary<string, Vector3> WireFallback =
         new System.Collections.Generic.Dictionary<string, Vector3> { { "feCoalGenerator", new Vector3(-0.42f, 1.30f, 0f) } };
 
-    static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem" };
+    static readonly string[] OptionalParts = { "FeBeltChute", "FeDuctBoot", "FeDuctRamp", "FeDuctHatch", "FeFunnelSpout", "FeSurface", "FeTrackItem", "FeBeltDrive", "FeSpin_BeltDrive" };
     static readonly string[] HdMaps = { "Albedo", "Normal", "MetallicSmoothness", "Emission" };
 
     static Material SaveMat(Material m, string name)
@@ -367,9 +367,21 @@ public static class FeBuild
             {
                 var bounds = rends[0].bounds;
                 foreach (var r in rends.Skip(1)) bounds.Encapsulate(r.bounds);
+                // Keep the collider inside the block's own cells: placing a block runs
+                // GameUtils.IsColliderWithinBlock (an OverlapBox on the TerrainCollision layer) on the target
+                // cell, so a few cm sticking out (the Conveyor Stand's cradle, 0.09 up; a ramp's ends) forbid
+                // placing anything there. Overhangs under 0.15 past a cell face (faces at k + 0.5 in root space)
+                // are cut at that face, on every axis; real multi-cell models are kept.
+                Vector3 lo = root.transform.InverseTransformPoint(bounds.min);
+                Vector3 hi = root.transform.InverseTransformPoint(bounds.max);
+                for (int a = 0; a < 3; a++)
+                {
+                    hi[a] = Mathf.Min(hi[a], Mathf.Ceil(hi[a] - 0.65f) + 0.5f);
+                    lo[a] = Mathf.Max(lo[a], Mathf.Floor(lo[a] + 0.65f) - 0.5f);
+                }
                 var col = root.AddComponent<BoxCollider>();
-                col.center = root.transform.InverseTransformPoint(bounds.center);
-                col.size = bounds.size;
+                col.center = (lo + hi) / 2f;
+                col.size = hi - lo;
                 Debug.Log($"[FE] {b}: collider center {col.center} size {col.size}");
             }
             AddParticles(root.transform);   // after the collider: particle renderers must not size it

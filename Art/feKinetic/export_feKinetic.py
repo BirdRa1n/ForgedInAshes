@@ -8,11 +8,12 @@ import bpy
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
     r"F:\Github\FerroEngrenagem\Art"
+# feConveyor, feConveyorRamp, feConveyorDown: our low belt, built by Art/feConveyor/build_feConveyor.py
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
          "feClutch", "feTorqueGauge", "feWaterWheel",
          "feSteamEngine", "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",
          "feElectricMotor", "feElectricMotor2", "feElectricMotor3", "feDynamo",
-         "feDynamo2", "feBus", "feConveyor", "feConveyorRamp", "feFunnel", "feConveyorDown", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
+         "feDynamo2", "feBus", "feFunnel", "feFluidFiller", "feFluidBottler", "feMetalChute", "feCaster", "feCrusher", "feChemMixer", "feWasher", "feSteamDryer", "feInductionFurnace", "feCasterElectric", "feRetortKiln", "feBiodigester", "feBiodigesterBig",
          "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"]
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ART, "feKinetic", "feKinetic.blend"))

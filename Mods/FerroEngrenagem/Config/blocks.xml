@@ -569,11 +569,13 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorDuctPrefab"/>
 			<property name="SortOrder2" value="0036"/>
 		</block>
-		<!-- 2026-11-24: Conveyor Stand: a trestle (legs and a cradle) to carry a Conveyor Duct one block up. No logic. -->
+		<!-- 2026-11-24: Conveyor Stand: a trestle that carries a belt or a Conveyor Duct one block up. Its shape follows the
+		     belt on top (straight, curve, junction, duct cradle): src/FerroEngrenagem/ConveyorStand.cs. No logic. -->
 		<block name="feConveyorStand">
 			<property name="CustomIcon" value="feConveyorStand"/>
 			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="FerroEngrenagem.FeConveyorStand, FerroEngrenagem"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feConveyorStandDesc"/>
 			<property name="Shape" value="ModelEntity"/>

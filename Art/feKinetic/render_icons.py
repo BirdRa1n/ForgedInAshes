@@ -31,6 +31,10 @@ BLOCK_COLS.update({
     "feRobotics": "feM_Robotics",
 })
 
+# our low belt renders its own icons (Art/feConveyor/render_icons.py), filter conveyor included
+for _n in ("feConveyor", "feConveyorRamp", "feConveyorDown"):
+    BLOCK_COLS.pop(_n, None)
+
 # ---------------------------------------------------------------- extra materials (icons only)
 EXTRA = {
     "feIco_Char":    ((0.035, 0.035, 0.04), 0.95, 0.0),
@@ -428,7 +432,7 @@ for name, col_name in BLOCK_COLS.items():
     ICONS.append(name)
 
 # the filter conveyor: the conveyor with a blue filter frame on top
-col = bpy.data.collections.get("feConveyor")
+col = None   # feConveyorFilter: Art/feConveyor/render_icons.py
 if col:
     bm = bmesh.new()
     for x in (-0.3, 0.3):
