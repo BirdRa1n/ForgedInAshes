@@ -149,6 +149,27 @@
 			<ingredient name="fePipe" count="2"/>
 			<ingredient name="feResourceGear" count="2"/>
 		</recipe>
+		<!-- F8.2 chemistry machines -->
+		<recipe name="feCrusher" count="1" craft_area="feAssembler" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceGear" count="6"/>
+			<ingredient name="feResourceIronPlate" count="8"/>
+			<ingredient name="feResourceIronShaft" count="2"/>
+		</recipe>
+		<recipe name="feChemMixer" count="1" craft_area="feAssembler" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="8"/>
+			<ingredient name="feResourceGear" count="4"/>
+			<ingredient name="fePipe" count="2"/>
+		</recipe>
+		<recipe name="feWasher" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="6"/>
+			<ingredient name="fePipe" count="2"/>
+			<ingredient name="resourceMetalPipe" count="2"/>
+		</recipe>
+		<recipe name="feSteamDryer" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
+			<ingredient name="feResourceIronPlate" count="10"/>
+			<ingredient name="fePipe" count="4"/>
+			<ingredient name="resourceMetalPipe" count="2"/>
+		</recipe>
 		<!-- F8.1 metallurgy (PLANO_CRAFT.md) -->
 		<recipe name="feMetalChute" count="4" craft_area="feFoundry" craft_time="20" always_unlocked="true">
 			<ingredient name="resourceForgedIron" count="2"/>

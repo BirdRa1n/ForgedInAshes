@@ -36,7 +36,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster }
+    public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor }
 
     public class FluidPort
     {
@@ -59,6 +59,7 @@ namespace FerroEngrenagem
         public string Mold = "";   // F8.1 Casting Table: the mold in it
         public string Made = "";   // F8.1 Casting Table: the item its finished casts are
         public int Count;          // F8.1 Casting Table: finished casts waiting to leave
+        public string Stock = "";  // F8.2 process machine: ingredients inside ("item=n,...")
     }
 
     public class FluidNet
@@ -160,6 +161,7 @@ namespace FerroEngrenagem
                     case "chute": k = FluidKind.Chute; break;
                     case "smelter": k = FluidKind.Smelter; break;
                     case "caster": k = FluidKind.Caster; break;
+                    case "processor": k = FluidKind.Processor; break;
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -247,6 +249,14 @@ namespace FerroEngrenagem
                         l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false,
                                               Fluid = cs.Amount > 0.01f ? cs.Fluid : "", Metal = true,
                                               Accepts = MetalWorks.MoldMetals(cs.Mold) });
+                    }
+                    break;
+                case FluidKind.Processor:
+                    // F8.2: the fluid its processes use comes in at its back
+                    {
+                        string fin = ProcessMachine.FluidIn(bv.Block);
+                        if (fin != null)
+                            l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = fin });
                     }
                     break;
                 case FluidKind.SteamEngine:
@@ -440,6 +450,7 @@ namespace FerroEngrenagem
                         s.Made = t[7];
                         s.Count = int.Parse(t[8]);
                     }
+                    if (t.Length >= 10) s.Stock = t[9];
                     states[p] = s;
                 }
             }
@@ -461,7 +472,8 @@ namespace FerroEngrenagem
                     sb.Append(p.x).Append(';').Append(p.y).Append(';').Append(p.z).Append(';').Append(s.Fluid).Append(';')
                       .Append(s.Amount.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
                       .Append(s.Steam.ToString("0.###", CultureInfo.InvariantCulture)).Append(';')
-                      .Append(s.Mold).Append(';').Append(s.Made).Append(';').Append(s.Count).Append('\n');
+                      .Append(s.Mold).Append(';').Append(s.Made).Append(';').Append(s.Count).Append(';')
+                      .Append(s.Stock).Append('\n');
                 }
                 File.WriteAllText(loadedFor, sb.ToString());
                 dirty = false;
@@ -574,6 +586,9 @@ namespace FerroEngrenagem
                             break;
                         case FluidKind.Caster:
                             demand[port] = MetalWorks.CasterDemand(world, p, bv, s, dt);
+                            break;
+                        case FluidKind.Processor:
+                            demand[port] = ProcessMachine.Demand(world, p, bv, s);
                             break;
                         case FluidKind.MechPump:
                         case FluidKind.ElecPump:
@@ -769,7 +784,7 @@ namespace FerroEngrenagem
             FluidState s = FluidStore.Get(d.Owner);
             FluidKind k = Fluids.Kind(bv.Block);
             if (k == FluidKind.SteamEngine) { s.Amount += amount; s.Fluid = Fluids.Water; }
-            else if (k == FluidKind.Caster)
+            else if (k == FluidKind.Caster || k == FluidKind.Processor)
             {
                 if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
             }
@@ -834,6 +849,12 @@ namespace FerroEngrenagem
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_pour", "loot_sort", true, false, null), take };
             if (k == FluidKind.Bottler)
                 return new BlockActivationCommand[] { new BlockActivationCommand("fe_bottle", "loot_sort", true, false, null), take };
+            if (k == FluidKind.Processor)
+                return new BlockActivationCommand[]
+                {
+                    new BlockActivationCommand("fe_put", "loot_sort", true, false, null),
+                    new BlockActivationCommand("fe_cast_take", "hand", true, false, null), take
+                };
             if (k == FluidKind.Caster)
                 return new BlockActivationCommand[]
                 {
@@ -873,6 +894,11 @@ namespace FerroEngrenagem
                     : string.Format(Kinetic.Text("feBottled", "Took {0}x {1}"), st.count, st.itemValue.ItemClass.GetLocalizedItemName()), false, false, 0f);
                 return true;
             }
+            if (Fluids.Kind(this) == FluidKind.Processor && (_commandName == "fe_put" || _commandName == "fe_cast_take") && w != null)
+            {
+                GameManager.ShowTooltip(_player, ProcessMachine.Activate(w, _blockPos, _commandName, _player), false, false, 0f);
+                return true;
+            }
             if ((_commandName == "fe_mold" || _commandName == "fe_cast_take") && w != null)
             {
                 GameManager.ShowTooltip(_player, MetalWorks.Activate(w, _blockPos, _commandName, _player), false, false, 0f);
@@ -890,6 +916,7 @@ namespace FerroEngrenagem
             FluidKind k = Fluids.Kind(this);
             string hint = k == FluidKind.Filler ? Kinetic.Text("feHintPour", "{0} pour the item in your hand - hold {0}: take")
                         : k == FluidKind.Bottler ? Kinetic.Text("feHintBottle", "{0} take the bottled items - hold {0}: take")
+                        : k == FluidKind.Processor ? Kinetic.Text("feHintProc", "{0} put the item in your hand - hold {0}: take the products or take")
                         : k == FluidKind.Caster ? Kinetic.Text("feHintCaster", "{0} take the casts - hold {0}: change the mold (the one in your hand) or take")
                         : Kinetic.Text("feHintTake", "Hold {0} to take");
             return KineticLookController.Escape(FluidText.Describe(_blockPos, _blockValue, true)) + "\n" + hint;
@@ -935,6 +962,8 @@ namespace FerroEngrenagem
                 }
                 case FluidKind.Caster:
                     return (name + "\n" + MetalWorks.DescribeCaster(world, owner, bv, s)).Trim();
+                case FluidKind.Processor:
+                    return (name + "\n" + ProcessMachine.Describe(world, owner, bv, s)).Trim();
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
                         Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),
@@ -1215,6 +1244,11 @@ namespace FerroEngrenagem
                 if (k == FluidKind.Caster)
                 {
                     MetalWorks.TickCaster(world, p, bv, FluidStore.Get(p));
+                    continue;
+                }
+                if (k == FluidKind.Processor)
+                {
+                    ProcessMachine.Tick(world, p, bv, FluidStore.Get(p), 0.5f);
                     continue;
                 }
                 if (k == FluidKind.Bottler)

@@ -28,9 +28,10 @@
 	<machine name="feAssembler" text="Montadora"/>
 	<machine name="feCaster" text="Mesa de Moldagem"/>
 	<machine name="feMetalChute" text="Calha de Metal"/>
-	<machine name="feCrusher" text="Triturador" planned="true"/>
-	<machine name="feWasher" text="Lavadora" planned="true"/>
-	<machine name="feSteamDryer" text="Secador a Vapor" planned="true"/>
+	<machine name="feCrusher" text="Triturador"/>
+	<machine name="feWasher" text="Lavadora"/>
+	<machine name="feSteamDryer" text="Secador a Vapor"/>
+	<machine name="feChemMixer" text="Misturador Químico"/>
 	<machine name="feInlinePress" text="Prensa em Linha" planned="true"/>
 
 	<!-- new items -->
@@ -41,9 +42,9 @@
 	<item name="feMoldPipe" text="Molde de Tubo" metals="molten_iron"/>
 	<item name="feMoldGear" text="Molde de Engrenagem" metals="molten_iron"/>
 	<item name="feCasingRaw" text="Cápsula Bruta"/>
-	<item name="feCoalDust" text="Pó de Carvão" planned="true"/>
-	<item name="feNitratePure" text="Salitre Purificado" planned="true"/>
-	<item name="feGunPowderWet" text="Pólvora Úmida" planned="true"/>
+	<item name="feCoalDust" text="Pó de Carvão"/>
+	<item name="feNitratePure" text="Salitre Purificado"/>
+	<item name="feGunPowderWet" text="Pólvora Úmida"/>
 
 	<!-- ammo 9mm (PLANO_CRAFT.md 4.1) -->
 	<process id="melt_brass" kind="melt" machine="feFoundry" input="resourceScrapBrass" count="1"
@@ -66,16 +67,16 @@
 	         output="resourceBulletCasing" out_count="1" time="1"
 	         text="Na Prensa de Munição (receita fixa ou à mão), a cápsula bruta vira o revestimento de bala."/>
 	<process id="crush_coal" kind="crush" machine="feCrusher" input="resourceCoal" count="1"
-	         output="feCoalDust" out_count="2" time="2" torque="128" planned="true"
+	         output="feCoalDust" out_count="2" time="2" torque="128"
 	         text="O Triturador mói o carvão."/>
 	<process id="wash_nitrate" kind="wash" machine="feWasher" input="resourcePotassiumNitratePowder" count="2"
-	         fluid_in="water" liters="5" output="feNitratePure" out_count="2" time="3" planned="true"
+	         fluid_in="water" liters="5" output="feNitratePure" out_count="2" time="3"
 	         text="A Lavadora limpa o salitre com água."/>
-	<process id="mix_powder" kind="mix" machine="feMixer" input="feCoalDust,feNitratePure" count="1,2"
-	         fluid_in="water" liters="1" output="feGunPowderWet" out_count="3" time="4" torque="64" planned="true"
-	         text="A Misturadora junta o pó de carvão, o salitre e um pouco de água."/>
+	<process id="mix_powder" kind="mix" machine="feChemMixer" input="feCoalDust,feNitratePure" count="1,2"
+	         fluid_in="water" liters="1" output="feGunPowderWet" out_count="3" time="4" torque="64"
+	         text="O Misturador Químico junta o pó de carvão, o salitre e um pouco de água."/>
 	<process id="dry_powder" kind="dry" machine="feSteamDryer" input="feGunPowderWet" count="1"
-	         fluid_in="steam" liters="2" output="resourceGunPowder" out_count="1" time="3" planned="true"
+	         fluid_in="steam" liters="2" output="resourceGunPowder" out_count="1" time="3"
 	         text="O Secador a Vapor seca a pólvora."/>
 	<process id="assemble_9mm" kind="assemble" machine="feAssembler"
 	         input="resourceBulletCasing,resourceBulletTip,resourceGunPowder" count="1,1,1"
@@ -108,6 +109,12 @@
 	         output="feResourceGear" out_count="1" time="4"
 	         text="O Molde de Engrenagem faz a engrenagem bruta."/>
 
+	<!-- F8.2 chemistry -->
+	<process id="crush_stone" kind="crush" machine="feCrusher" input="resourceRockSmall" count="2"
+	         output="resourceCrushedSand" out_count="1" time="2" torque="128"
+	         text="O Triturador também mói pedra em areia."/>
+
+	<chain product="resourceGunPowder" text="Pólvora" phase="F8.2" steps="crush_coal,wash_nitrate,mix_powder,dry_powder"/>
 	<chain product="resourceBulletCasing" text="Revestimento de Bala (cápsula)" phase="F8.1"
 	       steps="melt_brass,cast_casing,press_casing_bench"/>
 	<chain product="resourceBulletTip" text="Ponta de Bala" phase="F8.1" steps="melt_lead,cast_tip"/>

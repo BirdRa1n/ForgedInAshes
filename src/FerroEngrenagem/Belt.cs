@@ -717,7 +717,7 @@ namespace FerroEngrenagem
         {
             if (b == null) return false;
             if (IsStorage(b)) return true;
-            if (Fluids.Kind(b) == FluidKind.Filler) return true;
+            if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor) return true;
             if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
             return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
         }
@@ -863,6 +863,16 @@ namespace FerroEngrenagem
                 int before = st.count;
                 FluidDevices.Pour(world, parent, st);
                 if (st.count < before) { BeltStore.MarkDirty(); Note(world, parent, "poured " + (before - st.count) + " items"); }
+                return st.count <= 0;
+            }
+            if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Processor)
+            {
+                int ptook = ProcessMachine.Insert(world, parent, st);
+                string iname = st.itemValue.ItemClass == null ? "?" : st.itemValue.ItemClass.GetItemName();
+                if (ptook <= 0) { Note(world, parent, iname + " not taken (full or not used here), it waits"); return false; }
+                st.count -= ptook;
+                BeltStore.MarkDirty();
+                Note(world, parent, "took " + ptook + "x " + iname);
                 return st.count <= 0;
             }
             TileEntityWorkstation ws = world.GetTileEntity(parent) as TileEntityWorkstation;

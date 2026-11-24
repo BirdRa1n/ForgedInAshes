@@ -242,7 +242,7 @@ script (fase F8.0) lista receita por receita com o modelo e os produtos intermed
 |---|---|---|
 | **F8.0** [feito, falta teste] | Arquivo de processos, validador, planilha de cobertura (`tools/craft_matrix.py` → CSV com as ~600 receitas e o modelo de cada uma), painel de receita (N10) | Painel abre e escolhe receita; validador passa |
 | **F8.1** [feito, falta teste] | Metalurgia: Fundição como fonte de fluido, Calha, Mesa de Moldagem, moldes de Cápsula, Ponta, Lingote, Chapa, Tubo e Engrenagem | Latão vira cápsula bruta; molde errado recusa |
-| **F8.2** | Química: Triturador, Lavadora, Secador, uso da Misturadora | Carvão + salitre viram pólvora sem a mão do jogador |
+| **F8.2** [feito, falta teste] | Química: Triturador, Lavadora, Secador, uso da Misturadora | Carvão + salitre viram pólvora sem a mão do jogador |
 | **F8.3** | Montadora com baús ligados + Prensa em Linha | **Bala 9mm** sai sozinha da linha completa (exemplo 4.1) |
 | **F8.4** | Toda a munição (9mm, .44, 7.62, cartucho, flecha, foguete) | Cada uma com a sua linha |
 | **F8.5** | Armas e ferramentas | Pistola e Picareta de Aço |

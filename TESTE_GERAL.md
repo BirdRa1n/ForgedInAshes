@@ -128,3 +128,19 @@ criativo: Calha de Metal, Mesa de Moldagem e os moldes (Cápsula, Ponta, Lingote
 6. **Cápsula:** a Cápsula Bruta vira Revestimento de Bala na Prensa de Munição.
 7. **Ferro:** Ferro Forjado derretido + Molde de Chapa = Chapa de Ferro; Molde de Lingote aceita ferro e aço.
 8. Saia e entre: o metal na Fundição, o molde e as peças prontas continuam.
+
+## 9. Química da pólvora (F8.2)
+
+Pegue no criativo: Triturador, Lavadora, Misturador Químico, Secador a Vapor; Carvão e Salitre.
+
+1. **Triturador:**
+   - Ligue um eixo com torque na esquerda ou na direita dele (gasta 128 UT). Os rolos giram.
+   - Com Carvão na mão, segure E e escolha "Colocar o item da mão" (ou leve por esteira de qualquer lado).
+   - Sai Pó de Carvão na esteira da frente (ou "Pegar os produtos"). Sem torque: "Sem torque no eixo".
+   - Pedras pequenas viram Areia.
+2. **Lavadora:** água por trás (cano de uma bomba ou Caixa d'Água). Salitre vira Salitre Purificado.
+3. **Misturador Químico:** eixo na esquerda ou direita (64 UT), água por trás. 1 Pó de Carvão + 2 Salitre Purificado + 1 L de água = 3 Pólvoras Úmidas. O agitador gira.
+4. **Secador a Vapor:** vapor por trás (do Motor a Vapor). Pólvora Úmida vira Pólvora.
+5. **Linha completa:** esteiras ligando Triturador e Lavadora → Misturador → Secador → Prensa de Munição. Com a Mesa de Moldagem fazendo cápsulas e pontas, a Bala 9mm sai na Prensa de Munição com "Escolher produção".
+6. A leitura de cada máquina mostra o que ela faz, o que tem dentro, a água/vapor e o progresso.
+7. Saia e entre: o que estava dentro das máquinas continua.

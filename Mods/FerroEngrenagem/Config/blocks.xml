@@ -767,6 +767,56 @@
 			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMetalChutePrefab"/>
 			<property name="EconomicValue" value="20"/>
 		</block>
+		<!-- F8.2 (PLANO_CRAFT.md): process machines (ProcessMachine.cs; what they do: Data/fe_processes.xml) -->
+		<block name="feCrusher">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feCrusherDesc"/>
+			<property name="CustomIcon" value="toolAnvil"/>
+			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrusherPrefab"/>
+			<property name="EconomicValue" value="200"/>
+		</block>
+		<block name="feChemMixer">
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feChemMixerDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="c0ff80"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feChemMixerPrefab"/>
+			<property name="EconomicValue" value="200"/>
+		</block>
+		<block name="feWasher">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="DescriptionKey" value="feWasherDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="60a0ff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWasherPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<block name="feSteamDryer">
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="DescriptionKey" value="feSteamDryerDesc"/>
+			<property name="CustomIcon" value="cntBarrelAcidSingle00"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSteamDryerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
 		<block name="feCaster">
 			<property name="Extends" value="fePipe"/>
 			<property name="FeFluid" value="caster"/>

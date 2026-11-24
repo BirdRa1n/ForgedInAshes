@@ -149,6 +149,12 @@ namespace FerroEngrenagem
                 {
                     new BlockActivationCommand("fe_setting", "electric_switch", true, false, null), take
                 };
+            if (Fluids.Kind(this) == FluidKind.Processor)   // F8.2: Crusher / Chemical Mixer
+                return new BlockActivationCommand[]
+                {
+                    new BlockActivationCommand("fe_put", "loot_sort", true, false, null),
+                    new BlockActivationCommand("fe_cast_take", "hand", true, false, null), take
+                };
             return new BlockActivationCommand[] { take };
         }
 
@@ -166,6 +172,11 @@ namespace FerroEngrenagem
                 Log.Out(FerroEngrenagemMod.LogPrefix + GetBlockName() + " at " + _blockPos + " -> setting " + nbv.meta);
                 return true;
             }
+            if ((_commandName == "fe_put" || _commandName == "fe_cast_take") && _world is World)
+            {
+                GameManager.ShowTooltip(_player, ProcessMachine.Activate((World)_world, _blockPos, _commandName, _player), false, false, 0f);
+                return true;
+            }
             if (_commandName != "take") return false;
             float delay = Properties != null && Properties.Contains("TakeDelay") ? Properties.GetFloat("TakeDelay") : 2f;
             takeItemWithTimer(_blockPos, _blockValue, _player, delay);
@@ -176,7 +187,9 @@ namespace FerroEngrenagem
                                                  EntityAlive _entityFocusing)
         {
             string text = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, true));
-            string hint = Settings(Kind) > 0
+            string hint = Fluids.Kind(this) == FluidKind.Processor
+                ? Kinetic.Text("feHintProc", "{0} put the item in your hand - hold {0}: take the products or take")
+                : Settings(Kind) > 0
                 ? Kinetic.Text("feHintSetting", "{0} change setting - hold {0}: take")
                 : Kinetic.Text("feHintTake", "Hold {0} to take");
             return text + "\n" + hint;

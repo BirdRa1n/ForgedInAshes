@@ -810,3 +810,8 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Funcionou: Funil (baú) → Fundição derrete latão → Calha → Mesa de Moldagem (24x "cast 5x feCasingRaw") → esteira → Prensa de Munição → Funil tirou 16 Revestimentos. Molde de Lingote: 12 lingotes de ferro. Trocar molde ok.
 - Bug: itens sumiam nas máquinas do mod. O ramo "material de forja vai para a entrada" (`InsertWorkstation`) colocava itens com ForgeCategory (Cápsula Bruta, argila...) nos slots de entrada escondidos (as janelas das máquinas do mod não têm entrada): 90 Cápsulas Brutas e 16 argilas perdidas. Corrigido: esse ramo não vale para máquinas fe*; `RescueHidden` devolve o que estiver escondido (cai no chão ao lado da máquina, quando uma esteira entrega ou quando o jogador olha para ela).
 - "Próxima produção" com um item na mão pula direto para a receita dele (a Prensa de Munição tem 49 receitas).
+
+## 2026-11-23: F8.2 química
+- `ProcessMachine.cs`: máquina genérica (FeFluid processor). O que faz = processos não planejados do fe_processes.xml com machine = nome do bloco. Itens por esteira (qualquer lado) ou "Colocar o item da mão", estoque de 8 receitas por ingrediente; fluido pela porta de trás (o fluid_in dos processos); torque quando o processo pede (bloco FeKinetic pump, eixo na lateral); produtos na esteira da frente ou "Pegar os produtos". FluidState.Stock salvo (coluna 10).
+- Blocos: feCrusher (torque 128), feChemMixer (torque 64 + água), feWasher (água), feSteamDryer (vapor). Itens: feCoalDust, feNitratePure, feGunPowderWet. Processos crush_coal, crush_stone, wash_nitrate, mix_powder, dry_powder; linha "Pólvora" no site.
+- Modelos com FeSpin (rolos do Triturador ao contrário um do outro, agitador vertical no Misturador).

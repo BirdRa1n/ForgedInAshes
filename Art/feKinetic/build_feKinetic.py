@@ -1207,6 +1207,111 @@ def model_caster(col):
     return out
 
 
+# ---------------------------------------------------------------- F8.2 process machines
+# 1x1, front = Blender -Y (products drop on the belt in front at 0.62), back = Blender +Y (fluid inlet at C).
+# Crusher and Chemical Mixer: drive shaft across the block (Blender X) at C, like the Mechanical Pump.
+def out_chute(bm):
+    box(bm, (0.34, 0.26, 0.04), (0, -0.37, 0.60), STEEL)
+    for sx in (-1, 1):
+        box(bm, (0.03, 0.26, 0.10), (sx * 0.185, -0.37, 0.64), STEEL)
+    box(bm, (0.36, 0.03, 0.03), (0, -0.49, 0.64), OUT)
+
+
+def drive_shaft(name="FeSpin_DriveShaft"):
+    sh = bmesh.new()
+    shaft_end(sh, 0.0, -0.5)
+    shaft_end(sh, 0.0, 0.5)
+    return to_object(sh, name, location=(0, 0, C), rotation=(0, 0, -math.pi / 2), bevel=0.002)
+
+
+def model_crusher(col):
+    base = bmesh.new()
+    box(base, (0.84, 0.70, 0.06), (0, 0, 0.03), IRON)
+    for sx in (-1, 1):
+        box(base, (0.08, 0.60, 0.62), (sx * 0.36, 0, 0.37), PAINT)                  # side cheeks (bearings)
+        box(base, (0.10, 0.16, 0.12), (sx * 0.36, 0, C), RUST)
+    box(base, (0.64, 0.06, 0.40), (0, 0.27, 0.46), PAINT)                             # back wall
+    box(base, (0.64, 0.06, 0.20), (0, -0.27, 0.36), PAINT)                            # front wall (low)
+    # hopper on top, open
+    for k, (w, z) in enumerate(((0.70, 0.98), (0.60, 0.92), (0.50, 0.86))):
+        for sy in (-1, 1):
+            box(base, (w, 0.03, 0.06), (0, sy * (w / 2 - 0.02), z), IRON)
+        for sx in (-1, 1):
+            box(base, (0.03, w, 0.06), (sx * (w / 2 - 0.02), 0, z), IRON)
+    out_chute(base)
+    out = [to_object(base, "feCrusher_Base", bevel=0.003)]
+    out.append(drive_shaft())
+    for name, y in (("FeSpin_x2_RollA", 0.075), ("FeSpin_x2_Rev_RollB", -0.075)):
+        r = bmesh.new()
+        cyl(r, 0.07, 0.58, (0, 0, 0), "Y", STEEL, segs=16)
+        for k in range(10):
+            a = 2 * math.pi * k / 10
+            box(r, (0.02, 0.56, 0.02), (0.075 * math.cos(a), 0, 0.075 * math.sin(a)), IRON)   # teeth
+        out.append(to_object(r, name, location=(0, y, 0.72), rotation=(0, 0, -math.pi / 2), bevel=0.001))
+    return out
+
+
+def model_chem_mixer(col):
+    base = bmesh.new()
+    box(base, (0.84, 0.84, 0.06), (0, 0, 0.03), IRON)
+    cyl(base, 0.30, 0.66, (0, 0.04, 0.45), "Z", STEEL, segs=28)                      # tank
+    for z in (0.14, 0.45, 0.77):
+        cyl(base, 0.315, 0.03, (0, 0.04, z), "Z", IRON, segs=28)
+    ring(base, 0.31, 0.26, 0.04, (0, 0.04, 0.80), "Z", IRON, segs=28)               # open rim
+    cyl(base, 0.26, 0.02, (0, 0.04, 0.70), "Z", GASC, segs=28)                       # the mix inside
+    for sx in (-1, 1):
+        box(base, (0.12, 0.14, 0.16), (sx * 0.40, 0, C), RUST)                        # gear boxes on the shaft
+        beam(base, (sx * 0.36, 0.04, 0.84), (sx * 0.30, 0.04, 0.95), 0.04, 0.04, IRON)
+    box(base, (0.64, 0.06, 0.05), (0, 0.04, 0.96), IRON)                              # bridge with the motor head
+    box(base, (0.14, 0.14, 0.12), (0, 0.04, 1.0), PAINT)
+    inlet_stub(base, (0, 0.5, C), "Y", 1, IN)
+    out_chute(base)
+    out = [to_object(base, "feChemMixer_Base", bevel=0.003)]
+    out.append(drive_shaft())
+    st = bmesh.new()                                                                 # stirrer: built along Y, stood up
+    cyl(st, 0.02, 0.42, (0, 0.21, 0), "Y", STEEL, segs=8)
+    for k in range(3):
+        a = 2 * math.pi * k / 3
+        box(st, (0.20 * abs(math.cos(a)) + 0.02, 0.06, 0.20 * abs(math.sin(a)) + 0.02),
+            (0.10 * math.cos(a), 0.36, 0.10 * math.sin(a)), BRASS)
+    out.append(to_object(st, "FeSpin_x0.5_Stirrer", location=(0, 0.04, 0.96), rotation=AX_UP, bevel=0.001))
+    return out
+
+
+def model_washer(col):
+    base = bmesh.new()
+    box(base, (0.84, 0.84, 0.06), (0, 0, 0.03), IRON)
+    for sx in (-1, 1):
+        box(base, (0.04, 0.70, 0.46), (sx * 0.38, 0.02, 0.29), PAINT)
+    box(base, (0.80, 0.04, 0.46), (0, 0.36, 0.29), PAINT)
+    box(base, (0.80, 0.04, 0.30), (0, -0.33, 0.21), PAINT)
+    box(base, (0.72, 0.66, 0.02), (0, 0.02, 0.42), WATERC)                            # water
+    box(base, (0.66, 0.50, 0.02), (0, 0.04, 0.54), IRON)                              # sieve frame
+    for k in range(9):
+        box(base, (0.015, 0.48, 0.03), (-0.28 + k * 0.07, 0.04, 0.55), STEEL)         # sieve bars
+    for sx in (-1, 1):
+        box(base, (0.04, 0.04, 0.20), (sx * 0.31, 0.04, 0.46), IRON)
+    box(base, (0.08, 0.30, 0.06), (0, 0.22, 0.62), STEEL)                             # spray bar
+    inlet_stub(base, (0, 0.5, C), "Y", 1, IN)
+    out_chute(base)
+    return [to_object(base, "feWasher_Base", bevel=0.003)]
+
+
+def model_steam_dryer(col):
+    base = bmesh.new()
+    box(base, (0.80, 0.70, 0.90), (0, 0.06, 0.50), PAINT)                             # cabinet
+    for k in range(6):
+        box(base, (0.60, 0.03, 0.03), (0, -0.30, 0.30 + k * 0.10), IRON)             # louvers
+    for k in range(4):
+        cyl(base, 0.025, 0.66, (0, 0.42, 0.20 + k * 0.16), "X", STEEL, segs=10)      # steam coil at the back
+    box(base, (0.84, 0.74, 0.05), (0, 0.06, 0.97), IRON)
+    cyl(base, 0.06, 0.03, (0.26, -0.30, 0.86), "Y", GLASS, segs=16)                   # gauge
+    cyl(base, 0.04, 0.10, (-0.25, 0.10, 1.04), "Z", STEEL, segs=10)                   # vent
+    inlet_stub(base, (0, 0.5, C), "Y", 1, IN)
+    out_chute(base)
+    return [to_object(base, "feSteamDryer_Base", bevel=0.003)]
+
+
 # ---------------------------------------------------------------- production machines (phase 6)
 # Footprints: 1x1 = x -0.5..0.5; 2 wide (MultiBlockDim 2,2,1) = x -1..1 (the game shifts an even width by half a
 # block, so the model is centred); 3 wide = x -1.5..1.5. Depth 1 (y -0.5..0.5), height up to the block count.
@@ -1624,6 +1729,10 @@ MODELS = {
     "feFluidBottler": model_fluid_bottler,
     "feMetalChute": model_metal_chute,
     "feCaster": model_caster,
+    "feCrusher": model_crusher,
+    "feChemMixer": model_chem_mixer,
+    "feWasher": model_washer,
+    "feSteamDryer": model_steam_dryer,
     "feM_Foundry": model_m_foundry,
     "feM_Press": model_m_press,
     "feM_Lathe": model_m_lathe,
