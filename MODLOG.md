@@ -1205,3 +1205,12 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   `Art/feFoundry`, `Art/feLathe`, `Art/fePress`, `Art/feSawmill` (protótipos da fase 1, substituídos pelos
   `feM_*` do feKinetic) e `Art/feFlywheel` (modelo do item, não usado). Ícones, materiais e prefabs: todos em uso.
 - Pendente de arte: só os ícones da Seringueira (5 estágios) e 1 item (`PENDENCIAS_ASSETS.md`).
+
+## 2026-11-25: últimos assets pendentes (Seringueira e Rotor de Turbina)
+
+- Seringueira (5 estágios): os PNGs existiam, mas `gen_chain.py` (`tree_xml`) recriava os blocos sem `CustomIcon`
+  a cada execução, e a pendência voltava. Agora ele usa o ícone próprio quando o PNG existe (como `block_xml`).
+  O ícone do estágio 08 tinha uma faixa de fundo: novo recorte, guardando só as formas grandes (as folhas).
+- Rotor de Turbina (`feTurbineRotor`): modelo só para o ícone (`ITEM_MODELS` em `build_feHD.py`: eixo, três rodas
+  de palhetas crescentes com aro, mancais e flange de acoplamento), texturizado e renderizado como os blocos.
+- `list_assets.py`: **0 blocos e 0 itens pendentes**. check_xpath 773/0, phase3 23/23.

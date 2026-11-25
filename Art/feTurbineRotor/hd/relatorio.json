@@ -1,0 +1,16 @@
+{
+ "nome": "feTurbineRotor",
+ "config": "F:\\IA\\fe_blender\\configs\\feTurbineRotor.json",
+ "triangulos_antes": 6848,
+ "triangulos_depois": 2600,
+ "atlas": 1024,
+ "arquivos": [
+  "feTurbineRotor_Albedo.png",
+  "feTurbineRotor_Normal.png",
+  "feTurbineRotor_MetallicSmoothness.png",
+  "feTurbineRotor_Roughness.png",
+  "feTurbineRotor_HD.fbx",
+  "feTurbineRotor_HD.blend"
+ ],
+ "segundos": 13.4
+}

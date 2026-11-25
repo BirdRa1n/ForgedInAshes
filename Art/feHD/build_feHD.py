@@ -4178,6 +4178,30 @@ PLANT_MODELS = {"feBoilerFirebox": model_boiler_firebox, "feBoilerDrum": model_b
                 "feSteamTurbine": model_steam_turbine}
 
 
+# ================================================================ item models (only for their inventory icon)
+def model_turbine_rotor():
+    """Turbine Rotor (item feTurbineRotor): the shaft with three bladed wheels growing toward the exhaust, journals
+    and the coupling flange; the part that goes inside the Steam Turbine."""
+    b = bmesh.new()
+    cyl(b, 0.035, 0.90, (0, 0, 0.25), "X", STEEL, segs=16)                               # shaft
+    for x in (-0.40, 0.36):
+        cyl(b, 0.05, 0.06, (x, 0, 0.25), "X", BRASS, segs=16)                             # journals
+    cyl(b, 0.09, 0.025, (-0.46, 0, 0.25), "X", CAST, segs=18)                             # coupling flange
+    bolt_circle(b, 6, 0.065, (-0.475, 0, 0.25), "X", STEEL, r=0.008, d=0.012)
+    for x, r, n in ((-0.16, 0.13, 20), (0.02, 0.17, 24), (0.20, 0.21, 28)):
+        cyl(b, r * 0.62, 0.05, (x, 0, 0.25), "X", STEEL, segs=28)                         # disc
+        cyl(b, 0.06, 0.07, (x, 0, 0.25), "X", CAST, segs=16)                              # hub
+        for k in range(n):
+            a_ = 2 * math.pi * k / n
+            m = Matrix.Rotation(a_, 4, "X") @ Matrix.Rotation(0.5, 4, "Z")
+            box(b, (0.045, 0.012, r * 0.42), (x, -r * 0.80 * math.sin(a_), 0.25 + r * 0.80 * math.cos(a_)), BRASS, m)
+        ring(b, r + 0.005, r - 0.012, 0.05, (x, 0, 0.25), "X", STEEL, segs=36)            # shroud band
+    return [to_object(b, "feTurbineRotor_Base", bevel=0.002)]
+
+
+ITEM_MODELS = {"feTurbineRotor": model_turbine_rotor}
+
+
 MODELS = {
     "feCoalEngine": model_coal_engine,
     "feBus": model_bus,
@@ -4214,6 +4238,7 @@ MODELS = {
     "feM_Foundry": model_m_foundry,
     **D12_MODELS,
     **PLANT_MODELS,
+    **ITEM_MODELS,
     **D13_MODELS,
 }
 

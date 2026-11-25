@@ -23,24 +23,18 @@ Ao ganhar modelo próprio, o `blocks.xml` deve apontar `Model` para `...unity3d?
 - **signal**: a lever / box; the Display Panel writes its digits on the +Z face 0.52 m from the centre (DisplayVisual)
 - **tree**: uses the planted oak models (a Rubber Tree look: lighter bark, the sap cup)
 
-## Blocos (5)
+## Blocos (0)
 
 | Bloco | Nome | Tipo / contrato | Modelo atual | Modelo próprio | Ícone próprio |
 |---|---|---|---|---|---|
-| `feTreeRubber08` | Seringueira | tree | `próprio` | ok | falta |
-| `feTreeRubber16` | Seringueira | tree | `próprio` | ok | falta |
-| `feTreeRubber27` | Seringueira | tree | `próprio` | ok | falta |
-| `feTreeRubber41` | Seringueira | tree | `próprio` | ok | falta |
-| `feTreeRubberSeed` | Seringueira (muda) | tree | `próprio` | ok | falta |
 
-## Itens sem ícone próprio (1)
+## Itens sem ícone próprio (0)
 
 Usam o ícone de um item do jogo com tinta. Um ícone 160x160 transparente em
 `Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<item>.png` + `python tools/apply_icons.py` resolve.
 
 | Item | Nome | Ícone emprestado (tinta) |
 |---|---|---|
-| `feTurbineRotor` | Rotor de Turbina | `feFlywheel` (e0e0ff) |
 
 ## Outros assets
 

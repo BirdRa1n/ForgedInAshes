@@ -851,9 +851,15 @@ def tree_xml():
     for name, base, nxt, rate in TREE:
         lines = [f'\t\t<block name="{name}">', f'\t\t\t<property name="Extends" value="{base}"/>',
                  f'\t\t\t<property name="DescriptionKey" value="{name}Desc"/>']
+        # own icon when there is one (ItemIconAtlas/<name>.png), like block_xml; else the oak sapling, tinted
+        own = (fe.MOD_DIR / "UIAtlases" / "ItemIconAtlas" / f"{name}.png").exists()
+        if own:
+            lines.append(f'\t\t\t<property name="CustomIcon" value="{name}"/>')
+            lines.append('\t\t\t<property name="CustomIconTint" value="ffffff"/>')
         if name == "feTreeRubberSeed":
-            lines.append('\t\t\t<property name="CustomIcon" value="treePlantedOak1m"/>')
-            lines.append('\t\t\t<property name="CustomIconTint" value="80ff80"/>')
+            if not own:
+                lines.append('\t\t\t<property name="CustomIcon" value="treePlantedOak1m"/>')
+                lines.append('\t\t\t<property name="CustomIconTint" value="80ff80"/>')
             lines.append('\t\t\t<drop event="Destroy" name="feTreeRubberSeed" count="1"/>')
         else:
             lines.append('\t\t\t<property name="CreativeMode" value="None"/>')
