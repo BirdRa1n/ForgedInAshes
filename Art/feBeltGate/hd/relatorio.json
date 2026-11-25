@@ -1,8 +1,8 @@
 {
  "nome": "feBeltGate",
  "config": "F:\\IA\\fe_blender\\configs\\feBeltGate.json",
- "triangulos_antes": 8216,
- "triangulos_depois": 7336,
+ "triangulos_antes": 9504,
+ "triangulos_depois": 8624,
  "atlas": 1024,
  "arquivos": [
   "feBeltGate_Albedo.png",
@@ -12,5 +12,5 @@
   "feBeltGate_HD.fbx",
   "feBeltGate_HD.blend"
  ],
- "segundos": 64.3
+ "segundos": 68.3
 }

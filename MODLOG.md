@@ -1043,3 +1043,64 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   - Materiais novos: `feHD_Red` (volantes, cilindros) e `feHD_Leather` (couros).
 - `blocks.xml`: os 50 apontam para `<bloco>Prefab`; ícones próprios (`render_icons_hd.py`, `apply_icons.py`).
 - Seringueira (5 estágios) continua com as árvores do jogo (é planta, não máquina).
+
+## 2026-11-24: fita da esteira que anda, barramento HD, fio no Dínamo Industrial
+
+- Relato (print): a animação da esteira era só traços (as travessas `FeBeltSlats` deslizando 0,125 m) sobre uma
+  lona parada. Agora a lona inteira anda: `Art/feConveyor/split_for_hd.py` dá às faces de borracha (FeBeltBed,
+  FeCurveSet_*, FeBeltFill_*, base das rampas) o material `feBelt_Band` e um UV próprio (`BandUV`: u = largura,
+  v = ao longo do percurso, 1 repetição = 0,25 m; em volta dos tambores e pelo arco da curva). As travessas soltas
+  saíram (as nervuras em V estão na textura). `Art/feFx/make_belt_band.py` gera a textura repetível (borracha gasta,
+  nervuras em V, poeira, riscos) e o normal map. Texturizador: `materiais_uv_proprio` mantém esse UV.
+  FeBuild: material `FeBeltBand`. `BeltShape` rola `_MainTex_ST` só nesse submesh, na velocidade da esteira
+  (rampa x1,41 ao longo da inclinação).
+- Barramento (`feBus`): modelo HD novo (`model_bus`): armário de manobra rebitado, 3 barras de cobre em isoladores,
+  isoladores de entrada atrás, isolador grande de saída na frente (WireOffset), disjuntor, amperímetro, placa de perigo.
+- Dínamo Industrial não ligava no barramento. Causa (IL 3.4.0 b10): `ItemActionConnectPower.OnHoldingUpdate` usa
+  a célula mirada como está; numa célula filha de um bloco grande (o dínamo é 3x2x3) `GetPoweredBlock` CRIA um
+  tile entity de energia novo ali, e o fio ia para esse fantasma. `WireMultiblock.cs`: com o alicate na mão, a mira
+  numa célula filha de um bloco fe* elétrico vai para a célula pai; fantasmas de tentativas antigas são removidos
+  quando o alicate mira a célula (log `wire tool: removed a stray power tile entity`). Vale também para o Gerador a
+  Carvão (2x2x1).
+- Jogo abriu o mundo com a DLL nova (Player.log 21:17: `Harmony: 38 method(s) patched`, sem erro do mod).
+  **Não verificado no jogo:** a fita andando e o fio no dínamo.
+
+## 2026-11-24: curva e esteiras lado a lado (print do usuário)
+
+- Montagem: linha para leste terminando numa curva para o sul; ao lado da saída da curva, outra esteira para o sul
+  (até uma máquina). Causa: `Belt.Outputs` conta como saída a esteira ao lado que aponta para fora, então a célula
+  antes da curva virou divisão (leste + sul) e era desenhada como mesa de junção; e as duas faixas para o sul foram
+  fundidas numa esteira larga (`FillL/R`), embora uma saia da curva e a outra da divisão.
+- `BeltLook`: divisão com frente + um lado = esteira reta + a curva daquele lado (`SplitL/R`), sem a mesa; a curva
+  fica 3 mm acima da reta (sem piscar). O guarda-corpo externo da curva virou peça própria (`FeCurveRail_L/R`,
+  `split_for_hd.py`) e só aparece na curva normal, para não atravessar a reta.
+- Esteira larga só junta faixas que são linhas próprias (`OwnLane`: atrás não há esteira, ou a de trás corre no
+  mesmo sentido). Faixa que nasce de curva ou divisão fica separada, com o guarda-corpo dela.
+- **Não verificado no jogo.**
+
+## 2026-11-24: junções viram curvas, sem esteira larga (segundo print)
+
+- Pedido: "quando duas esteiras estão juntas elas têm a animação de uma única esteira: remova" e as junções devem
+  ser suaves (curvas). A esteira larga (`FillL/R`) saiu: duas esteiras lado a lado são duas esteiras, cada uma com
+  sua lona e guarda-corpo.
+- Divisões sem mesa de junção: frente + um lado = reta + curva daquele lado; os dois lados (T) = duas curvas em Y;
+  frente + os dois lados = reta + duas curvas. As lonas que se sobrepõem ficam 3/6 mm acima uma da outra; o
+  guarda-corpo externo da curva só aparece na curva simples. Saída para rampa de descida conta como frente.
+- **Não verificado no jogo** (render de conferência do Y no Blender).
+
+## 2026-11-24: rampa de descida longe do bloco; diagnóstico das junções
+
+- Rampa de descida aparecia a 3 blocos do lugar (print). Causa: `build_feConveyor.py` põe as peças lado a lado em X
+  para exibição (rampa 1,6; descida 3,2; suporte 4,8) e o `export_feConveyor.py` dele as devolve ao centro; o
+  `split_for_hd.py` não devolvia. Corrigido (tabela `OFFSET`); FeBuild agora mostra os colisores centrados.
+  O suporte (feConveyorStand) tinha o mesmo erro (4,8 m).
+- Junções marcadas em azul ainda sem curva no jogo (DLL nova carregada às 21:55, mas a esteira larga já tinha
+  sumido). No save, as faixas curtas (-232/-236, 61, 842..843 → fundições em z 844) têm na célula de trás um registro
+  de funil (`F;-232;61;841`, `F;-236;61;841`). Para não chutar: `BeltShape` registra uma linha por mudança de visual
+  (`belt look <bloco> at <pos> front .. left .. exits[..] -> mode .. split ..`, até 600 por sessão).
+- Log das 84 esteiras (22:11) mostrou o contrário do suposto: as linhas ENTRAM pelos lados da esteira central
+  (-232, 61, 856, indo para +z até a máquina) e as faixas curtas entram de lado na linha. Não eram divisões, eram
+  uniões. Novo: `BeltLook.MergeL/R` (um vizinho de lado entrega nesta esteira) e `BackFed`. O modelo ganhou
+  `FeMerge_L/R` (a curva do outro lado girada 180°, lona com v invertido: corre do lado para a frente) e
+  `FeMergeRail_L/R`. Reta + união(ões) quando há entrada por trás; só a(s) curva(s) de entrada quando não há.
+  Render de conferência ok. **Não verificado no jogo.**

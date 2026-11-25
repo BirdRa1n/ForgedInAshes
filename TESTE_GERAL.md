@@ -325,3 +325,18 @@ Coloque cada bloco (criativo, busca "fe") e confira: modelo próprio (não mais 
 9. **Braço Mecânico:** com energia, a torre gira de trás (pega) para a frente (põe) a cada transferência.
 10. **Alavanca de Sinal:** a alavanca vira para um lado ligada e para o outro desligada. Receptor: lâmpada acesa
     quando passa o sinal.
+
+## 21. Fita da esteira, barramento, fio no Dínamo Industrial
+
+1. **Esteira:** com torque, a lona de borracha inteira corre (nervuras em V e sujeira andando juntas) na reta, na
+   curva (em volta do canto), na esteira larga e nas rampas; parada, a lona para. Não há mais traços soltos.
+2. **Sentido:** a lona anda para o mesmo lado que os itens.
+3. **Barramento:** modelo novo (armário com barras de cobre); o fio sai do isolador grande da frente.
+4. **Dínamo Industrial:** alicate do barramento até QUALQUER parte do dínamo industrial: liga (o barramento mostra
+   "Junta 1 fonte"). Mesmo teste com o Gerador a Carvão. Se o log mostrar `removed a stray power tile entity`, era
+   um ponto falso de tentativas antigas.
+5. **Curva com faixa ao lado:** linha para leste com curva para o sul no fim e outra esteira para o sul ao lado da
+   saída da curva: a célula antes da curva aparece reta com uma curva saindo para o lado (divisão), sem a mesa de
+   junção; as duas faixas para o sul ficam separadas (cada uma com guarda-corpo), não uma esteira larga.
+6. **Esteiras lado a lado:** são sempre esteiras separadas (cada uma com sua lona andando e guarda-corpo).
+7. **T:** uma esteira que solta para os dois lados (sem nada na frente) aparece como um Y de duas curvas, sem mesa.

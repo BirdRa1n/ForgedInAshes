@@ -152,7 +152,7 @@ public static class FeBuild
         m.renderQueue = 3000;
     }
 
-    static Material molten, liquid, gas, glow, smoke, spark, flame;
+    static Material molten, liquid, gas, glow, smoke, spark, flame, band;
 
     /// <summary>Shared effect materials. FxVisual (the mod's C#) recolours them per block with property blocks:
     /// _EmissionColor (heat / metal colour), _Color (fluid colour), _MainTex_ST offset (flow).</summary>
@@ -203,6 +203,16 @@ public static class FeBuild
         flame.SetTexture("_MainTex", Tex($"{FxDir}/flame.png"));
         flame.SetColor("_TintColor", new Color(1f, 0.6f, 0.3f, 0.7f));
         flame = SaveMat(flame, "FeFlame");
+
+        // the conveyor band (material feBelt_Band, Art/feConveyor/split_for_hd.py): tileable rubber with molded
+        // cleats, its own UV (v = along the travel, 1 tile = 0.25 m); BeltShape scrolls _MainTex_ST with the speed
+        band = new Material(Shader.Find("Standard"));
+        band.SetTexture("_MainTex", Tex($"{FxDir}/belt_band_Albedo.png"));
+        band.SetTexture("_BumpMap", Tex($"{FxDir}/belt_band_Normal.png"));
+        band.EnableKeyword("_NORMALMAP");
+        band.SetFloat("_Glossiness", 0.22f);
+        band.SetFloat("_Metallic", 0f);
+        band = SaveMat(band, "FeBeltBand");
     }
 
     /// <summary>Swaps the imported FBX materials: "<block>_HD" -> atlas, feHD_Molten / Liquid / Gas / Glow -> effects.</summary>
@@ -219,6 +229,7 @@ public static class FeBuild
                 else if (n.StartsWith("feHD_Liquid")) mats[i] = liquid;
                 else if (n.StartsWith("feHD_Gas")) mats[i] = gas;
                 else if (n.StartsWith("feHD_Glow")) mats[i] = glow;
+                else if (n.StartsWith("feBelt_Band")) mats[i] = band;
             }
             r.sharedMaterials = mats;
         }

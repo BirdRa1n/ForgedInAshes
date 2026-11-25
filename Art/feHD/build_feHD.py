@@ -3588,8 +3588,52 @@ D12_MODELS = {
 }
 
 
+def model_bus():
+    """Power Bus (1 block): a riveted switchgear cabinet. Three copper bus bars on insulator posts across the top, a
+    row of incoming insulators at the back (one per dynamo wired to it), the big outgoing insulator in front (the
+    wire anchor, WireOffset), a main breaker handle on the side, an ammeter and a danger plate on the door."""
+    b = bmesh.new()
+    box(b, (0.80, 0.60, 0.06), (0, 0, 0.03), IRON)                                       # plinth
+    hazard(b, 0.78, (0, -0.304, 0.03), "X", h=0.05, n=10)
+    plate(b, (0.70, 0.50, 0.64), (0, 0, 0.38), PAINT, "-Y", n=6)                         # cabinet
+    plate(b, (0.70, 0.50, 0.64), (0, 0, 0.38), PAINT, "+Y", n=6)
+    box(b, (0.76, 0.56, 0.04), (0, 0, 0.72), IRON)                                       # roof
+    for sx in (-1, 1):                                                                    # corner angles
+        for sy in (-1, 1):
+            box(b, (0.03, 0.03, 0.66), (sx * 0.355, sy * 0.255, 0.38), IRON)
+    # door: frame, louvres, handle, ammeter, danger plate
+    box(b, (0.56, 0.02, 0.52), (0, -0.258, 0.38), CAST)
+    for k in range(5):
+        box(b, (0.22, 0.012, 0.018), (0.14, -0.27, 0.20 + k * 0.04), SOOT)
+    box(b, (0.03, 0.03, 0.12), (-0.22, -0.28, 0.40), STEEL)
+    cyl(b, 0.07, 0.03, (-0.06, -0.275, 0.52), "Y", CAST, segs=20)
+    cyl(b, 0.058, 0.032, (-0.06, -0.277, 0.52), "Y", GLASS, segs=20)
+    box(b, (0.004, 0.006, 0.05), (-0.06, -0.296, 0.535), RED, Matrix.Rotation(0.5, 4, "Y"))
+    box(b, (0.14, 0.008, 0.10), (0.14, -0.27, 0.53), HAZ)                                # danger plate
+    box(b, (0.06, 0.010, 0.05), (0.14, -0.275, 0.53), SOOT)
+    # main breaker on the right side
+    box(b, (0.04, 0.12, 0.20), (-0.37, 0.0, 0.45), CAST)
+    beam(b, (-0.40, 0.0, 0.45), (-0.44, 0.0, 0.60), 0.025, 0.025, RED)
+    cyl(b, 0.025, 0.06, (-0.44, 0.0, 0.62), "Y", WOOD, segs=10)
+    # bus bars on posts across the top
+    for y in (-0.12, 0.0, 0.12):
+        for x in (-0.28, 0.28):
+            insulator(b, x, y, 0.74, n=2, s=0.8)
+        box(b, (0.66, 0.025, 0.035), (0, y, 0.83), COPPER)
+    # incoming insulators at the back (dynamo wires) and the outgoing one in front
+    for k in range(4):
+        insulator(b, -0.24 + k * 0.16, 0.22, 0.74, n=3, s=0.9)
+        beam(b, (-0.24 + k * 0.16, 0.22, 0.86), (-0.24 + k * 0.16, 0.12, 0.83), 0.012, 0.012, COPPER)
+    insulator(b, 0.0, -0.20, 0.74, n=5, s=1.2)
+    beam(b, (0.0, -0.20, 0.98), (0.0, -0.12, 0.83), 0.015, 0.015, COPPER)
+    objs = [to_object(b, "feBus_Base", bevel=0.003)]
+    wire(objs, (0.0, -0.20, 1.02))
+    return objs
+
+
 MODELS = {
     "feCoalEngine": model_coal_engine,
+    "feBus": model_bus,
     "feGasEngine": model_gas_engine,
     "feBeltCrate": model_belt_crate,
     "feBiodigester": model_biodigester,

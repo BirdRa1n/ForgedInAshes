@@ -1,8 +1,8 @@
 {
  "nome": "feBeltSplitter",
  "config": "F:\\IA\\fe_blender\\configs\\feBeltSplitter.json",
- "triangulos_antes": 7948,
- "triangulos_depois": 7284,
+ "triangulos_antes": 9236,
+ "triangulos_depois": 8572,
  "atlas": 1024,
  "arquivos": [
   "feBeltSplitter_Albedo.png",
@@ -12,5 +12,5 @@
   "feBeltSplitter_HD.fbx",
   "feBeltSplitter_HD.blend"
  ],
- "segundos": 61.6
+ "segundos": 67.7
 }

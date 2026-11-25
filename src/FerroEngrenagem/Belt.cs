@@ -1248,6 +1248,9 @@ namespace FerroEngrenagem
         public int Mode;                       // 0 straight, 1 curve left, 2 curve right, 3 junction (2 or 3 outputs)
         public bool OpenL, OpenR, Front, Both, Chute;
         public bool FillL, FillR;              // a belt beside running the same way: one wide belt
+        public bool SplitL, SplitR;            // straight on AND a turn to that side: the straight belt + that curve
+        public bool MergeL, MergeR;            // a belt feeds this one from that side: a curve from that side in
+        public bool BackFed;                   // something feeds it from behind (or a ramp behind)
         public bool DriveL, DriveR;            // a torque block on that side
         public bool DuctOpenB, DuctTop;        // duct: fed from behind / a funnel on top
         public int DuctFront;                  // duct front: 0 cap, 1 open, 2 machine (boot), 3 ramp up onto a belt
@@ -1261,12 +1264,6 @@ namespace FerroEngrenagem
         static Vector3i At(Vector3i p, Vector3i d)
         {
             return new Vector3i(p.x + d.x, p.y + d.y, p.z + d.z);
-        }
-
-        static bool SameWay(World world, Vector3i p, Vector3i front)
-        {
-            BlockValue b = Belt.Get(world, p);
-            return Belt.Is(b.Block) && !Belt.IsRamp(b.Block) && !Belt.IsClosed(b.Block) && Belt.Front(b) == front;
         }
 
         public static BeltLook Evaluate(World world, Vector3i pos, BlockValue bv)
@@ -1299,19 +1296,31 @@ namespace FerroEngrenagem
                 return k;
             }
             List<Vector3i> links = Belt.Links(world, pos, bv);
-            bool outL = exits.Contains(pl), outR = exits.Contains(pr), outF = exits.Contains(pf);
+            bool outL = exits.Contains(pl), outR = exits.Contains(pr);
+            bool outF = exits.Contains(pf) || exits.Contains(new Vector3i(pf.x, pf.y - 1, pf.z));   // or a down ramp
             k.Mode = exits.Count >= 2 ? 3 : outL ? 1 : outR ? 2 : 0;
+            if ((outL || outR) && (outF || (outL && outR)))
+            {
+                // a split (user 2026-11-24, prints): no junction table, the belt itself turns. Straight on + a side:
+                // the straight belt and the curve of that side; both sides: the two curves, a smooth Y. Mode stays 3
+                // for a split with no straight part (the Conveyor Stand under it takes its junction legs).
+                k.Mode = outF ? 0 : 3;
+                k.SplitL = outL;
+                k.SplitR = outR;
+            }
             k.OpenL = links.Contains(pl);
             k.OpenR = links.Contains(pr);
             k.Front = outF;
             k.Both = outL && outR && !outF;
             Block front = Belt.Get(world, pf).Block;
             k.Chute = outF && (!Belt.Is(front) || Belt.IsClosed(front));
-            if (k.Mode == 0)
-            {
-                k.FillL = !k.OpenL && SameWay(world, pl, f);
-                k.FillR = !k.OpenR && SameWay(world, pr, f);
-            }
+            // no more "wide belt" (user 2026-11-24: two belts side by side are two belts, each with its own band)
+            // side inputs (user 2026-11-24, log of the prints: the lines run INTO the middle belt from its sides,
+            // the short lanes into the line): a curve from that side face to the front, drawn on this belt
+            k.MergeL = !outL && Belt.FedFrom(world, pos, l);
+            k.MergeR = !outR && Belt.FedFrom(world, pos, nl);
+            k.BackFed = Belt.FedFrom(world, pos, nf) || Belt.FedFrom(world, pos, new Vector3i(-f.x, -1, -f.z)) ||
+                        Belt.FedFrom(world, pos, new Vector3i(-f.x, 1, -f.z));
             return k;
         }
     }
@@ -1323,6 +1332,10 @@ namespace FerroEngrenagem
         public Transform driveL, driveR, hubL, hubR;                               // bearing stand + coupling
         public Transform fillL, fillR, fillSlatsL, fillSlatsR;                     // wide belt (a belt beside)
         public Transform capF, capB, wallL, wallR, sideL, sideR, boot, ramp, hatch, frontSeg; // duct
+        Vector3 setL0, setR0;                                                      // the curves' own positions
+        public Transform crvRailL, crvRailR;                                       // a curve's outer rail
+        public Transform mrgL, mrgR, mrgRailL, mrgRailR;                           // side inputs
+        Vector3 mrgL0, mrgR0;
 
         public static BeltParts Of(Transform t)
         {
@@ -1360,6 +1373,16 @@ namespace FerroEngrenagem
             p.ramp = Find(t, "FeDuctRamp");
             p.hatch = Find(t, "FeDuctHatch");
             p.frontSeg = Find(t, "FeDuctFront");
+            p.crvRailL = Find(t, "FeCurveRail_L");
+            p.crvRailR = Find(t, "FeCurveRail_R");
+            p.mrgL = Find(t, "FeMerge_L");
+            p.mrgR = Find(t, "FeMerge_R");
+            p.mrgRailL = Find(t, "FeMergeRail_L");
+            p.mrgRailR = Find(t, "FeMergeRail_R");
+            if (p.mrgL != null) p.mrgL0 = p.mrgL.localPosition;
+            if (p.mrgR != null) p.mrgR0 = p.mrgR.localPosition;
+            if (p.setL != null) p.setL0 = p.setL.localPosition;
+            if (p.setR != null) p.setR0 = p.setR.localPosition;
             return p;
         }
 
@@ -1385,25 +1408,40 @@ namespace FerroEngrenagem
                 return;
             }
             int m = k.Mode;
-            bool straight = m == 0, junc = m == 3;
+            bool split = k.SplitL || k.SplitR;
+            bool merge = k.MergeL || k.MergeR;
+            // fed only from the side(s), nothing behind: the input curve(s) alone (one side = a turn, both = a Y)
+            bool mergeOnly = merge && !k.BackFed && !split && m == 0;
+            bool straight = m == 0 && !mergeOnly, junc = m == 3 && !split, twoWay = k.SplitL && k.SplitR;
+            Show(mrgL, k.MergeL);
+            Show(mrgR, k.MergeR);
+            Show(mrgRailL, mergeOnly && k.MergeL && !k.MergeR);
+            Show(mrgRailR, mergeOnly && k.MergeR && !k.MergeL);
+            if (mrgL != null) mrgL.localPosition = mrgL0 + Vector3.up * (k.MergeL && (straight || k.MergeR) ? 0.004f : 0f);
+            if (mrgR != null) mrgR.localPosition = mrgR0 + Vector3.up * (k.MergeR && straight ? 0.008f : 0f);
             Show(slats, straight);
             Show(bed, straight);
             Show(rollF, straight);
             Show(rollB, straight);
-            Show(setL, m == 1);
+            Show(setL, m == 1 || k.SplitL);
             Show(cslL, m == 1);
-            Show(setR, m == 2);
+            Show(setR, m == 2 || k.SplitR);
             Show(cslR, m == 2);
+            Show(crvRailL, m == 1);                                       // not on a split: it would cross the belt
+            Show(crvRailR, m == 2);
+            // bands that overlap on a split sit a few mm apart in height, so they do not flicker
+            if (setL != null) setL.localPosition = setL0 + (k.SplitL && straight ? Vector3.up * 0.003f : Vector3.zero);
+            if (setR != null) setR.localPosition = setR0 + (k.SplitR ? Vector3.up * (straight || twoWay ? 0.006f : 0.003f) : Vector3.zero);
             Show(junction, junc);
             Show(posts, junc);
-            Show(wedge, junc && k.Both);
-            Show(railL, (straight || junc) && !k.OpenL && !k.FillL);
-            Show(railR, (straight || junc) && !k.OpenR && !k.FillR);
+            Show(wedge, false);                                           // the split turns instead
+            Show(railL, (straight || junc) && !k.OpenL);
+            Show(railR, (straight || junc) && !k.OpenR);
             Show(end, (straight || junc) && !k.Front);
-            Show(fillL, k.FillL);
-            Show(fillSlatsL, k.FillL);
-            Show(fillR, k.FillR);
-            Show(fillSlatsR, k.FillR);
+            Show(fillL, false);
+            Show(fillSlatsL, false);
+            Show(fillR, false);
+            Show(fillSlatsR, false);
             Show(chute, k.Chute);
         }
 
@@ -1454,6 +1492,41 @@ namespace FerroEngrenagem
         Quaternion baseL, baseR;
         float speed, offset, angle, next;
         int mode;
+        // The moving band (user 2026-11-24: the band itself must run, not only lines on it): the submeshes with the
+        // FeBeltBand material (straight, curve, wide-belt fill, ramp) have their own UV, v along the travel in tiles
+        // of BandTile m; their texture offset runs with the belt speed (the cleats are molded in the texture).
+        const float BandTile = 0.25f;
+        static readonly int MainTexSt = Shader.PropertyToID("_MainTex_ST");
+        readonly List<Renderer> bandR = new List<Renderer>();
+        readonly List<int> bandI = new List<int>();
+        MaterialPropertyBlock bandMpb;
+        float bandScale = 1f, bandV;
+
+        // Diagnostic (2026-11-24, joins that did not show their curves in game): one log line when a belt's look
+        // changes, with what decided it. At most 600 lines per session.
+        static int lookLogs;
+        string lastSig;
+
+        void LogLook(World world, BlockValue bv, BeltLook k)
+        {
+            if (lookLogs >= 600) return;
+            string sig = k.Mode + (k.SplitL ? "L" : "") + (k.SplitR ? "R" : "") + (k.Front ? "F" : "") +
+                         (k.MergeL ? "m" : "") + (k.MergeR ? "n" : "") + (k.BackFed ? "b" : "") +
+                         (k.OpenL ? "l" : "") + (k.OpenR ? "r" : "") + (k.Closed ? "C" : "") + (k.Ramp ? "U" : "");
+            if (sig == lastSig) return;
+            lastSig = sig;
+            lookLogs++;
+            StringBuilder ex = new StringBuilder();
+            foreach (Vector3i e in Belt.Exits(world, pos, bv))
+                ex.Append(' ').Append(e.x - pos.x).Append(',').Append(e.y - pos.y).Append(',').Append(e.z - pos.z);
+            Vector3i f = Belt.Front(bv), l = Belt.Left(bv);
+            Log.Out(FerroEngrenagemMod.LogPrefix + "belt look " + bv.Block.GetBlockName() + " at " + pos + " front " +
+                    f.x + "," + f.z + " left " + l.x + "," + l.z + " exits[" + ex + " ] -> mode " + k.Mode +
+                    " split " + (k.SplitL ? "L" : "-") + (k.SplitR ? "R" : "-") + " merge " + (k.MergeL ? "L" : "-") +
+                    (k.MergeR ? "R" : "-") + (k.BackFed ? " back" : "") + " front " + k.Front +
+                    " open " + (k.OpenL ? "L" : "-") + (k.OpenR ? "R" : "-") +
+                    " parts curveL=" + (parts.setL != null) + " curveR=" + (parts.setR != null));
+        }
 
         /// <summary>The look shown now (the Conveyor Stand under it follows it).</summary>
         public BeltLook Look { get; private set; }
@@ -1474,6 +1547,19 @@ namespace FerroEngrenagem
             if (p.cslR != null) s.baseR = p.cslR.localRotation;
             s.slide = Belt.IsDown(block) ? (Vector3.forward - Vector3.up)
                     : Belt.IsRamp(block) ? (Vector3.forward + Vector3.up) : Vector3.forward;
+            s.bandScale = s.slide.magnitude / BandTile;           // band metres per metre of travel, in tiles
+            s.bandR.Clear();
+            s.bandI.Clear();
+            foreach (Renderer r in ebcd.transform.GetComponentsInChildren<Renderer>(true))
+            {
+                Material[] ms = r.sharedMaterials;
+                for (int i = 0; i < ms.Length; i++)
+                    if (ms[i] != null && ms[i].name.StartsWith("FeBeltBand", System.StringComparison.Ordinal))
+                    {
+                        s.bandR.Add(r);
+                        s.bandI.Add(i);
+                    }
+            }
             s.next = 0f;
             BeltLook start = new BeltLook();
             start.Closed = s.closed;
@@ -1494,11 +1580,20 @@ namespace FerroEngrenagem
                     speed = Belt.Speed(world, pos, bv);
                     BeltLook k = BeltLook.Evaluate(world, pos, bv);
                     parts.Apply(k);
+                    LogLook(world, bv, k);
                     mode = k.Mode;
                     Look = k;
                 }
             }
             if (speed <= 0f || closed) return;   // nothing moves you can see in a duct
+            if (bandR.Count > 0)
+            {
+                bandV = Mathf.Repeat(bandV + speed * bandScale * Time.deltaTime, 1f);
+                if (bandMpb == null) bandMpb = new MaterialPropertyBlock();
+                bandMpb.SetVector(MainTexSt, new Vector4(1f, 1f, 0f, -bandV));   // the texture runs toward +v
+                for (int i = 0; i < bandR.Count; i++)
+                    if (bandR[i] != null && bandR[i].gameObject.activeInHierarchy) bandR[i].SetPropertyBlock(bandMpb, bandI[i]);
+            }
             if (mode == 1 || mode == 2)
             {
                 // the slats turn around the back corner: radius 0.5 m, so speed / 0.5 rad/s
