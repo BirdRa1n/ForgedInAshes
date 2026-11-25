@@ -8,7 +8,7 @@
                 - <modelo>_HD.blend mais novo que o <modelo>_HD.fbx (editado à mão no Blender)
                     -> reexporta o FBX desse .blend (tools/blender_export_hd.py);
                 - <modelo>_src.blend mais novo que o _HD.blend e o FBX (geometria alterada)
-                    -> retexturiza e faz o bake (F:\IA\texturizar.bat <config>), o que REFAZ o _HD.blend;
+                    -> retexturiza e faz o bake (F:\IA\fe_blender\texturizar_pbr.py <config>), o que REFAZ o _HD.blend;
                 - se os dois mudaram, o _HD.blend vence (para não perder a edição à mão) e aparece um aviso.
               Modelos antigos: Art/feKinetic/feKinetic.blend mais novo que os FBX -> export_feKinetic.py.
               Se algum FBX ou textura ficou mais novo que o bundle: Unity FeBuild.BuildAll.
@@ -46,7 +46,7 @@ $icons = Join-Path $mod 'UIAtlases\ItemIconAtlas'
 # ------------------------------------------------------------------ caminhos das ferramentas (ajuste aqui se mudar)
 $Blender = 'C:\Program Files\Blender Foundation\Blender 5.3\blender.exe'
 $Unity = 'E:\UnityEditors\2022.3.62f2\Editor\Unity.exe'
-$Texturizar = 'F:\IA\texturizar.bat'
+$Texturizar = 'F:\IA\fe_blender\texturizar_pbr.py'   # o que F:\IA\texturizar.bat roda
 $IaConfigs = 'F:\IA\fe_blender\configs'
 $Python = 'python'
 # modelo -> nome do ícone quando são diferentes (Art/feHD/render_icons_hd.py BLOCKS)
@@ -181,9 +181,9 @@ function Fazer-Modelos {
         else {
             $cfg = Join-Path $IaConfigs "$($e.Modelo).json"
             if (-not (Test-Path $cfg)) { Aviso "$($e.Modelo): sem config da IA ($cfg), pulei"; $falhas += $e.Modelo; continue }
-            Exigir $Texturizar 'texturizar.bat'
+            Exigir $Texturizar 'texturizar_pbr.py'
             Info "$($e.Modelo): retexturizando e fazendo o bake (alguns minutos)..."
-            $code = Rodar 'cmd.exe' @('/c', (Q $Texturizar), (Q $cfg)) $log
+            $code = Rodar $Blender @('-b', '--python', (Q $Texturizar), '--', (Q $cfg)) $log
         }
         if ($code -ne 0 -or (-not $Simular -and -not (Test-Path $e.Fbx))) { Aviso "$($e.Modelo): FALHOU (log: $log)"; $falhas += $e.Modelo }
         else { Ok "$($e.Modelo): ok" }

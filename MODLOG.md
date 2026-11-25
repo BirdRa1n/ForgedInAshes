@@ -1116,5 +1116,7 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
     mais novos que o bundle -> Unity `FeBuild.BuildAll` (mostra os erros do febuild.log se falhar).
   - icones: ícone mais velho que o `_HD.blend` -> `render_icons_hd.py` + `apply_icons.py`.
   - mod: os 4 validadores, `build.ps1`, `install.ps1` (link; `-Copiar` = cópia); avisa se o jogo/Unity estão abertos.
-- Testado: estado, simulação de tudo, ícone do Funil, passo do mod (validadores, DLL, link), reexportação do
-  feCrusher para uma pasta temporária (FBX igual ao original). Não rodei a retexturização nem o Unity por ele.
+- Testado: `tudo` de verdade (3 esteiras retexturizadas, Unity, 3 ícones, mod) em 105 s; antes: estado, simulação,
+  ícone do Funil, passo do mod, reexportação do
+  feCrusher para uma pasta temporária (FBX igual ao original). Correção: o `texturizar.bat` via `cmd /c` quebrava as
+  aspas; agora o Blender roda `texturizar_pbr.py` direto. Bundle 98,3 MB (perto do limite de 100 MB do GitHub).
