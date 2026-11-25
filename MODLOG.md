@@ -1104,3 +1104,17 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   `FeMerge_L/R` (a curva do outro lado girada 180°, lona com v invertido: corre do lado para a frente) e
   `FeMergeRail_L/R`. Reta + união(ões) quando há entrada por trás; só a(s) curva(s) de entrada quando não há.
   Render de conferência ok. **Não verificado no jogo.**
+
+## 2026-11-25: ferramenta única (fe.bat / tools/fe.ps1)
+
+- Pedido: um script para recompilar os modelos alterados no Blender, gerar os ícones e compilar/instalar o mod.
+- `fe.bat` (duplo clique = menu) chama `tools/fe.ps1 [estado|modelos|icones|mod|tudo] [-Modelos a,b] [-Forcar]
+  [-Copiar] [-Simular]`:
+  - modelos: `_HD.blend` mais novo que o `_HD.fbx` -> reexporta o FBX (`tools/blender_export_hd.py`, mesmas opções
+    do texturizador); `_src.blend` mais novo -> `F:\IA	exturizar.bat <config>` (os dois mudaram: vale o `_HD.blend`,
+    com aviso); `feKinetic.blend` mais novo que os FBX da lista do `export_feKinetic.py` -> reexporta; FBX/texturas
+    mais novos que o bundle -> Unity `FeBuild.BuildAll` (mostra os erros do febuild.log se falhar).
+  - icones: ícone mais velho que o `_HD.blend` -> `render_icons_hd.py` + `apply_icons.py`.
+  - mod: os 4 validadores, `build.ps1`, `install.ps1` (link; `-Copiar` = cópia); avisa se o jogo/Unity estão abertos.
+- Testado: estado, simulação de tudo, ícone do Funil, passo do mod (validadores, DLL, link), reexportação do
+  feCrusher para uma pasta temporária (FBX igual ao original). Não rodei a retexturização nem o Unity por ele.
