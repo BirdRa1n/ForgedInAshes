@@ -1128,7 +1128,6 @@
 	<remove xpath="/recipes/recipe[@name='resourcePaint'][@craft_area='feRefinery']"/>
 	<remove xpath="/recipes/recipe[@name='resourcePaper'][@craft_area='feRefinery']"/>
 	<remove xpath="/recipes/recipe[@name='drinkJarEmpty'][@craft_area='feFoundry']"/>
-	<remove xpath="/recipes/recipe[@name='feSteamEngine'][@craft_area='feGarage']"/>
 	<append xpath="/recipes">
 		<recipe name="fePipeHP" count="2" craft_area="feAssembler" craft_time="20" always_unlocked="true">
 			<ingredient name="fePipe" count="2"/>
@@ -1456,6 +1455,23 @@
 			<ingredient name="feResourceIronPlate" count="4"/>
 			<ingredient name="fePipe" count="2"/>
 		</recipe>
+		<recipe name="feBoilerFirebox" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feFirebox" count="1"/>
+			<ingredient name="resourceClayLump" count="10"/>
+		</recipe>
+		<recipe name="feBoilerDrum" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feBoilerShell" count="1"/>
+			<ingredient name="feSafetyValve" count="1"/>
+			<ingredient name="fePressureGaugeItem" count="1"/>
+			<ingredient name="fePipe" count="2"/>
+		</recipe>
+		<recipe name="feSteamTurbine" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteamCylinder" count="1"/>
+			<ingredient name="feTurbineRotor" count="1"/>
+			<ingredient name="feValveGear" count="1"/>
+			<ingredient name="feGasket" count="4"/>
+			<ingredient name="fePipeHP" count="2"/>
+		</recipe>
 		<recipe name="feHub" count="1" craft_area="feLathe" craft_time="6" always_unlocked="true">
 			<ingredient name="resourceForgedIron" count="2"/>
 		</recipe>
@@ -1680,6 +1696,11 @@
 		<recipe name="feSteamCylinder" count="1" craft_area="feLathe" craft_time="20" always_unlocked="true">
 			<ingredient name="feSteamCylinderRaw" count="1"/>
 		</recipe>
+		<recipe name="feTurbineRotor" count="1" craft_area="feLathe" craft_time="40" always_unlocked="true">
+			<ingredient name="feCrankshaft" count="1"/>
+			<ingredient name="feSteelPlate" count="6"/>
+			<ingredient name="feResourceGear" count="4"/>
+		</recipe>
 		<recipe name="feBoilerShell" count="1" craft_area="feMetalShop" craft_time="30" always_unlocked="true">
 			<ingredient name="feSteelPlate" count="8"/>
 			<ingredient name="resourceNail" count="30"/>
@@ -1705,19 +1726,6 @@
 			<ingredient name="feResourceGear" count="2"/>
 			<ingredient name="feRod" count="2"/>
 			<ingredient name="feResourceIronShaft" count="1"/>
-		</recipe>
-		<recipe name="feSteamEngine" count="1" craft_area="feGarage" craft_time="60" always_unlocked="true">
-			<ingredient name="feBoilerShell" count="1"/>
-			<ingredient name="feFirebox" count="1"/>
-			<ingredient name="feSteamCylinder" count="2"/>
-			<ingredient name="fePiston" count="2"/>
-			<ingredient name="feCrankshaft" count="1"/>
-			<ingredient name="feFlywheel" count="2"/>
-			<ingredient name="feSafetyValve" count="1"/>
-			<ingredient name="fePressureGaugeItem" count="1"/>
-			<ingredient name="feValveGear" count="1"/>
-			<ingredient name="resourceMetalPipe" count="4"/>
-			<ingredient name="feGasket" count="4"/>
 		</recipe>
 	</append>
 	<append xpath="/recipes/recipe[@name='armorAssassinHelmet'][@craft_area='feLoom']">

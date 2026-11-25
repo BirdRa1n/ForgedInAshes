@@ -2412,11 +2412,11 @@
 		</block>
 		<block name="feMechDrill">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feCrusher"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feMechDrill"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMechDrillDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrusherPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechDrillPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2426,11 +2426,11 @@
 		</block>
 		<block name="feMechSaw">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feCrusher"/>
-			<property name="CustomIconTint" value="c08040"/>
+			<property name="CustomIcon" value="feMechSaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMechSawDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCrusherPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechSawPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2440,11 +2440,11 @@
 		</block>
 		<block name="feMechHarvester">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feSpeedBox"/>
-			<property name="CustomIconTint" value="80ff80"/>
+			<property name="CustomIcon" value="feMechHarvester"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMechHarvesterDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechHarvesterPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2454,11 +2454,11 @@
 		</block>
 		<block name="feDeployer">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feTorqueRegulator"/>
-			<property name="CustomIconTint" value="ffa0ff"/>
+			<property name="CustomIcon" value="feDeployer"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feDeployerDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueRegulatorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feDeployerPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2468,11 +2468,11 @@
 		</block>
 		<block name="feMechPiston">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feClutch"/>
-			<property name="CustomIconTint" value="a0a0ff"/>
+			<property name="CustomIcon" value="feMechPiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMechPistonDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feClutchPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechPistonPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2483,11 +2483,11 @@
 		</block>
 		<block name="feFan">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feMechPump"/>
-			<property name="CustomIconTint" value="80c0ff"/>
+			<property name="CustomIcon" value="feFan"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feFanDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechPumpPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFanPrefab"/>
 			<property name="FeKinetic" value="pump"/>
 			<property name="FeShaftAxis" value="x"/>
 			<property name="FeFluid" value="none"/>
@@ -2497,136 +2497,178 @@
 		</block>
 		<block name="fePistonHead">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="fePipe"/>
-			<property name="CustomIconTint" value="a0a0ff"/>
+			<property name="CustomIcon" value="fePistonHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="fePistonHeadDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?fePipePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?fePistonHeadPrefab"/>
 			<property name="CreativeMode" value="None"/>
 			<property name="Shape" value="ModelEntity"/>
 		</block>
 		<block name="feItemChute">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="fePipe"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feItemChute"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feItemChuteDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?fePipePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feItemChutePrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeHolder, FerroEngrenagem"/>
 			<property name="FeChute" value="true"/>
 			<property name="Shape" value="ModelEntity"/>
 		</block>
 		<block name="feDepot">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feCaster"/>
-			<property name="CustomIconTint" value="e0e0a0"/>
+			<property name="CustomIcon" value="feDepot"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feDepotDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCasterPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feDepotPrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeHolder, FerroEngrenagem"/>
 			<property name="FeDepot" value="true"/>
 			<property name="Shape" value="ModelEntity"/>
 		</block>
 		<block name="feItemVault">
 			<property name="Extends" value="feBeltCrate"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="c0a060"/>
+			<property name="CustomIcon" value="feItemVault"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feItemVaultDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feItemVaultPrefab"/>
 			<property name="FeVault" value="true"/>
 		</block>
 		<block name="feBeltTunnel">
 			<property name="Extends" value="feConveyor"/>
-			<property name="CustomIcon" value="feConveyorDuct"/>
-			<property name="CustomIconTint" value="e0c060"/>
+			<property name="CustomIcon" value="feBeltTunnel"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feBeltTunnelDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feConveyorDuctPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBeltTunnelPrefab"/>
 			<property name="FeBeltTunnel" value="true"/>
 		</block>
 		<block name="feHosePulley">
 			<property name="Extends" value="feMechPump"/>
-			<property name="CustomIcon" value="feMechPump"/>
-			<property name="CustomIconTint" value="6060ff"/>
+			<property name="CustomIcon" value="feHosePulley"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feHosePulleyDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feMechPumpPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feHosePulleyPrefab"/>
 			<property name="FeIntakeDepth" value="16"/>
 			<property name="FeIntakeWater" value="6"/>
 			<property name="FeFluidRate" value="300"/>
 		</block>
 		<block name="feWindmill">
 			<property name="Extends" value="feWaterWheel"/>
-			<property name="CustomIcon" value="feWaterWheel"/>
-			<property name="CustomIconTint" value="e0e0e0"/>
+			<property name="CustomIcon" value="feWindmill"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWindmillDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterWheelPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWindmillPrefab"/>
 			<property name="FeWind" value="true"/>
 			<property name="FeTorqueOutput" value="256"/>
 		</block>
 		<block name="feCogwheel">
 			<property name="Extends" value="feShaft"/>
-			<property name="CustomIcon" value="feSpinInverter"/>
-			<property name="CustomIconTint" value="e0c060"/>
+			<property name="CustomIcon" value="feCogwheel"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feCogwheelDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpinInverterPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feCogwheelPrefab"/>
 			<property name="FeKinetic" value="cog"/>
 		</block>
 		<block name="feSignalAnalog">
 			<property name="Extends" value="fePipe"/>
-			<property name="CustomIcon" value="feClutch"/>
-			<property name="CustomIconTint" value="ffff40"/>
+			<property name="CustomIcon" value="feSignalAnalog"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feSignalAnalogDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feClutchPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSignalAnalogPrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeLever, FerroEngrenagem"/>
 			<property name="FeFluid" value="none"/>
 			<property name="FeSignal" value="analog"/>
 		</block>
 		<block name="feWirelessTx">
 			<property name="Extends" value="fePipe"/>
-			<property name="CustomIcon" value="feTorqueGauge"/>
-			<property name="CustomIconTint" value="ff8040"/>
+			<property name="CustomIcon" value="feWirelessTx"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWirelessTxDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueGaugePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWirelessTxPrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeLever, FerroEngrenagem"/>
 			<property name="FeFluid" value="none"/>
 			<property name="FeSignal" value="wtx"/>
 		</block>
 		<block name="feWirelessRx">
 			<property name="Extends" value="fePipe"/>
-			<property name="CustomIcon" value="feTorqueGauge"/>
-			<property name="CustomIconTint" value="40c0ff"/>
+			<property name="CustomIcon" value="feWirelessRx"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWirelessRxDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueGaugePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWirelessRxPrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeLever, FerroEngrenagem"/>
 			<property name="FeFluid" value="none"/>
 			<property name="FeSignal" value="wrx"/>
 		</block>
 		<block name="feDisplayPanel">
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feTorqueGauge"/>
-			<property name="CustomIconTint" value="ff9030"/>
+			<property name="CustomIcon" value="feDisplayPanel"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feDisplayPanelDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueGaugePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feDisplayPanelPrefab"/>
 			<property name="Class" value="FerroEngrenagem.FeDisplay, FerroEngrenagem"/>
 			<property name="Shape" value="ModelEntity"/>
 		</block>
 		<block name="feItemDrain">
 			<property name="Extends" value="feWasher"/>
-			<property name="CustomIcon" value="feFluidFiller"/>
-			<property name="CustomIconTint" value="60a0ff"/>
+			<property name="CustomIcon" value="feItemDrain"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feItemDrainDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidFillerPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feItemDrainPrefab"/>
 			<property name="FeFluid" value="processor"/>
 			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feBoilerFirebox">
+			<property name="Extends" value="fePipe"/>
+			<property name="CustomIcon" value="feFluidFiller"/>
+			<property name="CustomIconTint" value="ff6020"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBoilerFireboxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidFillerPrefab"/>
+			<property name="FeFluid" value="burner"/>
+			<property name="FeFluidRate" value="60"/>
+			<property name="FeHeatPerLitre" value="2"/>
+			<property name="FeHeatMax" value="900"/>
+		</block>
+		<block name="feBoilerDrum">
+			<property name="Extends" value="fePipe"/>
+			<property name="CustomIcon" value="feWaterTank"/>
+			<property name="CustomIconTint" value="c08060"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBoilerDrumDesc"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterTankPrefab"/>
+			<property name="FeFluid" value="boiler"/>
+			<property name="FeFluidBuffer" value="1000"/>
+			<property name="FeSteamBuffer" value="600"/>
+			<property name="FeSteamPerHeat" value="90"/>
+			<property name="FeSteamMax" value="180"/>
+			<property name="FeOutBar" value="4"/>
+		</block>
+		<block name="feSteamTurbine">
+			<property name="Extends" value="feWaterWheel"/>
+			<property name="CustomIcon" value="feSpeedBox"/>
+			<property name="CustomIconTint" value="e0e0ff"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSteamTurbineDesc"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
+			<property name="FeSteamTurbine" value="true"/>
+			<property name="FeFluid" value="turbine"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeTorqueOutput" value="1024"/>
+			<property name="FeSourceRpm" value="32"/>
+			<property name="FeSteamRate" value="240"/>
+			<property name="FeFluidBuffer" value="120"/>
+			<property name="FeMinBar" value="1.5"/>
 		</block>
 		<block name="feTreeRubberSeed">
 			<property name="Extends" value="treePlantedOak1m"/>

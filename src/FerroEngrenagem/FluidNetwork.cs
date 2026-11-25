@@ -37,7 +37,7 @@ using UnityEngine;
 namespace FerroEngrenagem
 {
     public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor,
-                            GasTank, Valve, Gauge, Burner, Tapper, TowerSection }
+                            GasTank, Valve, Gauge, Burner, Tapper, TowerSection, Boiler, Turbine }
 
     public class FluidPort
     {
@@ -202,6 +202,8 @@ namespace FerroEngrenagem
                     case "burner": k = FluidKind.Burner; break;
                     case "tapper": k = FluidKind.Tapper; break;
                     case "towersection": k = FluidKind.TowerSection; break;
+                    case "boiler": k = FluidKind.Boiler; break;
+                    case "turbine": k = FluidKind.Turbine; break;
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -299,6 +301,12 @@ namespace FerroEngrenagem
                     break;
                 case FluidKind.Valve:
                     FluidControl.Ports(world, pos, bv, l);
+                    break;
+                case FluidKind.Boiler:
+                    SteamPlant.BoilerPorts(pos, l);
+                    break;
+                case FluidKind.Turbine:
+                    SteamPlant.TurbinePorts(pos, bv, l);
                     break;
                 case FluidKind.Gauge:
                     l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = Rot(bv, Vector3.back), Out = false, Fluid = "" });
@@ -687,6 +695,14 @@ namespace FerroEngrenagem
                         case FluidKind.Gauge:
                             readers.Add(port);
                             break;
+                        case FluidKind.Boiler:
+                            if (port.Out) { offer[port] = s.Steam; offerBar[port] = Fluids.Prop(bv.Block, "FeOutBar", 4f); }
+                            else demand[port] = SteamPlant.BoilerDemand(bv, s);
+                            break;
+                        case FluidKind.Turbine:
+                            if (port.Out) { offer[port] = s.Steam; offerBar[port] = 1f; }
+                            else demand[port] = SteamPlant.TurbineDemand(bv, s);
+                            break;
                         case FluidKind.Burner:
                             demand[port] = FluidControl.BurnerDemand(bv, s, dt);
                             break;
@@ -743,8 +759,10 @@ namespace FerroEngrenagem
                 Flow(world, net, members, offer, demand, offerBar, dt);
             }
 
-            // 3. joined tanks share their content (communicating vessels, Create-like multi-block tanks)
+            // 3. joined tanks share their content (communicating vessels, Create-like multi-block tanks); so do the
+            // drums of one boiler
             FluidControl.EqualizeTanks(world);
+            SteamPlant.EqualizeBoilers(world);
 
             // 4. the machines turn what they received into their products (and engines run)
             foreach (Vector3i p in FluidStore.Devices)
@@ -755,6 +773,8 @@ namespace FerroEngrenagem
                 if (k == FluidKind.SteamEngine) SteamEngine.Run(world, p, bv, FluidStore.Get(p), dt);
                 else if (k == FluidKind.Burner) FluidControl.BurnerTick(world, p, bv, FluidStore.Get(p), dt);
                 else if (k == FluidKind.Gauge) FluidControl.GaugeTick(world, p, bv, FluidStore.Get(p));
+                else if (k == FluidKind.Boiler) SteamPlant.BoilerTick(world, p, bv, FluidStore.Get(p), dt);
+                else if (k == FluidKind.Turbine) SteamPlant.TurbineTick(world, p, bv, FluidStore.Get(p), dt);
             }
             FluidStore.MarkDirty();
         }
@@ -967,7 +987,7 @@ namespace FerroEngrenagem
         {
             FluidState s = FluidStore.Get(o.Owner);
             FluidKind k = Fluids.Kind(world.GetBlock(o.Owner).Block);
-            if (k == FluidKind.Condenser || k == FluidKind.SteamEngine) s.Steam = Mathf.Max(0f, s.Steam - amount);
+            if (k == FluidKind.Condenser || k == FluidKind.SteamEngine || k == FluidKind.Boiler || k == FluidKind.Turbine) s.Steam = Mathf.Max(0f, s.Steam - amount);
             else if (k == FluidKind.Filler || k == FluidKind.Smelter || k == FluidKind.Tapper || k == FluidKind.TowerSection
                      || k == FluidKind.Valve)
             {
@@ -984,7 +1004,8 @@ namespace FerroEngrenagem
             BlockValue bv = world.GetBlock(d.Owner);
             FluidState s = FluidStore.Get(d.Owner);
             FluidKind k = Fluids.Kind(bv.Block);
-            if (k == FluidKind.SteamEngine) { s.Amount += amount; s.Fluid = Fluids.Water; }
+            if (k == FluidKind.SteamEngine || k == FluidKind.Boiler) { s.Amount += amount; s.Fluid = Fluids.Water; }
+            else if (k == FluidKind.Turbine) { s.Amount += amount; s.Fluid = Fluids.Steam; s.LastFlow += amount / dt * 60f; }
             else if (k == FluidKind.Processor)
             {
                 if (amount > 0f && fluid.Length > 0) { ProcessMachine.Got(d, s, amount, fluid); s.LastFlow += amount / dt * 60f; }
@@ -1222,6 +1243,9 @@ namespace FerroEngrenagem
                 case FluidKind.Tapper:
                 case FluidKind.TowerSection:
                     return (name + "\n" + FluidControl.Describe(world, owner, bv, s)).Trim();
+                case FluidKind.Boiler:
+                case FluidKind.Turbine:
+                    return (name + "\n" + SteamPlant.Describe(world, owner, bv, s)).Trim();
                 case FluidKind.Tank:
                     return (name + "\n" + string.Format(Fluids.Text("feFluidStored", "{0}: {1} / {2} L"),
                         Fluids.FluidName(s.Fluid), Mathf.RoundToInt(s.Amount),

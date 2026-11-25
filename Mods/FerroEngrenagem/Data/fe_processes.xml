@@ -346,11 +346,12 @@
 	<item name="feEngineerManual" text="Manual do Engenheiro"/>
 	<item name="feBoilerShell" text="Corpo de Caldeira"/>
 	<item name="feFirebox" text="Fornalha"/>
-	<item name="feSteamCylinderRaw" text="Cilindro a Vapor Bruto"/>
-	<item name="feSteamCylinder" text="Cilindro a Vapor"/>
+	<item name="feSteamCylinderRaw" text="Carcaça de Turbina Bruta"/>
+	<item name="feSteamCylinder" text="Carcaça de Turbina"/>
+	<item name="feTurbineRotor" text="Rotor de Turbina"/>
 	<item name="feSafetyValve" text="Válvula de Segurança"/>
 	<item name="fePressureGaugeItem" text="Manômetro de Caldeira"/>
-	<item name="feValveGear" text="Distribuidor"/>
+	<item name="feValveGear" text="Regulador de Turbina"/>
 	<!-- processes -->
 	<process id="crush_shale" kind="crush" machine="feCrusher" input="resourceOilShale" count="2" output="feShaleCrushed" out_count="2" time="2" torque="128" text="O Triturador mói o xisto."/>
 	<process id="retort_shale" kind="distill" machine="feShaleRetort" input="feShaleCrushed" count="10" fluid_out="crude_oil,shale_gas" out_liters="40,60" extra="feShaleAsh" extra_count="2" time="60" heat="true" text="A Retorta aquece o xisto sem ar: óleo cru (em cima), gás de xisto (direita) e cinza."/>
@@ -491,7 +492,7 @@
 	<process id="drain_lube" kind="wash" machine="feItemDrain" input="feResourceLubricant" count="1" fluid_out="lubricant" out_liters="10" time="0.5" text="Esvazia no cano de cima."/>
 	<process id="drain_ethanol" kind="wash" machine="feItemDrain" input="feEthanol" count="1" fluid_out="ethanol" out_liters="5" time="0.5" text="Esvazia no cano de cima."/>
 	<process id="drain_gas_canister" kind="wash" machine="feItemDrain" input="feGasCanister" count="1" fluid_out="fuel_gas" out_liters="50" time="0.5" text="Esvazia no cano de cima."/>
-	<process id="cast_feSteamCylinderRaw" kind="cast" machine="feCaster" mold="feMoldCylinder" fluid_in="molten_iron" liters="40" output="feSteamCylinderRaw" out_count="1" time="12" text="Molde de Cilindro."/>
+	<process id="cast_feSteamCylinderRaw" kind="cast" machine="feCaster" mold="feMoldCylinder" fluid_in="molten_iron" liters="40" output="feSteamCylinderRaw" out_count="1" time="12" text="Molde de Carcaça de Turbina."/>
 	<process id="cook_drinkJarBeer" kind="boil" machine="feCookerIndustrial" input="resourceCropHopsFlower,drinkJarBoiledWater" count="16,4" output="drinkJarBeer" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>
 	<process id="cook_drinkJarBoiledWater" kind="boil" machine="feCookerIndustrial" input="drinkJarRiverWater" count="4" output="drinkJarBoiledWater" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>
 	<process id="cook_drinkJarPureMineralWater" kind="boil" machine="feCookerIndustrial" input="drinkJarBoiledWater,resourceCoal,resourceCropGoldenrodPlant,resourceCropChrysanthemumPlant" count="4,4,4,4" output="drinkJarPureMineralWater" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>

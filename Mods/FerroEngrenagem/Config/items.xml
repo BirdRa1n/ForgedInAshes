@@ -2,6 +2,8 @@
 	<!-- F0-T06: test item, only to prove the mod loads. Remove before release. -->
 	<append xpath="/items">
 		<item name="feTestItem">
+			<property name="CustomIcon" value="feTestItem"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="HoldType" value="45"/>
 			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
 			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
@@ -9,8 +11,6 @@
 			<property name="Weight" value="1"/>
 			<property name="Stacknumber" value="100"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMechanicalParts"/>
-			<property name="CustomIconTint" value="ff8000"/>
 			<property name="DescriptionKey" value="feTestItemDesc"/>
 			<property name="CreativeMode" value="Player"/>
 		</item>
@@ -443,8 +443,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceOilShale"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feShaleCrushed"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feShaleCrushedDesc"/>
 		</item>
 		<item name="feShaleAsh">
@@ -455,8 +455,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceCrushedSand"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feShaleAsh"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feShaleAshDesc"/>
 		</item>
 		<item name="feSulfur">
@@ -467,8 +467,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePotassiumNitratePowder"/>
-			<property name="CustomIconTint" value="f0e040"/>
+			<property name="CustomIcon" value="feSulfur"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSulfurDesc"/>
 		</item>
 		<item name="feGasCanister">
@@ -479,8 +479,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="ammoGasCan"/>
-			<property name="CustomIconTint" value="60a0ff"/>
+			<property name="CustomIcon" value="feGasCanister"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feGasCanisterDesc"/>
 		</item>
 		<item name="feEthanol">
@@ -491,8 +491,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="drinkJarGrandpasMoonshine"/>
-			<property name="CustomIconTint" value="e0f0ff"/>
+			<property name="CustomIcon" value="feEthanol"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEthanolDesc"/>
 		</item>
 		<item name="feRubberCoagulum">
@@ -503,8 +503,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceClayLump"/>
-			<property name="CustomIconTint" value="f0f0e0"/>
+			<property name="CustomIcon" value="feRubberCoagulum"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberCoagulumDesc"/>
 		</item>
 		<item name="feRubberSheetRaw">
@@ -515,8 +515,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePaper"/>
-			<property name="CustomIconTint" value="e0d8b0"/>
+			<property name="CustomIcon" value="feRubberSheetRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberSheetRawDesc"/>
 		</item>
 		<item name="feRubberRaw">
@@ -527,8 +527,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePaper"/>
-			<property name="CustomIconTint" value="b09060"/>
+			<property name="CustomIcon" value="feRubberRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberRawDesc"/>
 		</item>
 		<item name="feCarbonBlack">
@@ -539,8 +539,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceCoal"/>
-			<property name="CustomIconTint" value="303030"/>
+			<property name="CustomIcon" value="feCarbonBlack"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCarbonBlackDesc"/>
 		</item>
 		<item name="feRubberCompound">
@@ -551,8 +551,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceClayLump"/>
-			<property name="CustomIconTint" value="404040"/>
+			<property name="CustomIcon" value="feRubberCompound"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberCompoundDesc"/>
 		</item>
 		<item name="feTire">
@@ -563,8 +563,8 @@
 			<property name="Stacknumber" value="20"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="vehicleWheels"/>
-			<property name="CustomIconTint" value="303030"/>
+			<property name="CustomIcon" value="feTire"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feTireDesc"/>
 		</item>
 		<item name="feGasket">
@@ -575,8 +575,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceDuctTape"/>
-			<property name="CustomIconTint" value="303030"/>
+			<property name="CustomIcon" value="feGasket"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feGasketDesc"/>
 		</item>
 		<item name="feRubberBelt">
@@ -587,8 +587,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceDuctTape"/>
-			<property name="CustomIconTint" value="505050"/>
+			<property name="CustomIcon" value="feRubberBelt"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberBeltDesc"/>
 		</item>
 		<item name="feHose">
@@ -599,8 +599,8 @@
 			<property name="Stacknumber" value="100"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMetalPipe"/>
-			<property name="CustomIconTint" value="303030"/>
+			<property name="CustomIcon" value="feHose"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feHoseDesc"/>
 		</item>
 		<item name="feRubberSole">
@@ -611,8 +611,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceLeather"/>
-			<property name="CustomIconTint" value="303030"/>
+			<property name="CustomIcon" value="feRubberSole"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRubberSoleDesc"/>
 		</item>
 		<item name="fePolymerDust">
@@ -623,8 +623,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceScrapPolymers"/>
-			<property name="CustomIconTint" value="c0c0ff"/>
+			<property name="CustomIcon" value="fePolymerDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePolymerDustDesc"/>
 		</item>
 		<item name="feCircuitBase">
@@ -635,8 +635,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="40a040"/>
+			<property name="CustomIcon" value="feCircuitBase"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCircuitBaseDesc"/>
 		</item>
 		<item name="feBatteryCase">
@@ -647,8 +647,8 @@
 			<property name="Stacknumber" value="20"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="carBattery"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feBatteryCase"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBatteryCaseDesc"/>
 		</item>
 		<item name="feLensRaw">
@@ -659,8 +659,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceScopeLens"/>
-			<property name="CustomIconTint" value="a0c0c0"/>
+			<property name="CustomIcon" value="feLensRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feLensRawDesc"/>
 		</item>
 		<item name="feGlassPane">
@@ -671,8 +671,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceBrokenGlass"/>
-			<property name="CustomIconTint" value="c0f0ff"/>
+			<property name="CustomIcon" value="feGlassPane"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feGlassPaneDesc"/>
 		</item>
 		<item name="feBulb">
@@ -683,8 +683,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceBrokenGlass"/>
-			<property name="CustomIconTint" value="ffffc0"/>
+			<property name="CustomIcon" value="feBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBulbDesc"/>
 		</item>
 		<item name="feLightBulb">
@@ -695,8 +695,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="ffff80"/>
+			<property name="CustomIcon" value="feLightBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feLightBulbDesc"/>
 		</item>
 		<item name="feInsulator">
@@ -707,8 +707,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceClayLump"/>
-			<property name="CustomIconTint" value="f0f0f0"/>
+			<property name="CustomIcon" value="feInsulator"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feInsulatorDesc"/>
 		</item>
 		<item name="feSparkPlugCeramic">
@@ -719,8 +719,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceClayLump"/>
-			<property name="CustomIconTint" value="e0e0ff"/>
+			<property name="CustomIcon" value="feSparkPlugCeramic"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSparkPlugCeramicDesc"/>
 		</item>
 		<item name="feSparkPlug">
@@ -731,8 +731,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="e0e0ff"/>
+			<property name="CustomIcon" value="feSparkPlug"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSparkPlugDesc"/>
 		</item>
 		<item name="feRod">
@@ -743,8 +743,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMetalPipe"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feRod"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRodDesc"/>
 		</item>
 		<item name="feRodBrass">
@@ -755,8 +755,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMetalPipe"/>
-			<property name="CustomIconTint" value="e0c060"/>
+			<property name="CustomIcon" value="feRodBrass"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRodBrassDesc"/>
 		</item>
 		<item name="feWireThick">
@@ -767,8 +767,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceBrassWire"/>
-			<property name="CustomIconTint" value="b0b0b0"/>
+			<property name="CustomIcon" value="feWireThick"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feWireThickDesc"/>
 		</item>
 		<item name="feSteelWire">
@@ -779,8 +779,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceBrassWire"/>
-			<property name="CustomIconTint" value="d0d0d0"/>
+			<property name="CustomIcon" value="feSteelWire"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSteelWireDesc"/>
 		</item>
 		<item name="feSteelPlate">
@@ -791,8 +791,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronPlate"/>
-			<property name="CustomIconTint" value="a0b0c0"/>
+			<property name="CustomIcon" value="feSteelPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSteelPlateDesc"/>
 		</item>
 		<item name="feArmorPlate">
@@ -803,8 +803,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronPlate"/>
-			<property name="CustomIconTint" value="6080a0"/>
+			<property name="CustomIcon" value="feArmorPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feArmorPlateDesc"/>
 		</item>
 		<item name="feLeadPlate">
@@ -815,8 +815,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronPlate"/>
-			<property name="CustomIconTint" value="707080"/>
+			<property name="CustomIcon" value="feLeadPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feLeadPlateDesc"/>
 		</item>
 		<item name="feProfile">
@@ -827,8 +827,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMetalPipe"/>
-			<property name="CustomIconTint" value="909090"/>
+			<property name="CustomIcon" value="feProfile"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feProfileDesc"/>
 		</item>
 		<item name="feRim">
@@ -839,8 +839,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="vehicleWheels"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feRim"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRimDesc"/>
 		</item>
 		<item name="feHub">
@@ -851,8 +851,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceGear"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feHub"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feHubDesc"/>
 		</item>
 		<item name="feChassisFrame">
@@ -863,8 +863,8 @@
 			<property name="Stacknumber" value="20"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceMetalPipe"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feChassisFrame"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feChassisFrameDesc"/>
 		</item>
 		<item name="feToolHeadRaw">
@@ -875,8 +875,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="meleeToolPickT1IronPickaxe"/>
-			<property name="CustomIconTint" value="808080"/>
+			<property name="CustomIcon" value="feToolHeadRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feToolHeadRawDesc"/>
 		</item>
 		<item name="feToolHead">
@@ -887,8 +887,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="meleeToolPickT1IronPickaxe"/>
-			<property name="CustomIconTint" value="d0d0d0"/>
+			<property name="CustomIcon" value="feToolHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feToolHeadDesc"/>
 		</item>
 		<item name="feNeedle">
@@ -899,8 +899,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceNail"/>
-			<property name="CustomIconTint" value="e0e0e0"/>
+			<property name="CustomIcon" value="feNeedle"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feNeedleDesc"/>
 		</item>
 		<item name="feHinge">
@@ -911,8 +911,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceDoorKnob"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feHinge"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feHingeDesc"/>
 		</item>
 		<item name="feLock">
@@ -923,8 +923,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceDoorKnob"/>
-			<property name="CustomIconTint" value="e0c060"/>
+			<property name="CustomIcon" value="feLock"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feLockDesc"/>
 		</item>
 		<item name="feBuckle">
@@ -935,8 +935,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceDoorKnob"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feBuckle"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBuckleDesc"/>
 		</item>
 		<item name="feZipper">
@@ -947,8 +947,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceNail"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feZipper"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feZipperDesc"/>
 		</item>
 		<item name="feTinCan">
@@ -959,8 +959,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="foodCanSoup"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feTinCan"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feTinCanDesc"/>
 		</item>
 		<item name="feGrenadeShell">
@@ -971,8 +971,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="thrownGrenade"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feGrenadeShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feGrenadeShellDesc"/>
 		</item>
 		<item name="feGrenadeFilled">
@@ -983,8 +983,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="thrownGrenade"/>
-			<property name="CustomIconTint" value="a07050"/>
+			<property name="CustomIcon" value="feGrenadeFilled"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feGrenadeFilledDesc"/>
 		</item>
 		<item name="feRocketFilled">
@@ -995,8 +995,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceRocketCasing"/>
-			<property name="CustomIconTint" value="a07050"/>
+			<property name="CustomIcon" value="feRocketFilled"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRocketFilledDesc"/>
 		</item>
 		<item name="feEngineBlock">
@@ -1007,8 +1007,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="808080"/>
+			<property name="CustomIcon" value="feEngineBlock"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineBlockDesc"/>
 		</item>
 		<item name="feEngineBlockBored">
@@ -1019,8 +1019,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feEngineBlockBored"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineBlockBoredDesc"/>
 		</item>
 		<item name="fePiston">
@@ -1031,8 +1031,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feSteamPiston"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="fePiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePistonDesc"/>
 		</item>
 		<item name="feCrankshaft">
@@ -1043,8 +1043,8 @@
 			<property name="Stacknumber" value="20"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronShaft"/>
-			<property name="CustomIconTint" value="e0e0e0"/>
+			<property name="CustomIcon" value="feCrankshaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCrankshaftDesc"/>
 		</item>
 		<item name="feEngineStage1">
@@ -1055,8 +1055,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="b0b0b0"/>
+			<property name="CustomIcon" value="feEngineStage1"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineStage1Desc"/>
 		</item>
 		<item name="feEngineStage2">
@@ -1067,8 +1067,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feEngineStage2"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineStage2Desc"/>
 		</item>
 		<item name="feEngineStage3">
@@ -1079,8 +1079,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="d0d0d0"/>
+			<property name="CustomIcon" value="feEngineStage3"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineStage3Desc"/>
 		</item>
 		<item name="feEngineStage4">
@@ -1091,8 +1091,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="smallEngine"/>
-			<property name="CustomIconTint" value="e0e0e0"/>
+			<property name="CustomIcon" value="feEngineStage4"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineStage4Desc"/>
 		</item>
 		<item name="feElectricMotorSmall">
@@ -1103,8 +1103,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceCoil"/>
-			<property name="CustomIconTint" value="80a0ff"/>
+			<property name="CustomIcon" value="feElectricMotorSmall"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feElectricMotorSmallDesc"/>
 		</item>
 		<item name="feServo">
@@ -1115,8 +1115,8 @@
 			<property name="Stacknumber" value="50"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceGear"/>
-			<property name="CustomIconTint" value="80a0ff"/>
+			<property name="CustomIcon" value="feServo"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feServoDesc"/>
 		</item>
 		<item name="feBrassDust">
@@ -1127,8 +1127,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceScrapBrass"/>
-			<property name="CustomIconTint" value="e0c060"/>
+			<property name="CustomIcon" value="feBrassDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBrassDustDesc"/>
 		</item>
 		<item name="feCircuitTraced">
@@ -1139,8 +1139,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="60c060"/>
+			<property name="CustomIcon" value="feCircuitTraced"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCircuitTracedDesc"/>
 		</item>
 		<item name="feCircuitPopulated">
@@ -1151,8 +1151,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="80e080"/>
+			<property name="CustomIcon" value="feCircuitPopulated"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCircuitPopulatedDesc"/>
 		</item>
 		<item name="feCircuitBoard">
@@ -1163,8 +1163,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceElectricParts"/>
-			<property name="CustomIconTint" value="40ff40"/>
+			<property name="CustomIcon" value="feCircuitBoard"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCircuitBoardDesc"/>
 		</item>
 		<item name="feRoundPrimed">
@@ -1175,8 +1175,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceBulletCasing"/>
-			<property name="CustomIconTint" value="c08040"/>
+			<property name="CustomIcon" value="feRoundPrimed"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRoundPrimedDesc"/>
 		</item>
 		<item name="feRoundTipped">
@@ -1187,8 +1187,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceBulletTip"/>
-			<property name="CustomIconTint" value="c0a060"/>
+			<property name="CustomIcon" value="feRoundTipped"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feRoundTippedDesc"/>
 		</item>
 		<item name="feArrowShaft">
@@ -1199,8 +1199,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceWood"/>
-			<property name="CustomIconTint" value="c0a080"/>
+			<property name="CustomIcon" value="feArrowShaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feArrowShaftDesc"/>
 		</item>
 		<item name="feArrowHeaded">
@@ -1211,8 +1211,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="ammoArrowIron"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feArrowHeaded"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feArrowHeadedDesc"/>
 		</item>
 		<item name="feThread">
@@ -1223,8 +1223,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceCloth"/>
-			<property name="CustomIconTint" value="f0f0f0"/>
+			<property name="CustomIcon" value="feThread"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feThreadDesc"/>
 		</item>
 		<item name="feLeatherTanned">
@@ -1235,8 +1235,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceLeather"/>
-			<property name="CustomIconTint" value="a06030"/>
+			<property name="CustomIcon" value="feLeatherTanned"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feLeatherTannedDesc"/>
 		</item>
 		<item name="feBarkDust">
@@ -1247,8 +1247,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceWood"/>
-			<property name="CustomIconTint" value="806040"/>
+			<property name="CustomIcon" value="feBarkDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBarkDustDesc"/>
 		</item>
 		<item name="fePulp">
@@ -1259,8 +1259,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceWood"/>
-			<property name="CustomIconTint" value="e0d0b0"/>
+			<property name="CustomIcon" value="fePulp"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePulpDesc"/>
 		</item>
 		<item name="feWetPaper">
@@ -1271,8 +1271,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePaper"/>
-			<property name="CustomIconTint" value="d0d0c0"/>
+			<property name="CustomIcon" value="feWetPaper"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feWetPaperDesc"/>
 		</item>
 		<item name="fePigment">
@@ -1283,8 +1283,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePaint"/>
-			<property name="CustomIconTint" value="ff6040"/>
+			<property name="CustomIcon" value="fePigment"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePigmentDesc"/>
 		</item>
 		<item name="feFruitConcentrate">
@@ -1295,8 +1295,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="foodCropBlueberries"/>
-			<property name="CustomIconTint" value="c040c0"/>
+			<property name="CustomIcon" value="feFruitConcentrate"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feFruitConcentrateDesc"/>
 		</item>
 		<item name="feHerbExtract">
@@ -1307,8 +1307,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="drinkJarGoldenRodTea"/>
-			<property name="CustomIconTint" value="80c040"/>
+			<property name="CustomIcon" value="feHerbExtract"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feHerbExtractDesc"/>
 		</item>
 		<item name="feCultureBroth">
@@ -1319,8 +1319,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="foodCropMushrooms"/>
-			<property name="CustomIconTint" value="c0c080"/>
+			<property name="CustomIcon" value="feCultureBroth"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCultureBrothDesc"/>
 		</item>
 		<item name="feCultureExtract">
@@ -1331,8 +1331,8 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="drugAntibiotics"/>
-			<property name="CustomIconTint" value="e0e0a0"/>
+			<property name="CustomIcon" value="feCultureExtract"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feCultureExtractDesc"/>
 		</item>
 		<item name="feAntibioticPowder">
@@ -1343,7 +1343,7 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="drugAntibiotics"/>
+			<property name="CustomIcon" value="feAntibioticPowder"/>
 			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feAntibioticPowderDesc"/>
 		</item>
@@ -1355,7 +1355,7 @@
 			<property name="Stacknumber" value="500"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceCement"/>
+			<property name="CustomIcon" value="fePlaster"/>
 			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePlasterDesc"/>
 		</item>
@@ -1367,8 +1367,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="meleeToolSalvageT1Wrench"/>
-			<property name="CustomIconTint" value="e0a030"/>
+			<property name="CustomIcon" value="feEngineerWrench"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineerWrenchDesc"/>
 		</item>
 		<item name="feEngineerManual">
@@ -1379,8 +1379,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourcePaper"/>
-			<property name="CustomIconTint" value="e0a030"/>
+			<property name="CustomIcon" value="feEngineerManual"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feEngineerManualDesc"/>
 			<property class="Action0">
 				<property name="Class" value="FerroEngrenagem.FeGuide, FerroEngrenagem"/>
@@ -1395,8 +1395,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0c0ff"/>
+			<property name="CustomIcon" value="feMoldPellet"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldPelletDesc"/>
 		</item>
 		<item name="feMoldBoard">
@@ -1407,8 +1407,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="40a040"/>
+			<property name="CustomIcon" value="feMoldBoard"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldBoardDesc"/>
 		</item>
 		<item name="feMoldBatteryCase">
@@ -1419,8 +1419,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feMoldBatteryCase"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldBatteryCaseDesc"/>
 		</item>
 		<item name="feMoldStock">
@@ -1431,8 +1431,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="604020"/>
+			<property name="CustomIcon" value="feMoldStock"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldStockDesc"/>
 		</item>
 		<item name="feMoldJar">
@@ -1443,8 +1443,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0f0ff"/>
+			<property name="CustomIcon" value="feMoldJar"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldJarDesc"/>
 		</item>
 		<item name="feMoldLens">
@@ -1455,8 +1455,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="a0c0c0"/>
+			<property name="CustomIcon" value="feMoldLens"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldLensDesc"/>
 		</item>
 		<item name="feMoldBeaker">
@@ -1467,8 +1467,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0f0ff"/>
+			<property name="CustomIcon" value="feMoldBeaker"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldBeakerDesc"/>
 		</item>
 		<item name="feMoldGlassPane">
@@ -1479,8 +1479,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0f0ff"/>
+			<property name="CustomIcon" value="feMoldGlassPane"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldGlassPaneDesc"/>
 		</item>
 		<item name="feMoldBulb">
@@ -1491,8 +1491,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="ffffc0"/>
+			<property name="CustomIcon" value="feMoldBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldBulbDesc"/>
 		</item>
 		<item name="feMoldRod">
@@ -1503,8 +1503,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feMoldRod"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldRodDesc"/>
 		</item>
 		<item name="feMoldToolHead">
@@ -1515,8 +1515,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="808080"/>
+			<property name="CustomIcon" value="feMoldToolHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldToolHeadDesc"/>
 		</item>
 		<item name="feMoldShell">
@@ -1527,8 +1527,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feMoldShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldShellDesc"/>
 		</item>
 		<item name="feMoldEngineBlock">
@@ -1539,8 +1539,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="808080"/>
+			<property name="CustomIcon" value="feMoldEngineBlock"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldEngineBlockDesc"/>
 		</item>
 		<item name="feMoldPiston">
@@ -1551,8 +1551,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feMoldPiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldPistonDesc"/>
 		</item>
 		<item name="feMoldCrank">
@@ -1563,8 +1563,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="e0e0e0"/>
+			<property name="CustomIcon" value="feMoldCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldCrankDesc"/>
 		</item>
 		<item name="feMoldArrowHead">
@@ -1575,8 +1575,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="a0a0a0"/>
+			<property name="CustomIcon" value="feMoldArrowHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldArrowHeadDesc"/>
 		</item>
 		<item name="feMoldBuckshot">
@@ -1587,8 +1587,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="707080"/>
+			<property name="CustomIcon" value="feMoldBuckshot"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldBuckshotDesc"/>
 		</item>
 		<item name="feMoldRocket">
@@ -1599,8 +1599,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feMoldRocket"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldRocketDesc"/>
 		</item>
 		<item name="feBoilerShell">
@@ -1611,8 +1611,8 @@
 			<property name="Stacknumber" value="5"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronPlate"/>
-			<property name="CustomIconTint" value="806040"/>
+			<property name="CustomIcon" value="feBoilerShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feBoilerShellDesc"/>
 		</item>
 		<item name="feFirebox">
@@ -1623,8 +1623,8 @@
 			<property name="Stacknumber" value="5"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceIronPlate"/>
-			<property name="CustomIconTint" value="a04020"/>
+			<property name="CustomIcon" value="feFirebox"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feFireboxDesc"/>
 		</item>
 		<item name="feSteamCylinderRaw">
@@ -1635,8 +1635,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feSteamPiston"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feSteamCylinderRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSteamCylinderRawDesc"/>
 		</item>
 		<item name="feSteamCylinder">
@@ -1647,9 +1647,21 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feSteamPiston"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feSteamCylinder"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSteamCylinderDesc"/>
+		</item>
+		<item name="feTurbineRotor">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feFlywheel"/>
+			<property name="CustomIconTint" value="e0e0ff"/>
+			<property name="DescriptionKey" value="feTurbineRotorDesc"/>
 		</item>
 		<item name="feSafetyValve">
 			<property name="HoldType" value="45"/>
@@ -1659,8 +1671,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceGear"/>
-			<property name="CustomIconTint" value="ff4040"/>
+			<property name="CustomIcon" value="feSafetyValve"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feSafetyValveDesc"/>
 		</item>
 		<item name="fePressureGaugeItem">
@@ -1671,7 +1683,7 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="resourceScopeLens"/>
+			<property name="CustomIcon" value="fePressureGaugeItem"/>
 			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="fePressureGaugeItemDesc"/>
 		</item>
@@ -1683,8 +1695,8 @@
 			<property name="Stacknumber" value="10"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feResourceGear"/>
-			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="CustomIcon" value="feValveGear"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feValveGearDesc"/>
 		</item>
 		<item name="feMoldCylinder">
@@ -1695,8 +1707,8 @@
 			<property name="Stacknumber" value="1"/>
 			<property name="EconomicValue" value="10"/>
 			<property name="Group" value="Resources"/>
-			<property name="CustomIcon" value="feMoldPlate"/>
-			<property name="CustomIconTint" value="707070"/>
+			<property name="CustomIcon" value="feMoldCylinder"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="DescriptionKey" value="feMoldCylinderDesc"/>
 		</item>
 	</append>

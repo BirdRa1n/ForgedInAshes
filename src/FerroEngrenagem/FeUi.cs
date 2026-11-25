@@ -941,6 +941,8 @@ namespace FerroEngrenagem
             }
             if (fk == FluidKind.Valve) l.Add(Kinetic.Text("feHowValve", "fluid in at the back, out at the front"));
             if (fk == FluidKind.Burner) l.Add(Kinetic.Text("feHowBurner", "fuel gas in at the back; touch the machine to heat"));
+            if (fk == FluidKind.Boiler) l.Add(Kinetic.Text("feHowBoiler", "fireboxes under or beside it; water by pipe on its sides; steam out at the top; join drums for a bigger boiler"));
+            if (fk == FluidKind.Turbine) l.Add(Kinetic.Text("feHowTurbine", "steam in at the back, used steam out at the front (to a Condenser); shaft on its sides; Dynamos on the shaft for electricity"));
             if (fk == FluidKind.Tapper) l.Add(Kinetic.Text("feHowTapper", "its back on a living trunk, a pipe in front"));
             if (wm == "drill" || wm == "saw") l.Add(Kinetic.Text("feHowDrill", "works on the block in front; drops go into the block behind"));
             if (wm == "fan") l.Add(Kinetic.Text("feHowFan", "water or a lit burner right in front of it; belts in the air stream"));

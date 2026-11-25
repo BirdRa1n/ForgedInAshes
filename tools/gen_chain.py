@@ -755,31 +755,44 @@ RECIPES.append(("gunBowT1WoodenBowParts", 1, "feAssembler", 6, [("feArrowShaft",
 RECIPES.append(("armorParts", 1, "feLoom", 8, [("feLeatherTanned", 1), ("feThread", 2), ("feBuckle", 1)]))
 RECIPES.append(("gunBotRoboticsParts", 1, "feRobotics", 10, [("feServo", 1), ("feCircuitBoard", 1), ("feSteelPlate", 1)]))
 
-# Steam Engine built from scratch, part by part (user: "um item básico, quebra-galho, que se constrói peça por peça")
-item("feBoilerShell", "Boiler Shell", "Corpo de Caldeira", "feResourceIronPlate", "806040", "Riveted steel drum of the Steam Engine.", "Tambor de aço rebitado do Motor a Vapor.", 5)
-item("feFirebox", "Firebox", "Fornalha", "feResourceIronPlate", "a04020", "Firebrick-lined firebox with a door, of the Steam Engine.", "Fornalha forrada de tijolo, com porta, do Motor a Vapor.", 5)
-item("feSteamCylinderRaw", "Rough Steam Cylinder", "Cilindro a Vapor Bruto", "feSteamPiston", "707070", "Cast iron cylinder. Bore it on the Lathe.", "Cilindro de ferro fundido. Fure no Torno.", 10)
-item("feSteamCylinder", "Steam Cylinder", "Cilindro a Vapor", "feSteamPiston", "c0c0c0", "Bored cylinder of the Steam Engine.", "Cilindro furado do Motor a Vapor.", 10)
+# Thermal power plant (user 2026-11-25): the Steam Engine stays the simple, cheap engine; a player who wants more builds
+# a plant of any size: Boiler Fireboxes under Boiler Drums (drums touching each other are one boiler), pipes of steam
+# to Steam Turbines on a shaft (torque), and Dynamos on that shaft for electricity. The parts below are made item by item.
+item("feBoilerShell", "Boiler Shell", "Corpo de Caldeira", "feResourceIronPlate", "806040", "Riveted steel drum. Boiler Drums of the power plant.", "Tambor de aço rebitado. Tambores de Caldeira da usina.", 5)
+item("feFirebox", "Firebox", "Fornalha", "feResourceIronPlate", "a04020", "Firebrick-lined firebox with a door. Boiler Fireboxes of the power plant.", "Fornalha forrada de tijolo, com porta. Fornalhas de Caldeira da usina.", 5)
+item("feSteamCylinderRaw", "Rough Turbine Casing", "Carcaça de Turbina Bruta", "feSteamPiston", "707070", "Cast iron casing. Bore it on the Lathe.", "Carcaça de ferro fundido. Fure no Torno.", 10)
+item("feSteamCylinder", "Turbine Casing", "Carcaça de Turbina", "feSteamPiston", "c0c0c0", "Bored casing of the Steam Turbine.", "Carcaça furada da Turbina a Vapor.", 10)
+item("feTurbineRotor", "Turbine Rotor", "Rotor de Turbina", "feFlywheel", "e0e0ff", "Steel shaft with rows of blades. Steam Turbines.", "Eixo de aço com fileiras de pás. Turbinas a Vapor.", 10)
 item("feSafetyValve", "Safety Valve", "Válvula de Segurança", "feResourceGear", "ff4040", "Spring-loaded valve of the boiler.", "Válvula de mola da caldeira.", 10)
 item("fePressureGaugeItem", "Pressure Gauge", "Manômetro de Caldeira", "resourceScopeLens", "ffffff", "Boiler gauge (glass, spring, brass wire).", "Manômetro da caldeira (vidro, mola, fio de latão).", 10)
-item("feValveGear", "Valve Gear", "Distribuidor", "feResourceGear", "c0c0c0", "Eccentric and rods that open the cylinder valves in time.", "Excêntrico e hastes que abrem as válvulas do cilindro na hora certa.", 10)
-MOLDS.append(("feMoldCylinder", "Cylinder Mold", "Molde de Cilindro", "707070"))   # item and recipe below
-item("feMoldCylinder", "Cylinder Mold", "Molde de Cilindro", "feMoldPlate", "707070", "A mold of the Casting Table (and the Injection Moulder): hold it and choose Change the mold.",
+item("feValveGear", "Turbine Governor", "Regulador de Turbina", "feResourceGear", "c0c0c0", "Flyweights and rods that open the steam valve of a turbine by its load.", "Pesos e hastes que abrem a válvula de vapor da turbina conforme a carga.", 10)
+MOLDS.append(("feMoldCylinder", "Casing Mold", "Molde de Carcaça de Turbina", "707070"))   # item and recipe below
+item("feMoldCylinder", "Casing Mold", "Molde de Carcaça de Turbina", "feMoldPlate", "707070", "A mold of the Casting Table (and the Injection Moulder): hold it and choose Change the mold.",
      "Molde da Mesa de Moldagem (e da Injetora): segure-o e escolha Trocar o molde.", 1)
-proc("cast_feSteamCylinderRaw", "cast", "feCaster", [], "feSteamCylinderRaw", 1, 12, fin=[("molten_iron", 40)], mold="feMoldCylinder", text="Molde de Cilindro.")
+proc("cast_feSteamCylinderRaw", "cast", "feCaster", [], "feSteamCylinderRaw", 1, 12, fin=[("molten_iron", 40)], mold="feMoldCylinder", text="Molde de Carcaça de Turbina.")
 RECIPES += [
     ("feMoldCylinder", 1, "feLathe", 20, [("resourceForgedIron", 10), ("resourceClayLump", 10)]),
     ("feSteamCylinder", 1, "feLathe", 20, [("feSteamCylinderRaw", 1)]),
+    ("feTurbineRotor", 1, "feLathe", 40, [("feCrankshaft", 1), ("feSteelPlate", 6), (R_GEAR, 4)]),
     ("feBoilerShell", 1, "feMetalShop", 30, [("feSteelPlate", 8), ("resourceNail", 30), ("fePipe", 2)]),
     ("feFirebox", 1, "feMetalShop", 20, [(R_PLATE, 4), ("resourceClayLump", 12), ("feHinge", 1)]),
     ("feSafetyValve", 1, "feAssembler", 8, [(SPRING, 2), ("feRodBrass", 1), ("feGasket", 1)]),
     ("fePressureGaugeItem", 1, "feAssembler", 8, [("feGlassPane", 1), (SPRING, 1), (WIRE, 1), (R_PLATE, 1)]),
     ("feValveGear", 1, "feAssembler", 10, [(R_GEAR, 2), ("feRod", 2), (R_SHAFT, 1)]),
-    ("feSteamEngine", 1, "feGarage", 60, [("feBoilerShell", 1), ("feFirebox", 1), ("feSteamCylinder", 2), ("fePiston", 2), ("feCrankshaft", 1),
-                                          ("feFlywheel", 2), ("feSafetyValve", 1), ("fePressureGaugeItem", 1), ("feValveGear", 1),
-                                          ("resourceMetalPipe", 4), ("feGasket", 4)]),
 ]
-REMOVE_RECIPE.append(("feSteamEngine", "feGarage"))
+block("feBoilerFirebox", "Boiler Firebox", "Fornalha de Caldeira", "Burns coal, charcoal, wood, shale or biofuel (belt, arm, hand) or fuel gas (pipe at its back) and heats the Boiler Drums it touches. More fireboxes = more steam.",
+      "Queima carvão, carvão vegetal, madeira, xisto ou biocombustível (esteira, braço, mão) ou gás combustível (cano atrás) e aquece os Tambores de Caldeira encostados. Mais fornalhas = mais vapor.",
+      "fePipe", {"FeFluid": "burner", "FeFluidRate": "60", "FeHeatPerLitre": "2", "FeHeatMax": "900"}, "feFluidFillerPrefab", "feFluidFiller", "ff6020",
+      [("feFirebox", 1), ("resourceClayLump", 10)])
+block("feBoilerDrum", "Boiler Drum", "Tambor de Caldeira", "Water in by pipe on its sides, steam out at the top (4 bar). Each lit Boiler Firebox touching it boils 90 L/min (up to 180 per drum). Drums touching each other are one boiler: build it as big as you want.",
+      "Água entra por cano nos lados, vapor sai em cima (4 bar). Cada Fornalha de Caldeira acesa encostada ferve 90 L/min (até 180 por tambor). Tambores encostados são uma caldeira só: monte do tamanho que quiser.",
+      "fePipe", {"FeFluid": "boiler", "FeFluidBuffer": "1000", "FeSteamBuffer": "600", "FeSteamPerHeat": "90", "FeSteamMax": "180", "FeOutBar": "4"},
+      "feWaterTankPrefab", "feWaterTank", "c08060", [("feBoilerShell", 1), ("feSafetyValve", 1), ("fePressureGaugeItem", 1), ("fePipe", 2)])
+block("feSteamTurbine", "Steam Turbine", "Turbina a Vapor", "Steam in at the back (at least 1.5 bar), used steam out at the front (to a Condenser). Gives up to 1024 UT at 32 RPM with 240 L/min of steam; uses steam by the load. Put Dynamos on its shaft for electricity.",
+      "Vapor entra atrás (pelo menos 1,5 bar), vapor usado sai na frente (para a Condensadora). Dá até 1024 UT a 32 RPM com 240 L/min de vapor; gasta vapor conforme a carga. Ponha Dínamos no eixo para ter eletricidade.",
+      "feWaterWheel", {"FeSteamTurbine": "true", "FeFluid": "turbine", "FeShaftAxis": "x", "FeTorqueOutput": "1024", "FeSourceRpm": "32", "FeSteamRate": "240",
+                       "FeFluidBuffer": "120", "FeMinBar": "1.5"},
+      "feSpeedBoxPrefab", "feSpeedBox", "e0e0ff", [("feSteamCylinder", 1), ("feTurbineRotor", 1), ("feValveGear", 1), ("feGasket", 4), ("fePipeHP", 2)])
 
 # ------------------------------------------------------------------------------------------------ writers
 def esc(s):
@@ -788,6 +801,9 @@ def esc(s):
 
 def item_xml(i):
     name, en, pt, icon, tint, den, dpt, stack = i
+    # an item that got its own icon (UIAtlases/ItemIconAtlas/<item>.png) uses it; the tinted game icon is the placeholder
+    if (fe.MOD_DIR / "UIAtlases" / "ItemIconAtlas" / f"{name}.png").exists():
+        icon, tint = name, "ffffff"
     extra = ""
     if name == "feEngineerManual":
         extra = """
@@ -1084,6 +1100,14 @@ UI_TEXT = [[k, "UI", "Text", en, pt] for k, en, pt in [
     ("feFanCold", "The burner in front is not lit", "O queimador da frente não está aceso"),
     ("feFanPush", "Blows air: pushes the dropped items (water or a lit burner in front: washes / heats)", "Sopra ar: empurra itens soltos (água ou queimador aceso na frente: lava / aquece)"),
     ("feFanRange", "Range: {0} blocks", "Alcance: {0} blocos"),
+    ("feBoilerInfo", "Boiler of {0} drum(s): water {1} L, steam {2} L, boiling {3} L/min", "Caldeira de {0} tambor(es): água {1} L, vapor {2} L, fervendo {3} L/min"),
+    ("feBoilerNoFire", "No lit Boiler Firebox touching this drum", "Nenhuma Fornalha de Caldeira acesa encostada neste tambor"),
+    ("feBoilerNoWater", "No water: pipe water into a side", "Sem água: ligue um cano de água num lado"),
+    ("feBoilerFull", "Steam full: pipe it from the top to turbines", "Vapor cheio: leve por cano, de cima, até as turbinas"),
+    ("feTurbineInfo", "Steam in {0} L ({1} bar) - using {2} L/min - ready {3}%", "Vapor {0} L ({1} bar) - gastando {2} L/min - pronta {3}%"),
+    ("feTurbineHow", "Steam in at the back, used steam out at the front; Dynamos on its shaft make electricity", "Vapor entra atrás, vapor usado sai na frente; Dínamos no eixo geram eletricidade"),
+    ("feHowBoiler", "fireboxes under or beside it; water by pipe on its sides; steam out at the top; join drums for a bigger boiler", "fornalhas embaixo ou ao lado; água por cano nos lados; vapor sai em cima; junte tambores para uma caldeira maior"),
+    ("feHowTurbine", "steam in at the back, used steam out at the front (to a Condenser); shaft on its sides; Dynamos on the shaft for electricity", "vapor entra atrás, vapor usado sai na frente (para a Condensadora); eixo nos lados; Dínamos no eixo para eletricidade"),
 ]]
 
 

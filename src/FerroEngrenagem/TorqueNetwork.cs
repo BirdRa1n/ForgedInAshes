@@ -214,6 +214,11 @@ namespace FerroEngrenagem
                 if (!WorldMachines.All.Contains(_blockPos)) WorldMachines.Register(_blockPos);
                 text += "\n" + KineticLookController.Escape(WorldMachines.Describe(ww, _blockPos, _blockValue));
             }
+            if (ww != null && SteamPlant.IsTurbine(this))
+            {
+                FluidStore.EnsureLoaded();
+                text += "\n" + KineticLookController.Escape(SteamPlant.Describe(ww, _blockPos, _blockValue, FluidStore.Get(_blockPos)));
+            }
             if (Kind == KineticKind.WaterWheel && Properties.Contains("FeWind") && ww != null)
                 text += "\n" + string.Format(Kinetic.Text("feWindInfo", "Wind: {0}% (free height under it and open air in front)"),
                                              Mathf.RoundToInt(100f * Kinetic.WindFactor(ww, _blockPos, _blockValue)));
@@ -586,6 +591,7 @@ namespace FerroEngrenagem
                 case KineticKind.Engine:
                     return TorqueEngine.IsRunning(world, Fluids.ParentOf(world, pos, bv)) ? SourceOutput(bv.Block) : 0;
                 case KineticKind.WaterWheel:
+                    if (SteamPlant.IsTurbine(bv.Block)) return SteamPlant.Capacity(world, pos, bv);
                     if (bv.Block.Properties != null && bv.Block.Properties.Contains("FeWind"))
                         return Mathf.RoundToInt(SourceOutput(bv.Block) * WindFactor(world, pos, bv));
                     return WaterTouching(world, pos, bv) > 0 ? SourceOutput(bv.Block) : 0;
