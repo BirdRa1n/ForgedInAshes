@@ -17,6 +17,9 @@
   3. mod      Valida os XML (check_xpath, check_processes, check_phase3, check_coverage), compila a DLL
               (tools/build.ps1) e instala na pasta do jogo (tools/install.ps1: link; -Copiar = cópia de verdade).
   4. tudo     1 + 2 + 3, nessa ordem.
+  5. site     Site de tutoriais (site/): exporta em GLB os modelos HD mais novos que o GLB do site
+              (tools/blender_export_glb.py), regenera site/public/data/mod.json e os ícones (tools/gen_site.py) e
+              compila o site (npm run build em site/; a Vercel faz o mesmo no deploy).
   0. estado   Só mostra o que está desatualizado (não muda nada).
 
   Sem parâmetros abre um menu. -Modelos limita aos nomes dados; -Forcar refaz mesmo sem mudança;
@@ -30,7 +33,7 @@
   powershell -ExecutionPolicy Bypass -File tools\fe.ps1 mod -Copiar
 #>
 param(
-    [Parameter(Position = 0)][ValidateSet('', 'estado', 'modelos', 'icones', 'mod', 'tudo')][string]$Acao = '',
+    [Parameter(Position = 0)][ValidateSet('', 'estado', 'modelos', 'icones', 'mod', 'tudo', 'site')][string]$Acao = '',
     [string[]]$Modelos = @(),
     [switch]$Forcar,
     [switch]$Copiar,
@@ -252,6 +255,39 @@ function Fazer-Mod {
     return @()
 }
 
+# ------------------------------------------------------------------ 5. site
+function Fazer-Site {
+    Titulo '5. Site: modelos GLB, dados e build'
+    $site = Join-Path $repo 'site'
+    $glbDir = Join-Path $site 'public\models'
+    New-Item -ItemType Directory -Force $glbDir | Out-Null
+    $lista = @(Modelos-HD | Where-Object {
+        $b = Join-Path $art "$_\hd\$($_)_HD.blend"
+        (Test-Path $b) -and ($Forcar -or (Mais-Novo $b (Join-Path $glbDir "$_.glb")))
+    })
+    if ($lista.Count -eq 0) { Ok 'GLB do site em dia' }
+    elseif ($Simular) { Info ("(simulação) exportaria GLB: " + ($lista -join ', ')) }
+    else {
+        $log = Join-Path $tmp 'site_glb.log'
+        $code = Rodar $Blender (@('-b', '--factory-startup', '--python', (Q (Join-Path $PSScriptRoot 'blender_export_glb.py')), '--', (Q $glbDir)) + $lista) $log
+        if ($code -ne 0) { Aviso "GLB: FALHOU (log: $log)"; return @('site glb') }
+        Ok ("{0} modelo(s) GLB" -f $lista.Count)
+    }
+    if ($Simular) { Info '(simulação) python tools\gen_site.py'; Info '(simulação) npm run build (site)'; return @() }
+    $out = & $Python (Join-Path $PSScriptRoot 'gen_site.py') 2>&1
+    if ($LASTEXITCODE -ne 0) { Aviso 'gen_site.py FALHOU'; $out | Select-Object -Last 8 | ForEach-Object { Aviso ('  ' + $_) }; return @('site dados') }
+    Ok ('dados: ' + ($out | Select-Object -Last 1))
+    Push-Location $site
+    try {
+        if (-not (Test-Path 'node_modules')) { & npm install --no-fund --no-audit | Out-Host }
+        & npm run build | Select-Object -Last 4 | Out-Host
+        $c = $LASTEXITCODE
+    } finally { Pop-Location }
+    if ($c -ne 0) { Aviso 'npm run build FALHOU'; return @('site build') }
+    Ok 'Site compilado em site\dist (teste local: cd site; npm run dev)'
+    return @()
+}
+
 # ------------------------------------------------------------------ menu
 if ($Acao -eq '') {
     Write-Host ''
@@ -260,9 +296,10 @@ if ($Acao -eq '') {
     Write-Host '  2  Ícones do inventário dos modelos alterados'
     Write-Host '  3  Mod: validar, compilar a DLL e instalar no jogo'
     Write-Host '  4  Tudo (1 + 2 + 3)'
+    Write-Host '  5  Site de tutoriais (GLB + dados + build)'
     Write-Host '  0  Só ver o que está desatualizado'
     $r = Read-Host 'Escolha'
-    $Acao = @{ '1' = 'modelos'; '2' = 'icones'; '3' = 'mod'; '4' = 'tudo'; '0' = 'estado' }[$r]
+    $Acao = @{ '1' = 'modelos'; '2' = 'icones'; '3' = 'mod'; '4' = 'tudo'; '5' = 'site'; '0' = 'estado' }[$r]
     if (-not $Acao) { Write-Host 'Opção inválida'; exit 1 }
 }
 
@@ -274,6 +311,7 @@ switch ($Acao) {
     'icones' { $falhou += Fazer-Icones }
     'mod' { $falhou += Fazer-Mod }
     'tudo' { $falhou += Fazer-Modelos; $falhou += Fazer-Icones; $falhou += Fazer-Mod }
+    'site' { $falhou += Fazer-Site }
 }
 Write-Host ''
 $t = [int]((Get-Date) - $inicio).TotalSeconds

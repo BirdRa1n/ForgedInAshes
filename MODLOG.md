@@ -1214,3 +1214,19 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Rotor de Turbina (`feTurbineRotor`): modelo só para o ícone (`ITEM_MODELS` em `build_feHD.py`: eixo, três rodas
   de palhetas crescentes com aro, mancais e flange de acoplamento), texturizado e renderizado como os blocos.
 - `list_assets.py`: **0 blocos e 0 itens pendentes**. check_xpath 773/0, phase3 23/23.
+
+## 2026-11-25: site de tutoriais refeito (React + 3D, páginas geradas dos dados)
+
+- `site/` agora é um app Vite + React 19 + react-router + three/@react-three/fiber (Vercel: raiz `site`,
+  `npm run build`, saída `dist`, rewrite SPA em `vercel.json`). O site estático antigo (`itens/`, `maquinas/`,
+  `linhas/`, `app.js`) saiu.
+- Nenhuma página por item: `tools/gen_site.py` gera `site/public/data/mod.json` (itens, receitas, processos,
+  fluidos, linhas em destaque, indicadores) e copia os ícones do mod; o front monta sozinho, para qualquer item,
+  a árvore de produção, o passo a passo em ordem, as máquinas e a matéria-prima (`plan()` em `src/data.js`).
+  Só os guias de conceito (`src/guides.js`, sintaxe `[[id]]` vira chip com link) são escritos à mão.
+- Modelos 3D: `tools/blender_export_glb.py` exporta os `_HD.blend` como GLB (texturas 512 px JPEG, partes de
+  estado ocultas), 110 modelos, 26 MB. Só modelos e ícones do próprio mod (nada do jogo).
+- Páginas: início (vitrine 3D), linhas (quantidade ajustável), máquinas, catálogo com filtros, item (3D + como
+  ligar + como fazer + linha completa + usado em), guias, indicadores (gráficos) e busca Ctrl+K.
+- `fe.bat site` (`tools/fe.ps1`, opção 5): GLB dos modelos alterados + `gen_site.py` + `npm run build`.
+- Corrigido: o spinner `Html` do drei dentro do Canvas causava `removeChild` ao trocar de página (removido).

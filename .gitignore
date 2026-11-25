@@ -49,3 +49,7 @@ Art/UnityProject/Assets/Prefabs.meta
 
 # local switch for the verbose mod log (FerroEngrenagemMod.Verbose)
 Mods/FerroEngrenagem/debug.txt
+
+# Site de tutoriais (site/): dependências e build local (a Vercel compila no deploy)
+site/node_modules/
+site/dist/

@@ -1,0 +1,93 @@
+// Concept guides: the only hand-written content of the site. Everything about a specific item (recipes, machines,
+// trees, ports) comes from the data. [[id]] becomes an item chip, [[id|n]] a chip with a quantity.
+export const GUIDES = [
+  {
+    id: "primeiros-passos",
+    title: "Primeiros passos",
+    sub: "Da manivela à primeira linha automática",
+    icon: "feCrank",
+    blocks: [
+      { p: "Ferro & Engrenagem troca a bancada de um clique por linhas de produção: o material muda de forma em cada etapa (sucata → metal fundido → peça moldada → peça usinada → montagem), e cada etapa usa uma energia: torque, vapor, eletricidade, calor ou pressão." },
+      { h: "1. Energia de começo" },
+      { p: "A [[feCrank]] e a [[feTorqueCrank]] dão o primeiro torque à mão. A [[feWaterWheel]] gira sozinha num rio. Um [[feShaft]] leva o giro até as máquinas; cada máquina pede seu custo em UT e a rede mostra o total ao mirar." },
+      { h: "2. As bancadas do mod" },
+      { p: "A [[feFoundry]] faz ferro e aço; a [[fePress]] faz chapas; o [[feLathe]] faz eixos, engrenagens, molas e peças mecânicas; a [[feAssembler]] monta armas e ferramentas. Todas (menos a Fundição) precisam de energia: um [[feElectricMotor]] encostado ou torque no encaixe de motor." },
+      { h: "3. A primeira linha" },
+      { p: "Com receita fixa (segure E > Escolher receita) e ingredientes chegando por [[feConveyor]] e [[feFunnel]], a máquina trabalha sozinha. Baús encostados na Montadora alimentam a receita escolhida." },
+      { note: "Abra qualquer item deste site: a aba Linha completa mostra a árvore inteira até as matérias-primas, as máquinas e o passo a passo." },
+    ],
+  },
+  {
+    id: "torque",
+    title: "Torque e transmissão",
+    sub: "UT, RPM, sobrecarga e engrenagens",
+    icon: "feGearbox",
+    model: "feGearbox",
+    blocks: [
+      { p: "Toda rede de eixos tem uma capacidade (soma das fontes) e um uso (soma das máquinas). Uso acima da capacidade = SOBRECARGA: a rede para depois de 20 s de inércia. Mais RPM deixa as máquinas mais rápidas, mas o custo sobe ao quadrado." },
+      { ul: ["[[feShaft]] liga blocos em linha reta.", "[[feGearbox]] distribui para os seis lados.", "[[feSpeedBox]] muda a relação (mais rápido ou mais forte).", "[[feClutch]] separa partes da rede (também por sinal).", "[[feTorqueRegulator]] limita quanto uma parte puxa.", "[[feSpinInverter]] inverte o sentido.", "[[feCogwheel]] engrenagens lado a lado giram uma à outra, sem eixo entre elas."] },
+      { h: "Fontes" },
+      { p: "Da mais simples à maior: [[feTorqueCrank]], [[feWaterWheel]], [[feWindmill]], [[feElectricMotor]], [[feCoalEngine]], [[feGasEngine]], [[feSteamEngine]] (o quebra-galho barato) e a usina com [[feSteamTurbine]]." },
+    ],
+  },
+  {
+    id: "fluidos",
+    title: "Fluidos, gases e pressão",
+    sub: "Canos, tanques, válvulas e manômetros",
+    icon: "fePipe",
+    model: "fePipe",
+    blocks: [
+      { p: "Uma rede de canos leva UM fluido por vez (dois fluidos = BLOQUEADO). Líquidos andam pela bomba; gases têm pressão em bar: o [[fePipe]] aguenta 4 bar, o [[fePipeHP]] aguenta 12. Acima disso o cano VAZA." },
+      { ul: ["[[feMechPump]] e [[feHosePulley]] puxam água do mundo.", "[[feTankLiquid]] e [[feTankGas]] se juntam com os vizinhos e viram um tanque só.", "[[feCompressor]] leva gás de baixa para alta pressão.", "[[feValveShutoff]] abre/fecha (também por sinal), [[feValveCheck]] deixa passar num sentido, [[feValveRegulator]] limita vazão, [[feValveSeparator]] deixa passar um fluido só, [[feValveRelief]] protege os canos.", "[[feGauge]] mede e dá sinal no valor escolhido."] },
+      { note: "Máquinas de processo: fluidos ENTRAM atrás (e embaixo) e SAEM em cima (e à direita, à esquerda)." },
+    ],
+  },
+  {
+    id: "logistica",
+    title: "Esteiras e logística",
+    sub: "Mover, dividir, filtrar e guardar itens",
+    icon: "feConveyor",
+    model: "feConveyor",
+    blocks: [
+      { p: "A [[feConveyor]] anda com torque (um eixo do lado de qualquer esteira da linha). Itens entram nas máquinas por qualquer lado e saem na esteira da frente." },
+      { ul: ["[[feFunnel]] tira de baús e da saída das máquinas.", "[[feMechArm]] pega atrás e põe na frente (filtro e quantidade).", "[[feBeltSplitter]] divide numa proporção; [[feBeltTunnel]] separa por item; [[feConveyorFilter]] manda um item para os lados.", "[[feBeltGate]] para com sinal; [[feBeltCounter]] dá um sinal a cada N itens.", "[[feItemChute]] leva itens para baixo (ou para cima com um [[feFan]] embaixo).", "[[feDepot]] mostra uma pilha e serve de bancada para estações em linha.", "[[feItemVault]] encostados viram um armazém só."] },
+      { h: "Estações em linha" },
+      { p: "Colocadas EM CIMA da esteira, trabalham no item que passa: [[feInlinePress]], [[feDoser]], [[feInserter]], [[feCrimper]], [[feWireDrawer]], [[feGrinder]], [[feBender]], [[feWelder]], [[feReflowOven]]. É a montagem em sequência: veja a linha da munição 9mm." },
+      { line: "ammo9mmBulletBall" },
+    ],
+  },
+  {
+    id: "usina",
+    title: "Usina termelétrica",
+    sub: "Monte do tamanho que quiser: torque + eletricidade",
+    icon: "feSteamTurbine",
+    model: "feSteamTurbine",
+    blocks: [
+      { p: "O [[feSteamEngine]] é o motor simples. Quando a fábrica cresce, monte uma usina: fornalhas aquecem tambores de caldeira, o vapor vai por cano até turbinas, e dínamos no eixo das turbinas geram eletricidade." },
+      { ol: ["[[feBoilerFirebox]] com carvão (esteira) ou gás combustível (cano).", "[[feBoilerDrum]] encostado na fornalha: água por cano nos lados, vapor a 4 bar sai em cima. Cada fornalha acesa encostada ferve 90 L/min. Tambores encostados são UMA caldeira.", "Cano de vapor até a [[feSteamTurbine]] (entra atrás). Ela dá até 1024 UT com 240 L/min e gasta conforme a carga.", "O vapor usado sai na frente: leve até a [[feCondenser]] e a água volta para a caldeira.", "No eixo da turbina, um [[feDynamo]] ou [[feDynamo2]] transforma torque em eletricidade para a rede vanilla."] },
+      { note: "Escala: 2 fornalhas por tambor dão 180 L/min; 4 tambores e 8 fornalhas alimentam 3 turbinas. Some turbinas no mesmo eixo para somar a força." },
+    ],
+  },
+  {
+    id: "sinais",
+    title: "Sinais e automação",
+    sub: "Alavancas, receptores, sem fio e painéis",
+    icon: "feSignalLever",
+    blocks: [
+      { p: "Um bloco de sinal dá sinal aos seis blocos encostados. Quem obedece: registro (por sinal), comporta, embreagem e pistão." },
+      { ul: ["[[feSignalLever]] liga/desliga; [[feSignalAnalog]] dá força de 0 a 15.", "[[feSignalReceiver]] liga a fiação do jogo (interruptor, timer, sensor) aos blocos do mod.", "[[feWirelessTx]] e [[feWirelessRx]] com o mesmo item de frequência ficam ligados a qualquer distância.", "[[feGauge]] e [[feBeltCounter]] também dão sinal.", "[[feDisplayPanel]] mostra o número do bloco de trás (pressão, tanque, baú, RPM)."] },
+      { note: "Exemplo: manômetro no tanque de gás + registro por sinal na entrada = o tanque nunca passa do limite." },
+    ],
+  },
+  {
+    id: "mundo",
+    title: "Máquinas no mundo",
+    sub: "Mineração, madeira e lavoura automáticas",
+    icon: "feMechDrill",
+    model: "feMechDrill",
+    blocks: [
+      { p: "Máquinas de torque que agem no bloco da frente e entregam o que coletam no baú, esteira ou calha de trás." },
+      { ul: ["[[feMechDrill]] desgasta pedra, minério e terra.", "[[feMechSaw]] derruba a árvore inteira.", "[[feMechHarvester]] colhe e replanta.", "[[feDeployer]] coloca blocos e sementes.", "[[feMechPiston]] empurra blocos com sinal.", "[[feFan]] lava (água na frente), aquece (queimador aceso na frente) ou empurra itens."] },
+    ],
+  },
+];
