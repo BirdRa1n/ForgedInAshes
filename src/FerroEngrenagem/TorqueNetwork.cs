@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace FerroEngrenagem
 {
-    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump, Dynamo, Conveyor }
+    public enum KineticKind { None, Shaft, Gearbox, SpeedBox, Clutch, Regulator, Gauge, Inverter, Motor, TorqueCrank, Engine, WaterWheel, Pump, Dynamo, Conveyor, Cog }
 
     [UnityEngine.Scripting.Preserve]
     public class BlockFeKinetic : Block
@@ -64,6 +64,7 @@ namespace FerroEngrenagem
                 case "waterwheel": Kind = KineticKind.WaterWheel; break;
                 case "pump": Kind = KineticKind.Pump; break;
                 case "conveyor": Kind = KineticKind.Conveyor; break;
+                case "cog": Kind = KineticKind.Cog; break;
                 default: Kind = KineticKind.Gearbox; break;
             }
             if (Properties != null && Properties.Contains("FeShaftAxis"))
@@ -127,6 +128,7 @@ namespace FerroEngrenagem
         {
             base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
             KineticSpinner.Attach(_ebcd, _blockPos, this);
+            MachineItems.Attach(_ebcd, _blockPos, this);
         }
 
         // Vanilla radial (user, 2026-11-22: "hold and select to take"): tap E = the first command, hold E = the
@@ -158,6 +160,8 @@ namespace FerroEngrenagem
                     new BlockActivationCommand("fe_setting", "electric_switch", true, false, null), take
                 };
             if (Fluids.Kind(this) == FluidKind.Processor) return ProcessMachine.Commands(take);   // F8.2: Crusher / Chemical Mixer
+            if (WorldMachines.Kind(this) == "deployer")
+                return new BlockActivationCommand[] { new BlockActivationCommand("fe_put", "loot_sort", true, false, null), take };
             if (Fluids.Kind(this) == FluidKind.Valve)   // D12: Compressor
                 return new BlockActivationCommand[] { new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null), take };
             return new BlockActivationCommand[] { take };
@@ -183,6 +187,11 @@ namespace FerroEngrenagem
                 return true;
             }
             if (_world is World && FeUi.HandleCommand(_commandName, (World)_world, _blockPos, _blockValue, _player)) return true;
+            if (_commandName == "fe_put" && WorldMachines.Kind(this) == "deployer" && _world is World)
+            {
+                GameManager.ShowTooltip(_player, WorldMachines.PutHeld((World)_world, _blockPos, _player), false, false, 0f);
+                return true;
+            }
             if (ProcessMachine.IsCommand(_commandName) && _world is World)
             {
                 string pm = ProcessMachine.Activate((World)_world, Fluids.ParentOf((World)_world, _blockPos, _blockValue), _commandName, _player);
@@ -199,6 +208,15 @@ namespace FerroEngrenagem
                                                  EntityAlive _entityFocusing)
         {
             string text = KineticLookController.Escape(KineticLookController.Describe(_blockPos, _blockValue, true));
+            World ww = _world as World;
+            if (ww != null && WorldMachines.Is(this))
+            {
+                if (!WorldMachines.All.Contains(_blockPos)) WorldMachines.Register(_blockPos);
+                text += "\n" + KineticLookController.Escape(WorldMachines.Describe(ww, _blockPos, _blockValue));
+            }
+            if (Kind == KineticKind.WaterWheel && Properties.Contains("FeWind") && ww != null)
+                text += "\n" + string.Format(Kinetic.Text("feWindInfo", "Wind: {0}% (free height under it and open air in front)"),
+                                             Mathf.RoundToInt(100f * Kinetic.WindFactor(ww, _blockPos, _blockValue)));
             string hint = Fluids.Kind(this) == FluidKind.Processor
                 ? Kinetic.Text("feHintPanel", "{0} panel - hold {0}: put, recipe, take")
                 : Fluids.Kind(this) == FluidKind.Valve
@@ -330,6 +348,7 @@ namespace FerroEngrenagem
                 case KineticKind.WaterWheel:
                 case KineticKind.Pump:
                 case KineticKind.Conveyor:
+                case KineticKind.Cog:
                     local = ((BlockFeKinetic)bv.Block).ShaftAxis.ToVector3();
                     break;
                 case KineticKind.Motor:
@@ -499,6 +518,23 @@ namespace FerroEngrenagem
             return n;
         }
 
+        /// <summary>D13 Windmill: the wind grows with the free height under it (8 blocks of air below = full power,
+        /// up to x1.5 at 12+) and needs open air in front of the sails (its front 3x3).</summary>
+        public static float WindFactor(World world, Vector3i pos, BlockValue bv)
+        {
+            Vector3i f = Fluids.Rot(bv, Vector3.forward);
+            Vector3i side = f.x != 0 ? new Vector3i(0, 0, 1) : new Vector3i(1, 0, 0);
+            for (int s = -1; s <= 1; s++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    Vector3i c = new Vector3i(pos.x + f.x + s * side.x, pos.y + dy, pos.z + f.z + s * side.z);
+                    if (!world.GetBlock(c).isair) return 0f;
+                }
+            int h = 0;
+            while (h < 16 && world.GetBlock(new Vector3i(pos.x, pos.y - h - 1, pos.z)).isair) h++;
+            return Mathf.Clamp(h / 8f, 0.25f, 1.5f);
+        }
+
         /// <summary>UT a source gives (FeTorqueOutput).</summary>
         public static int SourceOutput(Block b)
         {
@@ -550,6 +586,8 @@ namespace FerroEngrenagem
                 case KineticKind.Engine:
                     return TorqueEngine.IsRunning(world, Fluids.ParentOf(world, pos, bv)) ? SourceOutput(bv.Block) : 0;
                 case KineticKind.WaterWheel:
+                    if (bv.Block.Properties != null && bv.Block.Properties.Contains("FeWind"))
+                        return Mathf.RoundToInt(SourceOutput(bv.Block) * WindFactor(world, pos, bv));
                     return WaterTouching(world, pos, bv) > 0 ? SourceOutput(bv.Block) : 0;
                 default:
                     return 0;
@@ -710,6 +748,31 @@ namespace FerroEngrenagem
                     net.Machines[parent] = leave;
                     net.MachineNode[parent] = pos;
                     machineSpin[parent] = c;   // +1 = turning the right way into the machine (once sign applied)
+                }
+                if (kind == KineticKind.Cog)
+                {
+                    // D13 cogwheels: two cogs side by side with parallel axles mesh (no shaft needed between them);
+                    // the meshing reverses the spin and keeps the speed (same size)
+                    foreach (Vector3i d in Dirs)
+                    {
+                        if (Dot(d, axis) != 0) continue;
+                        Vector3i n = new Vector3i(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                        BlockValue nb = world.GetBlock(n);
+                        if (Kind(nb.Block) != KineticKind.Cog) continue;
+                        Vector3i na = NodeAxis(world, n, nb);
+                        if (na != axis && na != Neg(axis)) continue;
+                        Vector3i nOmega = Neg(omega);
+                        float seen;
+                        if (net.Factor.TryGetValue(n, out seen))
+                        {
+                            if (!Same(seen, f)) net.Lock("speed");
+                            if (net.Omega[n] != nOmega) net.Lock("direction");
+                            continue;
+                        }
+                        net.Factor[n] = f;
+                        net.Omega[n] = nOmega;
+                        open.Enqueue(n);
+                    }
                 }
                 if (kind == KineticKind.Conveyor)
                 {

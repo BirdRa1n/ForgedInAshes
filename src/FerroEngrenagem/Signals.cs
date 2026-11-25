@@ -30,6 +30,36 @@ namespace FerroEngrenagem
             return b != null && b.Properties != null && b.Properties.Contains("FeSignal") ? b.Properties.GetString("FeSignal").Trim().ToLowerInvariant() : "";
         }
 
+        /// <summary>D13: signal strength 0..15 the block at p gives (digital emitters: 15 when on).</summary>
+        public static int Level(World world, Vector3i p)
+        {
+            BlockValue bv = world.GetBlock(p);
+            if (Kind(bv.Block) == "analog")
+            {
+                int v;
+                return int.TryParse(LogicStore.Field(p, "lv"), out v) ? Mathf.Clamp(v, 0, 15) : 0;
+            }
+            return Emits(world, p) ? 15 : 0;
+        }
+
+        /// <summary>The strongest level reaching the block at p (powered BlockPowered = 15).</summary>
+        public static int LevelAt(World world, Vector3i p)
+        {
+            BlockValue bv = world.GetBlock(p);
+            int m = bv.Block is BlockPowered && Kind(bv.Block) != "receiver" && Industrial.IsPowered(world, p) ? 15 : 0;
+            foreach (Vector3i d in Dirs)
+                m = Mathf.Max(m, Level(world, new Vector3i(p.x + d.x, p.y + d.y, p.z + d.z)));
+            return m;
+        }
+
+        // wireless: frequency (an item name) -> on
+        static readonly Dictionary<string, bool> wireless = new Dictionary<string, bool>();
+
+        public static string Freq(Vector3i p)
+        {
+            return LogicStore.Field(p, "freq");
+        }
+
         /// <summary>Does the block at p give a signal now?</summary>
         public static bool Emits(World world, Vector3i p)
         {
@@ -40,6 +70,8 @@ namespace FerroEngrenagem
             string k = Kind(b);
             if (k == "lever") return LogicStore.Get(p) == "1";
             if (k == "receiver") return Industrial.IsPowered(world, p);
+            if (k == "analog") return Level(world, p) > 0;
+            if (k == "wrx") { bool on; return Freq(p).Length > 0 && wireless.TryGetValue(Freq(p), out on) && on; }
             if (Belt.Is(b) && Logistics.IsCounter(b)) return Logistics.CounterPulse(p);
             return false;
         }
@@ -82,6 +114,31 @@ namespace FerroEngrenagem
         public static void Tick(World world)
         {
             LogicStore.EnsureLoaded();
+            // wireless transmitters: a frequency is on when any of its transmitters is signalled
+            Dictionary<string, bool> now = new Dictionary<string, bool>();
+            foreach (KeyValuePair<Vector3i, string> kv in LogicStore.All)
+            {
+                if (!kv.Value.Contains("wtx=1") || world.GetChunkFromWorldPos(kv.Key) == null) continue;
+                if (Kind(world.GetBlock(kv.Key).Block) != "wtx") continue;
+                string f = Freq(kv.Key);
+                if (f.Length == 0) continue;
+                bool on = Active(world, kv.Key);
+                bool had;
+                now[f] = (now.TryGetValue(f, out had) && had) || on;
+            }
+            List<string> changed = new List<string>();
+            foreach (KeyValuePair<string, bool> kv in now)
+            {
+                bool old;
+                if (!wireless.TryGetValue(kv.Key, out old) || old != kv.Value) changed.Add(kv.Key);
+            }
+            foreach (string f in new List<string>(wireless.Keys)) if (!now.ContainsKey(f) && wireless[f]) changed.Add(f);
+            wireless.Clear();
+            foreach (KeyValuePair<string, bool> kv in now) wireless[kv.Key] = kv.Value;
+            if (changed.Count > 0)
+                foreach (KeyValuePair<Vector3i, string> kv in new List<KeyValuePair<Vector3i, string>>(LogicStore.All))
+                    if (kv.Value.Contains("wrx=1") && changed.Contains(Freq(kv.Key)) && world.GetChunkFromWorldPos(kv.Key) != null)
+                        Changed(world, kv.Key);
             foreach (KeyValuePair<Vector3i, string> kv in new List<KeyValuePair<Vector3i, string>>(LogicStore.All))
             {
                 if (world.GetChunkFromWorldPos(kv.Key) == null) continue;
@@ -220,8 +277,10 @@ namespace FerroEngrenagem
     {
         public static void Postfix(Block __instance, Vector3i _blockPos, BlockValue _blockValue)
         {
-            if (_blockValue.ischild || Signals.Kind(__instance) != "receiver") return;
-            LogicStore.SetField(_blockPos, "rx", "1");
+            string k = Signals.Kind(__instance);
+            if (_blockValue.ischild || k.Length == 0) return;
+            if (k == "receiver") LogicStore.SetField(_blockPos, "rx", "1");
+            else if (k == "wtx" || k == "wrx") LogicStore.SetField(_blockPos, k, "1");
         }
     }
 

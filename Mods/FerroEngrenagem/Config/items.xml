@@ -1603,6 +1603,102 @@
 			<property name="CustomIconTint" value="707070"/>
 			<property name="DescriptionKey" value="feMoldRocketDesc"/>
 		</item>
+		<item name="feBoilerShell">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="5"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feResourceIronPlate"/>
+			<property name="CustomIconTint" value="806040"/>
+			<property name="DescriptionKey" value="feBoilerShellDesc"/>
+		</item>
+		<item name="feFirebox">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="5"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feResourceIronPlate"/>
+			<property name="CustomIconTint" value="a04020"/>
+			<property name="DescriptionKey" value="feFireboxDesc"/>
+		</item>
+		<item name="feSteamCylinderRaw">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feSteamPiston"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feSteamCylinderRawDesc"/>
+		</item>
+		<item name="feSteamCylinder">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feSteamPiston"/>
+			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="DescriptionKey" value="feSteamCylinderDesc"/>
+		</item>
+		<item name="feSafetyValve">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feResourceGear"/>
+			<property name="CustomIconTint" value="ff4040"/>
+			<property name="DescriptionKey" value="feSafetyValveDesc"/>
+		</item>
+		<item name="fePressureGaugeItem">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="resourceScopeLens"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="DescriptionKey" value="fePressureGaugeItemDesc"/>
+		</item>
+		<item name="feValveGear">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feResourceGear"/>
+			<property name="CustomIconTint" value="c0c0c0"/>
+			<property name="DescriptionKey" value="feValveGearDesc"/>
+		</item>
+		<item name="feMoldCylinder">
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="CustomIcon" value="feMoldPlate"/>
+			<property name="CustomIconTint" value="707070"/>
+			<property name="DescriptionKey" value="feMoldCylinderDesc"/>
+		</item>
 	</append>
 	<!-- END GENERATED by tools/gen_chain.py -->
 </configs>

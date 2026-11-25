@@ -340,3 +340,36 @@ Coloque cada bloco (criativo, busca "fe") e confira: modelo próprio (não mais 
    junção; as duas faixas para o sul ficam separadas (cada uma com guarda-corpo), não uma esteira larga.
 6. **Esteiras lado a lado:** são sempre esteiras separadas (cada uma com sua lona andando e guarda-corpo).
 7. **T:** uma esteira que solta para os dois lados (sem nada na frente) aparece como um Y de duas curvas, sem mesa.
+
+## 20. D13: máquinas que agem no mundo, transporte, sinais, peças de arma e motor a vapor peça por peça
+
+Antes: feche o jogo e rode `fe.bat mod` (a DLL nova não foi instalada com o jogo aberto). Os blocos novos usam
+modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
+
+1. **Itens visíveis:** ponha ingredientes num Triturador / Lavadora: o item aparece girando em cima; trabalhando, ele
+   balança. Estações em linha (Prensa em Linha...) com peças `FeHead_*` descem sobre o item (só nos modelos novos).
+2. **Furadeira Mecânica** (eixo do lado, torque 128) de frente para pedra: "Quebrando X%"; o que cai vai para o baú /
+   esteira atrás dela. **Serra Mecânica** numa árvore: derruba a árvore inteira e entrega a madeira atrás.
+3. **Colheitadeira** de frente para milho maduro (ou um bloco acima dele): colhe e replanta.
+4. **Aplicador** com sementes ou blocos (segure E > Pôr item da mão): coloca à frente, um por segundo.
+5. **Pistão Mecânico** com uma Alavanca de Sinal encostada: estende até 6 empurrando blocos comuns; sem sinal, recolhe.
+6. **Ventilador Industrial:** com água logo na frente e uma esteira passando no vento, salitre vira salitre purificado;
+   com Queimador a Gás aceso na frente, carne crua vira carne grelhada, pólvora úmida seca. Sem nada, empurra itens
+   soltos. Virado para cima embaixo de uma **Calha Vertical**, os itens sobem.
+7. **Calha Vertical:** esteira apontando para a calha no alto; os itens caem até o baú embaixo da coluna.
+8. **Depósito:** esteira apontando para ele: a pilha aparece em cima; Prensa em Linha em cima trabalha nela; Braço pega.
+9. **Cofre Modular:** 3 encostados; a esteira enche os três; o Braço tira de qualquer um.
+10. **Túnel de Esteira:** configurações: Modo = lado, Item da mão = filtro; itens do filtro saem para aquele lado.
+11. **Dreno de Itens:** potes de água pela esteira -> água no cano de cima, potes vazios na frente.
+12. **Polia de Mangueira** (torque 64) sobre um poço fundo (até 16 blocos abaixo): bombeia.
+13. **Moinho de Vento** no alto, ar livre na frente: olhar mostra "Vento X%"; dá torque.
+14. **Engrenagens** lado a lado (eixos paralelos): giram uma à outra sem eixo entre elas.
+15. **Sinais:** Alavanca Analógica (E: 0 a 15) ao lado de uma Válvula Reguladora: a vazão acompanha. Transmissor e
+    Receptor sem Fio com o mesmo item de frequência: a alavanca no transmissor liga o registro no receptor longe.
+16. **Painel Numérico** atrás de um manômetro / tanque / baú / contador: mostra o número na frente.
+17. **Guia de Produção:** abra uma máquina nova no guia: aparece "Como ligar".
+18. **Peças de arma:** Montadora: Peças de Pistola = 2 Chapas de Aço + 1 Mola + 4 Pregos + 1 Perfil. A Pistola agora sai
+    só com itens fabricados.
+19. **Motor a Vapor peça por peça** (Garagem): Corpo de Caldeira (Serralheria), Fornalha (Serralheria), 2 Cilindros
+    (Molde de Cilindro na Mesa -> Torno), 2 Pistões, Virabrequim, 2 Volantes, Válvula de Segurança, Manômetro de
+    Caldeira, Distribuidor, 4 Canos, 4 Juntas.

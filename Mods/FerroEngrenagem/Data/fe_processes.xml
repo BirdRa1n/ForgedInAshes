@@ -243,6 +243,8 @@
 	<machine name="feBender" text="Dobradeira"/>
 	<machine name="feWelder" text="Soldadora"/>
 	<machine name="feReflowOven" text="Forno de Refusão"/>
+	<machine name="feItemDrain" text="Dreno de Itens"/>
+	<machine name="feFan" text="Ventilador Industrial"/>
 	<!-- molds and items -->
 	<item name="feMoldPellet" text="feMoldPellet" metals="molten_polymer"/>
 	<item name="feMoldBoard" text="feMoldBoard" metals="molten_polymer"/>
@@ -262,6 +264,7 @@
 	<item name="feMoldArrowHead" text="feMoldArrowHead" metals="molten_iron,molten_steel"/>
 	<item name="feMoldBuckshot" text="feMoldBuckshot" metals="molten_lead"/>
 	<item name="feMoldRocket" text="feMoldRocket" metals="molten_iron"/>
+	<item name="feMoldCylinder" text="feMoldCylinder" metals="molten_iron"/>
 	<item name="feShaleCrushed" text="Xisto Moído"/>
 	<item name="feShaleAsh" text="Cinza de Xisto"/>
 	<item name="feSulfur" text="Enxofre"/>
@@ -341,6 +344,13 @@
 	<item name="fePlaster" text="Gesso em Pó"/>
 	<item name="feEngineerWrench" text="Chave de Engenheiro"/>
 	<item name="feEngineerManual" text="Manual do Engenheiro"/>
+	<item name="feBoilerShell" text="Corpo de Caldeira"/>
+	<item name="feFirebox" text="Fornalha"/>
+	<item name="feSteamCylinderRaw" text="Cilindro a Vapor Bruto"/>
+	<item name="feSteamCylinder" text="Cilindro a Vapor"/>
+	<item name="feSafetyValve" text="Válvula de Segurança"/>
+	<item name="fePressureGaugeItem" text="Manômetro de Caldeira"/>
+	<item name="feValveGear" text="Distribuidor"/>
 	<!-- processes -->
 	<process id="crush_shale" kind="crush" machine="feCrusher" input="resourceOilShale" count="2" output="feShaleCrushed" out_count="2" time="2" torque="128" text="O Triturador mói o xisto."/>
 	<process id="retort_shale" kind="distill" machine="feShaleRetort" input="feShaleCrushed" count="10" fluid_out="crude_oil,shale_gas" out_liters="40,60" extra="feShaleAsh" extra_count="2" time="60" heat="true" text="A Retorta aquece o xisto sem ar: óleo cru (em cima), gás de xisto (direita) e cinza."/>
@@ -464,6 +474,24 @@
 	<process id="bend_rim" kind="press" machine="feBender" input="feSteelPlate" count="2" output="feRim" out_count="1" time="3" torque="64" text="Aro."/>
 	<process id="weld_frame" kind="assemble" machine="feWelder" input="feProfile" count="4" output="feChassisFrame" out_count="1" time="6" text="Quadro soldado."/>
 	<process id="reflow_board" kind="dry" machine="feReflowOven" input="feCircuitPopulated" count="1" output="feCircuitBoard" out_count="1" time="4" text="Solda a placa."/>
+	<process id="fan_wash_nitrate" kind="wash" machine="feFan" input="resourcePotassiumNitratePowder" count="2" output="feNitratePure" out_count="2" time="3" text="Ventilador: lava no ar (água na frente)."/>
+	<process id="fan_wash_nitre_earth" kind="wash" machine="feFan" input="feNitreEarth" count="1" output="resourcePotassiumNitratePowder" out_count="4" time="6" text="Ventilador: lava no ar (água na frente)."/>
+	<process id="fan_wash_coagulum" kind="wash" machine="feFan" input="feRubberCoagulum" count="1" output="feRubberSheetRaw" out_count="1" time="4" text="Ventilador: lava no ar (água na frente)."/>
+	<process id="fan_heat_meat" kind="dry" machine="feFan" input="foodRawMeat" count="1" output="foodCharredMeat" out_count="1" time="4" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_rubber" kind="dry" machine="feFan" input="feRubberSheetRaw" count="1" output="feRubberRaw" out_count="1" time="6" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_paper" kind="dry" machine="feFan" input="feWetPaper" count="1" output="resourcePaper" out_count="4" time="3" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_powder" kind="dry" machine="feFan" input="feGunPowderWet" count="1" output="resourceGunPowder" out_count="1" time="3" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_extract" kind="dry" machine="feFan" input="feCultureExtract" count="1" output="feAntibioticPowder" out_count="2" time="10" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_water" kind="dry" machine="feFan" input="drinkJarRiverWater" count="1" output="drinkJarBoiledWater" out_count="1" time="5" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="fan_heat_corn" kind="dry" machine="feFan" input="foodCropCorn" count="1" output="foodCornOnTheCob" out_count="1" time="5" text="Ventilador: aquece no ar (queimador aceso na frente)."/>
+	<process id="drain_river_water" kind="wash" machine="feItemDrain" input="drinkJarRiverWater" count="1" output="drinkJarEmpty" out_count="1" fluid_out="water" out_liters="5" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_boiled_water" kind="wash" machine="feItemDrain" input="drinkJarBoiledWater" count="1" output="drinkJarEmpty" out_count="1" fluid_out="water" out_liters="5" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_oil" kind="wash" machine="feItemDrain" input="resourceOil" count="1" fluid_out="oil" out_liters="10" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_gas_can" kind="wash" machine="feItemDrain" input="ammoGasCan" count="1" fluid_out="gasoline" out_liters="1" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_lube" kind="wash" machine="feItemDrain" input="feResourceLubricant" count="1" fluid_out="lubricant" out_liters="10" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_ethanol" kind="wash" machine="feItemDrain" input="feEthanol" count="1" fluid_out="ethanol" out_liters="5" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="drain_gas_canister" kind="wash" machine="feItemDrain" input="feGasCanister" count="1" fluid_out="fuel_gas" out_liters="50" time="0.5" text="Esvazia no cano de cima."/>
+	<process id="cast_feSteamCylinderRaw" kind="cast" machine="feCaster" mold="feMoldCylinder" fluid_in="molten_iron" liters="40" output="feSteamCylinderRaw" out_count="1" time="12" text="Molde de Cilindro."/>
 	<process id="cook_drinkJarBeer" kind="boil" machine="feCookerIndustrial" input="resourceCropHopsFlower,drinkJarBoiledWater" count="16,4" output="drinkJarBeer" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>
 	<process id="cook_drinkJarBoiledWater" kind="boil" machine="feCookerIndustrial" input="drinkJarRiverWater" count="4" output="drinkJarBoiledWater" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>
 	<process id="cook_drinkJarPureMineralWater" kind="boil" machine="feCookerIndustrial" input="drinkJarBoiledWater,resourceCoal,resourceCropGoldenrodPlant,resourceCropChrysanthemumPlant" count="4,4,4,4" output="drinkJarPureMineralWater" out_count="4" time="20" heat="true" text="Cozinha Industrial: lote de 4."/>

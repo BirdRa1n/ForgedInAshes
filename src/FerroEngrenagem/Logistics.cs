@@ -202,6 +202,16 @@ namespace FerroEngrenagem
                 return got;
             }
             Vector3i par = Fluids.ParentOf(world, c, cb);
+            if (ItemTransport.Holder(cb.Block)) return ItemTransport.Take(c, amount, filter, peek);
+            if (ItemTransport.IsVault(cb.Block))
+            {
+                foreach (Vector3i v in ItemTransport.Cluster(world, c))
+                {
+                    if (v == c) continue;
+                    ItemStack g = TakeStorage(world, v, amount, filter, peek);
+                    if (g != null) return g;
+                }
+            }
             if (ProcessMachine.Is(cb.Block))
             {
                 FluidState s = FluidStore.Get(par);
@@ -245,8 +255,14 @@ namespace FerroEngrenagem
                 }
                 return null;
             }
-            TileEntityComposite tc = te as TileEntityComposite;
-            TEFeatureStorage store = tc == null ? null : tc.GetFeature<TEFeatureStorage>();
+            return TakeStorage(world, par, amount, filter, peek);
+        }
+
+        static ItemStack TakeStorage(World world, Vector3i par, int amount, string filter, bool peek)
+        {
+            TileEntityComposite tc = world.GetTileEntity(par) as TileEntityComposite;
+            if (tc == null || tc.IsUserAccessing()) return null;
+            TEFeatureStorage store = tc.GetFeature<TEFeatureStorage>();
             if (store == null || store.ItemGrid == null) return null;
             ItemStackGrid grid = store.ItemGrid;
             for (int i = 0; i < grid.Length; i++)
@@ -374,7 +390,20 @@ namespace FerroEngrenagem
             World w = _world as World;
             if (_commandName == "fe_lever" && w != null)
             {
-                GameManager.ShowTooltip(_player, Signals.Toggle(w, _blockPos), false, false, 0f);
+                if (Signals.Kind(this) == "analog")
+                {
+                    int v;
+                    int.TryParse(LogicStore.Field(_blockPos, "lv"), out v);
+                    v = (v + 1) % 16;
+                    LogicStore.SetField(_blockPos, "lv", v.ToString());
+                    Signals.Changed(w, _blockPos);
+                    GameManager.ShowTooltip(_player, string.Format(Kinetic.Text("feAnalogLevel", "Signal strength: {0} / 15"), v), false, false, 0f);
+                }
+                else if (Signals.Kind(this) == "wtx" || Signals.Kind(this) == "wrx")
+                {
+                    FeUi.OpenConfig(_player, _blockPos);
+                }
+                else GameManager.ShowTooltip(_player, Signals.Toggle(w, _blockPos), false, false, 0f);
                 return true;
             }
             if (_commandName != "take") return false;
@@ -392,9 +421,19 @@ namespace FerroEngrenagem
 
         public override string GetActivationText(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos, EntityAlive _entityFocusing)
         {
-            bool on = LogicStore.Get(_blockPos) == "1";
-            return KineticLookController.Escape(GetLocalizedBlockName() + "\n" + (on ? Kinetic.Text("feSignalOn", "SIGNAL ON") : Kinetic.Text("feSignalOff", "no signal")))
-                   + "\n" + Kinetic.Text("feHintLever", "{0} pull the lever - hold {0}: take");
+            World w = _world as World;
+            string k = Signals.Kind(this);
+            string state;
+            if (k == "analog") state = string.Format(Kinetic.Text("feAnalogLevel", "Signal strength: {0} / 15"), LogicStore.Field(_blockPos, "lv").Length == 0 ? "0" : LogicStore.Field(_blockPos, "lv"));
+            else if ((k == "wtx" || k == "wrx") && w != null)
+            {
+                string f = Signals.Freq(_blockPos);
+                state = (f.Length == 0 ? Kinetic.Text("feWirelessNoFreq", "No frequency: E, then Item in hand") : string.Format(Kinetic.Text("feWirelessFreq", "Frequency: {0}"), ProcessMachine.ItemName(f)))
+                        + " - " + ((k == "wtx" ? Signals.Active(w, _blockPos) : Signals.Emits(w, _blockPos)) ? Kinetic.Text("feSignalOn", "SIGNAL ON") : Kinetic.Text("feSignalOff", "no signal"));
+            }
+            else state = LogicStore.Get(_blockPos) == "1" ? Kinetic.Text("feSignalOn", "SIGNAL ON") : Kinetic.Text("feSignalOff", "no signal");
+            return KineticLookController.Escape(GetLocalizedBlockName() + "\n" + state)
+                   + "\n" + (k == "wtx" || k == "wrx" ? Kinetic.Text("feHintConfig", "{0} settings - hold {0}: take") : Kinetic.Text("feHintLever", "{0} pull the lever - hold {0}: take"));
         }
     }
 }

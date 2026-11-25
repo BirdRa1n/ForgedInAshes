@@ -137,6 +137,7 @@ namespace FerroEngrenagem
         public static void Postfix(BlockPowered __instance, Vector3i _blockPos, BlockEntityData _ebcd)
         {
             if (Fluids.Kind(__instance) == FluidKind.Caster) CasterVisual.Attach(_ebcd, _blockPos);
+            MachineItems.Attach(_ebcd, _blockPos, __instance);
         }
     }
 }

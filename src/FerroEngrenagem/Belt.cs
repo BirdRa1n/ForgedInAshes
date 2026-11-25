@@ -279,6 +279,7 @@ namespace FerroEngrenagem
         {
             List<Vector3i> outs = Exits(world, pos, bv);
             if (Logistics.IsSplitter(bv.Block)) return Logistics.Filter(pos, bv, outs);
+            if (ItemTransport.IsTunnel(bv.Block)) return ItemTransport.TunnelExits(world, pos, bv, st, outs);
             if (!IsFilter(bv.Block)) return outs;
             string filter = BeltStore.Filter(pos);
             if (filter == null) return outs;
@@ -371,6 +372,7 @@ namespace FerroEngrenagem
                 t += "\n" + sb.ToString();
             }
             if (Logistics.IsSplitter(bv.Block)) t += "\n" + string.Format(Kinetic.Text("feSplitInfo", "Splitter: front : each side = {0}"), Logistics.Ratio(pos));
+            if (ItemTransport.IsTunnel(bv.Block)) t += "\n" + ItemTransport.DescribeTunnel(pos);
             if (Logistics.IsCounter(bv.Block)) t += "\n" + string.Format(Kinetic.Text("feCounterInfo", "Counter: {0} / {1} (a signal every {1} items)"), Logistics.CounterCount(pos), Logistics.CounterN(pos));
             if (Logistics.IsGate(bv.Block))
             {
@@ -645,10 +647,12 @@ namespace FerroEngrenagem
                 AutoCraft.TickAll(world);
                 FluidDevices.TickAll(world);
                 Logistics.TickArms(world);
+                WorldMachines.TickAll(world);
                 Signals.Tick(world);
             }
             if (Time.time >= nextSave) LogicStore.Save();
             Move(world, Step);
+            ItemTransport.Tick(world);
             if (Time.time >= nextSave) { nextSave = Time.time + 30f; BeltStore.Save(); }
         }
 
@@ -705,6 +709,7 @@ namespace FerroEngrenagem
                 List<BeltItem> items = BeltStore.Items(pos, false);
                 if (items == null || items.Count == 0 || !Loaded(world, pos)) continue;
                 BlockValue bv = world.GetBlock(pos);
+                if (ItemTransport.Holder(bv.Block)) continue;                                   // chute / depot (ItemTransport)
                 if (!Belt.Is(bv.Block)) { BeltStore.Remove(pos); changed = true; continue; }   // block gone
                 float v = Belt.Speed(world, pos, bv);
                 if (v <= 0f) continue;
@@ -829,6 +834,7 @@ namespace FerroEngrenagem
             if (IsStorage(b)) return true;
             if (Fluids.Kind(b) == FluidKind.Filler || Fluids.Kind(b) == FluidKind.Processor || Fluids.Kind(b) == FluidKind.Smelter
                 || Fluids.Kind(b) == FluidKind.Burner) return true;
+            if (ItemTransport.Holder(b) || WorldMachines.Kind(b) == "deployer") return true;
             if (b is BlockPowerSource && Industrial.AltFuel(b) != null) return true;
             if (b is BlockWorkstation && b.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal)) return true;
             return b is BlockPowerSource && FuelGenerator.FuelItem(b) != null && Fluids.Kind(b) != FluidKind.SteamEngine;
@@ -929,6 +935,21 @@ namespace FerroEngrenagem
         /// it open (changing an open inventory desyncs it).</summary>
         static bool InsertStorage(World world, Vector3i p, ItemStack st)
         {
+            if (ItemTransport.IsVault(world.GetBlock(p).Block))
+            {
+                // D13 Item Vault: the whole cluster of vaults is one storage
+                foreach (Vector3i c in ItemTransport.Cluster(world, p))
+                {
+                    InsertOne(world, c, st);
+                    if (st.count <= 0) return true;
+                }
+                return false;
+            }
+            return InsertOne(world, p, st);
+        }
+
+        static bool InsertOne(World world, Vector3i p, ItemStack st)
+        {
             TileEntityComposite te = world.GetTileEntity(p) as TileEntityComposite;
             if (te == null) return false;
             if (te.IsUserAccessing()) { Note(world, p, "open by a player, waiting"); return false; }
@@ -986,6 +1007,19 @@ namespace FerroEngrenagem
                 st.count -= m;
                 BeltStore.MarkDirty();
                 Note(world, parent, "melted " + m + "x " + mname);
+                return st.count <= 0;
+            }
+            if (ItemTransport.Holder(world.GetBlock(parent).Block))
+            {
+                bool all = ItemTransport.Insert(world, parent, st);
+                return all;
+            }
+            if (WorldMachines.Kind(world.GetBlock(parent).Block) == "deployer")
+            {
+                int dt = WorldMachines.Insert(world, parent, st);
+                if (dt <= 0) return false;
+                st.count -= dt;
+                BeltStore.MarkDirty();
                 return st.count <= 0;
             }
             if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Burner)
@@ -1077,7 +1111,7 @@ namespace FerroEngrenagem
     // The items: one model per stack (the dropped-item model, or a small box for blocks), gliding along its path.
     public class BeltRenderer : MonoBehaviour
     {
-        class Shown
+        internal class Shown
         {
             public GameObject Go;
             public AssetManagement.InstanceHandle<GameObject> Handle;
@@ -1103,6 +1137,16 @@ namespace FerroEngrenagem
                 List<BeltItem> items = BeltStore.Items(pos, false);
                 if (items == null || items.Count == 0) continue;
                 BlockValue bv = world.GetBlock(pos);
+                if (ItemTransport.IsDepot(bv.Block))
+                {
+                    // D13: the depot shows its stack on top
+                    BeltItem dep = items[0];
+                    Shown ds;
+                    if (!shown.TryGetValue(dep.Id, out ds)) { ds = Make(dep.Stack); shown[dep.Id] = ds; }
+                    ds.Seen = frame;
+                    if (ds.Go != null) ds.Go.transform.position = pos.ToVector3() + new Vector3(0.5f, 0.82f, 0.5f) - Origin.position;
+                    continue;
+                }
                 if (!Belt.Is(bv.Block) || Belt.IsClosed(bv.Block)) continue;   // a duct hides its items
                 foreach (BeltItem it in items)
                 {
@@ -1178,13 +1222,13 @@ namespace FerroEngrenagem
             signItem.Clear();
         }
 
-        static void Kill(Shown s)
+        internal static void Kill(Shown s)
         {
             if (s.HasHandle) s.Handle.Destroy();
             if (s.Go != null) Object.Destroy(s.Go);
         }
 
-        static Shown Make(ItemStack stack)
+        internal static Shown Make(ItemStack stack)
         {
             Shown s = new Shown();
             GameObject root = new GameObject("FeBeltItem");
@@ -1701,7 +1745,7 @@ namespace FerroEngrenagem
                                                                            Vector3i _blockPos, EntityAlive _entityFocusing)
         {
             BlockActivationCommand[] b = base.GetBlockActivationCommands(_world, _blockValue, _blockPos, _entityFocusing);
-            if (Logistics.IsSplitter(this) || Logistics.IsGate(this) || Logistics.IsCounter(this))
+            if (Logistics.IsSplitter(this) || Logistics.IsGate(this) || Logistics.IsCounter(this) || ItemTransport.IsTunnel(this))
             {
                 BlockActivationCommand[] c = new BlockActivationCommand[b.Length + 1];
                 c[0] = new BlockActivationCommand(FeUi.ConfigCommand, "tool", true, false, null);

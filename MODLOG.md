@@ -1120,3 +1120,25 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   ícone do Funil, passo do mod, reexportação do
   feCrusher para uma pasta temporária (FBX igual ao original). Correção: o `texturizar.bat` via `cmd /c` quebrava as
   aspas; agora o Blender roda `texturizar_pbr.py` direto. Bundle 98,3 MB (perto do limite de 100 MB do GitHub).
+
+## 2026-11-25: D13 - "um Create com pé no chão" (sem modelos)
+
+- Pedido: terminar código e lógica (sem lava, sem caldeira modular, motor a vapor simples mas montado peça por peça,
+  trens e multiplayer depois, modelos em outra sessão).
+- C#: `WorldMachines.cs` (Furadeira, Serra, Colheitadeira, Aplicador, Pistão Mecânico + `fePistonHead`, Ventilador
+  com lavar / aquecer / empurrar), `ItemTransport.cs` (Calha Vertical com subida por ventilador, Depósito com estação
+  em cima, Cofre Modular em conjunto, Túnel de Esteira), `MachineItems.cs` (item visível nas máquinas, `FeHead_*`
+  descendo), `Display.cs` (Painel Numérico com TextMesh), engrenagens (`KineticKind.Cog`, encaixe lado a lado inverte
+  o giro), moinho (`FeWind` na roda d'água: altura livre e ar na frente), Polia de Mangueira (`FeIntakeDepth`),
+  sinais analógicos (0-15, reguladora) e sem fio (frequência = item), guia "Como ligar". `build.ps1 -Out` compila em
+  outro lugar (o jogo aberto trava a DLL).
+- Dados (`gen_chain.py`): 19 blocos novos, processos do Ventilador e do Dreno de Itens, receitas das 16 "Peças"
+  (armas, ferramentas, armadura, robótica) que só vinham de loot, motor a vapor com 9 peças novas.
+  `check_coverage.py` agora cobra todo ingrediente `*Parts`. Validadores: xpath 774/0, processos 223/0, regras 23/23,
+  cobertura 0 faltando.
+- **Bug evitado:** o `gen_chain.py` reescrevia os blocos D12 com os modelos emprestados e desfazia os 50 modelos
+  próprios feitos em outra sessão (que editou o `blocks.xml` direto). Agora o gerador usa `<bloco>Prefab` quando
+  existe `Art/<bloco>/hd/<bloco>_HD.fbx` e o ícone próprio quando existe o png.
+- `PENDENCIAS_ASSETS.md` (gerado por `tools/list_assets.py`): 15 blocos novos sem modelo, 106 itens sem ícone
+  próprio, contratos de nomes por tipo de bloco, sons e partículas que faltam.
+- Compilado (fora da pasta do jogo, que estava aberto). **Não instalado nem testado no jogo:** `TESTE_GERAL.md` 20.

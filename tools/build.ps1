@@ -11,6 +11,7 @@
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File tools\build.ps1
 #>
+param([string]$Out = '')   # -Out <path>: build elsewhere (e.g. to check while the game holds the DLL)
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $game = (Get-Content (Join-Path $PSScriptRoot 'game_path.txt') -TotalCount 1).Trim()
@@ -20,7 +21,7 @@ $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path $csc)) { throw "csc not found: $csc" }
 
 $src = Get-ChildItem (Join-Path $repo 'src\FerroEngrenagem') -Recurse -Filter *.cs | ForEach-Object { $_.FullName }
-$out = Join-Path $repo 'Mods\FerroEngrenagem\FerroEngrenagem.dll'
+$out = if ($Out) { $Out } else { Join-Path $repo 'Mods\FerroEngrenagem\FerroEngrenagem.dll' }
 $refs = @(
     (Join-Path $managed 'mscorlib.dll'),
     (Join-Path $managed 'System.dll'),
@@ -35,6 +36,7 @@ $refs = @(
     (Join-Path $managed 'UnityEngine.AnimationModule.dll'),
     (Join-Path $managed 'UnityEngine.PhysicsModule.dll'),
     (Join-Path $managed 'UnityEngine.ParticleSystemModule.dll'),   # FxVisual: steam / smoke / sparks
+    (Join-Path $managed 'UnityEngine.TextRenderingModule.dll'),    # Display Panel (TextMesh)
     (Join-Path $managed 'InControl.dll'),          # PlayerAction (Activate key) for the Crank
     (Join-Path $harmonyDir '0Harmony.dll')
 )

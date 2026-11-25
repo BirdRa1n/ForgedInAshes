@@ -643,6 +643,144 @@ add(["glassBlockVariantHelper", "glassBulletproofBlockVariantHelper"], "feFoundr
 REMOVE_RECIPE = [("ammoGasCan", "feRefinery"), ("resourceOil", "feRefinery"), ("resourceGlue", "feRefinery"), ("resourcePaint", "feRefinery"),
                  ("resourcePaper", "feRefinery"), ("drinkJarEmpty", "feFoundry")]
 
+# ================================================================================================ D13 (2026-11-25)
+# "um Create com pé no chão": machines that act on the world, more item transport, cogs, windmill, signals, the
+# weapon parts route and the Steam Engine built part by part. No new models (PENDENCIAS_ASSETS.md lists them).
+PLAIN = "corrugatedMetalNoUpgradeMaster"
+WM = {"FeKinetic": "pump", "FeShaftAxis": "x", "FeFluid": "none"}
+
+
+def wm(name, en, pt, den, dpt, kind, cost, extra, model, icon, tint, recipe):
+    p = dict(WM)
+    p.update({"FeWorld": kind, "FeTorqueCost": str(cost)})
+    p.update(extra)
+    block(name, en, pt, den, dpt, "feShaft", p, model, icon, tint, recipe)
+
+
+wm("feMechDrill", "Mechanical Drill", "Furadeira Mecânica", "Torque 128 (shaft on its side): wears down the block in front (stone, ore, soil) and gives its drops to the block behind (crate, belt, chute) or the ground.",
+   "Torque 128 (eixo do lado): desgasta o bloco da frente (pedra, minério, terra) e entrega o que cai no bloco de trás (baú, esteira, calha) ou no chão.",
+   "drill", 128, {"FeWorkPower": "60"}, "feCrusherPrefab", "feCrusher", "c0c0c0", [("feToolHead", 2), (R_GEAR, 3), (R_SHAFT, 2), ("feSteelPlate", 4)])
+wm("feMechSaw", "Mechanical Saw", "Serra Mecânica", "Torque 128: cuts the tree (whole) or wooden block in front; the wood goes to the block behind.",
+   "Torque 128: corta a árvore (inteira) ou o bloco de madeira da frente; a madeira vai para o bloco de trás.",
+   "saw", 128, {"FeWorkPower": "80"}, "feCrusherPrefab", "feCrusher", "c08040", [("feSteelPlate", 3), (R_GEAR, 3), (R_SHAFT, 2), ("feToolHead", 1)])
+wm("feMechHarvester", "Mechanical Harvester", "Colheitadeira Mecânica", "Torque 32: harvests the ripe crop in front (or in front and one down) and plants it again; the crop goes to the block behind.",
+   "Torque 32: colhe a planta madura da frente (ou da frente e um abaixo) e replanta; a colheita vai para o bloco de trás.",
+   "harvester", 32, {"FeWorkSeconds": "2"}, "feSpeedBoxPrefab", "feSpeedBox", "80ff80", [(R_PLATE, 4), (R_GEAR, 2), ("feToolHead", 1)])
+wm("feDeployer", "Deployer", "Aplicador", "Torque 32: places the blocks or seeds it holds in front (give them by belt, arm, funnel or hand).",
+   "Torque 32: coloca à frente os blocos ou sementes que guarda (dê por esteira, braço, funil ou mão).",
+   "deployer", 32, {"FeWorkSeconds": "1"}, "feTorqueRegulatorPrefab", "feTorqueRegulator", "ffa0ff", [("feServo", 1), (R_PLATE, 3), (R_GEAR, 2)])
+wm("feMechPiston", "Mechanical Piston", "Pistão Mecânico", "Torque 64: while it gets a signal it extends up to 6 blocks, pushing up to 12 plain blocks; without it, it retracts.",
+   "Torque 64: enquanto recebe sinal estende até 6 blocos, empurrando até 12 blocos comuns; sem sinal, recolhe.",
+   "piston", 64, {"FeRange": "6", "FeWorkSeconds": "0.5"}, "feClutchPrefab", "feClutch", "a0a0ff", [("fePiston", 2), ("feSteelPlate", 4), (R_GEAR, 2), ("feRod", 4)])
+wm("feFan", "Industrial Fan", "Ventilador Industrial", "Torque 64: blows 5 blocks ahead. Water right in front = washes the items in the air (on belts or on the ground); a lit Gas Burner = heats them; nothing = pushes dropped items. Pointing up under an Item Chute it lifts the items.",
+   "Torque 64: sopra 5 blocos à frente. Água logo na frente = lava os itens no ar (na esteira ou no chão); Queimador a Gás aceso = aquece; nada = empurra itens soltos. Virado para cima sob uma Calha Vertical, sobe os itens.",
+   "fan", 64, {"FeRange": "5"}, "feMechPumpPrefab", "feMechPump", "80c0ff", [("feSteelPlate", 3), (R_GEAR, 2), (R_SHAFT, 1), (R_PLATE, 4)])
+block("fePistonHead", "Piston Head", "Cabeça de Pistão", "Part of an extended Mechanical Piston.", "Parte de um Pistão Mecânico estendido.", PLAIN,
+      {"CreativeMode": "None", "Shape": "ModelEntity"}, "fePipePrefab", "fePipe", "a0a0ff", [])
+block("feItemChute", "Item Chute", "Calha Vertical", "A closed vertical chute: items put into it fall to what is under the column (crate, machine, belt). A fan under it blowing up lifts them.",
+      "Calha vertical fechada: os itens caem até o que está embaixo da coluna (baú, máquina, esteira). Um ventilador embaixo, para cima, sobe os itens.",
+      PLAIN, {"Class": "FerroEngrenagem.FeHolder, FerroEngrenagem", "FeChute": "true", "Shape": "ModelEntity"}, "fePipePrefab", "fePipe", "c0c0c0",
+      [(R_PLATE, 3)], 2)
+block("feDepot", "Depot", "Depósito", "Holds one stack in view. Belts, funnels and arms put; arms take; a station on top (press, inserter, doser) works on it.",
+      "Guarda uma pilha à vista. Esteiras, funis e braços põem; braços pegam; uma estação em cima (prensa, encaixador, dosador) trabalha nela.",
+      PLAIN, {"Class": "FerroEngrenagem.FeHolder, FerroEngrenagem", "FeDepot": "true", "Shape": "ModelEntity"}, "feCasterPrefab", "feCaster", "e0e0a0",
+      [(R_PLATE, 2), ("resourceWood", 4)])
+block("feItemVault", "Item Vault", "Cofre Modular", "A big crate. Vaults touching each other are one storage: belts fill the cluster, arms take from it.",
+      "Um baú grande. Cofres encostados são um armazém só: esteiras enchem o conjunto, braços tiram dele.",
+      "feBeltCrate", {"FeVault": "true"}, "feBeltCratePrefab", "feBeltCrate", "c0a060", [("feSteelPlate", 6), ("feHinge", 2), ("feLock", 1)])
+block("feBeltTunnel", "Belt Tunnel", "Túnel de Esteira", "A covered belt that sorts: the left filter goes left, the right filter goes right, the rest straight on.",
+      "Esteira coberta que separa: o filtro da esquerda vai para a esquerda, o da direita para a direita, o resto segue reto.",
+      "feConveyor", {"FeBeltTunnel": "true"}, "feConveyorDuctPrefab", "feConveyorDuct", "e0c060", [("feConveyorDuct", 1), ("feBrassDust", 2), (R_GEAR, 1)])
+block("feHosePulley", "Hose Pulley", "Polia de Mangueira", "A pump (torque 64) whose hose goes straight down up to 16 blocks to a pool: pumps from deep water.",
+      "Bomba (torque 64) com mangueira que desce reto até 16 blocos até um poço: bombeia de água funda.",
+      "feMechPump", {"FeIntakeDepth": "16", "FeIntakeWater": "6", "FeFluidRate": "300"}, "feMechPumpPrefab", "feMechPump", "6060ff",
+      [("feMechPump", 1), ("feHose", 8), (R_GEAR, 2)])
+block("feWindmill", "Windmill", "Moinho de Vento", "Torque source (256 UT, 16 RPM). Needs open air in front of the sails; stronger with free height under it (8 blocks = full, 12+ = x1.5).",
+      "Fonte de torque (256 UT, 16 RPM). Precisa de ar livre na frente das pás; mais forte com altura livre embaixo (8 blocos = cheio, 12+ = x1,5).",
+      "feWaterWheel", {"FeWind": "true", "FeTorqueOutput": "256"}, "feWaterWheelPrefab", "feWaterWheel", "e0e0e0",
+      [("resourceWood", 40), ("resourceCloth", 20), (R_SHAFT, 2), (R_GEAR, 2)])
+block("feCogwheel", "Cogwheel", "Engrenagem", "A shaft with a gear: cogs side by side with parallel axles turn each other (the other way), no shaft between them.",
+      "Eixo com engrenagem: engrenagens lado a lado com eixos paralelos giram uma à outra (em sentido contrário), sem eixo entre elas.",
+      "feShaft", {"FeKinetic": "cog"}, "feSpinInverterPrefab", "feSpinInverter", "e0c060", [(R_GEAR, 2), (R_SHAFT, 1)], 2)
+block("feSignalAnalog", "Analog Lever", "Alavanca Analógica", "E: signal strength 0 to 15. Regulator valves next to it open that much.",
+      "E: força do sinal de 0 a 15. Válvulas reguladoras encostadas abrem nessa medida.", "fePipe",
+      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "analog"}, "feClutchPrefab", "feClutch", "ffff40", [(R_PLATE, 1), (SPRING, 1)])
+block("feWirelessTx", "Wireless Transmitter", "Transmissor de Sinal", "Sends the signal it gets (lever, gauge, wire) to every receiver with the same frequency (an item, set in its settings).",
+      "Envia o sinal que recebe (alavanca, manômetro, fio) a todo receptor com a mesma frequência (um item, nas configurações).", "fePipe",
+      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "wtx"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff8040",
+      [("feCircuitBoard", 1), (COIL, 1), (R_PLATE, 1)])
+block("feWirelessRx", "Wireless Receiver", "Receptor sem Fio", "Gives the signal of its frequency to the blocks touching it.", "Dá o sinal da sua frequência aos blocos encostados.", "fePipe",
+      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "wrx"}, "feTorqueGaugePrefab", "feTorqueGauge", "40c0ff",
+      [("feCircuitBoard", 1), (COIL, 1), (R_PLATE, 1)])
+block("feDisplayPanel", "Display Panel", "Painel Numérico", "Shows in big digits what the block behind it reads: gauge, tank, counter, crate, machine or shaft.",
+      "Mostra em números grandes o que o bloco de trás lê: manômetro, tanque, contador, baú, máquina ou eixo.", PLAIN,
+      {"Class": "FerroEngrenagem.FeDisplay, FerroEngrenagem", "Shape": "ModelEntity"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff9030",
+      [("feLightBulb", 4), ("feCircuitBoard", 1), (R_PLATE, 2)])
+machine("feItemDrain", "Item Drain", "Dreno de Itens", "Empties fluid items (jars of water, oil, gas cans, lubricant, ethanol, gas canisters) into the pipe on its top; the empty jars go out in front.",
+        "Esvazia itens com fluido (potes de água, óleo, latas de gasolina, lubrificante, álcool, botijões) no cano de cima; os potes vazios saem na frente.",
+        PL, {"FeFluid": "processor", "FeFluidBuffer": "100"}, "feFluidFillerPrefab", "feFluidFiller", "60a0ff", [(R_PLATE, 4), ("fePipe", 2)])
+MACHINES.append(("feFan", "Ventilador Industrial"))
+
+# fan processes (machine feFan, kind wash = through water, dry = through a lit burner)
+for pid, kind, i, n, o, on, t in [
+        ("fan_wash_nitrate", "wash", "resourcePotassiumNitratePowder", 2, "feNitratePure", 2, 3),
+        ("fan_wash_nitre_earth", "wash", "feNitreEarth", 1, "resourcePotassiumNitratePowder", 4, 6),
+        ("fan_wash_coagulum", "wash", "feRubberCoagulum", 1, "feRubberSheetRaw", 1, 4),
+        ("fan_heat_meat", "dry", "foodRawMeat", 1, "foodCharredMeat", 1, 4),
+        ("fan_heat_rubber", "dry", "feRubberSheetRaw", 1, "feRubberRaw", 1, 6),
+        ("fan_heat_paper", "dry", "feWetPaper", 1, "resourcePaper", 4, 3),
+        ("fan_heat_powder", "dry", "feGunPowderWet", 1, "resourceGunPowder", 1, 3),
+        ("fan_heat_extract", "dry", "feCultureExtract", 1, "feAntibioticPowder", 2, 10),
+        ("fan_heat_water", "dry", "drinkJarRiverWater", 1, "drinkJarBoiledWater", 1, 5),
+        ("fan_heat_corn", "dry", "foodCropCorn", 1, "foodCornOnTheCob", 1, 5)]:
+    proc(pid, kind, "feFan", [(i, n)], o, on, t, text="Ventilador: " + ("lava no ar (água na frente)." if kind == "wash" else "aquece no ar (queimador aceso na frente)."))
+# item drain
+for pid, i, fl, l, back in [("drain_river_water", "drinkJarRiverWater", "water", 5, "drinkJarEmpty"),
+                            ("drain_boiled_water", "drinkJarBoiledWater", "water", 5, "drinkJarEmpty"),
+                            ("drain_oil", "resourceOil", "oil", 10, None), ("drain_gas_can", "ammoGasCan", "gasoline", 1, None),
+                            ("drain_lube", "feResourceLubricant", "lubricant", 10, None), ("drain_ethanol", "feEthanol", "ethanol", 5, None),
+                            ("drain_gas_canister", "feGasCanister", "fuel_gas", 50, None)]:
+    proc(pid, "wash", "feItemDrain", [(i, 1)], back, 1 if back else 0, 0.5, fout=[(fl, l)], text="Esvazia no cano de cima.")
+
+# weapon / tool parts: the game gives them only by loot and salvage; now they are made
+GUN_PARTS = ["gunHandgunT1PistolParts", "gunMGT1AK47Parts", "gunRifleT1HuntingRifleParts", "gunShotgunT1DoubleBarrelParts", "gunExplosivesT3RocketLauncherParts"]
+MELEE_PARTS = ["meleeToolAllSteelParts", "meleeToolAxeT3ChainsawParts", "meleeWpnBatonT2StunBatonParts", "meleeWpnBladeT3MacheteParts",
+               "meleeWpnClubT3SteelClubParts", "meleeWpnKnucklesT3SteelKnucklesParts", "meleeWpnSledgeT3SteelSledgehammerParts", "meleeWpnSpearT3SteelSpearParts"]
+for n in GUN_PARTS:
+    RECIPES.append((n, 1, "feAssembler", 10, [("feSteelPlate", 2), (SPRING, 1), ("resourceNail", 4), ("feProfile", 1)]))
+for n in MELEE_PARTS:
+    extra = [("feRubberBelt", 1)] if "Chainsaw" in n else [(COIL, 1)] if "Baton" in n else []
+    RECIPES.append((n, 1, "feAssembler", 8, [("feSteelPlate", 2), ("resourceNail", 2)] + extra))
+RECIPES.append(("gunBowT1WoodenBowParts", 1, "feAssembler", 6, [("feArrowShaft", 2), ("feThread", 2), ("resourceGlue", 1)]))
+RECIPES.append(("armorParts", 1, "feLoom", 8, [("feLeatherTanned", 1), ("feThread", 2), ("feBuckle", 1)]))
+RECIPES.append(("gunBotRoboticsParts", 1, "feRobotics", 10, [("feServo", 1), ("feCircuitBoard", 1), ("feSteelPlate", 1)]))
+
+# Steam Engine built from scratch, part by part (user: "um item básico, quebra-galho, que se constrói peça por peça")
+item("feBoilerShell", "Boiler Shell", "Corpo de Caldeira", "feResourceIronPlate", "806040", "Riveted steel drum of the Steam Engine.", "Tambor de aço rebitado do Motor a Vapor.", 5)
+item("feFirebox", "Firebox", "Fornalha", "feResourceIronPlate", "a04020", "Firebrick-lined firebox with a door, of the Steam Engine.", "Fornalha forrada de tijolo, com porta, do Motor a Vapor.", 5)
+item("feSteamCylinderRaw", "Rough Steam Cylinder", "Cilindro a Vapor Bruto", "feSteamPiston", "707070", "Cast iron cylinder. Bore it on the Lathe.", "Cilindro de ferro fundido. Fure no Torno.", 10)
+item("feSteamCylinder", "Steam Cylinder", "Cilindro a Vapor", "feSteamPiston", "c0c0c0", "Bored cylinder of the Steam Engine.", "Cilindro furado do Motor a Vapor.", 10)
+item("feSafetyValve", "Safety Valve", "Válvula de Segurança", "feResourceGear", "ff4040", "Spring-loaded valve of the boiler.", "Válvula de mola da caldeira.", 10)
+item("fePressureGaugeItem", "Pressure Gauge", "Manômetro de Caldeira", "resourceScopeLens", "ffffff", "Boiler gauge (glass, spring, brass wire).", "Manômetro da caldeira (vidro, mola, fio de latão).", 10)
+item("feValveGear", "Valve Gear", "Distribuidor", "feResourceGear", "c0c0c0", "Eccentric and rods that open the cylinder valves in time.", "Excêntrico e hastes que abrem as válvulas do cilindro na hora certa.", 10)
+MOLDS.append(("feMoldCylinder", "Cylinder Mold", "Molde de Cilindro", "707070"))   # item and recipe below
+item("feMoldCylinder", "Cylinder Mold", "Molde de Cilindro", "feMoldPlate", "707070", "A mold of the Casting Table (and the Injection Moulder): hold it and choose Change the mold.",
+     "Molde da Mesa de Moldagem (e da Injetora): segure-o e escolha Trocar o molde.", 1)
+proc("cast_feSteamCylinderRaw", "cast", "feCaster", [], "feSteamCylinderRaw", 1, 12, fin=[("molten_iron", 40)], mold="feMoldCylinder", text="Molde de Cilindro.")
+RECIPES += [
+    ("feMoldCylinder", 1, "feLathe", 20, [("resourceForgedIron", 10), ("resourceClayLump", 10)]),
+    ("feSteamCylinder", 1, "feLathe", 20, [("feSteamCylinderRaw", 1)]),
+    ("feBoilerShell", 1, "feMetalShop", 30, [("feSteelPlate", 8), ("resourceNail", 30), ("fePipe", 2)]),
+    ("feFirebox", 1, "feMetalShop", 20, [(R_PLATE, 4), ("resourceClayLump", 12), ("feHinge", 1)]),
+    ("feSafetyValve", 1, "feAssembler", 8, [(SPRING, 2), ("feRodBrass", 1), ("feGasket", 1)]),
+    ("fePressureGaugeItem", 1, "feAssembler", 8, [("feGlassPane", 1), (SPRING, 1), (WIRE, 1), (R_PLATE, 1)]),
+    ("feValveGear", 1, "feAssembler", 10, [(R_GEAR, 2), ("feRod", 2), (R_SHAFT, 1)]),
+    ("feSteamEngine", 1, "feGarage", 60, [("feBoilerShell", 1), ("feFirebox", 1), ("feSteamCylinder", 2), ("fePiston", 2), ("feCrankshaft", 1),
+                                          ("feFlywheel", 2), ("feSafetyValve", 1), ("fePressureGaugeItem", 1), ("feValveGear", 1),
+                                          ("resourceMetalPipe", 4), ("feGasket", 4)]),
+]
+REMOVE_RECIPE.append(("feSteamEngine", "feGarage"))
+
 # ------------------------------------------------------------------------------------------------ writers
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
@@ -673,6 +811,12 @@ def item_xml(i):
 
 def block_xml(b):
     name, en, pt, den, dpt, base, props, model, icon, tint, recipe, count = b
+    # a block that got its own HD model (Art/<block>/hd/<block>_HD.fbx, built into <block>Prefab by FeBuild) and its
+    # own icon uses them; the borrowed model / tinted icon above are only the placeholders until then
+    if (fe.REPO / "Art" / name / "hd" / f"{name}_HD.fbx").exists():
+        model = name + "Prefab"
+    if (fe.MOD_DIR / "UIAtlases" / "ItemIconAtlas" / f"{name}.png").exists():
+        icon, tint = name, "ffffff"
     lines = [f'\t\t<block name="{name}">',
              f'\t\t\t<property name="Extends" value="{base}"/>',
              f'\t\t\t<property name="CustomIcon" value="{icon}"/>',
@@ -889,6 +1033,57 @@ UI_TEXT = [[k, "UI", "Text", en, pt] for k, en, pt in [
     ("feGuideNoRoute", "No recipe: found in the world (loot, mining, harvest, traders)", "Sem receita: vem do mundo (loot, mineração, colheita, comerciantes)"),
     ("feGuideMore", "... and {0} more", "... e mais {0}"), ("feGuideNeeds", "needs", "precisa"), ("feGuideUsedIn", "used in", "usado em"),
     ("feGuideHand", "by hand (inventory)", "à mão (inventário)"), ("feGuideAll", "All", "Todas"),
+    # D13
+    ("feDisplayInfo", "Shows what the block behind it reads (gauge, tank, counter, crate, machine, shaft)", "Mostra o que o bloco de trás lê (manômetro, tanque, contador, baú, máquina, eixo)"),
+    ("feWirelessNoFreq", "No frequency: E, then Item in hand", "Sem frequência: E e depois Item da mão"),
+    ("feWirelessFreq", "Frequency: {0}", "Frequência: {0}"),
+    ("feCfgHelpWireless", "Item in hand: the frequency (any item). Transmitters and receivers with the same item are linked (any distance).", "Item da mão: a frequência (qualquer item). Transmissores e receptores com o mesmo item ficam ligados (qualquer distância)."),
+    ("feAnalogLevel", "Signal strength: {0} / 15", "Força do sinal: {0} / 15"),
+    ("feCfgHelpAnalog", "- / +: strength. Regulator valves next to it open that much (15 = fully).", "- / +: força. Válvulas reguladoras encostadas abrem nessa medida (15 = toda)."),
+    ("feDisplayFilter", "Crates: counts {0}", "Baús: conta {0}"), ("feDisplayAll", "every item", "todos os itens"),
+    ("feCfgHelpDisplay", "Item in hand: count only that item in a crate behind it (empty hand: every item)", "Item da mão: conta só esse item no baú de trás (mão vazia: todos)"),
+    ("feCfgHelpTunnel", "Mode: which side you set now ({0}). Item in hand: that side's filter (empty hand clears)", "Modo: qual lado você ajusta agora ({0}). Item da mão: o filtro desse lado (mão vazia limpa)"),
+    ("feRight", "right", "direita"), ("feLeft", "left", "esquerda"), ("feGuideHow", "How to connect", "Como ligar"),
+    ("feHowShaft", "a shaft on its left or right side gives it torque", "um eixo à esquerda ou à direita dá o torque"),
+    ("feHowCog", "cogs side by side (parallel axles) turn each other the other way", "engrenagens lado a lado (eixos paralelos) giram uma à outra ao contrário"),
+    ("feHowWind", "high up, open air in front; the shaft comes out of its back", "no alto, ar livre na frente; o eixo sai por trás"),
+    ("feHowPower", "wire it to power", "ligue com fio na energia"),
+    ("feHowInline", "put it ON TOP of a belt (or a depot): it works on the items under it; its other ingredients by belt / arm / hand", "coloque EM CIMA de uma esteira (ou depósito): trabalha nos itens embaixo; os outros ingredientes por esteira / braço / mão"),
+    ("feHowItems", "items in by belt / arm / funnel on any side, products out on the belt in front", "itens entram por esteira / braço / funil em qualquer lado, produtos saem na esteira da frente"),
+    ("feHowFluids", "fluids: in at the back (and bottom), out at the top (and right, left)", "fluidos: entram atrás (e embaixo), saem em cima (e direita, esquerda)"),
+    ("feHowHeat", "a lit Gas Burner against it", "um Queimador a Gás aceso encostado"), ("feHowTower", "stack Tower Sections on it", "empilhe Seções de Torre em cima"),
+    ("feHowValve", "fluid in at the back, out at the front", "fluido entra atrás, sai na frente"),
+    ("feHowBurner", "fuel gas in at the back; touch the machine to heat", "gás combustível entra atrás; encoste na máquina a aquecer"),
+    ("feHowTapper", "its back on a living trunk, a pipe in front", "as costas num tronco vivo, cano na frente"),
+    ("feHowDrill", "works on the block in front; drops go into the block behind", "trabalha no bloco da frente; o que cai vai para o bloco de trás"),
+    ("feHowFan", "water or a lit burner right in front of it; belts in the air stream", "água ou queimador aceso logo na frente; esteiras no caminho do vento"),
+    ("feHowPiston", "a signal (lever, receiver) makes it extend", "um sinal (alavanca, receptor) faz estender"),
+    ("feHowHarvester", "faces the crop (in front or in front and one down)", "virada para a plantação (na frente ou na frente e um abaixo)"),
+    ("feHowDeployer", "give it blocks or seeds; it places them in front", "dê blocos ou sementes; ele coloca na frente"),
+    ("feHowChute", "stack it in a column; a fan under it blowing up lifts the items", "empilhe em coluna; um ventilador embaixo, para cima, sobe os itens"),
+    ("feHowDepot", "a station on top works on its item", "uma estação em cima trabalha no item dele"),
+    ("feHowSignal", "touch the block it controls (valve, gate, clutch, piston)", "encoste no bloco que controla (registro, comporta, embreagem, pistão)"),
+    ("feTunnelInfo", "Tunnel: left {0}, right {1}, the rest straight on", "Túnel: esquerda {0}, direita {1}, o resto reto"),
+    ("feHolderEmpty", "Empty", "Vazio"), ("feChuteUp", "A fan under the column blows the items UP", "Um ventilador embaixo da coluna sopra os itens para CIMA"),
+    ("feChuteDown", "Items fall to what is under the column", "Os itens caem para o que está embaixo da coluna"),
+    ("feDepotInfo", "Belts, funnels and arms put items here; arms take them; a station on top works on them", "Esteiras, funis e braços põem itens aqui; braços pegam; uma estação em cima trabalha neles"),
+    ("feHintHolder", "{0} take the items - hold {0}: put, take", "{0} pega os itens - segure {0}: pôr, pegar"),
+    ("feWindInfo", "Wind: {0}% (free height under it and open air in front)", "Vento: {0}% (altura livre embaixo e ar livre na frente)"),
+    ("feWmNothing", "Nothing in front", "Nada na frente"), ("feWmBreaking", "Breaking {0}: {1}%", "Quebrando {0}: {1}%"),
+    ("feWmDrops", "Drops go into the block behind it (crate, belt, chute) or to the ground", "O que cai vai para o bloco de trás (baú, esteira, calha) ou para o chão"),
+    ("feWmHarvest", "Harvests the ripe crop in front (or in front and below) and plants it again", "Colhe a planta madura da frente (ou da frente e abaixo) e replanta"),
+    ("feWmEmpty", "Holds nothing: give it blocks or seeds (belt, arm, hand)", "Vazio: dê blocos ou sementes (esteira, braço, mão)"),
+    ("feWmHolds", "Holds {0}x {1}: places them in front", "Guarda {0}x {1}: coloca na frente"),
+    ("feWmPiston", "Extended {0} / {1} - extends while it gets a signal", "Estendido {0} / {1} - estende enquanto recebe sinal"),
+    ("feWmBlocked", "Blocked", "Bloqueado"), ("feWmContainer", "It does not break containers", "Não quebra baús"),
+    ("feWmTree", "Trees: use a Mechanical Saw", "Árvores: use a Serra Mecânica"), ("feWmNotWood", "The saw cuts trees and wood only", "A serra corta só árvores e madeira"),
+    ("feWmHard", "It cannot break this", "Não consegue quebrar isto"), ("feWmNoCrop", "No ripe crop in front", "Nenhuma planta madura na frente"),
+    ("feWmCannot", "It cannot place that there", "Não dá para colocar isso ali"), ("feWmHoldBlock", "Hold the blocks or seeds to give it", "Segure os blocos ou sementes para dar a ele"),
+    ("feFanWash", "Blows through water: washes the items in its stream", "Sopra pela água: lava os itens no caminho do vento"),
+    ("feFanHeat", "Blows through a lit burner: heats the items in its stream", "Sopra pelo queimador aceso: aquece os itens no caminho do vento"),
+    ("feFanCold", "The burner in front is not lit", "O queimador da frente não está aceso"),
+    ("feFanPush", "Blows air: pushes the dropped items (water or a lit burner in front: washes / heats)", "Sopra ar: empurra itens soltos (água ou queimador aceso na frente: lava / aquece)"),
+    ("feFanRange", "Range: {0} blocks", "Alcance: {0} blocos"),
 ]]
 
 
@@ -1015,16 +1210,16 @@ def main():
         return 0
     write_region(fe.MOD_CONFIG / "items.xml", '\t<append xpath="/items">\n' + "\n".join(item_xml(i) for i in I) + "\n\t</append>")
     write_region(fe.MOD_CONFIG / "blocks.xml", '\t<append xpath="/blocks">\n' + "\n".join(block_xml(b) for b in B) + "\n" + tree_xml() + "\n\t</append>")
-    rec = [recipe_xml(b[0], b[11], "feAssembler", 20, b[10]) for b in B]
+    rec = [recipe_xml(b[0], b[11], "feAssembler", 20, b[10]) for b in B if b[10]]
     rec += [recipe_xml(*r) for r in RECIPES]
-    body = ['\t<append xpath="/recipes">', "\n".join(rec), "\t</append>"]
+    # whole recipes replaced by the chain go first (a new recipe of the same name is appended after them)
+    body = [f"\t<remove xpath=\"/recipes/recipe[@name='{n}'][@craft_area='{a}']\"/>" for n, a in REMOVE_RECIPE]
+    body += ['\t<append xpath="/recipes">', "\n".join(rec), "\t</append>"]
     for n, a, ings in APPEND:
         ing = "\n".join(f'\t\t<ingredient name="{i}" count="{c}"/>' for i, c in ings)
         body.append(f"\t<append xpath=\"/recipes/recipe[@name='{n}'][@craft_area='{a}']\">\n{ing}\n\t</append>")
     for n, a, i in REMOVE_ING:
         body.append(f"\t<remove xpath=\"/recipes/recipe[@name='{n}'][@craft_area='{a}']/ingredient[@name='{i}']\"/>")
-    for n, a in REMOVE_RECIPE:
-        body.append(f"\t<remove xpath=\"/recipes/recipe[@name='{n}'][@craft_area='{a}']\"/>")
     write_region(fe.MOD_CONFIG / "recipes.xml", "\n".join(body))
     write_processes()
     write_fallback()

@@ -111,8 +111,10 @@ namespace FerroEngrenagem
             if (b == null) return false;
             FluidKind k = Fluids.Kind(b);
             if (k == FluidKind.Valve || k == FluidKind.Gauge) return true;
-            if (b is BlockFeArm || b is BlockFeFunnel) return true;
-            if (Belt.Is(b) && (Logistics.IsSplitter(b) || Logistics.IsGate(b) || Logistics.IsCounter(b) || Belt.IsFilter(b))) return true;
+            if (b is BlockFeArm || b is BlockFeFunnel || b is BlockFeDisplay) return true;
+            string sk = Signals.Kind(b);
+            if (sk == "wtx" || sk == "wrx" || sk == "analog") return true;
+            if (Belt.Is(b) && (Logistics.IsSplitter(b) || Logistics.IsGate(b) || Logistics.IsCounter(b) || Belt.IsFilter(b) || ItemTransport.IsTunnel(b))) return true;
             KineticKind kk = Kinetic.Kind(b);
             return kk == KineticKind.Clutch || kk == KineticKind.SpeedBox || kk == KineticKind.Regulator;
         }
@@ -170,6 +172,28 @@ namespace FerroEngrenagem
                 else if (t != "retencao") sb.Append(Kinetic.Text("feCfgHelpPlus", "- / +: change the value"));
                 return sb.ToString();
             }
+            string sk = Signals.Kind(b);
+            if (sk == "wtx" || sk == "wrx")
+            {
+                string f = Signals.Freq(Target);
+                sb.Append(f.Length == 0 ? Kinetic.Text("feWirelessNoFreq", "No frequency: E, then Item in hand") : string.Format(Kinetic.Text("feWirelessFreq", "Frequency: {0}"), ProcessMachine.ItemName(f))).Append("\n\n");
+                sb.Append(Kinetic.Text("feCfgHelpWireless", "Item in hand: the frequency (any item). Transmitters and receivers with the same item are linked (any distance)."));
+                return sb.ToString();
+            }
+            if (sk == "analog")
+            {
+                sb.Append(string.Format(Kinetic.Text("feAnalogLevel", "Signal strength: {0} / 15"), LogicStore.Field(Target, "lv").Length == 0 ? "0" : LogicStore.Field(Target, "lv"))).Append("\n\n");
+                sb.Append(Kinetic.Text("feCfgHelpAnalog", "- / +: strength. Regulator valves next to it open that much (15 = fully)."));
+                return sb.ToString();
+            }
+            if (b is BlockFeDisplay)
+            {
+                sb.Append(Display.Text(w, Target, bv)).Append("\n\n");
+                string f = LogicStore.Field(Target, "f");
+                sb.Append(string.Format(Kinetic.Text("feDisplayFilter", "Crates: counts {0}"), f.Length == 0 ? Kinetic.Text("feDisplayAll", "every item") : ProcessMachine.ItemName(f))).Append("\n");
+                sb.Append(Kinetic.Text("feCfgHelpDisplay", "Item in hand: count only that item in a crate behind it (empty hand: every item)"));
+                return sb.ToString();
+            }
             if (b is BlockFeArm)
             {
                 sb.Append(Logistics.DescribeArm(w, Target, bv)).Append("\n\n");
@@ -188,6 +212,9 @@ namespace FerroEngrenagem
                 if (Logistics.IsSplitter(b)) sb.Append(Kinetic.Text("feCfgHelpSplit", "Mode: next ratio (front : each side)"));
                 else if (Logistics.IsGate(b)) sb.Append(Kinetic.Text("feCfgHelpGate", "Mode: stop while signalled / run only while signalled"));
                 else if (Logistics.IsCounter(b)) sb.Append(Kinetic.Text("feCfgHelpCounter", "- / +: items per signal. Mode: reset the count"));
+                else if (ItemTransport.IsTunnel(b))
+                    sb.Append(string.Format(Kinetic.Text("feCfgHelpTunnel", "Mode: which side you set now ({0}). Item in hand: that side's filter (empty hand clears)"),
+                        LogicStore.Field(Target, "side") == "r" ? Kinetic.Text("feRight", "right") : Kinetic.Text("feLeft", "left")));
                 else sb.Append(Kinetic.Text("feCfgHelpFilter", "Item in hand: the filter (empty hand clears)"));
                 return sb.ToString();
             }
@@ -244,6 +271,24 @@ namespace FerroEngrenagem
                 FluidStore.MarkDirty();
                 return;
             }
+            string sk = Signals.Kind(b);
+            if (sk == "wtx" || sk == "wrx")
+            {
+                if (act == "hand") LogicStore.SetField(Target, "freq", HeldItem() ?? "");
+                return;
+            }
+            if (sk == "analog")
+            {
+                int v;
+                int.TryParse(LogicStore.Field(Target, "lv"), out v);
+                if (act == "minus" || act == "plus") { LogicStore.SetField(Target, "lv", Mathf.Clamp(v + sign, 0, 15).ToString()); Signals.Changed(w, Target); }
+                return;
+            }
+            if (b is BlockFeDisplay)
+            {
+                if (act == "hand") LogicStore.SetField(Target, "f", HeldItem() ?? "");
+                return;
+            }
             if (b is BlockFeArm || b is BlockFeFunnel)
             {
                 if (act == "hand") { LogicStore.SetField(Target, "f", HeldItem() ?? ""); return; }
@@ -272,6 +317,11 @@ namespace FerroEngrenagem
                         LogicStore.SetField(Target, "n", Mathf.Clamp(Logistics.CounterN(Target) + sign * (Logistics.CounterN(Target) >= 20 ? 10 : 1), 1, 1000).ToString());
                 }
                 else if (Belt.IsFilter(b) && act == "hand") BeltStore.SetFilter(Target, HeldItem());
+                else if (ItemTransport.IsTunnel(b))
+                {
+                    if (act == "mode") LogicStore.SetField(Target, "side", LogicStore.Field(Target, "side") == "r" ? "" : "r");
+                    else if (act == "hand") LogicStore.SetField(Target, LogicStore.Field(Target, "side") == "r" ? "fr" : "fl", HeldItem() ?? "");
+                }
                 return;
             }
             if (act == "mode")
@@ -747,6 +797,8 @@ namespace FerroEngrenagem
             sb.Append("[e0a030]").Append(ProcessMachine.ItemName(it)).Append("[-]\n");
             List<string> routes = GuideData.Routes(it);
             if (routes.Count == 0) sb.Append(Kinetic.Text("feGuideNoRoute", "No recipe: found in the world (loot, mining, harvest, traders)")).Append("\n");
+            string how = GuideData.HowToConnect(it);
+            if (how.Length > 0) sb.Append("[e0a030]").Append(Kinetic.Text("feGuideHow", "How to connect")).Append("[-]: ").Append(how).Append("\n");
             for (int i = 0; i < routes.Count && i < 6; i++) sb.Append("- ").Append(routes[i]).Append("\n");
             if (routes.Count > 6) sb.Append(string.Format(Kinetic.Text("feGuideMore", "... and {0} more"), routes.Count - 6)).Append("\n");
             body = sb.ToString();
@@ -864,6 +916,41 @@ namespace FerroEngrenagem
                     r.Add(Area(rc.craftingArea) + ": " + rc.count + "x <- " + string.Join(" + ", ins.ToArray()));
                 }
             return r;
+        }
+
+        /// <summary>D13 (Ponder-like, in words): where the ports of a mod block are.</summary>
+        public static string HowToConnect(string item)
+        {
+            Block b = Block.GetBlockByName(item, false);
+            if (b == null || !item.StartsWith("fe", System.StringComparison.Ordinal)) return "";
+            List<string> l = new List<string>();
+            KineticKind kk = Kinetic.Kind(b);
+            FluidKind fk = Fluids.Kind(b);
+            string wm = WorldMachines.Kind(b);
+            if (kk == KineticKind.Pump || kk == KineticKind.Conveyor) l.Add(Kinetic.Text("feHowShaft", "a shaft on its left or right side gives it torque"));
+            if (kk == KineticKind.Cog) l.Add(Kinetic.Text("feHowCog", "cogs side by side (parallel axles) turn each other the other way"));
+            if (kk == KineticKind.WaterWheel && b.Properties.Contains("FeWind")) l.Add(Kinetic.Text("feHowWind", "high up, open air in front; the shaft comes out of its back"));
+            if (b is BlockPowered) l.Add(Kinetic.Text("feHowPower", "wire it to power"));
+            if (fk == FluidKind.Processor)
+            {
+                if (ProcessMachine.IsInline(b)) l.Add(Kinetic.Text("feHowInline", "put it ON TOP of a belt (or a depot): it works on the items under it; its other ingredients by belt / arm / hand"));
+                else l.Add(Kinetic.Text("feHowItems", "items in by belt / arm / funnel on any side, products out on the belt in front"));
+                l.Add(Kinetic.Text("feHowFluids", "fluids: in at the back (and bottom), out at the top (and right, left)"));
+                if (b.Properties.Contains("FeHeat")) l.Add(Kinetic.Text("feHowHeat", "a lit Gas Burner against it"));
+                if (ProcessMachine.IsTower(b)) l.Add(Kinetic.Text("feHowTower", "stack Tower Sections on it"));
+            }
+            if (fk == FluidKind.Valve) l.Add(Kinetic.Text("feHowValve", "fluid in at the back, out at the front"));
+            if (fk == FluidKind.Burner) l.Add(Kinetic.Text("feHowBurner", "fuel gas in at the back; touch the machine to heat"));
+            if (fk == FluidKind.Tapper) l.Add(Kinetic.Text("feHowTapper", "its back on a living trunk, a pipe in front"));
+            if (wm == "drill" || wm == "saw") l.Add(Kinetic.Text("feHowDrill", "works on the block in front; drops go into the block behind"));
+            if (wm == "fan") l.Add(Kinetic.Text("feHowFan", "water or a lit burner right in front of it; belts in the air stream"));
+            if (wm == "piston") l.Add(Kinetic.Text("feHowPiston", "a signal (lever, receiver) makes it extend"));
+            if (wm == "harvester") l.Add(Kinetic.Text("feHowHarvester", "faces the crop (in front or in front and one down)"));
+            if (wm == "deployer") l.Add(Kinetic.Text("feHowDeployer", "give it blocks or seeds; it places them in front"));
+            if (ItemTransport.IsChute(b)) l.Add(Kinetic.Text("feHowChute", "stack it in a column; a fan under it blowing up lifts the items"));
+            if (ItemTransport.IsDepot(b)) l.Add(Kinetic.Text("feHowDepot", "a station on top works on its item"));
+            if (Signals.Kind(b).Length > 0) l.Add(Kinetic.Text("feHowSignal", "touch the block it controls (valve, gate, clutch, piston)"));
+            return string.Join("; ", l.ToArray());
         }
 
         public static List<string> Ingredients(string item)

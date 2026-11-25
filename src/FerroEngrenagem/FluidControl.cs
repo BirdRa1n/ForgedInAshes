@@ -104,7 +104,13 @@ namespace FerroEngrenagem
             float buf = Fluids.Prop(bv.Block, "FeFluidBuffer", 40f);
             float room = Mathf.Max(0f, buf - s.Amount);
             if (t == "alivio") return s.InBar > Setting(s, DefaultSetting(t)) ? 400f : 0f;
-            if (t == "reguladora" && !Fluids.IsGas(s.Fluid)) return Mathf.Min(room, Setting(s, DefaultSetting(t)) * dt / 60f);
+            if (t == "reguladora" && !Fluids.IsGas(s.Fluid))
+            {
+                // D13: an analog signal next to it opens it that much (15 = its full setting)
+                int lv = Signals.LevelAt(world, p);
+                float k = lv > 0 ? lv / 15f : 1f;
+                return Mathf.Min(room, Setting(s, DefaultSetting(t)) * k * dt / 60f);
+            }
             if (t == "compressor") return Mathf.Min(room, Fluids.Prop(bv.Block, "FeFluidRate", 300f) * CompressorSpeed(world, p, s) * dt / 60f);
             return room;
         }

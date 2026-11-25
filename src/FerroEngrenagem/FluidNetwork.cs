@@ -439,6 +439,26 @@ namespace FerroEngrenagem
         /// <summary>World water cells around a pump intake (the cell behind the pump and its neighbours).</summary>
         public static int IntakeWater(World world, Vector3i pump, BlockValue bv)
         {
+            int depth = (int)Prop(bv.Block, "FeIntakeDepth", 0f);
+            if (depth > 0)
+            {
+                // D13 Hose Pulley: the hose goes down through air (or water) to the first water and counts the pool
+                for (int dy = 1; dy <= depth; dy++)
+                {
+                    int y = pump.y - dy;
+                    if (world.IsWater(pump.x, y, pump.z))
+                    {
+                        int w = 0;
+                        for (int dx = -2; dx <= 2; dx++)
+                            for (int dz = -2; dz <= 2; dz++)
+                                for (int d2 = 0; d2 <= 1; d2++)
+                                    if (world.IsWater(pump.x + dx, y - d2, pump.z + dz)) w++;
+                        return w;
+                    }
+                    if (!world.GetBlock(new Vector3i(pump.x, y, pump.z)).isair) return 0;
+                }
+                return 0;
+            }
             Vector3i intake = Add(pump, Rot(bv, Vector3.back));
             int n = 0;
             for (int dx = -1; dx <= 1; dx++)
@@ -1020,6 +1040,7 @@ namespace FerroEngrenagem
             base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
             PipeArms.Attach(_ebcd, _blockPos);
             if (Fluids.Kind(this) == FluidKind.Caster) CasterVisual.Attach(_ebcd, _blockPos);
+            MachineItems.Attach(_ebcd, _blockPos, this);
         }
 
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos,

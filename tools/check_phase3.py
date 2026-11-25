@@ -96,7 +96,7 @@ def main() -> int:
     mod_items = [i.get("name") for i in items if (i.get("name") or "").startswith("fe") and i.get("name") != "feTestItem"]
     crafted = {r.get("name") for r in recipes.iter("recipe")}
     # growth stages of a plant (D12 Rubber Tree) are not crafted: only its seed
-    rule("every mod machine can be crafted", [n for n in mod_blocks if n not in crafted and not (n.startswith("feTreeRubber") and n != "feTreeRubberSeed")])
+    rule("every mod machine can be crafted", [n for n in mod_blocks if n not in crafted and not (n.startswith("feTreeRubber") and n != "feTreeRubberSeed") and n != "fePistonHead"])
 
     # 4. key parts only from the Lathe
     rule("no key part in loot", sorted({f"{i.getparent().get('name')}:{i.get('name')}" for i in loot.iter("item")

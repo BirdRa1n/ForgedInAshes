@@ -53,6 +53,10 @@ def main():
         made_by_proc[n] = made_by_proc.get(n, 0) + 1
     missing = [n for n in wanted if recipes.get(n, 0) + made_by_proc.get(n, 0) == 0 and n not in EXEMPT]
     loot = [n for n in LOOT_ONLY if recipes.get(n, 0) + made_by_proc.get(n, 0) == 0]
+    # D13 (the pistol needed its "Parts", which nothing made): every *Parts ingredient of a recipe must be made too
+    parts = sorted({i.get("name") for r in patched.getroot().iter("recipe") for i in r.iter("ingredient")
+                    if i.get("name", "").endswith("Parts") and i.get("name") != "resourceLegendaryParts"})
+    loot += [n for n in parts if recipes.get(n, 0) + made_by_proc.get(n, 0) == 0 and n not in loot]
     if "--list" in sys.argv:
         for n in wanted:
             print(f"{n}: {recipes.get(n, 0)} recipe(s), {made_by_proc.get(n, 0)} process(es)")
