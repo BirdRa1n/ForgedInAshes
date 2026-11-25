@@ -1,0 +1,16 @@
+{
+ "nome": "feItemChute",
+ "config": "F:\\IA\\fe_blender\\configs\\feItemChute.json",
+ "triangulos_antes": 616,
+ "triangulos_depois": 168,
+ "atlas": 1024,
+ "arquivos": [
+  "feItemChute_Albedo.png",
+  "feItemChute_Normal.png",
+  "feItemChute_MetallicSmoothness.png",
+  "feItemChute_Roughness.png",
+  "feItemChute_HD.fbx",
+  "feItemChute_HD.blend"
+ ],
+ "segundos": 24.8
+}

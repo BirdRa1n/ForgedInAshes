@@ -1142,3 +1142,66 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `PENDENCIAS_ASSETS.md` (gerado por `tools/list_assets.py`): 15 blocos novos sem modelo, 106 itens sem ícone
   próprio, contratos de nomes por tipo de bloco, sons e partículas que faltam.
 - Compilado (fora da pasta do jogo, que estava aberto). **Não instalado nem testado no jogo:** `TESTE_GERAL.md` 20.
+
+## 2026-11-25: pendências de assets (PENDENCIAS_ASSETS.md) com a IA local
+
+- **Ícones dos itens (106) e das Seringueiras (5):** feitos pelo SDXL local (F:\IA, ComfyUI), sem modelar no Blender
+  e sem gastar tokens. `Art/feIcons/prompts.txt` (item | descrição em inglês | seed) + `tools/gen_item_icons.py`:
+  o SDXL desenha o objeto sobre fundo "chroma" (verde; magenta para itens verdes), a cor do fundo é medida na
+  borda da imagem e a região parecida ligada à borda (sombras incluídas) é cortada, mais o fundo preso em furos;
+  recorta, centraliza e reduz para 160×160 transparente. As imagens grandes ficam em `F:\IA\saida\icones` (para
+  refazer só o recorte: `--recut`; refazer um item: `--only feTire` e outra seed no prompts.txt).
+  (rembg/U²-Net foi tentado, mas instalar pacote foi bloqueado: ficou o recorte por cor.)
+- **19 blocos do D13** com modelo próprio (`build_feHD.py`, `D13_MODELS`), cada um no contrato da função:
+  Furadeira (broca `FeSpin_x2_Bit` na frente, poeira), Serra (disco `FeSpin_x3_Blade`), Colheitadeira (molinete
+  `FeSpin_x0.5_Reel` + barra de corte), Aplicador (`FeHead_Ram`, `FeItemAnchor`), Ventilador (pás `FeSpin_x4_Blades`
+  num anel com grade), Pistão Mecânico + Cabeça de Pistão (placa + haste), Engrenagem (`FeSpin_Cog`, dentes até as
+  faces), Moinho de Vento (nacele, eixo atrás, pás `FeSpin_WindSails` fora do colisor), Polia de Mangueira (carretel
+  `FeSpin_x0.3_Reel`, mangueira `FeReach_Hose` descendo), Depósito (tampo a 0,82, `FeItemAnchor`), Calha Vertical
+  (tubo fechado empilhável), Cofre Modular, Dreno de Itens (bacia `FeSurface`, cano em cima, calha baixa),
+  Painel Numérico (face escura na frente, onde o DisplayVisual escreve), Alavanca Analógica (quadrante 0..15,
+  `FeLever_Analog`), Transmissor (antena) e Receptor (antena parabólica) sem fio, Túnel de Esteira (a esteira nova
+  com cobertura e janelas de filtro). Eixos de lado (`FeSpin_DriveShaft`) nos de torque com eixo X.
+- Ícones: 111 gerados; 28 refeitos com outra seed / descrição mais firme (placas de circuito viravam textura, a sola
+  virou botas, sobrava "chão" atrás de alguns), 6 com o recorte tolerante (`--loose`). Ícones dos 19 blocos
+  renderizados dos modelos (`render_icons_hd.py`).
+- `gen_chain.py` passou os 19 blocos para `<bloco>Prefab` sozinho (existe o `_HD.fbx`); `list_assets.py`:
+  **0 blocos e 0 itens pendentes**. Validadores ok (check_xpath 774/0, phase3 23/23, coverage 0).
+- Pacote: 120 MB passava do limite de 100 MiB por arquivo do GitHub. FeBuild agora importa os mapas
+  `_MetallicSmoothness` a 512 px (os outros seguem até 2048): 91,7 MB.
+- **Não verificado no jogo.** Sons e partículas novas (vento, serragem) seguem em "Outros assets".
+
+## 2026-11-25: usina termelétrica modular; Motor a Vapor restaurado
+
+- Correção de entendimento: o Motor a Vapor continua o motor simples e barato (quebra-galho); a receita original
+  voltou (Garagem: 2 pistões, 6 volantes, 30 chapas, 10 engrenagens, 6 lubrificantes, 6 canos).
+- Nova **usina** (`SteamPlant.cs`), montada do tamanho que o jogador quiser: **Fornalha de Caldeira** (queimador
+  grande: itens ou gás) encostada em **Tambores de Caldeira** (água nos lados, vapor a 4 bar em cima; cada fornalha
+  acesa encostada ferve 90 L/min, até 180 por tambor; tambores encostados são uma caldeira só) -> canos de vapor ->
+  **Turbinas a Vapor** (fonte de torque: até 1024 UT com 240 L/min, gasta vapor conforme a carga, vapor usado sai na
+  frente para a Condensadora) -> **Dínamos** no mesmo eixo para eletricidade. As peças feitas na D13 (corpo de
+  caldeira, fornalha, válvula de segurança, manômetro, carcaça, regulador, rotor novo) montam esses blocos.
+- `gen_chain.py` também usa o ícone próprio dos itens quando o png existe. **Não testado no jogo.**
+
+## 2026-11-25: modelos da usina termelétrica (commit 422298f, outra sessão)
+
+- `build_feHD.py` (`PLANT_MODELS`), no contrato do `SteamPlant.cs`:
+  - Fornalha de Caldeira: fornalha de tijolo com cintas de ferro, porta com grelha e brasa (`feHD_Glow`, fogo e
+    fumaça pelo caso Burner do FxVisual), cinzeiro, gás entrando atrás, tampo de ferro onde o tambor assenta.
+  - Tambor de Caldeira: tambor rebitado deitado em X com flanges nas pontas (tambores encostados emendam num
+    corpo só), bocais de água na frente / atrás, domo e saída de vapor em cima, válvula de segurança
+    (`FeFx_Steam_1`), visor de nível (`FeSurface_r0.50_Level`) e manômetro (`FeNeedle_Steam`).
+  - Turbina a Vapor: carcaça bipartida no eixo X (acoplamentos dos dois lados: várias turbinas num eixo), vapor
+    entra atrás pela válvula do regulador, sai pelo escape da frente, regulador de esferas (`FeSpin_x2_Governor`),
+    manômetro e vapor de gaxeta.
+- FxVisual: casos Boiler (nível = água, ponteiro = vapor, válvula sopra com o vapor acima de 90 %) e Turbine
+  (ponteiro = vapor de entrada, vapor de gaxeta enquanto gira).
+- Pacote 94 MB. Pendente: ícone do item `feTurbineRotor`. **Não verificado no jogo.**
+
+## 2026-11-25: modelos D13 e da usina integrados; limpeza de assets
+
+- Commit dos modelos HD dos 19 blocos D13 e dos 3 da usina, dos ícones dos itens (SDXL local) e do bundle (89,7 MB).
+- Removidas as pastas de modelos antigos sem uso (nem no FeBuild nem em blocks.xml): `Art/feCharcoalKiln`,
+  `Art/feFoundry`, `Art/feLathe`, `Art/fePress`, `Art/feSawmill` (protótipos da fase 1, substituídos pelos
+  `feM_*` do feKinetic) e `Art/feFlywheel` (modelo do item, não usado). Ícones, materiais e prefabs: todos em uso.
+- Pendente de arte: só os ícones da Seringueira (5 estágios) e 1 item (`PENDENCIAS_ASSETS.md`).

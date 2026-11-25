@@ -2630,11 +2630,11 @@
 		</block>
 		<block name="feBoilerFirebox">
 			<property name="Extends" value="fePipe"/>
-			<property name="CustomIcon" value="feFluidFiller"/>
-			<property name="CustomIconTint" value="ff6020"/>
+			<property name="CustomIcon" value="feBoilerFirebox"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feBoilerFireboxDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feFluidFillerPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBoilerFireboxPrefab"/>
 			<property name="FeFluid" value="burner"/>
 			<property name="FeFluidRate" value="60"/>
 			<property name="FeHeatPerLitre" value="2"/>
@@ -2642,11 +2642,11 @@
 		</block>
 		<block name="feBoilerDrum">
 			<property name="Extends" value="fePipe"/>
-			<property name="CustomIcon" value="feWaterTank"/>
-			<property name="CustomIconTint" value="c08060"/>
+			<property name="CustomIcon" value="feBoilerDrum"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feBoilerDrumDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feWaterTankPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feBoilerDrumPrefab"/>
 			<property name="FeFluid" value="boiler"/>
 			<property name="FeFluidBuffer" value="1000"/>
 			<property name="FeSteamBuffer" value="600"/>
@@ -2656,11 +2656,11 @@
 		</block>
 		<block name="feSteamTurbine">
 			<property name="Extends" value="feWaterWheel"/>
-			<property name="CustomIcon" value="feSpeedBox"/>
-			<property name="CustomIconTint" value="e0e0ff"/>
+			<property name="CustomIcon" value="feSteamTurbine"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feSteamTurbineDesc"/>
-			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSpeedBoxPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?feSteamTurbinePrefab"/>
 			<property name="FeSteamTurbine" value="true"/>
 			<property name="FeFluid" value="turbine"/>
 			<property name="FeShaftAxis" value="x"/>

@@ -415,6 +415,27 @@ namespace FerroEngrenagem
                 case FluidKind.TowerSection:
                     fluid = s.Fluid;
                     break;
+                case FluidKind.Boiler:
+                {
+                    // thermal plant drum (SteamPlant.cs): Amount = water, Steam = steam; the gauge reads the steam,
+                    // the level glass the water, the safety valve blows off when the steam is nearly full
+                    float wcap = Fluids.Prop(bv.Block, "FeFluidBuffer", 1000f);
+                    float scap = Fluids.Prop(bv.Block, "FeSteamBuffer", 600f);
+                    fill = wcap > 0f ? Mathf.Clamp01(s.Amount / wcap) : 0f;
+                    fluid = s.Amount > 0.01f ? "water" : "";
+                    needleGoal = scap > 0f ? Mathf.Clamp01(s.Steam / scap) : 0f;
+                    steaming = scap > 0f && s.Steam > 0.9f * scap;
+                    break;
+                }
+                case FluidKind.Turbine:
+                {
+                    // steam turbine: Amount = steam in, Bar = steam L/min used; a little gland steam while it runs
+                    float tbuf = Fluids.Prop(bv.Block, "FeFluidBuffer", 120f);
+                    working = s.Bar > 0.01f;
+                    steaming = working;
+                    needleGoal = tbuf > 0f ? Mathf.Clamp01(s.Amount / tbuf) : 0f;
+                    break;
+                }
                 case FluidKind.Processor:
                     // working = its progress (FluidState.Steam) moved since the last look
                     working = s.Steam > 0f && Mathf.Abs(s.Steam - lastProgress) > 0.001f;

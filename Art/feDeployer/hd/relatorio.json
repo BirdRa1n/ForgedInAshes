@@ -1,0 +1,16 @@
+{
+ "nome": "feDeployer",
+ "config": "F:\\IA\\fe_blender\\configs\\feDeployer.json",
+ "triangulos_antes": 3224,
+ "triangulos_depois": 1160,
+ "atlas": 1024,
+ "arquivos": [
+  "feDeployer_Albedo.png",
+  "feDeployer_Normal.png",
+  "feDeployer_MetallicSmoothness.png",
+  "feDeployer_Roughness.png",
+  "feDeployer_HD.fbx",
+  "feDeployer_HD.blend"
+ ],
+ "segundos": 31.7
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feMechPiston",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechPiston.json",
+ "triangulos_antes": 3820,
+ "triangulos_depois": 1484,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechPiston_Albedo.png",
+  "feMechPiston_Normal.png",
+  "feMechPiston_MetallicSmoothness.png",
+  "feMechPiston_Roughness.png",
+  "feMechPiston_HD.fbx",
+  "feMechPiston_HD.blend"
+ ],
+ "segundos": 25.8
+}

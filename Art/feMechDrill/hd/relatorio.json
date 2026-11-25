@@ -1,0 +1,16 @@
+{
+ "nome": "feMechDrill",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechDrill.json",
+ "triangulos_antes": 4224,
+ "triangulos_depois": 1496,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechDrill_Albedo.png",
+  "feMechDrill_Normal.png",
+  "feMechDrill_MetallicSmoothness.png",
+  "feMechDrill_Roughness.png",
+  "feMechDrill_HD.fbx",
+  "feMechDrill_HD.blend"
+ ],
+ "segundos": 28.0
+}

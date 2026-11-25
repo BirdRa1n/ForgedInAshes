@@ -1,0 +1,16 @@
+{
+ "nome": "feSignalAnalog",
+ "config": "F:\\IA\\fe_blender\\configs\\feSignalAnalog.json",
+ "triangulos_antes": 1108,
+ "triangulos_depois": 324,
+ "atlas": 1024,
+ "arquivos": [
+  "feSignalAnalog_Albedo.png",
+  "feSignalAnalog_Normal.png",
+  "feSignalAnalog_MetallicSmoothness.png",
+  "feSignalAnalog_Roughness.png",
+  "feSignalAnalog_HD.fbx",
+  "feSignalAnalog_HD.blend"
+ ],
+ "segundos": 32.9
+}

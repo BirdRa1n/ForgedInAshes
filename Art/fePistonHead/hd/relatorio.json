@@ -1,0 +1,16 @@
+{
+ "nome": "fePistonHead",
+ "config": "F:\\IA\\fe_blender\\configs\\fePistonHead.json",
+ "triangulos_antes": 904,
+ "triangulos_depois": 336,
+ "atlas": 1024,
+ "arquivos": [
+  "fePistonHead_Albedo.png",
+  "fePistonHead_Normal.png",
+  "fePistonHead_MetallicSmoothness.png",
+  "fePistonHead_Roughness.png",
+  "fePistonHead_HD.fbx",
+  "fePistonHead_HD.blend"
+ ],
+ "segundos": 16.9
+}

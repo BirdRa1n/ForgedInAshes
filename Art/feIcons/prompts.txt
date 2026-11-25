@@ -1,0 +1,113 @@
+# Item icons made by the local SDXL (F:\IA): <item>|<what it is, in English>|<seed>
+# python tools/gen_item_icons.py  (needs F:\IA\iniciar_comfyui.bat running). Style words are added by the script.
+feAntibioticPowder|small glass vial of white antibiotic powder with a cork|7401
+feArmorPlate|curved tempered steel armor plate with rivet holes, blue-grey heat tint|7402
+feArrowHeaded|wooden arrow shaft with a sharp iron arrowhead, no feathers|7103
+feArrowShaft|bundle of three straight wooden arrow shafts tied with string|7104
+feBarkDust|small pile of ground brown tree bark dust|7105
+feBatteryCase|empty black plastic car battery case without lid|7106
+feBoilerShell|riveted rusty steel boiler cylinder shell|7107
+feBrassDust|small pile of shiny golden brass powder|7408
+feBuckle|old steel belt buckle|7109
+feBulb|empty clear glass bulb envelope without base, glass only|8010
+feCarbonBlack|small pile of fine black soot carbon powder|7411
+feChassisFrame|welded rectangular steel tube frame|7112
+feCircuitBase|blank green fiberglass circuit board without traces|7113
+feCircuitBoard|finished green circuit board with chips and capacitors|7114
+feCircuitPopulated|single small green circuit board with resistors and capacitors, whole board visible with empty space around it|7415
+feCircuitTraced|single small green circuit board with copper traces and no parts, whole board visible with empty space around it|7416
+feCrankshaft|steel engine crankshaft|7117
+feCultureBroth|glass jar of cloudy yellow culture broth|7118
+feCultureExtract|small glass vial of amber liquid extract|7119
+feElectricMotorSmall|small electric motor with copper windings and shaft|7120
+feEngineBlock|raw cast iron engine block, rough casting|7121
+feEngineBlockBored|cast iron engine block with machined cylinder bores|7122
+feEngineStage1|engine block with pistons installed|7123
+feEngineStage2|engine block with crankshaft installed|7124
+feEngineStage3|engine block with spark plugs installed|7125
+feEngineStage4|complete small engine, oiled|7126
+feEngineerManual|worn engineer handbook with a gear on the leather cover|7127
+feEngineerWrench|large orange painted adjustable engineer wrench|7128
+feEthanol|glass bottle of clear alcohol with a hand written label|8029
+feFirebox|small cast iron firebox with a grate door|7430
+feFruitConcentrate|glass jar of thick purple fruit concentrate|7131
+feGasCanister|blue steel propane gas canister with brass valve|7432
+feGasket|black rubber ring gasket|7433
+feGlassPane|square pane of clear glass|7434
+feGrenadeFilled|cast iron grenade body filled with brown powder, open top|7135
+feGrenadeShell|empty segmented cast iron grenade shell|7136
+feHerbExtract|small glass vial of green herbal extract|7137
+feHinge|steel door hinge|7138
+feHose|coiled black rubber hose with brass fittings|7139
+feHub|steel wheel hub with lug bolts|7140
+feInsulator|white ceramic electrical insulator|7141
+feLeadPlate|dull grey lead plate|7142
+feLeatherTanned|folded sheet of brown tanned leather|7143
+feLensRaw|rough unpolished glass lens|7444
+feLightBulb|incandescent light bulb with brass screw base|7145
+feLock|brass door lock with a key|7446
+feMoldArrowHead|steel casting mold with arrowhead shaped cavities|7147
+feMoldBatteryCase|steel casting mold with a battery case shaped cavity|7148
+feMoldBeaker|steel casting mold with a beaker shaped cavity|7149
+feMoldBoard|steel casting mold with a flat board shaped cavity|7150
+feMoldBuckshot|steel casting mold with many small round ball cavities|7151
+feMoldBulb|steel casting mold with a bulb shaped cavity|7152
+feMoldCrank|steel casting mold with a crankshaft shaped cavity|7153
+feMoldCylinder|steel casting mold with a cylinder shaped cavity|7154
+feMoldEngineBlock|large steel casting mold with an engine block cavity|7155
+feMoldGlassPane|steel casting mold with a thin square cavity|7156
+feMoldJar|steel casting mold with a jar shaped cavity|7157
+feMoldLens|steel casting mold with round lens cavities|7158
+feMoldPellet|steel casting mold with small pellet cavities|7159
+feMoldPiston|steel casting mold with a piston shaped cavity|7160
+feMoldRocket|long steel casting mold with a rocket tube cavity|7161
+feMoldRod|steel casting mold with long rod grooves|7162
+feMoldShell|steel casting mold with a grenade shell cavity|7163
+feMoldStock|steel casting mold with a rifle stock shaped cavity|7164
+feMoldToolHead|steel casting mold with a pickaxe head cavity|7165
+feNeedle|steel sewing needle with thread eye|7166
+fePigment|small pile of bright red-orange pigment powder|7467
+fePiston|steel engine piston with rings|8068
+fePlaster|small pile of white plaster powder|7169
+fePolymerDust|small heap of light blue plastic pellets|7470
+fePressureGaugeItem|round brass pressure gauge with dial and needle|7471
+feProfile|steel I-beam profile piece|7172
+fePulp|lump of wet beige wood pulp|8073
+feRim|steel wheel rim|7174
+feRocketFilled|metal rocket tube filled with propellant|7175
+feRod|single straight steel rod lying diagonally|7476
+feRodBrass|straight brass rod|7177
+feRoundPrimed|brass bullet casing filled with gunpowder, no bullet|7178
+feRoundTipped|brass bullet casing with a copper bullet tip, unsealed|7179
+feRubberBelt|loop of black rubber drive belt|7180
+feRubberCoagulum|lump of white coagulated rubber latex|7181
+feRubberCompound|one single thick slab of black rubber, one object|8193
+feRubberRaw|sheet of raw amber brown natural rubber|7483
+feRubberSheetRaw|wet pale cream rubber sheet|7484
+feRubberSole|single black rubber shoe sole, only the sole, no shoe|7485
+feSafetyValve|one single brass steam safety valve with a red lever|7486
+feServo|small servo motor with gear output|7187
+feShaleAsh|small pile of grey ash|7188
+feShaleCrushed|small pile of crushed grey shale rock|7189
+feSparkPlug|spark plug with white ceramic insulator|7190
+feSparkPlugCeramic|white ceramic spark plug insulator body without metal|7191
+feSteamCylinder|machined steam engine cylinder with flanges|7192
+feSteamCylinderRaw|rough cast iron steam cylinder casting|7193
+feSteelPlate|flat steel sheet plate|7194
+feSteelWire|coil of thin steel wire|7495
+feSulfur|small pile of yellow sulfur powder|7196
+feTestItem|orange painted mechanical part with a question mark tag|7197
+feThread|spool of white thread|7198
+feTinCan|empty open tin can|7199
+feTire|black rubber car tire|7200
+feToolHead|polished steel pickaxe head|7201
+feToolHeadRaw|rough cast iron pickaxe head casting|7202
+feValveGear|brass steam valve gear linkage with eccentric|7203
+feWetPaper|a single folded sheet of soaked grey paper, one piece|9302
+feWireThick|coil of thick steel wire|7205
+feZipper|single closed metal zipper lying flat|8106
+feTreeRubber08|small young rubber tree sapling in soil|7207
+feTreeRubber16|young rubber tree with light grey bark|7208
+feTreeRubber27|rubber tree with light grey bark and a sap cup on the trunk|7209
+feTreeRubber41|tall mature rubber tree with light grey bark and a sap cup|7210
+feTreeRubberSeed|rubber tree seed pod and seeds|7211

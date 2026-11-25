@@ -1,0 +1,16 @@
+{
+ "nome": "feHosePulley",
+ "config": "F:\\IA\\fe_blender\\configs\\feHosePulley.json",
+ "triangulos_antes": 5960,
+ "triangulos_depois": 2528,
+ "atlas": 1024,
+ "arquivos": [
+  "feHosePulley_Albedo.png",
+  "feHosePulley_Normal.png",
+  "feHosePulley_MetallicSmoothness.png",
+  "feHosePulley_Roughness.png",
+  "feHosePulley_HD.fbx",
+  "feHosePulley_HD.blend"
+ ],
+ "segundos": 29.9
+}

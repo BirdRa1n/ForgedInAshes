@@ -1,0 +1,16 @@
+{
+ "nome": "feItemDrain",
+ "config": "F:\\IA\\fe_blender\\configs\\feItemDrain.json",
+ "triangulos_antes": 3208,
+ "triangulos_depois": 1264,
+ "atlas": 1024,
+ "arquivos": [
+  "feItemDrain_Albedo.png",
+  "feItemDrain_Normal.png",
+  "feItemDrain_MetallicSmoothness.png",
+  "feItemDrain_Roughness.png",
+  "feItemDrain_HD.fbx",
+  "feItemDrain_HD.blend"
+ ],
+ "segundos": 18.8
+}

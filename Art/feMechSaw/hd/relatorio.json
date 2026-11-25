@@ -1,0 +1,16 @@
+{
+ "nome": "feMechSaw",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechSaw.json",
+ "triangulos_antes": 4348,
+ "triangulos_depois": 1612,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechSaw_Albedo.png",
+  "feMechSaw_Normal.png",
+  "feMechSaw_MetallicSmoothness.png",
+  "feMechSaw_Roughness.png",
+  "feMechSaw_HD.fbx",
+  "feMechSaw_HD.blend"
+ ],
+ "segundos": 31.3
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feWirelessTx",
+ "config": "F:\\IA\\fe_blender\\configs\\feWirelessTx.json",
+ "triangulos_antes": 2716,
+ "triangulos_depois": 872,
+ "atlas": 1024,
+ "arquivos": [
+  "feWirelessTx_Albedo.png",
+  "feWirelessTx_Normal.png",
+  "feWirelessTx_MetallicSmoothness.png",
+  "feWirelessTx_Roughness.png",
+  "feWirelessTx_HD.fbx",
+  "feWirelessTx_HD.blend"
+ ],
+ "segundos": 23.2
+}

@@ -1,0 +1,16 @@
+{
+ "nome": "feWindmill",
+ "config": "F:\\IA\\fe_blender\\configs\\feWindmill.json",
+ "triangulos_antes": 2452,
+ "triangulos_depois": 820,
+ "atlas": 1024,
+ "arquivos": [
+  "feWindmill_Albedo.png",
+  "feWindmill_Normal.png",
+  "feWindmill_MetallicSmoothness.png",
+  "feWindmill_Roughness.png",
+  "feWindmill_HD.fbx",
+  "feWindmill_HD.blend"
+ ],
+ "segundos": 33.5
+}

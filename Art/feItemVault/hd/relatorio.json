@@ -1,0 +1,16 @@
+{
+ "nome": "feItemVault",
+ "config": "F:\\IA\\fe_blender\\configs\\feItemVault.json",
+ "triangulos_antes": 3796,
+ "triangulos_depois": 1172,
+ "atlas": 1024,
+ "arquivos": [
+  "feItemVault_Albedo.png",
+  "feItemVault_Normal.png",
+  "feItemVault_MetallicSmoothness.png",
+  "feItemVault_Roughness.png",
+  "feItemVault_HD.fbx",
+  "feItemVault_HD.blend"
+ ],
+ "segundos": 27.9
+}

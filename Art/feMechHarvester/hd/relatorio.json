@@ -1,0 +1,16 @@
+{
+ "nome": "feMechHarvester",
+ "config": "F:\\IA\\fe_blender\\configs\\feMechHarvester.json",
+ "triangulos_antes": 5388,
+ "triangulos_depois": 1724,
+ "atlas": 1024,
+ "arquivos": [
+  "feMechHarvester_Albedo.png",
+  "feMechHarvester_Normal.png",
+  "feMechHarvester_MetallicSmoothness.png",
+  "feMechHarvester_Roughness.png",
+  "feMechHarvester_HD.fbx",
+  "feMechHarvester_HD.blend"
+ ],
+ "segundos": 26.0
+}

@@ -373,3 +373,10 @@ modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
 19. **Motor a Vapor peça por peça** (Garagem): Corpo de Caldeira (Serralheria), Fornalha (Serralheria), 2 Cilindros
     (Molde de Cilindro na Mesa -> Torno), 2 Pistões, Virabrequim, 2 Volantes, Válvula de Segurança, Manômetro de
     Caldeira, Distribuidor, 4 Canos, 4 Juntas.
+
+## 22. Usina termelétrica (modelos)
+
+1. Fornalha de Caldeira com combustível: brasa na grelha, fogo na porta, fumaça.
+2. Tambor em cima da fornalha, cano de água num lado: o visor de nível sobe; com fogo, o ponteiro sobe; vapor
+   pela válvula de segurança quando enche. Dois tambores lado a lado em X emendam visualmente.
+3. Turbina com vapor atrás: o eixo e o regulador giram, sai um pouco de vapor da gaxeta; escape na frente.

@@ -1,0 +1,16 @@
+{
+ "nome": "feBoilerFirebox",
+ "config": "F:\\IA\\fe_blender\\configs\\feBoilerFirebox.json",
+ "triangulos_antes": 2516,
+ "triangulos_depois": 828,
+ "atlas": 1024,
+ "arquivos": [
+  "feBoilerFirebox_Albedo.png",
+  "feBoilerFirebox_Normal.png",
+  "feBoilerFirebox_MetallicSmoothness.png",
+  "feBoilerFirebox_Roughness.png",
+  "feBoilerFirebox_HD.fbx",
+  "feBoilerFirebox_HD.blend"
+ ],
+ "segundos": 23.7
+}

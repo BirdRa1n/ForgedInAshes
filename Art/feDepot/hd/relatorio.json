@@ -1,0 +1,16 @@
+{
+ "nome": "feDepot",
+ "config": "F:\\IA\\fe_blender\\configs\\feDepot.json",
+ "triangulos_antes": 924,
+ "triangulos_depois": 252,
+ "atlas": 1024,
+ "arquivos": [
+  "feDepot_Albedo.png",
+  "feDepot_Normal.png",
+  "feDepot_MetallicSmoothness.png",
+  "feDepot_Roughness.png",
+  "feDepot_HD.fbx",
+  "feDepot_HD.blend"
+ ],
+ "segundos": 35.2
+}

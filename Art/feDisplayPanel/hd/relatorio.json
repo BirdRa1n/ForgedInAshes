@@ -1,0 +1,16 @@
+{
+ "nome": "feDisplayPanel",
+ "config": "F:\\IA\\fe_blender\\configs\\feDisplayPanel.json",
+ "triangulos_antes": 1316,
+ "triangulos_depois": 396,
+ "atlas": 1024,
+ "arquivos": [
+  "feDisplayPanel_Albedo.png",
+  "feDisplayPanel_Normal.png",
+  "feDisplayPanel_MetallicSmoothness.png",
+  "feDisplayPanel_Roughness.png",
+  "feDisplayPanel_HD.fbx",
+  "feDisplayPanel_HD.blend"
+ ],
+ "segundos": 29.7
+}
