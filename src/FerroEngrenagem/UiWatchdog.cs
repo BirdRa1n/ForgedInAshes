@@ -1,4 +1,4 @@
-// Bug (user, 2026-11-24): "after a while the E prompt and the look texts are gone on every block, and E takes the
+﻿// Bug (user, 2026-11-24): "after a while the E prompt and the look texts are gone on every block, and E takes the
 // item". The game shows the look text (XUiC_InteractionPrompt) only while no modal window is open
 // (PlayerMoveController.Update: guiOpenThisUpdate = IsModalWindowOpen). The E radial is a modal window. The mod opens
 // its own windows (Recipes, Machine Panel, Picker, Settings, Network, Guide) right after a radial command: when the
@@ -11,6 +11,9 @@
 //   - this watchdog: a radial "open" while E is not held for more than 1.5 s is stuck: close it (and log it).
 //     It also logs, once per 30 s, when the player looks at a block that has a look text but the prompt window is
 //     not open, with the window state (diagnostic for any other cause).
+//   - 2026-11-26: the look text also vanished with no modal window open (log: "looking at feSteamEngine ... the
+//     look-text window is closed"): the window had been closed while the game kept the same text cached, and the
+//     game only reopens it when the text changes. The watchdog clears that cache (part 2 of Check).
 //
 // Client side, single player / host. C# 5 only.
 
@@ -21,7 +24,7 @@ namespace FerroEngrenagem
     public class UiWatchdog : MonoBehaviour
     {
         static GameObject host;
-        float next, radialSince = -1f, lastReport = -100f;
+        float next, radialSince = -1f, lastReport = -100f, lastRepair = -100f;
 
         public static void Ensure()
         {
@@ -87,8 +90,27 @@ namespace FerroEngrenagem
             }
             else radialSince = -1f;
 
-            // 2. diagnostic: looking at a block with a look text, no modal window, but no prompt window
-            if (modal != null || Time.time - lastReport < 30f || wm.IsWindowOpen("interactionPrompt")) return;
+            // 2. the look-text window was closed behind the game's back. PlayerMoveController.HandleInteraction only
+            //    calls XUiC_InteractionPrompt.SetText when the text differs from its cache strTextLabelPointingTo
+            //    (IL 3.4.0 b10), so once anything closes the window while the text stays the same (an engine that is
+            //    stopped, a block whose readout does not change), it never opens again until the player looks at
+            //    something with another text (user test 2026-11-26, Steam Engine). Clear the cache: the next frame
+            //    the game sees a "new" text and opens the window itself.
+            if (modal != null || wm.IsWindowOpen("interactionPrompt") || wm.IsFullHUDDisabled() || wm.IsHUDPartialHidden()) return;
+            PlayerMoveController pmc = pl.MoveController;
+            if (pmc != null && !string.IsNullOrEmpty(pmc.strTextLabelPointingTo))
+            {
+                pmc.strTextLabelPointingTo = null;
+                if (Time.time - lastRepair > 30f)
+                {
+                    lastRepair = Time.time;
+                    Log.Out(FerroEngrenagemMod.LogPrefix + "ui watchdog: the look-text window was closed with a text cached: reopened it");
+                }
+                return;
+            }
+
+            // 3. diagnostic: looking at a block with a look text, no modal window, but no prompt window
+            if (Time.time - lastReport < 30f) return;
             WorldRayHitInfo hit = pl.HitInfo;
             if (hit == null || !hit.bHitValid || !GameUtils.IsBlockOrTerrain(hit.tag)) return;
             BlockValue bv = hit.hit.blockValue;

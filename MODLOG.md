@@ -1230,3 +1230,13 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   ligar + como fazer + linha completa + usado em), guias, indicadores (gráficos) e busca Ctrl+K.
 - `fe.bat site` (`tools/fe.ps1`, opção 5): GLB dos modelos alterados + `gen_site.py` + `npm run build`.
 - Corrigido: o spinner `Html` do drei dentro do Canvas causava `removeChild` ao trocar de página (removido).
+
+## 2026-11-26: texto ao olhar sumia sem janela aberta (Motor a Vapor)
+
+- Log 00:06-00:08: `ui watchdog: looking at feSteamEngine ... but the look-text window is closed`, sem janela modal.
+- Causa (IL 3.4.0 b10, `PlayerMoveController.HandleInteraction`): o jogo só chama `XUiC_InteractionPrompt.SetText`
+  quando o texto difere do cache `strTextLabelPointingTo`. Se a janela é fechada por fora com o mesmo texto em cache
+  (motor parado, leitura que não muda), ela nunca reabre até olhar algo com outro texto.
+- Correção (`UiWatchdog`): sem modal, sem HUD oculto, janela fechada e cache não vazio → limpa o cache; no quadro
+  seguinte o jogo reabre a janela sozinho (no máximo 0,25 s). Loga "reopened it" a cada 30 s no máximo.
+- **Não verificado no jogo.**
