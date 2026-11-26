@@ -1280,3 +1280,13 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `LookTextProbe.cs`: postfix em `HandleInteraction`; quando o texto passa de mostrado a vazio com um bloco "fe" na
   mira (ou um item), loga tudo: acerto, tag, bloco e distância, célula interna, acerto de item (nome, raiz, tag,
   camada, distância), checagem de câmera, item na mão e o texto anterior. No máximo 1 linha a cada 10 s.
+
+## 2026-11-26: texto existe mas não aparece (Prensa de Munição)
+
+- Log 00:38:34: olhando `feAmmoPress` a 1,31 m (alcance 5), tile entity ok, `HasBlockActivationCommands` true,
+  texto de 158 caracteres, sem modal, janela fechada e cache vazio. Outras linhas da sonda: só fora do alcance.
+- IL 3.4.0 b10 (`PlayerMoveController.Update`, início): todo quadro, se `IsCursorWindowOpen()` (janela aberta e
+  mostrada com `alwaysUsesMouseCursor`) ou modal ou `playerInput.Enabled` falso (e veículo também) ou
+  `bCanControlOverride` falso, o jogo faz `SetText(null)` e zera o cache. Algo deixa uma dessas condições ligada.
+- `UiWatchdog.Controls`: o diagnóstico agora loga essas condições e a lista de janelas abertas (mostrada/oculta,
+  modal, cursor, actions).

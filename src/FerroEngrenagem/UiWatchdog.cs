@@ -17,6 +17,7 @@
 //
 // Client side, single player / host. C# 5 only.
 
+using HarmonyLib;
 using UnityEngine;
 
 namespace FerroEngrenagem
@@ -135,8 +136,32 @@ namespace FerroEngrenagem
             lastReport = Time.time;
             Log.Warning(FerroEngrenagemMod.LogPrefix + "ui watchdog: looking at " + bv.Block.GetBlockName() + " at " + hit.hit.blockPos
                         + " but the look-text window is closed (HUD full off: " + wm.IsFullHUDDisabled() + ", HUD partial: "
-                        + wm.IsHUDPartialHidden() + ") | " + WhyNoText(gm.World, pl, hit));
+                        + wm.IsHUDPartialHidden() + ") | " + WhyNoText(gm.World, pl, hit) + " | " + Controls(wm, pl));
         }
+        /// <summary>The conditions under which PlayerMoveController.Update (IL 3.4.0 b10) clears the look text every
+        /// frame: a cursor window, a modal window, the player's action set off, bCanControlOverride off.</summary>
+        static string Controls(GUIWindowManager wm, EntityPlayerLocal pl)
+        {
+            try
+            {
+                PlayerActionsLocal input = pl.playerInput;
+                PlayerMoveController pmc = pl.MoveController;
+                string r = "cursor window " + wm.IsCursorWindowOpen() + ", modal " + wm.IsModalWindowOpen()
+                           + ", input " + (input == null ? "null" : input.Enabled.ToString())
+                           + ", vehicle input " + (input == null || input.VehicleActions == null ? "null" : input.VehicleActions.Enabled.ToString())
+                           + ", can control " + (pmc == null ? "-" : pmc.bCanControlOverride.ToString())
+                           + ", input locked " + wm.IsInputLocked + ", input active " + wm.IsInputActive() + ", open:";
+                System.Collections.Generic.List<GUIWindow> open =
+                    Traverse.Create(wm).Field("openWindows").GetValue<System.Collections.Generic.List<GUIWindow>>();
+                if (open != null)
+                    foreach (GUIWindow w in open)
+                        r += " " + w.Id + "[" + (w.isShowing ? "shown" : "hidden") + (w.isModal ? ",modal" : "")
+                             + (w.alwaysUsesMouseCursor ? ",cursor" : "") + (w.bActionSetEnabled ? ",actions" : "") + "]";
+                return r;
+            }
+            catch (System.Exception e) { return "controls: " + e.Message; }
+        }
+
         /// <summary>What PlayerMoveController.TryHandleBlock (IL 3.4.0 b10) sees for this hit: parent cell, tile entity,
         /// HasBlockActivationCommands and the activation text.</summary>
         static string WhyNoText(World world, EntityPlayerLocal pl, WorldRayHitInfo hit)
