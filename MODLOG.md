@@ -1271,3 +1271,12 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `UiWatchdog.WhyNoText`: nesse caso agora loga célula, filho/offset, célula pai e bloco, tile entity, distância /
   alcance, `HasBlockActivationCommands` e o tamanho do texto (ou a exceção).
 - Próximo teste decide a correção.
+
+## 2026-11-26: sonda no HandleInteraction (texto ao olhar que some)
+
+- Usuário: "acho que os itens do mod em si estejam causando isso". IL 3.4.0 b10 (`PlayerMoveController.Update`):
+  antes do bloco, um raio de itens (máscara 73728 = camadas 13 e 16) com tag "Item" vence o bloco se estiver até
+  1,2 m atrás dele; com `TPCameraCheckResult == 2` os blocos são ignorados. O vigia antigo só olhava acertos em bloco.
+- `LookTextProbe.cs`: postfix em `HandleInteraction`; quando o texto passa de mostrado a vazio com um bloco "fe" na
+  mira (ou um item), loga tudo: acerto, tag, bloco e distância, célula interna, acerto de item (nome, raiz, tag,
+  camada, distância), checagem de câmera, item na mão e o texto anterior. No máximo 1 linha a cada 10 s.
