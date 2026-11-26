@@ -1260,3 +1260,14 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Correção (fim de `blocks.xml`, depois da região do gen_chain): todos os blocos `fe*` com `ActivationDistance` 4
   (o alcance de construir); os com `MultiBlockDim` (20) com 5. check_xpath 775/0.
 - **Não verificado no jogo.**
+
+## 2026-11-26: texto ainda some no Motor a Vapor: diagnóstico detalhado
+
+- Log 00:27:52: `looking at feSteamEngine at -231, 61, 813 but the look-text window is closed`, sem modal, dentro do
+  alcance, com o texto em cache vazio: o jogo calculou texto vazio para o motor.
+- IL 3.4.0 b10 (`TryHandleBlock`): o texto só existe se `HasBlockActivationCommands(parentBV, parentPos)` for
+  verdadeiro; em `BlockPowerSource` isso é "há `TileEntityPowerSource` na célula pai". Senão cai em `DisplayInfo`
+  (nada).
+- `UiWatchdog.WhyNoText`: nesse caso agora loga célula, filho/offset, célula pai e bloco, tile entity, distância /
+  alcance, `HasBlockActivationCommands` e o tamanho do texto (ou a exceção).
+- Próximo teste decide a correção.

@@ -135,7 +135,31 @@ namespace FerroEngrenagem
             lastReport = Time.time;
             Log.Warning(FerroEngrenagemMod.LogPrefix + "ui watchdog: looking at " + bv.Block.GetBlockName() + " at " + hit.hit.blockPos
                         + " but the look-text window is closed (HUD full off: " + wm.IsFullHUDDisabled() + ", HUD partial: "
-                        + wm.IsHUDPartialHidden() + ")");
+                        + wm.IsHUDPartialHidden() + ") | " + WhyNoText(gm.World, pl, hit));
+        }
+        /// <summary>What PlayerMoveController.TryHandleBlock (IL 3.4.0 b10) sees for this hit: parent cell, tile entity,
+        /// HasBlockActivationCommands and the activation text.</summary>
+        static string WhyNoText(World world, EntityPlayerLocal pl, WorldRayHitInfo hit)
+        {
+            try
+            {
+                Vector3i pos = hit.hit.blockPos;
+                BlockValue bv = world.GetBlock(pos);
+                Block b = bv.Block;
+                Vector3i par = pos;
+                BlockValue pbv = bv;
+                if (bv.ischild && b.multiBlockPos != null) { par = b.multiBlockPos.GetParentPos(pos, bv); pbv = world.GetBlock(par); }
+                TileEntity te = world.GetTileEntity(par);
+                string r = "cell " + pos + " child " + bv.ischild + " (offset " + bv.parent + ") parent " + par + " = "
+                           + (pbv.isair ? "air" : pbv.Block.GetBlockName()) + ", tile entity " + (te == null ? "NONE" : te.GetType().Name)
+                           + ", dist " + Mathf.Sqrt(hit.hit.distanceSq).ToString("0.00") + "/" + Mathf.Sqrt(b.GetActivationDistanceSq()).ToString("0.0");
+                bool has = b.HasBlockActivationCommands(world, pbv, par, pl);
+                r += ", has commands " + has;
+                string txt = b.GetActivationText(world, pbv, par, pl);
+                r += ", text " + (txt == null ? "null" : txt.Length + " chars");
+                return r;
+            }
+            catch (System.Exception e) { return "exception: " + e.GetType().Name + ": " + e.Message; }
         }
     }
 }
