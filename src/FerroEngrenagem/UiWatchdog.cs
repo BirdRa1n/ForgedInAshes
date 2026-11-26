@@ -24,7 +24,8 @@ namespace FerroEngrenagem
     public class UiWatchdog : MonoBehaviour
     {
         static GameObject host;
-        float next, radialSince = -1f, lastReport = -100f, lastRepair = -100f;
+        float next, radialSince = -1f, lastReport = -100f, lastRepair = -100f, lastFeLook = -100f, lastLostReport = -100f;
+        string lastFeName = "";
 
         public static void Ensure()
         {
@@ -96,7 +97,22 @@ namespace FerroEngrenagem
             //    stopped, a block whose readout does not change), it never opens again until the player looks at
             //    something with another text (user test 2026-11-26, Steam Engine). Clear the cache: the next frame
             //    the game sees a "new" text and opens the window itself.
-            if (modal != null || wm.IsWindowOpen("interactionPrompt") || wm.IsFullHUDDisabled() || wm.IsHUDPartialHidden()) return;
+            bool promptOpen = wm.IsWindowOpen("interactionPrompt");
+            WorldRayHitInfo look = pl.HitInfo;
+            bool lookFe = look != null && look.bHitValid && GameUtils.IsBlockOrTerrain(look.tag) && !look.hit.blockValue.isair
+                          && look.hit.blockValue.Block.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal);
+            if (promptOpen && lookFe) { lastFeLook = Time.time; lastFeName = look.hit.blockValue.Block.GetBlockName(); }
+            else if (!promptOpen && modal == null && Time.time - lastFeLook < 2f && Time.time - lastLostReport > 30f)
+            {
+                // the text was shown on an "fe" block less than 2 s ago and is gone now: what does the game see?
+                lastLostReport = Time.time;
+                string what = look == null ? "no hit info"
+                    : "hit valid " + look.bHitValid + ", tag '" + look.tag + "', block " + (look.hit.blockValue.isair ? "air" : look.hit.blockValue.Block.GetBlockName())
+                      + " at " + look.hit.blockPos + ", dist " + Mathf.Sqrt(look.hit.distanceSq).ToString("0.00");
+                Log.Out(FerroEngrenagemMod.LogPrefix + "ui watchdog: look text gone right after " + lastFeName + " (" + what
+                        + ", cached text " + (pl.MoveController == null || string.IsNullOrEmpty(pl.MoveController.strTextLabelPointingTo) ? "empty" : "set") + ")");
+            }
+            if (modal != null || promptOpen || wm.IsFullHUDDisabled() || wm.IsHUDPartialHidden()) return;
             PlayerMoveController pmc = pl.MoveController;
             if (pmc != null && !string.IsNullOrEmpty(pmc.strTextLabelPointingTo))
             {

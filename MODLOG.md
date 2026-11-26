@@ -1240,3 +1240,13 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Correção (`UiWatchdog`): sem modal, sem HUD oculto, janela fechada e cache não vazio → limpa o cache; no quadro
   seguinte o jogo reabre a janela sozinho (no máximo 0,25 s). Loga "reopened it" a cada 30 s no máximo.
 - **Não verificado no jogo.**
+
+## 2026-11-26: Motor a Vapor torto; diagnóstico do texto que some
+
+- Teste 00:14: o motor apareceu torto. A edição de 00:04 do `feSteamEngine_HD.blend` deixou `feSteamEngine_Base` com
+  rotação X -6° (-0,105 rad) e x +1 cm. Zerados (cópia do arquivo torto no TEMP), FBX e bundle refeitos e ícone
+  re-renderizado. A cópia final do bundle pelo Unity falhou (arquivo preso pelo jogo fechando); copiado à mão.
+- O texto sumiu de novo, mas o log não teve nenhuma mensagem do vigia (nem "reopened", nem "window is closed"):
+  a mira provavelmente não acertava o bloco (colisor torto?). Novo diagnóstico em `UiWatchdog`: se o texto de um
+  bloco "fe" sumir menos de 2 s depois de aparecer, loga o que o jogo vê (acerto, tag, bloco, distância, cache).
+- **Não verificado no jogo.**
