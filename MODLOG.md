@@ -1250,3 +1250,13 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   a mira provavelmente não acertava o bloco (colisor torto?). Novo diagnóstico em `UiWatchdog`: se o texto de um
   bloco "fe" sumir menos de 2 s depois de aparecer, loga o que o jogo vê (acerto, tag, bloco, distância, cache).
 - **Não verificado no jogo.**
+
+## 2026-11-26: causa do texto ao olhar que some: distância de ativação de 2 m
+
+- Diagnóstico novo (log 00:22): `look text gone right after feGasEngine (hit ... terrAsphalt ..., dist 5.35)`.
+- IL 3.4.0 b10: `TryHandleBlock` só gera o texto (e o E) se `hit.distanceSq < Block.GetActivationDistanceSq()`, e um
+  bloco sem `ActivationDistance` usa `Constants.cCollectItemDistance` = **2 m**. Nenhum bloco do mod definia: bastava
+  dar um passo para trás de uma máquina (o Motor a Vapor tem 3x2x3) para o texto sumir.
+- Correção (fim de `blocks.xml`, depois da região do gen_chain): todos os blocos `fe*` com `ActivationDistance` 4
+  (o alcance de construir); os com `MultiBlockDim` (20) com 5. check_xpath 775/0.
+- **Não verificado no jogo.**
