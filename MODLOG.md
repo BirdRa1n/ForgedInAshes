@@ -1290,3 +1290,14 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   `bCanControlOverride` falso, o jogo faz `SetText(null)` e zera o cache. Algo deixa uma dessas condições ligada.
 - `UiWatchdog.Controls`: o diagnóstico agora loga essas condições e a lista de janelas abertas (mostrada/oculta,
   modal, cursor, actions).
+
+## 2026-11-26: rótulo do texto ao olhar com tamanho fixo
+
+- Log 00:42: com blocos "fe" na mira e dentro do alcance, a janela do texto estava ABERTA (nenhum "window is closed")
+  e mesmo assim o usuário não via o texto. Usuário: "será que o texto está subindo até sair da visão?".
+- Desde 2026-11-24 o `lblText` do `interactionPrompt` usava `overflow=resizeheight` (pivot center): altura variando
+  em tempo de execução. Agora: caixa fixa de 260 px (cerca de 7 linhas na fonte normal, `shrinkcontent` só além
+  disso), `pivot=bottom`, `pos=0,-35` (base 20 px acima da mira, a mesma base do original), crescendo para cima.
+- `UiWatchdog.LabelGeometry`: a cada 30 s com texto de bloco "fe" aberto loga altura, posição local e na tela,
+  visível/alfa/ativo e linhas. `build.ps1` passa a referenciar `NGUI.dll`.
+- **Não verificado no jogo.**

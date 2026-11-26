@@ -1,7 +1,13 @@
-<configs>
-	<!-- The look text of the machines was shrunk to fit the 70 px prompt (ShrinkContent): let it grow in height instead,
-	     at the normal font size (user report 2026-11-24, "o texto esta minusculo"). -->
-	<setattribute xpath="/windows/window[@name='interactionPrompt']/label[@name='lblText']" name="overflow">resizeheight</setattribute>
+﻿<configs>
+	<!-- Look text of the machines. Vanilla: a 70 px label (2000 wide, pivot center, ShrinkContent) in a window at 0,55, so a
+	     long readout shrank to tiny letters (user report 2026-11-24). Then we used overflow=resizeheight, and after a
+	     while the text stopped showing although the window was open with the text set (user 2026-11-26: "is the text
+	     moving up out of view?"). Now a fixed box: 260 px high (about 7 lines at the normal size, smaller only past
+	     that), its BOTTOM fixed at the bottom of the 70 px window, growing upwards. No size changes at runtime. -->
+	<setattribute xpath="/windows/window[@name='interactionPrompt']/label[@name='lblText']" name="pivot">bottom</setattribute>
+	<setattribute xpath="/windows/window[@name='interactionPrompt']/label[@name='lblText']" name="pos">0,-35</setattribute>
+	<setattribute xpath="/windows/window[@name='interactionPrompt']/label[@name='lblText']" name="height">260</setattribute>
+	<setattribute xpath="/windows/window[@name='interactionPrompt']/label[@name='lblText']" name="overflow">shrinkcontent</setattribute>
 
 	<!-- Recipe book window (RecipeBook.cs, controller XUiC_FeRecipes): title, one page of lines, previous / next / close -->
 	<append xpath="/windows">

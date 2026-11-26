@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Compiles src\FerroEngrenagem\*.cs into Mods\FerroEngrenagem\FerroEngrenagem.dll.
 
@@ -37,6 +37,7 @@ $refs = @(
     (Join-Path $managed 'UnityEngine.PhysicsModule.dll'),
     (Join-Path $managed 'UnityEngine.ParticleSystemModule.dll'),   # FxVisual: steam / smoke / sparks
     (Join-Path $managed 'UnityEngine.TextRenderingModule.dll'),    # Display Panel (TextMesh)
+    (Join-Path $managed 'NGUI.dll'),               # UiWatchdog: look-text label geometry (UILabel, UICamera)
     (Join-Path $managed 'InControl.dll'),          # PlayerAction (Activate key) for the Crank
     (Join-Path $harmonyDir '0Harmony.dll')
 )

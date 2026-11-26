@@ -25,7 +25,7 @@ namespace FerroEngrenagem
     public class UiWatchdog : MonoBehaviour
     {
         static GameObject host;
-        float next, radialSince = -1f, lastReport = -100f, lastRepair = -100f, lastFeLook = -100f, lastLostReport = -100f;
+        float next, radialSince = -1f, lastReport = -100f, lastRepair = -100f, lastFeLook = -100f, lastLostReport = -100f, lastGeom = -100f;
         string lastFeName = "";
 
         public static void Ensure()
@@ -102,7 +102,11 @@ namespace FerroEngrenagem
             WorldRayHitInfo look = pl.HitInfo;
             bool lookFe = look != null && look.bHitValid && GameUtils.IsBlockOrTerrain(look.tag) && !look.hit.blockValue.isair
                           && look.hit.blockValue.Block.GetBlockName().StartsWith("fe", System.StringComparison.Ordinal);
-            if (promptOpen && lookFe) { lastFeLook = Time.time; lastFeName = look.hit.blockValue.Block.GetBlockName(); }
+            if (promptOpen && lookFe)
+            {
+                lastFeLook = Time.time; lastFeName = look.hit.blockValue.Block.GetBlockName();
+                if (Time.time - lastGeom > 30f) { lastGeom = Time.time; Log.Out(FerroEngrenagemMod.LogPrefix + "ui watchdog: look text on " + lastFeName + ": " + LabelGeometry(ui)); }
+            }
             else if (!promptOpen && modal == null && Time.time - lastFeLook < 2f && Time.time - lastLostReport > 30f)
             {
                 // the text was shown on an "fe" block less than 2 s ago and is gone now: what does the game see?
@@ -138,6 +142,26 @@ namespace FerroEngrenagem
                         + " but the look-text window is closed (HUD full off: " + wm.IsFullHUDDisabled() + ", HUD partial: "
                         + wm.IsHUDPartialHidden() + ") | " + WhyNoText(gm.World, pl, hit) + " | " + Controls(wm, pl));
         }
+        /// <summary>Where the look-text label really is on screen (user 2026-11-26: "is the text moving up out of view?").</summary>
+        static string LabelGeometry(LocalPlayerUI ui)
+        {
+            try
+            {
+                XUiController grp = ui.xui.FindWindowGroupByName(XUiC_InteractionPrompt.ID);
+                XUiC_InteractionPrompt p = grp == null ? null : grp.GetChildByType<XUiC_InteractionPrompt>();
+                if (p == null) return "no prompt controller";
+                UILabel lbl = p.ViewComponent == null || p.ViewComponent.UiTransform == null ? null
+                    : p.ViewComponent.UiTransform.GetComponentInChildren<UILabel>(true);
+                if (lbl == null) return "no label";
+                Camera cam = UICamera.mainCamera;
+                Vector3 sp = cam == null ? Vector3.zero : cam.WorldToScreenPoint(lbl.transform.position);
+                return "label h " + lbl.height + " w " + lbl.width + " local y " + lbl.transform.localPosition.y.ToString("0")
+                       + " screen y " + sp.y.ToString("0") + "/" + Screen.height + " visible " + lbl.isVisible + " alpha " + lbl.finalAlpha.ToString("0.00")
+                       + " active " + lbl.gameObject.activeInHierarchy + " lines " + (string.IsNullOrEmpty(p.Text) ? 0 : p.Text.Split((char)10).Length);
+            }
+            catch (System.Exception e) { return "geometry: " + e.Message; }
+        }
+
         /// <summary>The conditions under which PlayerMoveController.Update (IL 3.4.0 b10) clears the look text every
         /// frame: a cursor window, a modal window, the player's action set off, bCanControlOverride off.</summary>
         static string Controls(GUIWindowManager wm, EntityPlayerLocal pl)
