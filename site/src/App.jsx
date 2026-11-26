@@ -77,7 +77,7 @@ function Shell({ children }) {
         <button className="searchbtn" onClick={() => setOpen(true)}>🔍 Buscar <span className="kbd">Ctrl K</span></button>
       </header>
       <main>{children}</main>
-      <footer>Ferro &amp; Engrenagem · mod para 7 Days to Die · páginas geradas dos arquivos do mod · valores sujeitos a balanceamento</footer>
+      <footer>ForgedInAshes · mod para 7 Days to Die · páginas geradas dos arquivos do mod · valores sujeitos a balanceamento</footer>
       {open && <Palette onClose={() => setOpen(false)} />}
     </div>
   );

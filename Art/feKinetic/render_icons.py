@@ -4,7 +4,7 @@ Run inside Blender AFTER build_feKinetic.py, in the same namespace (it uses its 
 to_object, the material indices...). bg_icons.py in the scratchpad does:
     exec(build_feKinetic.py, ns); exec(render_icons.py, ns)
 
-Writes 160x160 transparent PNGs to Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<name>.png:
+Writes 160x160 transparent PNGs to Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/<name>.png:
   - every mod block with a model in feKinetic.blend (orthographic, 3/4 view from the front right);
   - every mod item, from small item models built here (molds show their cavity in glowing metal).
 tools/apply_icons.py then points CustomIcon of each block/item at its own icon.
@@ -16,8 +16,8 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
-REPO = r"F:\Github\FerroEngrenagem"
-OUT_DIR = os.path.join(REPO, "Mods", "FerroEngrenagem", "UIAtlases", "ItemIconAtlas")
+REPO = r"F:\Github\ForgedInAshes"
+OUT_DIR = os.path.join(REPO, "Mods", "ForgedInAshes", "UIAtlases", "ItemIconAtlas")
 SIZE = 160
 os.makedirs(OUT_DIR, exist_ok=True)
 

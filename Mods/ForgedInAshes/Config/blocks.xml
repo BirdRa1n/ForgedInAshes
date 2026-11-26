@@ -1,0 +1,2737 @@
+﻿<configs>
+	<!-- F1-T02: machines M01, M02, M03 (phase 1: no power).
+	     How the game binds a workstation (read from Assembly-CSharp.dll, 3.4.0 b10):
+	       - <property class="Workstation"> CraftingAreaRecipes = which recipe craft_area values it shows.
+	       - Block property WorkstationWindow = XUi window group to open; if empty the game uses
+	         "workstation_<blockName>" (TileEntityWorkstation.OnLockResponseLocal / WorkstationData ctor).
+	       - Vanilla tableSaw uses the same pattern (own craft area + WorkstationWindow="workstation_workbench").
+	     So the machines reuse vanilla windows and need no XUi of their own (yet).
+	     Salvage drops and RepairItems avoid Mechanical Parts / Spring on purpose (see PLANO_MOD.md 12.1). -->
+	<append xpath="/blocks">
+
+		<!-- M01 Foundry: copy of vanilla forge with its own craft area, WITHOUT the smelter input.
+		     XUiM_Recipes.FilterRecipesByWorkstation only hides use_smelter/replace_smelter variants when
+		     craftingArea == "forge" (hard-coded), so a smelting copy showed every recipe twice.
+		     Phase 1: direct-scrap recipes only (works in both SmeltingType modes); vanilla
+		     "workstation_forge_nosmelting" window = tools + fuel + output, no input grid. -->
+		<block name="feFoundry">
+			<property name="CustomIcon" value="feFoundry"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Forge"/>
+			<property class="Workstation">
+				<property name="CraftingAreaRecipes" value="feFoundry"/>
+				<property name="Modules" value="tools,output,fuel"/>
+				<property name="ToolNames" value="1,2,3"/>
+			</property>
+			<property name="WorkstationWindow" value="workstation_forge_nosmelting"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feFoundryDesc"/>
+			<!-- F8.1: melts scrap / ingots into molten metal for Metal Chutes (MetalWorks.cs) -->
+			<property name="FeFluid" value="smelter"/>
+			<property name="FeMetalBuffer" value="200"/>
+			<property name="WorkstationIcon" value="ui_game_symbol_forge"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mstone_scrap"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_FoundryPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="1000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="6"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="BuffsWhenWalkedOn" value="buffBurningEnvironment"/>
+			<property name="ActiveRadiusEffects" value="buffCampfireAOE,5"/>
+			<property name="OpenSound" value="forge_open"/>
+			<property name="CloseSound" value="forge_close"/>
+			<property name="CraftSound" value="forge_smelt_click"/>
+			<property name="CraftCompleteSound" value="forge_item_complete"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceCobblestones" value="50"/>
+			</property>
+			<drop event="Harvest" name="resourceRockSmall" count="40" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="resourceClayLump" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="resourceLeather" count="5" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="terrDestroyedStone" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0210"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="forge_grab"/>
+			<property name="SoundPlace" value="forge_place"/>
+		</block>
+
+		<!-- M02 Parts Press: workbench-style station (model of vanilla combineStation).
+		     Runs on torque (D7/D8: motor socket, src/ForgedInAshes/PowerGatePatches.cs). -->
+		<block name="fePress">
+			<property name="CustomIcon" value="fePress"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="fePress"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePressDesc"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="WorkstationIcon" value="ui_game_symbol_workbench"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_PressPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="15"/>
+				<property name="resourceNail" value="30"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="resourceForgedIron" count="15" tag="salvageHarvest"/>
+			<drop event="Harvest" name="resourceMetalPipe" count="2" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0310"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+
+		<!-- M03 Lathe: workbench-style station (model of vanilla dev-only tableSaw, 1x1).
+		     Runs on torque like the Parts Press. -->
+		<block name="feLathe">
+			<property name="CustomIcon" value="feLathe"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feLathe"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feLatheDesc"/>
+			<property name="WorkstationIcon" value="ui_game_symbol_table_saw"/>
+			<property name="CraftIcon" value="ui_game_symbol_table_saw"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Miron_scrap"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_LathePrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="20"/>
+				<property name="resourceNail" value="40"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="200" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="resourceForgedIron" count="20" tag="salvageHarvest"/>
+			<drop event="Harvest" name="resourceMetalPipe" count="3" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0320"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+
+	</append>
+
+	<!-- F2-T02: E02 Charcoal Kiln = a Collector block (same class as the dew collector), XML only.
+	     How BlockCollector works (IL of BlockCollector.Init / TileEntityCollector, 3.4.0 b10):
+	       - FuelTypes and OutputTypes are REQUIRED (parsed without null check -> NRE if missing).
+	       - FuelTypes {name,item,...}: only these items are accepted as input.
+	       - OutputTypes {name,fuel,fuelCost,additionalCost,discountCost,convertTo,moddedConvertTo,
+	         moddedConvertSpeed,moddedConvertCount,minTicks,maxTicks,sound}; 1000 ticks = 1 game hour.
+	       - CollectorType is an enum (DewCollector/Apiary/ChickenCoop): it picks which sandbox
+	         input/time/output multipliers apply. DewCollector chosen here.
+	       - Every collector opens the vanilla "dewcollector" window group.
+	       - RequiredMods is optional; mod slots are locked to feTestItem (unobtainable outside creative)
+	         so dew collector mods cannot be inserted. Revisit when the test item is removed. -->
+	<append xpath="/blocks">
+		<block name="feCharcoalKiln">
+			<property name="CustomIcon" value="feCharcoalKiln"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Collector"/>
+			<property name="CollectorType" value="DewCollector"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCharcoalKilnDesc"/>
+			<property name="LootLabelKey" value="feCharcoalKiln"/>
+			<property name="ItemIconBackdrop" value="ui_game_symbol_forge"/>
+			<property name="ItemBackgroundColor" value="160,110,60,255"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mstone_scrap"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_KilnPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="RestrictSubmergedPlacement" value="true"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="OpenSound" value="forge_open"/>
+			<property name="CloseSound" value="forge_close"/>
+			<!-- input: Wood only -->
+			<property name="FuelTypes" value="{wood,resourceWood}"/>
+			<!-- 5 Wood -> 1 Charcoal per cycle (= 10 -> 2, PLANO_MOD.md I01), 250-350 ticks per cycle -->
+			<property name="OutputTypes" value="{charcoal,wood,5,5,5,feResourceCharcoal,feResourceCharcoal,1,1,250,350,forge_item_complete}"/>
+			<property name="Outputs" value="charcoal,charcoal,charcoal,charcoal,charcoal,charcoal"/>
+			<property name="FuelGridHeight" value="1"/>
+			<property name="OutputGridHeight" value="2"/>
+			<property name="FuelTitleText" value="feCharcoalKilnFuel"/>
+			<property name="FuelTitleSprite" value="ui_game_symbol_forge"/>
+			<property name="FuelTitleSpriteAtlas" value="UIAtlas"/>
+			<property name="FuelTypesSprites" value="resourceWood,ItemIconAtlasGreyscale"/>
+			<property name="EmptyText" value="feCharcoalKilnEmpty"/>
+			<property name="HasItem1Text" value="feCharcoalKilnHasCharcoal"/>
+			<property name="HasItem2Text" value="feCharcoalKilnHasCharcoal"/>
+			<property name="RequiredMods" value="feTestItem"/>
+			<property name="RequiredModsOnly" value="true"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="300"/>
+			<property name="MaxDamage" value="600"/>
+			<property name="HeatMapStrength" value="2"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceCobblestones" value="15"/>
+			</property>
+			<drop event="Harvest" name="resourceRockSmall" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="resourceClayLump" count="5" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="terrDestroyedStone" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0220"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="forge_grab"/>
+			<property name="SoundPlace" value="forge_place"/>
+		</block>
+	</append>
+
+	<!-- F2-T03: E03 Coal Generator = Collector with a CATALYST (same system as chickens in the chicken coop).
+	     TileEntityCollector.getCurrentConvertCount: if the block uses catalysts, output per cycle =
+	     (number of catalyst items) x CatalystMultiplier; CatalystRequirements = minimum catalysts to run.
+	     Catalysts are not consumed. Here: 1 Charcoal -> 5 Charge per installed Flywheel (PLANO_MOD.md 9),
+	     at least 1 Flywheel required. Uses the DewCollector sandbox multipliers (same as the Kiln). -->
+	<append xpath="/blocks">
+		<block name="feCoalGenerator">
+			<property name="CustomIcon" value="feCoalGenerator"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<!-- D7 step 3: an ELECTRIC generator (vanilla Class Generator: TileEntityPowerSource + PowerGenerator) that
+			     burns Charcoal (FeFuelItem, src/ForgedInAshes/FuelGenerator.cs) instead of gasoline. Output: 60 W per
+			     Flywheel in its slots (no Flywheel, no watts). 1 Charcoal = 1 fuel = 30000 energy = ~80 s of a 60 W
+			     machine (PowerManager tick 0.16 s); MaxFuel 200 Charcoal. -->
+			<property name="Class" value="Generator"/>
+			<property name="FeFuelItem" value="feResourceCharcoal"/>
+			<property name="FeFuelPerItem" value="1"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="60"/>
+			<property name="MaxFuel" value="200"/>
+			<property name="MaxPower" value="40000"/>
+			<property name="OutputPerFuel" value="30000"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCoalGeneratorDesc"/>
+			<property name="DisplayType" value="blockElectricalHardened"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCoalGeneratorPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="HandleFace" value="Bottom"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Path" value="solid"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="800"/>
+			<property name="MaxDamage" value="600"/>
+			<property name="HeatMapStrength" value="4"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="4"/>
+				<property name="resourceNail" value="10"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="80" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="4" tag="salvageHarvest"/>
+			<drop event="Harvest" name="feResourceGear" count="3" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0230"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="electricianSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+			<property name="SoundPickup" value="bankgenerator_grab"/>
+			<property name="SoundPlace" value="bankgenerator_place"/>
+		</block>
+	</append>
+
+	<!-- F2-T04b: E01 Crank, HOLD E to turn it (C#: src/ForgedInAshes/Crank.cs, class BlockFeCrank).
+	     Replaces the first version (every hit gave a 25% chance of Charge via buffs.xml + gameevents.xml).
+	     While the player looks at it and holds Activate: the rotor and dynamo pulley spin, stamina drains
+	     (FeCrankStaminaPerSecond) and 1 Charge is added every FeCrankChargeSeconds (2.5 s = the old ~4 Charge per
+	     10 s). Crouch + E opens the vanilla radial (Take). MaxDamage stays huge so it is not broken by accident.
+	     Model: Art/feCrank, built into Resources/forgedinashes.unity3d by Art/UnityProject (FeBuild.cs).
+	     Path syntax "#<bundle>?<asset>" with @modfolder: read in DataLoader.ParseDataPathIdentifier (3.4.0 b10). -->
+	<append xpath="/blocks">
+		<block name="feCrank">
+			<property name="CustomIcon" value="feCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="ForgedInAshes.FeCrank, ForgedInAshes"/>
+			<!-- D7 step 2: the crank is a vanilla-style GENERATOR (BlockFeCrank : BlockGenerator). Cranking adds fuel;
+			     1 fuel = 60 energy (PowerManager tick = 0.16 s), so 12.5 fuel/s = 750 energy per second of cranking =
+			     ~4 s of a 30 W motor (10 s crank = ~40 s machine, the balance approved for the Charge version).
+			     MaxFuel 400 = ~1 min of 30 W stored in the flywheel.
+			     Slots (user, 2026-11-22; src/ForgedInAshes/CrankSlots.cs): NO Flywheels. Slot 1 = Battery Bank Module
+			     (feBatteryModule), slot 2 = one car battery, locked until the module is in; the other 4 are hidden.
+			     With both: cranking past a full generator charges the battery (1 fuel = 1 charge unit) and the battery
+			     refuels the generator when the cranked fuel runs out. Output is always FeCrankBaseOutput. -->
+			<property name="SlotItem" value="feBatteryModule"/>
+			<property name="OutputPerStack" value="0"/>
+			<property name="MaxPower" value="120"/>
+			<property name="MaxFuel" value="400"/>
+			<property name="OutputPerFuel" value="60"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="FeCrankFuelPerSecond" value="12.5"/>
+			<!-- fixed output in watts (no Flywheels in the crank) -->
+			<property name="FeCrankBaseOutput" value="30"/>
+			<!-- was 25; user (2026-11-22): still too little stamina per Charge. Natural stamina regen keeps running
+			     while cranking (Crank.cs), so the net drain is lower than this number. -->
+			<property name="FeCrankStaminaPerSecond" value="40"/>
+			<property name="FeCrankMinStamina" value="5"/>
+			<property name="FeCrankSpinDegPerSecond" value="300"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCrankDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCrankPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="3"/>  <!-- 0 disables "take" on power sources (BlockPowerSource) -->
+			<property name="MaxDamage" value="50000"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="200"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="2"/>
+			</property>
+			<drop event="Harvest" name="resourceForgedIron" count="5" tag="salvageHarvest"/>
+			<drop event="Harvest" name="resourceScrapIron" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="Tags" value="feCrank"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0240"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+	</append>
+
+	<!-- F3-T03: the vanilla workbench lists every inventory recipe because CraftingAreaRecipes="player,workbench"
+	     (XUiM_Recipes.FilterRecipesByWorkstation adds craft_area "" recipes for the "player" token). After the
+	     remap that is ~211 inventory recipes the player can already craft by hand. Keep only its own area
+	     (phase-4 leftovers: vehicles, robots, chemistryStation, cementMixer). D1 hides it fully in F3-T07. -->
+	<set xpath="/blocks/block[@name='workbench']/property[@class='Workstation']/property[@name='CraftingAreaRecipes']/@value">workbench</set>
+
+	<!-- F3-T07 (D1): hide the vanilla forge, workbench and chemistry station from the player's creative menu
+	     (their recipes are removed in recipes.xml). Blocks already placed in POIs keep working. -->
+	<set xpath="/blocks/block[@name='forge']/property[@name='CreativeMode']/@value">Dev</set>
+	<set xpath="/blocks/block[@name='workbench']/property[@name='CreativeMode']/@value">Dev</set>
+	<set xpath="/blocks/block[@name='chemistryStation']/property[@name='CreativeMode']/@value">Dev</set>
+	<!-- F4-T01: the vanilla cement mixer is replaced by feMixer (M08) -->
+	<set xpath="/blocks/block[@name='cementMixer']/property[@name='CreativeMode']/@value">Dev</set>
+
+
+	<!-- D7: Electric Motor. A vanilla power consumer (Class Powered, like the wire relay) that you place in a
+	     machine's motor socket (the cell behind it, or the side named by FeMotorSide on the machine) and wire to a
+	     power source. It then draws the machine's FeMinPower; the machine crafts only while it is powered
+	     (src/ForgedInAshes/PowerGatePatches.cs, socket outline: MotorSocketMarker.cs). Placeholder model: relay. -->
+	<append xpath="/blocks">
+		<block name="feElectricMotor">
+			<property name="CustomIcon" value="feElectricMotor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="Powered"/>
+			<property name="RequiredPower" value="30"/>
+			<property name="FeMotor" value="true"/>
+			<property name="OnlySimpleRotations" value="false"/>
+			<property name="FeTorqueOutput" value="128"/>
+			<property name="DescriptionKey" value="feElectricMotorDesc"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Material" value="Mmetal_weak"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feElectricMotorPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="HandleFace" value="Bottom"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="2"/>
+			</property>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="resourceForgedIron" count="2" tag="salvageHarvest"/>
+			<drop event="Destroy" name="resourceScrapIron" count="2,6"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B155"/>
+			<property name="SortOrder2" value="0007"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+			<property name="SoundPickup" value="relay_grab"/>
+			<property name="SoundPlace" value="relay_place"/>
+		</block>
+	<!-- D7: Torque Crank (src/ForgedInAshes/TorqueCrank.cs). Goes in a machine's motor socket instead of the
+	     Electric Motor; hold E on it to drive the machine with FeTorqueOutput watts of shaft power (no wires,
+	     nothing stored). Model: the crank's prefab for now. -->
+		<block name="feTorqueCrank">
+			<property name="CustomIcon" value="feTorqueCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="ForgedInAshes.FeTorqueCrank, ForgedInAshes"/>
+			<property name="FeTorqueOutput" value="64"/>
+			<property name="FeTorqueCoastSeconds" value="1.5"/>
+			<property name="FeTorqueStaminaPerSecond" value="30"/>
+			<property name="FeTorqueMinStamina" value="5"/>
+			<property name="FeTorqueSpinDegPerSecond" value="300"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTorqueCrankDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTorqueCrankPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="MaxDamage" value="50000"/>
+			<property name="EconomicValue" value="120"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="2"/>
+			</property>
+			<drop event="Harvest" name="resourceForgedIron" count="3" tag="salvageHarvest"/>
+			<drop event="Harvest" name="resourceScrapIron" count="10" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0241"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<!-- D8 T1: torque network (src/ForgedInAshes/TorqueNetwork.cs, PLANO_MOD.md 5.4). Models: Art/feKinetic (bundle
+		     prefabs with FeSpin parts). Shaft: joins its two ends (FeShaftAxis = the pipe model's own axis, turned by the block rotation);
+		     rotate it with the rotation key to lay it flat or vertical. Gearbox: joins all six faces. -->
+		<block name="feShaft">
+			<property name="CustomIcon" value="feShaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="ForgedInAshes.FeKinetic, ForgedInAshes"/>
+			<property name="FeKinetic" value="shaft"/>
+			<property name="FeShaftAxis" value="z"/>
+			<property name="TakeDelay" value="2"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feShaftDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feShaftPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="LightOpacity" value="4"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="EconomicValue" value="20"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="4" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0010"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<!-- D10 T1: Conveyor belt (src/ForgedInAshes/Belt.cs). Items go to the block's front; a shaft on its left or
+		     right drives the whole line; 8 UT per belt at 32 RPM, 1 block/s (proportional to the RPM). -->
+		<block name="feConveyor">
+			<property name="CustomIcon" value="feConveyor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="Class" value="ForgedInAshes.FeConveyor, ForgedInAshes"/>
+			<property name="FeKinetic" value="conveyor"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeTorqueCost" value="8"/>
+			<property name="FeBeltSpeed" value="1"/>
+			<property name="DescriptionKey" value="feConveyorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="30"/>
+			<property name="SortOrder2" value="0030"/>
+		</block>
+		<!-- D10: Conveyor Ramp. Takes items at its back and gives them to the belt one block up and one forward. -->
+		<block name="feConveyorRamp">
+			<property name="CustomIcon" value="feConveyorRamp"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltRise" value="1"/>
+			<property name="DescriptionKey" value="feConveyorRampDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorRampPrefab"/>
+			<property name="SortOrder2" value="0031"/>
+		</block>
+		<!-- D10: Conveyor Down Ramp. Takes items from the belt one block up behind it; gives them in front at its level. -->
+		<block name="feConveyorDown">
+			<property name="CustomIcon" value="feConveyorDown"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltRise" value="-1"/>
+			<property name="DescriptionKey" value="feConveyorDownDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorDownPrefab"/>
+			<property name="SortOrder2" value="0034"/>
+		</block>
+		<!-- D10: Filter Belt. Items equal to its filter go to its side belts, the others straight on. -->
+		<block name="feConveyorFilter">
+			<property name="CustomIcon" value="feConveyorFilter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltFilter" value="true"/>
+			<property name="DescriptionKey" value="feConveyorFilterDesc"/>
+			<property name="SortOrder2" value="0035"/>
+		</block>
+		<!-- 2026-11-24: Conveyor Duct (Belt.cs, FeBeltClosed): an enclosed belt. Same logic as the belt (torque from a
+		     shaft on its left or right, curves, splits, filters by the belts around it), items hidden inside, no dropped
+		     items taken. Its mouth fits the machines' conveyor ports (centre 0.25 m). Stand it on a Conveyor Stand. -->
+		<block name="feConveyorDuct">
+			<property name="CustomIcon" value="feConveyorDuct"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="FeBeltClosed" value="true"/>
+			<property name="FeTorqueCost" value="6"/>
+			<property name="DescriptionKey" value="feConveyorDuctDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorDuctPrefab"/>
+			<property name="SortOrder2" value="0036"/>
+		</block>
+		<!-- 2026-11-24: Conveyor Stand: a trestle that carries a belt or a Conveyor Duct one block up. Its shape follows the
+		     belt on top (straight, curve, junction, duct cradle): src/ForgedInAshes/ConveyorStand.cs. No logic. -->
+		<block name="feConveyorStand">
+			<property name="CustomIcon" value="feConveyorStand"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="ForgedInAshes.FeConveyorStand, ForgedInAshes"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feConveyorStandDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorStandPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="1"/>
+			<property name="EconomicValue" value="15"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="2" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0037"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<!-- D10: Belt Storage (Belt.cs, BeltMachines): an iron crate that takes items from a belt pointing into any of its
+		     sides (stacks first, then empty slots); while a player has it open or it is full, the items wait. -->
+		<block name="feBeltCrate">
+			<property name="CustomIcon" value="feBeltCrate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="CompositeTileEntity"/>
+			<property class="CompositeFeatures">
+				<property class="TEFeatureStorage">
+					<property name="LootList" value="playerIronWritableStorage"/>
+				</property>
+				<property class="TEFeatureLockable"/>
+			</property>
+			<property name="FeBeltInput" value="true"/>
+			<property name="DescriptionKey" value="feBeltCrateDesc"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Path" value="solid"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="AllowedRotations" value="Basic90"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="MaxDamage" value="2500"/>
+			<property name="SoundPickup" value="crateiron_grab"/>
+			<property name="SoundPlace" value="crateiron_place"/>
+			<property class="RepairItems">
+				<property name="resourceForgedIron" value="10"/>
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="10,30"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0032"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<!-- D10 T2: Funnel (Belt.cs, Funnel). Back on a crate or a machine, front on a belt: puts up to 16 items every
+		     0.5 s on the belt (crates: any slot; machines: their output). -->
+		<block name="feFunnel">
+			<property name="CustomIcon" value="feFunnel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="ForgedInAshes.FeFunnel, ForgedInAshes"/>
+			<property name="FeFunnelAmount" value="16"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feFunnelDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feFunnelPrefab"/>
+			<!-- 2026-11-24: turns any way (down onto a duct's hatch, up, sideways); the spout follows what it feeds -->
+			<property name="OnlySimpleRotations" value="false"/>
+			<property name="AllowedRotations" value="No45"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="CanPickup" value="true"/>
+			<property name="TakeDelay" value="2"/>
+			<property name="EconomicValue" value="40"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="4" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0033"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<block name="feGearbox">
+			<property name="CustomIcon" value="feGearbox"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="gearbox"/>
+			<property name="DescriptionKey" value="feGearboxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGearboxPrefab"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="SortOrder2" value="0011"/>
+		</block>
+		<!-- D8 T2: Speed Box. Input at the back end, output at the front end (along the same axis as the Shaft);
+		     output RPM = input x2 / x4 / x1/2 (E cycles, stored in the block meta). Faster machines craft faster but
+		     cost (rpm/32)^2 times their torque. Placeholder model: vanilla pipe flange. -->
+		<block name="feSpeedBox">
+			<property name="CustomIcon" value="feSpeedBox"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="speedbox"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feSpeedBoxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSpeedBoxPrefab"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="SortOrder2" value="0012"/>
+		</block>
+		<!-- D8 T3: Clutch (E: engaged / released), Torque Regulator (E: lets 100/75/50/25 % of the network's UT
+		     through to what is behind its output end; machines there slow down instead of overloading) and Gauge
+		     (joins all six sides; looking at it shows sources, machines, regulators and load). Placeholder models:
+		     vanilla valves (axis assumed local Z like the Shaft) and a pipe cap. -->
+		<block name="feClutch">
+			<property name="CustomIcon" value="feClutch"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="clutch"/>
+			<!-- feet and lever: only the 4 upright turns -->
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feClutchDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feClutchPrefab"/>
+			<property name="EconomicValue" value="100"/>
+			<property name="SortOrder2" value="0013"/>
+		</block>
+		<block name="feTorqueRegulator">
+			<property name="CustomIcon" value="feTorqueRegulator"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="regulator"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feTorqueRegulatorDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTorqueRegulatorPrefab"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="SortOrder2" value="0014"/>
+		</block>
+		<block name="feTorqueGauge">
+			<property name="CustomIcon" value="feTorqueGauge"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="FeKinetic" value="gauge"/>
+			<property name="DescriptionKey" value="feTorqueGaugeDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTorqueGaugePrefab"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="SortOrder2" value="0015"/>
+		</block>
+		<!-- F4-T04 / D8: Water Wheel. A free, slow torque source: FeTorqueOutput UT at FeSourceRpm (16) while water touches
+		     its paddles (its cell, the cell below, and the side cells off its axle; Kinetic.WaterTouching). Its axle is
+		     the model's local Z like the Shaft; both ends connect. Mixing it with 32 RPM sources needs a Speed Box. -->
+		<block name="feWaterWheel">
+			<property name="CustomIcon" value="feWaterWheel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="waterwheel"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="FeTorqueOutput" value="128"/>
+			<property name="FeSourceRpm" value="16"/>
+			<property name="DescriptionKey" value="feWaterWheelDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWaterWheelPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="250"/>
+			<property name="SortOrder2" value="0022"/>
+		</block>
+		<!-- D9 fluid network (src/ForgedInAshes/FluidNetwork.cs, PLANO_MOD.md 5.5). Pipes join every side; the arms of
+		     the pipe model show where it connects. Pumps pull from the world water behind them (intake = local -Z) and
+		     push out of the front (local +Z). The Condenser takes steam at its back and gives water at its front. -->
+		<block name="fePipe">
+			<property name="CustomIcon" value="fePipe"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="Class" value="ForgedInAshes.FeFluid, ForgedInAshes"/>
+			<property name="FeFluid" value="pipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePipeDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?fePipePrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="TakeDelay" value="1"/>
+			<property name="EconomicValue" value="15"/>
+			<dropextendsoff/>
+			<drop event="Harvest" name="resourceScrapIron" count="2" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0001"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+		</block>
+		<block name="feWaterTank">
+			<property name="CustomIcon" value="feWaterTank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="tank"/>
+			<property name="FeFluidCapacity" value="4000"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feWaterTankDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWaterTankPrefab"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="SortOrder2" value="0002"/>
+		</block>
+		<!-- D9: Filler and Bottler (FluidNetwork.cs, FluidDevices): items <-> fluid. Oil 10 L, Gas Can 1 L, Lubricant 10 L. -->
+		<block name="feFluidFiller">
+			<property name="CustomIcon" value="feFluidFiller"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="filler"/>
+			<property name="FeFluidBuffer" value="1000"/>
+			<property name="DescriptionKey" value="feFluidFillerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feFluidFillerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="120"/>
+		</block>
+		<block name="feFluidBottler">
+			<property name="CustomIcon" value="feFluidBottler"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="bottler"/>
+			<property name="FeFluidBuffer" value="100"/>
+			<property name="DescriptionKey" value="feFluidBottlerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feFluidBottlerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="120"/>
+		</block>
+		<!-- F8.1 (PLANO_CRAFT.md): Metal Chute, a pipe for molten metal only, and the Casting Table (MetalWorks.cs) -->
+		<block name="feMetalChute">
+			<property name="CustomIcon" value="feMetalChute"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="chute"/>
+			<property name="DescriptionKey" value="feMetalChuteDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMetalChutePrefab"/>
+			<property name="EconomicValue" value="20"/>
+		</block>
+		<!-- F8.2 (PLANO_CRAFT.md): process machines (ProcessMachine.cs; what they do: Data/fe_processes.xml) -->
+		<block name="feCrusher">
+			<property name="CustomIcon" value="feCrusher"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feCrusherDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCrusherPrefab"/>
+			<property name="EconomicValue" value="200"/>
+		</block>
+		<block name="feChemMixer">
+			<property name="CustomIcon" value="feChemMixer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feChemMixerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feChemMixerPrefab"/>
+			<property name="EconomicValue" value="200"/>
+		</block>
+		<block name="feBiodigesterBig">
+			<property name="CustomIcon" value="feBiodigesterBig"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="120"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="MultiBlockDim" value="1,2,1"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feBiodigesterBigDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBiodigesterBigPrefab"/>
+			<property name="EconomicValue" value="700"/>
+		</block>
+		<block name="feWasher">
+			<property name="CustomIcon" value="feWasher"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="DescriptionKey" value="feWasherDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWasherPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<block name="feSteamDryer">
+			<property name="CustomIcon" value="feSteamDryer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="20"/>
+			<property name="DescriptionKey" value="feSteamDryerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSteamDryerPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<!-- Biodigester: rots meat and turns organic matter into Nitre Earth (gunpowder) or Organic Mash (biofuel) -->
+		<block name="feBiodigester">
+			<property name="CustomIcon" value="feBiodigester"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+			<property name="DescriptionKey" value="feBiodigesterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBiodigesterPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="300"/>
+		</block>
+		<block name="feCaster">
+			<property name="CustomIcon" value="feCaster"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="FeFluid" value="caster"/>
+			<property name="FeFluidRate" value="300"/>
+			<property name="DescriptionKey" value="feCasterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCasterPrefab"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<block name="feMechPump">
+			<property name="CustomIcon" value="feMechPump"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="mechpump"/>
+			<property name="FeFluidRate" value="100"/>
+			<property name="FeIntakeWater" value="3"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feMechPumpDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechPumpPrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0003"/>
+		</block>
+		<block name="feElecPump">
+			<property name="CustomIcon" value="feElecPump"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="Class" value="Powered"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluid" value="elecpump"/>
+			<property name="FeFluidRate" value="150"/>
+			<property name="FeIntakeWater" value="3"/>
+			<property name="DescriptionKey" value="feElecPumpDesc"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Material" value="Mmetal_weak"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feElecPumpPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="EconomicValue" value="200"/>
+			<property name="TakeDelay" value="3"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="2"/>
+			</property>
+			<drop event="Destroy" name="resourceScrapIron" count="2,6"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B283"/>
+			<property name="SortOrder2" value="0004"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+		</block>
+		<block name="feCondenser">
+			<property name="CustomIcon" value="feCondenser"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="120"/>
+			<property name="FeFluid" value="condenser"/>
+			<property name="FeFluidRate" value="120"/>
+			<property name="FeCondenseRatio" value="0.9"/>
+			<property name="FeFluidBuffer" value="200"/>
+			<!-- 2 wide x 2 high (CondenserVisual.cs): steam in at the back of the upper cell above the parent,
+			     water out at the front of the parent cell -->
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="DescriptionKey" value="feCondenserDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCondenserPrefab"/>
+			<property name="EconomicValue" value="600"/>
+			<property name="SortOrder2" value="0005"/>
+		</block>
+		<!-- Industrial versions (Industrial.cs): electric, for full automation -->
+		<block name="feInductionFurnace">
+			<property name="CustomIcon" value="feInductionFurnace"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="250"/>
+			<property name="FeFluid" value="smelter"/>
+			<property name="FeMetalBuffer" value="500"/>
+			<property name="FeMeltSpeed" value="2"/>
+			<property name="FeHeatMax" value="20"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="DescriptionKey" value="feInductionFurnaceDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feInductionFurnacePrefab"/>
+			<property name="EconomicValue" value="1500"/>
+		</block>
+		<block name="feCasterElectric">
+			<property name="CustomIcon" value="feCasterElectric"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluid" value="caster"/>
+			<property name="FeFluidRate" value="600"/>
+			<property name="FeCoolFactor" value="4"/>
+			<property name="DescriptionKey" value="feCasterElectricDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCasterElectricPrefab"/>
+			<property name="EconomicValue" value="400"/>
+		</block>
+		<block name="feRetortKiln">
+			<property name="CustomIcon" value="feRetortKiln"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="RequiredPower" value="100"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="DescriptionKey" value="feRetortKilnDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRetortKilnPrefab"/>
+			<property name="EconomicValue" value="500"/>
+		</block>
+		<!-- D8: Spin Inverter. Axial like the Shaft; the output end turns the other way round. Needed when torque
+		     reaches a machine (or another source) turning the wrong way. Placeholder: vanilla small pipe joint. -->
+		<block name="feSpinInverter">
+			<property name="CustomIcon" value="feSpinInverter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="FeKinetic" value="inverter"/>
+			<!-- feet and window: only the 4 upright turns (no rolling onto a side) -->
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DescriptionKey" value="feSpinInverterDesc"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSpinInverterPrefab"/>
+			<property name="EconomicValue" value="120"/>
+			<property name="SortOrder2" value="0016"/>
+		</block>
+		<!-- D8 T4: Electric Motor upgrades (more torque, more watts; same socket / shaft rules). -->
+		<block name="feElectricMotor2">
+			<property name="CustomIcon" value="feElectricMotor2"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElectricMotor"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feElectricMotor2Prefab"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeTorqueOutput" value="256"/>
+			<property name="DescriptionKey" value="feElectricMotor2Desc"/>
+			<property name="EconomicValue" value="150"/>
+		</block>
+		<block name="feElectricMotor3">
+			<property name="CustomIcon" value="feElectricMotor3"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElectricMotor"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="MultiBlockDim" value="3,2,3"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feElectricMotor3Prefab"/>
+			<property name="RequiredPower" value="120"/>
+			<property name="FeTorqueOutput" value="512"/>
+			<property name="DescriptionKey" value="feElectricMotor3Desc"/>
+			<property name="EconomicValue" value="350"/>
+		</block>
+		<!-- D8 T4: fuel engines (src/ForgedInAshes/TorqueEngine.cs). Vanilla Class Generator for the fuel window and
+		     on/off, but no electric output (OutputPerStack 0; MaxPower/OutputPerFuel 1). Torque through the model's
+		     local +Z while on and fuelled; one fuel unit per FeFuelSecondsPerUnit seconds. The slots do nothing. -->
+		<block name="feCoalEngine">
+			<property name="CustomIcon" value="feCoalEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Generator"/>
+			<property name="FeTorqueEngine" value="true"/>
+			<property name="FeTorqueOutput" value="256"/>
+			<property name="FeFuelSecondsPerUnit" value="60"/>
+			<property name="FeFuelItem" value="feResourceCharcoal"/>
+			<property name="FeFuelPerItem" value="1"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="0"/>
+			<property name="MaxFuel" value="100"/>
+			<property name="MaxPower" value="1"/>
+			<property name="OutputPerFuel" value="1"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCoalEngineDesc"/>
+			<property name="DisplayType" value="blockElectricalHardened"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCoalEnginePrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="Path" value="solid"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="HeatMapStrength" value="4"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="TakeDelay" value="5"/>
+			<property name="EconomicValue" value="600"/>
+			<property name="MaxDamage" value="600"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="4"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="60" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="feResourceGear" count="3" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0020"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="bankgenerator_grab"/>
+			<property name="SoundPlace" value="bankgenerator_place"/>
+		</block>
+		<block name="feGasEngine">
+			<property name="CustomIcon" value="feGasEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feCoalEngine"/>
+			<property name="FeTorqueOutput" value="512"/>
+			<property name="FeFuelSecondsPerUnit" value="30"/>
+			<property name="FeFuelItem" value=""/>
+			<property name="MaxFuel" value="200"/>
+			<!-- Biofuel by belt: 3 cans = 1 unit of fuel (Industrial.cs) -->
+			<property name="FeAltFuel" value="feBiofuel"/>
+			<property name="FeAltFuelPer" value="3"/>
+			<property name="DescriptionKey" value="feGasEngineDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGasEnginePrefab"/>
+			<property name="EconomicValue" value="1200"/>
+			<property name="SortOrder2" value="0021"/>
+		</block>
+		<!-- E08 / F4-T04 Steam Engine (TorqueEngine.cs): the late-game torque source. 1024 UT at 32 RPM while it is on,
+		     has Charcoal (1 per 20 s), water next to it or below it (the boiler) and Lubricant in its slots (1 per
+		     5 min). Missing any of them, it stands still and burns nothing. -->
+		<block name="feSteamEngine">
+			<property name="CustomIcon" value="feSteamEngine"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<!-- D9: the big Steam Engine (src/ForgedInAshes/SteamEngine.cs): 3x3 base, 2 high. Water in under the bottom
+			     centre, steam out over the top centre, torque out of the front centre of the bottom layer. Up to 1024 UT;
+			     Charcoal and water used in proportion to the load (min 10 %). Lubricant in its slots, 1 per 5 min. -->
+			<property name="Extends" value="feCoalEngine"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="MultiBlockDim" value="3,2,3"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="FeFluid" value="steamengine"/>
+			<property name="FeTorqueOutput" value="1024"/>
+			<property name="FeFuelSecondsPerUnit" value="20"/>
+			<property name="MaxFuel" value="400"/>
+			<property name="FeWaterTank" value="2000"/>
+			<property name="FeWaterPerMin" value="60"/>
+			<property name="FeSteamBuffer" value="500"/>
+			<property name="FeIdleLoad" value="0.1"/>
+			<property name="FeLubeItem" value="feResourceLubricant"/>
+			<property name="FeLubeSecondsPerUnit" value="300"/>
+			<property name="SlotItem" value="feResourceLubricant"/>
+			<property name="DescriptionKey" value="feSteamEngineDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSteamEnginePrefab"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="EconomicValue" value="2500"/>
+			<property name="SortOrder2" value="0023"/>
+		</block>
+		<!-- Dynamo (src/ForgedInAshes/Dynamo.cs): torque in, watts out. A torque consumer (128 UT at 32 RPM, cost x
+		     (rpm/32)^2) on its shaft (model local Z, both ends) and a vanilla generator on the wire side: 60 W x (rpm/32)
+		     while its torque network runs. The fuel is internal; no Refuel, no slots. -->
+		<block name="feDynamo">
+			<property name="CustomIcon" value="feDynamo"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Generator"/>
+			<property name="FeDynamo" value="true"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeDynamoWatts" value="60"/>
+			<property name="SlotItem" value="feFlywheel"/>
+			<property name="OutputPerStack" value="0"/>
+			<property name="MaxFuel" value="10"/>
+			<property name="MaxPower" value="5000"/>
+			<property name="OutputPerFuel" value="2000"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDynamoDesc"/>
+			<property name="DisplayType" value="blockElectrical"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal_medium"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDynamoPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Collide" value="movement,melee,bullet,arrow,rocket"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="StabilitySupport" value="true"/>
+			<property name="TakeDelay" value="3"/>
+			<property name="EconomicValue" value="400"/>
+			<property name="MaxDamage" value="400"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="2"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="20" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B282"/>
+			<property name="SortOrder2" value="0024"/>
+			<property name="Group" value="Science,TCScience"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_electrical"/>
+		</block>
+		<!-- Industrial Dynamo: 3x3 base, 2 high; shaft = front centre of the bottom layer. 1024 UT -> 500 W at 32 RPM. -->
+		<block name="feDynamo2">
+			<property name="CustomIcon" value="feDynamo2"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feDynamo"/>
+			<property name="MultiBlockDim" value="3,2,3"/>
+			<property name="DisplayType" value="blockMulti"/>
+			<property name="FeTorqueCost" value="1024"/>
+			<property name="FeDynamoWatts" value="500"/>
+			<property name="MaxPower" value="20000"/>
+			<property name="OutputPerFuel" value="10000"/>
+			<property name="DescriptionKey" value="feDynamo2Desc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDynamo2Prefab"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="SortOrder2" value="0025"/>
+		</block>
+		<!-- Power Bus (Dynamo.cs): wire it TO dynamos (and to other buses); it outputs the sum of their watts. -->
+		<block name="feBus">
+			<property name="CustomIcon" value="feBus"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feDynamo"/>
+			<property name="FeDynamo" value="false"/>
+			<property name="FeBus" value="true"/>
+			<property name="FeTorqueCost" value="0"/>
+			<property name="MaxPower" value="60000"/>
+			<property name="OutputPerFuel" value="30000"/>
+			<property name="DescriptionKey" value="feBusDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBusPrefab"/>
+			<property name="EconomicValue" value="300"/>
+			<property name="SortOrder2" value="0026"/>
+		</block>
+	</append>
+
+	<!-- F1-T05: no Mechanical Parts / Spring from salvaging blocks (PLANO_MOD.md 12.1, D5: some scrap iron, 0 ready parts).
+	     Order matters: rename the Destroy drops first, then remove the Harvest drops.
+	     Destroy drops are RENAMED to scrap iron instead of removed: XML.txt says a block without any Destroy drop
+	     "will always drop self", and 12 blocks (safes, ATM, pipe valve) have MP/Spring as their only Destroy drop.
+	     Children using Extends inherit the parent's drops, so patching the parents covers them. -->
+	<set xpath="/blocks/block/drop[@event='Destroy'][@name='resourceMechanicalParts' or @name='resourceSpring']/@name">resourceScrapIron</set>
+	<remove xpath="/blocks/block/drop[@event='Harvest'][@name='resourceMechanicalParts' or @name='resourceSpring']"/>
+	<!-- BEGIN GENERATED by tools/gen_phase3.py: do not edit by hand -->
+	<append xpath="/blocks">
+		<!-- M04 Ammo Press -->
+		<block name="feAmmoPress">
+			<property name="CustomIcon" value="feAmmoPress"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feAmmoPress"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feAmmoPressDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_AmmoPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0410"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M05 Weapon and Tool Assembler -->
+		<block name="feAssembler">
+			<property name="CustomIcon" value="feAssembler"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feAssembler"/>
+			</property>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feAssemblerDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_AssemblerPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0420"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M06 Mod Bench -->
+		<block name="feModBench">
+			<property name="CustomIcon" value="feModBench"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feModBench"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feModBenchDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_ModBenchPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0430"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M07 Loom and Tannery -->
+		<block name="feLoom">
+			<property name="CustomIcon" value="feLoom"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feLoom"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feLoomDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_LoomPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0440"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M09 Refinery -->
+		<block name="feRefinery">
+			<property name="CustomIcon" value="feRefinery"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<!-- D9: fluid in at its back (oil, gasoline, lubricant) = ingredients of its fixed recipe (AutoCraft.cs) -->
+			<property name="FeFluid" value="refinery"/>
+			<property name="FeFluidBuffer" value="100"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feRefinery"/>
+			</property>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feRefineryDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_RefineryPrefab"/>
+			<property name="MultiBlockDim" value="3,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0450"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M10 Laboratory -->
+		<block name="feLab">
+			<property name="CustomIcon" value="feLab"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feLab"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feLabDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_LabPrefab"/>
+			<property name="MultiBlockDim" value="3,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0460"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M11 Kitchen and Distillery -->
+		<block name="feKitchen">
+			<property name="CustomIcon" value="feKitchen"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feKitchen"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feKitchenDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_KitchenPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0470"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M12 Electronics Bench -->
+		<block name="feElectronics">
+			<property name="CustomIcon" value="feElectronics"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feElectronics"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feElectronicsDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_ElectronicsPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0480"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M14 Metal Shop -->
+		<block name="feMetalShop">
+			<property name="CustomIcon" value="feMetalShop"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feMetalShop"/>
+			</property>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMetalShopDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_MetalShopPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0490"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M16 Sawmill -->
+		<block name="feSawmill">
+			<property name="CustomIcon" value="feSawmill"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feSawmill"/>
+			</property>
+			<!-- D7: crafts only with >= 30 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="30"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSawmillDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_SawmillPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0500"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M08 Concrete Mixer -->
+		<block name="feMixer">
+			<property name="CustomIcon" value="feMixer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feMixer"/>
+			</property>
+			<!-- D7: crafts only with >= 60 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="60"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMixerDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_MixerPrefab"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0510"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M13 Garage -->
+		<block name="feGarage">
+			<property name="CustomIcon" value="feGarage"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feGarage"/>
+			</property>
+			<!-- D7: crafts only with >= 90 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="90"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGarageDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_GaragePrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0520"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+		<!-- M15 Robotics Workshop -->
+		<block name="feRobotics">
+			<property name="CustomIcon" value="feRobotics"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Class" value="Workstation"/>
+			<property class="Workstation">
+				<property name="Modules" value="output"/>
+				<property name="CraftingAreaRecipes" value="feRobotics"/>
+			</property>
+			<!-- D7: crafts only with >= 90 W from powered Electric Motors nearby (PowerGatePatches.cs) -->
+			<property name="FeMinPower" value="90"/>
+			<property name="WorkstationWindow" value="workstation_workbench"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feRoboticsDesc"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feM_RoboticsPrefab"/>
+			<property name="MultiBlockDim" value="2,2,1"/>
+			<property name="ImposterDontBlock" value="true"/>
+			<property name="WaterFlow" value="permitted"/>
+			<property name="Place" value="TowardsPlacerInverted"/>
+			<property name="OnlySimpleRotations" value="true"/>
+			<property name="IsTerrainDecoration" value="true"/>
+			<property name="StabilitySupport" value="false"/>
+			<property name="Weight" value="0"/>
+			<property name="EconomicValue" value="2000"/>
+			<property name="MaxDamage" value="800"/>
+			<property name="HeatMapStrength" value="5"/>
+			<property name="HeatMapTime" value="5000"/>
+			<property name="HeatMapFrequency" value="1000"/>
+			<property name="OpenSound" value="open_workbench"/>
+			<property name="CloseSound" value="close_workbench"/>
+			<property name="TakeDelay" value="5"/>
+			<property class="RepairItems">
+				<property name="feResourceIronPlate" value="5"/>
+				<property name="resourceNail" value="20"/>
+			</property>
+			<drop event="Harvest" name="resourceScrapIron" count="150" tag="allHarvest,perkJunkMiner"/>
+			<drop event="Harvest" name="terrStone" count="0" tool_category="Disassemble"/>
+			<drop event="Harvest" name="feResourceIronPlate" count="5" tag="salvageHarvest"/>
+			<drop event="Destroy" count="0"/>
+			<drop event="Fall" name="scrapMetalPile" count="1" prob="0.75" stick_chance="1"/>
+			<property name="SortOrder1" value="B281"/>
+			<property name="SortOrder2" value="0530"/>
+			<property name="Group" value="Building,TCScience,advBuilding"/>
+			<property name="Tags" value="workstationSkill"/>
+			<property name="FilterTags" value="MC_playerBlocks,SC_decor"/>
+			<property name="SoundPickup" value="workbench_grab"/>
+			<property name="SoundPlace" value="workbench_place"/>
+		</block>
+	</append>
+	<!-- END GENERATED by tools/gen_phase3.py -->
+	<!-- BEGIN GENERATED by tools/gen_chain.py: do not edit by hand -->
+	<append xpath="/blocks">
+		<block name="fePipeHP">
+			<property name="CustomIcon" value="fePipeHP"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePipeHPDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?fePipeHPPrefab"/>
+			<property name="FeMaxBar" value="12"/>
+		</block>
+		<block name="feValveShutoff">
+			<property name="CustomIcon" value="feValveShutoff"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feValveShutoffDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feValveShutoffPrefab"/>
+			<property name="RequiredPower" value="1"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="registro"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feValveCheck">
+			<property name="CustomIcon" value="feValveCheck"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feValveCheckDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feValveCheckPrefab"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="retencao"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feValveRegulator">
+			<property name="CustomIcon" value="feValveRegulator"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feValveRegulatorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feValveRegulatorPrefab"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="reguladora"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feValveSeparator">
+			<property name="CustomIcon" value="feValveSeparator"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feValveSeparatorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feValveSeparatorPrefab"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="separador"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feValveRelief">
+			<property name="CustomIcon" value="feValveRelief"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feValveReliefDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feValveReliefPrefab"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="alivio"/>
+			<property name="FeFluidBuffer" value="400"/>
+		</block>
+		<block name="feCompressor">
+			<property name="CustomIcon" value="feCompressor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feMechPump"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCompressorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCompressorPrefab"/>
+			<property name="FeFluid" value="valve"/>
+			<property name="FeValve" value="compressor"/>
+			<property name="FeFluidRate" value="300"/>
+			<property name="FeFluidBuffer" value="60"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeMaxBar" value="10"/>
+		</block>
+		<block name="feGauge">
+			<property name="CustomIcon" value="feGauge"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGaugeDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGaugePrefab"/>
+			<property name="FeFluid" value="gauge"/>
+		</block>
+		<block name="feTankLiquid">
+			<property name="CustomIcon" value="feTankLiquid"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWaterTank"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTankLiquidDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTankLiquidPrefab"/>
+			<property name="FeFluidCapacity" value="8000"/>
+		</block>
+		<block name="feTankGas">
+			<property name="CustomIcon" value="feTankGas"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWaterTank"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTankGasDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTankGasPrefab"/>
+			<property name="FeFluid" value="gastank"/>
+			<property name="FeFluidCapacity" value="2000"/>
+			<property name="FeMaxBar" value="10"/>
+		</block>
+		<block name="feGasBurner">
+			<property name="CustomIcon" value="feGasBurner"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGasBurnerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGasBurnerPrefab"/>
+			<property name="FeFluid" value="burner"/>
+			<property name="FeFluidRate" value="30"/>
+			<property name="FeHeatPerLitre" value="2"/>
+			<property name="FeHeatMax" value="240"/>
+		</block>
+		<block name="feSapTapper">
+			<property name="CustomIcon" value="feSapTapper"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSapTapperDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSapTapperPrefab"/>
+			<property name="FeFluid" value="tapper"/>
+			<property name="FeFluidBuffer" value="50"/>
+		</block>
+		<block name="feTowerSection">
+			<property name="CustomIcon" value="feTowerSection"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTowerSectionDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTowerSectionPrefab"/>
+			<property name="FeFluid" value="towersection"/>
+			<property name="FeFluidBuffer" value="500"/>
+		</block>
+		<block name="feBeltSplitter">
+			<property name="CustomIcon" value="feBeltSplitter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBeltSplitterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltSplitterPrefab"/>
+			<property name="FeBeltSplit" value="true"/>
+		</block>
+		<block name="feBeltGate">
+			<property name="CustomIcon" value="feBeltGate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBeltGateDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltGatePrefab"/>
+			<property name="FeBeltGate" value="true"/>
+		</block>
+		<block name="feBeltCounter">
+			<property name="CustomIcon" value="feBeltCounter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBeltCounterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCounterPrefab"/>
+			<property name="FeBeltCounter" value="true"/>
+		</block>
+		<block name="feMechArm">
+			<property name="CustomIcon" value="feMechArm"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMechArmDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechArmPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeArm, ForgedInAshes"/>
+			<property name="FeFluid" value="none"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeArmSeconds" value="1"/>
+		</block>
+		<block name="feSignalLever">
+			<property name="CustomIcon" value="feSignalLever"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSignalLeverDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSignalLeverPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeLever, ForgedInAshes"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeSignal" value="lever"/>
+		</block>
+		<block name="feSignalReceiver">
+			<property name="CustomIcon" value="feSignalReceiver"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feElecPump"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSignalReceiverDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSignalReceiverPrefab"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeSignal" value="receiver"/>
+			<property name="RequiredPower" value="1"/>
+		</block>
+		<block name="feShaleRetort">
+			<property name="CustomIcon" value="feShaleRetort"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feShaleRetortDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feShaleRetortPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeHeat" value="true"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feDistillTower">
+			<property name="CustomIcon" value="feDistillTower"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDistillTowerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDistillTowerPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeTower" value="true"/>
+			<property name="FeHeat" value="true"/>
+			<property name="FeFluidBuffer" value="200"/>
+		</block>
+		<block name="feCracker">
+			<property name="CustomIcon" value="feCracker"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCrackerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCrackerPrefab"/>
+			<property name="RequiredPower" value="400"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feGasScrubber">
+			<property name="CustomIcon" value="feGasScrubber"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGasScrubberDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGasScrubberPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="200"/>
+		</block>
+		<block name="fePolymerReactor">
+			<property name="CustomIcon" value="fePolymerReactor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePolymerReactorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?fePolymerReactorPrefab"/>
+			<property name="RequiredPower" value="300"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feCoagTank">
+			<property name="CustomIcon" value="feCoagTank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCoagTankDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCoagTankPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feCalender">
+			<property name="CustomIcon" value="feCalender"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCalenderDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCalenderPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feVulcanizer">
+			<property name="CustomIcon" value="feVulcanizer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feVulcanizerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feVulcanizerPrefab"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feSteelConverter">
+			<property name="CustomIcon" value="feSteelConverter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSteelConverterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSteelConverterPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeHeat" value="true"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feSpringCoiler">
+			<property name="CustomIcon" value="feSpringCoiler"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSpringCoilerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSpringCoilerPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+		</block>
+		<block name="feTemperFurnace">
+			<property name="CustomIcon" value="feTemperFurnace"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTemperFurnaceDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTemperFurnacePrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeHeat" value="true"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feSpinner">
+			<property name="CustomIcon" value="feSpinner"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSpinnerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSpinnerPrefab"/>
+			<property name="FeTorqueCost" value="32"/>
+		</block>
+		<block name="feTannery">
+			<property name="CustomIcon" value="feTannery"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feTanneryDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTanneryPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="60"/>
+		</block>
+		<block name="feFermenter">
+			<property name="CustomIcon" value="feFermenter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feFermenterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feFermenterPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feCentrifuge">
+			<property name="CustomIcon" value="feCentrifuge"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCentrifugeDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCentrifugePrefab"/>
+			<property name="RequiredPower" value="150"/>
+		</block>
+		<block name="feAutoclave">
+			<property name="CustomIcon" value="feAutoclave"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feAutoclaveDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feAutoclavePrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feCookerIndustrial">
+			<property name="CustomIcon" value="feCookerIndustrial"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCookerIndustrialDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCookerIndustrialPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeHeat" value="true"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feMill">
+			<property name="CustomIcon" value="feMill"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMillDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMillPrefab"/>
+			<property name="FeTorqueCost" value="32"/>
+		</block>
+		<block name="feJuicePress">
+			<property name="CustomIcon" value="feJuicePress"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feJuicePressDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feJuicePressPrefab"/>
+			<property name="FeTorqueCost" value="32"/>
+		</block>
+		<block name="feCanner">
+			<property name="CustomIcon" value="feCanner"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCannerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCannerPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+		</block>
+		<block name="feInjector">
+			<property name="CustomIcon" value="feInjector"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feCasterElectric"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feInjectorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feInjectorPrefab"/>
+			<property name="RequiredPower" value="120"/>
+			<property name="FeCoolFactor" value="6"/>
+		</block>
+		<block name="feGasMotor">
+			<property name="CustomIcon" value="feGasMotor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feGasEngine"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGasMotorDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGasMotorPrefab"/>
+			<property name="FeAltFuel" value="feGasCanister"/>
+			<property name="FeAltFuelPer" value="1"/>
+			<property name="FeFuelSecondsPerUnit" value="60"/>
+		</block>
+		<block name="feInlinePress">
+			<property name="CustomIcon" value="feInlinePress"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feInlinePressDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feInlinePressPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feDoser">
+			<property name="CustomIcon" value="feDoser"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDoserDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDoserPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="40"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feInserter">
+			<property name="CustomIcon" value="feInserter"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feInserterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feInserterPrefab"/>
+			<property name="FeTorqueCost" value="32"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feCrimper">
+			<property name="CustomIcon" value="feCrimper"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCrimperDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCrimperPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feWireDrawer">
+			<property name="CustomIcon" value="feWireDrawer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feWireDrawerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWireDrawerPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feGrinder">
+			<property name="CustomIcon" value="feGrinder"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feGrinderDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feGrinderPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feBender">
+			<property name="CustomIcon" value="feBender"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feChemMixer"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBenderDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBenderPrefab"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feWelder">
+			<property name="CustomIcon" value="feWelder"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feWelderDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWelderPrefab"/>
+			<property name="RequiredPower" value="200"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feReflowOven">
+			<property name="CustomIcon" value="feReflowOven"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feReflowOvenDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feReflowOvenPrefab"/>
+			<property name="RequiredPower" value="150"/>
+			<property name="FeInline" value="true"/>
+		</block>
+		<block name="feMechDrill">
+			<property name="CustomIcon" value="feMechDrill"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMechDrillDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechDrillPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="drill"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeWorkPower" value="60"/>
+		</block>
+		<block name="feMechSaw">
+			<property name="CustomIcon" value="feMechSaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMechSawDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechSawPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="saw"/>
+			<property name="FeTorqueCost" value="128"/>
+			<property name="FeWorkPower" value="80"/>
+		</block>
+		<block name="feMechHarvester">
+			<property name="CustomIcon" value="feMechHarvester"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMechHarvesterDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechHarvesterPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="harvester"/>
+			<property name="FeTorqueCost" value="32"/>
+			<property name="FeWorkSeconds" value="2"/>
+		</block>
+		<block name="feDeployer">
+			<property name="CustomIcon" value="feDeployer"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDeployerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDeployerPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="deployer"/>
+			<property name="FeTorqueCost" value="32"/>
+			<property name="FeWorkSeconds" value="1"/>
+		</block>
+		<block name="feMechPiston">
+			<property name="CustomIcon" value="feMechPiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feMechPistonDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMechPistonPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="piston"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeRange" value="6"/>
+			<property name="FeWorkSeconds" value="0.5"/>
+		</block>
+		<block name="feFan">
+			<property name="CustomIcon" value="feFan"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feFanDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feFanPrefab"/>
+			<property name="FeKinetic" value="pump"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeWorld" value="fan"/>
+			<property name="FeTorqueCost" value="64"/>
+			<property name="FeRange" value="5"/>
+		</block>
+		<block name="fePistonHead">
+			<property name="CustomIcon" value="fePistonHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="fePistonHeadDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?fePistonHeadPrefab"/>
+			<property name="CreativeMode" value="None"/>
+			<property name="Shape" value="ModelEntity"/>
+		</block>
+		<block name="feItemChute">
+			<property name="CustomIcon" value="feItemChute"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feItemChuteDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feItemChutePrefab"/>
+			<property name="Class" value="ForgedInAshes.FeHolder, ForgedInAshes"/>
+			<property name="FeChute" value="true"/>
+			<property name="Shape" value="ModelEntity"/>
+		</block>
+		<block name="feDepot">
+			<property name="CustomIcon" value="feDepot"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDepotDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDepotPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeHolder, ForgedInAshes"/>
+			<property name="FeDepot" value="true"/>
+			<property name="Shape" value="ModelEntity"/>
+		</block>
+		<block name="feItemVault">
+			<property name="CustomIcon" value="feItemVault"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feBeltCrate"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feItemVaultDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feItemVaultPrefab"/>
+			<property name="FeVault" value="true"/>
+		</block>
+		<block name="feBeltTunnel">
+			<property name="CustomIcon" value="feBeltTunnel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feConveyor"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBeltTunnelDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltTunnelPrefab"/>
+			<property name="FeBeltTunnel" value="true"/>
+		</block>
+		<block name="feHosePulley">
+			<property name="CustomIcon" value="feHosePulley"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feMechPump"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feHosePulleyDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feHosePulleyPrefab"/>
+			<property name="FeIntakeDepth" value="16"/>
+			<property name="FeIntakeWater" value="6"/>
+			<property name="FeFluidRate" value="300"/>
+		</block>
+		<block name="feWindmill">
+			<property name="CustomIcon" value="feWindmill"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWaterWheel"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feWindmillDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWindmillPrefab"/>
+			<property name="FeWind" value="true"/>
+			<property name="FeTorqueOutput" value="256"/>
+		</block>
+		<block name="feCogwheel">
+			<property name="CustomIcon" value="feCogwheel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feShaft"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feCogwheelDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCogwheelPrefab"/>
+			<property name="FeKinetic" value="cog"/>
+		</block>
+		<block name="feSignalAnalog">
+			<property name="CustomIcon" value="feSignalAnalog"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSignalAnalogDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSignalAnalogPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeLever, ForgedInAshes"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeSignal" value="analog"/>
+		</block>
+		<block name="feWirelessTx">
+			<property name="CustomIcon" value="feWirelessTx"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feWirelessTxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWirelessTxPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeLever, ForgedInAshes"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeSignal" value="wtx"/>
+		</block>
+		<block name="feWirelessRx">
+			<property name="CustomIcon" value="feWirelessRx"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feWirelessRxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWirelessRxPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeLever, ForgedInAshes"/>
+			<property name="FeFluid" value="none"/>
+			<property name="FeSignal" value="wrx"/>
+		</block>
+		<block name="feDisplayPanel">
+			<property name="CustomIcon" value="feDisplayPanel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feDisplayPanelDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feDisplayPanelPrefab"/>
+			<property name="Class" value="ForgedInAshes.FeDisplay, ForgedInAshes"/>
+			<property name="Shape" value="ModelEntity"/>
+		</block>
+		<block name="feItemDrain">
+			<property name="CustomIcon" value="feItemDrain"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWasher"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feItemDrainDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feItemDrainPrefab"/>
+			<property name="FeFluid" value="processor"/>
+			<property name="FeFluidBuffer" value="100"/>
+		</block>
+		<block name="feBoilerFirebox">
+			<property name="CustomIcon" value="feBoilerFirebox"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBoilerFireboxDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBoilerFireboxPrefab"/>
+			<property name="FeFluid" value="burner"/>
+			<property name="FeFluidRate" value="60"/>
+			<property name="FeHeatPerLitre" value="2"/>
+			<property name="FeHeatMax" value="900"/>
+		</block>
+		<block name="feBoilerDrum">
+			<property name="CustomIcon" value="feBoilerDrum"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="fePipe"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feBoilerDrumDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBoilerDrumPrefab"/>
+			<property name="FeFluid" value="boiler"/>
+			<property name="FeFluidBuffer" value="1000"/>
+			<property name="FeSteamBuffer" value="600"/>
+			<property name="FeSteamPerHeat" value="90"/>
+			<property name="FeSteamMax" value="180"/>
+			<property name="FeOutBar" value="4"/>
+		</block>
+		<block name="feSteamTurbine">
+			<property name="CustomIcon" value="feSteamTurbine"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feWaterWheel"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feSteamTurbineDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSteamTurbinePrefab"/>
+			<property name="FeSteamTurbine" value="true"/>
+			<property name="FeFluid" value="turbine"/>
+			<property name="FeShaftAxis" value="x"/>
+			<property name="FeTorqueOutput" value="1024"/>
+			<property name="FeSourceRpm" value="32"/>
+			<property name="FeSteamRate" value="240"/>
+			<property name="FeFluidBuffer" value="120"/>
+			<property name="FeMinBar" value="1.5"/>
+		</block>
+		<block name="feTreeRubberSeed">
+			<property name="CustomIcon" value="feTreeRubberSeed"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="treePlantedOak1m"/>
+			<property name="DescriptionKey" value="feTreeRubberSeedDesc"/>
+			<drop event="Destroy" name="feTreeRubberSeed" count="1"/>
+			<property class="PlantGrowing">
+				<property name="Next" value="feTreeRubber08"/>
+			</property>
+		</block>
+		<block name="feTreeRubber08">
+			<property name="CustomIcon" value="feTreeRubber08"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="treePlantedOak08m"/>
+			<property name="DescriptionKey" value="feTreeRubber08Desc"/>
+			<property name="CreativeMode" value="None"/>
+			<drop event="Destroy" name="feTreeRubberSeed" count="1"/>
+			<property class="PlantGrowing">
+				<property name="Next" value="feTreeRubber16"/>
+			</property>
+		</block>
+		<block name="feTreeRubber16">
+			<property name="CustomIcon" value="feTreeRubber16"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="treePlantedOak16m"/>
+			<property name="DescriptionKey" value="feTreeRubber16Desc"/>
+			<property name="CreativeMode" value="None"/>
+			<drop event="Destroy" name="feTreeRubberSeed" count="1"/>
+			<property class="PlantGrowing">
+				<property name="Next" value="feTreeRubber27"/>
+			</property>
+			<property name="FeLatexRate" value="1"/>
+		</block>
+		<block name="feTreeRubber27">
+			<property name="CustomIcon" value="feTreeRubber27"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="treePlantedOak27m"/>
+			<property name="DescriptionKey" value="feTreeRubber27Desc"/>
+			<property name="CreativeMode" value="None"/>
+			<drop event="Destroy" name="feTreeRubberSeed" count="1"/>
+			<property class="PlantGrowing">
+				<property name="Next" value="feTreeRubber41"/>
+			</property>
+			<property name="FeLatexRate" value="1.5"/>
+		</block>
+		<block name="feTreeRubber41">
+			<property name="CustomIcon" value="feTreeRubber41"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="treePlantedOak41m"/>
+			<property name="DescriptionKey" value="feTreeRubber41Desc"/>
+			<property name="CreativeMode" value="None"/>
+			<drop event="Destroy" name="feTreeRubberSeed" count="1"/>
+			<property name="FeLatexRate" value="2"/>
+		</block>
+	</append>
+	<!-- END GENERATED by tools/gen_chain.py -->
+	<!-- Look text and E: the game shows them only while the aimed point is closer than the block's ActivationDistance,
+	     and a block without it gets 2 m (Constants.cCollectItemDistance, IL 3.4.0 b10): stepping back a little from a
+	     machine made its text vanish (user test 2026-11-26). All mod blocks: 4 m (the build reach); big machines: 5 m.
+	     Keep this after every block of the mod. -->
+	<append xpath="/blocks/block[starts-with(@name,'fe') and not(property[@name='ActivationDistance'])]">
+		<property name="ActivationDistance" value="4"/>
+	</append>
+	<set xpath="/blocks/block[starts-with(@name,'fe') and property[@name='MultiBlockDim']]/property[@name='ActivationDistance']/@value">5</set>
+</configs>

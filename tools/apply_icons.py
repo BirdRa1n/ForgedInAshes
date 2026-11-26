@@ -1,4 +1,4 @@
-"""Points CustomIcon of every mod block/item that has its own icon (Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas,
+"""Points CustomIcon of every mod block/item that has its own icon (Mods/ForgedInAshes/UIAtlases/ItemIconAtlas,
 made by Art/feKinetic/render_icons.py) at that icon, with no tint. Re-run after adding icons.
 
 Usage: python tools/apply_icons.py
@@ -6,7 +6,7 @@ Usage: python tools/apply_icons.py
 import re
 from pathlib import Path
 
-MOD = Path(__file__).resolve().parent.parent / "Mods" / "FerroEngrenagem"
+MOD = Path(__file__).resolve().parent.parent / "Mods" / "ForgedInAshes"
 icons = {p.stem for p in (MOD / "UIAtlases" / "ItemIconAtlas").glob("*.png")}
 for f in ("blocks.xml", "items.xml"):
     path = MOD / "Config" / f

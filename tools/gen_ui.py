@@ -1,13 +1,13 @@
 """D12: writes the windows of the mod (Machine Panel, Recipe Picker, Settings, Network Panel, Production Guide) into
-Config/XUi_InGame/windows.xml and their window groups into xui.xml. Controllers: src/FerroEngrenagem/FeUi.cs.
+Config/XUi_InGame/windows.xml and their window groups into xui.xml. Controllers: src/ForgedInAshes/FeUi.cs.
 No <textfield>: one in a mod window broke XUi.Cleanup when leaving the world (2026-11-24 log).
 
 Usage: python tools/gen_ui.py
 """
 import os, re
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-P = 'Mods/FerroEngrenagem/Config/XUi_InGame/windows.xml'
-X = 'Mods/FerroEngrenagem/Config/XUi_InGame/xui.xml'
+P = 'Mods/ForgedInAshes/Config/XUi_InGame/windows.xml'
+X = 'Mods/ForgedInAshes/Config/XUi_InGame/xui.xml'
 BEGIN = '<!-- BEGIN D12 windows (tools/gen_ui.py, controllers in FeUi.cs) -->'
 END = '<!-- END D12 windows -->'
 
@@ -22,7 +22,7 @@ def btn(id, x, y, w, text):
 
 def frame(name, ctrl, w, h, icon, inner):
     return f'''		<window name="{name}" width="{w}" height="{h}" pos="{-w // 2},{h // 2}" anchor="Center" depth="15" cursor_area="true"
-		        controller="FerroEngrenagem.{ctrl}, FerroEngrenagem">
+		        controller="ForgedInAshes.{ctrl}, ForgedInAshes">
 			<rect name="header" height="43" depth="1">
 				<headerbg />
 				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="{icon}"/>

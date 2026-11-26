@@ -1,6 +1,6 @@
 """F3-T02 generator: phase-3 machines (M04-M16) and intermediate items (I08-I18).
 
-Writes a marked GENERATED region in Mods/FerroEngrenagem/Config/{blocks,items,recipes}.xml and the matching
+Writes a marked GENERATED region in Mods/ForgedInAshes/Config/{blocks,items,recipes}.xml and the matching
 rows in Localization.csv. Re-running replaces the region (idempotent). Edit the tables below, not the output.
 Before writing, it checks that every icon exists in Data/ItemIcons and every ingredient is a real item/block
 (vanilla or mod). Values = PLANO_MOD.md sections 5.1 and 6 (balance proposals).
@@ -30,7 +30,7 @@ MODELS = {
     "mixer": ("@:Entities/Crafting/cementMixerPrefab.prefab", None, "0,0,0", "cementMixer"),
 }
 
-# Phase 6: the mod's own models (Art/feKinetic, model_m_*; bundle ferroengrenagem.unity3d). Same footprint as the
+# Phase 6: the mod's own models (Art/feKinetic, model_m_*; bundle forgedinashes.unity3d). Same footprint as the
 # placeholder above (MultiBlockDim kept); no ModelOffset (the engine default 0,0.5,0 is what FeBuild expects).
 OWN_MODELS = {
     "feAmmoPress": "feM_Ammo", "feAssembler": "feM_Assembler", "feModBench": "feM_ModBench", "feLoom": "feM_Loom",
@@ -169,7 +169,7 @@ def machine_block(m):
     mid, name, en, pt, den, dpt, model, tint, so2, cost = m
     path, dim, offset, icon = MODELS[model]
     if name in OWN_MODELS:
-        path = "#@modfolder:Resources/ferroengrenagem.unity3d?" + OWN_MODELS[name] + "Prefab"
+        path = "#@modfolder:Resources/forgedinashes.unity3d?" + OWN_MODELS[name] + "Prefab"
         offset = None
     watts = WATTS[mid]
     dim_line = f'\n\t\t\t<property name="MultiBlockDim" value="{dim}"/>' if dim else ""

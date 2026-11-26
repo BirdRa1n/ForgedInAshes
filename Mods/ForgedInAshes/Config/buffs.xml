@@ -1,0 +1,5 @@
+<configs>
+	<!-- F2-T04 used a buffStatusCheck01 effect (onSelfDamagedBlock + TriggerHasTags feCrank -> CallGameEvent
+	     fe_crank_charge) to give Charge when the Crank was hit. Replaced by "hold E" in C# (F2-T04b,
+	     src/ForgedInAshes/Crank.cs); nothing is patched here now. -->
+</configs>

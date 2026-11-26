@@ -1,9 +1,9 @@
 ﻿<#
 .SYNOPSIS
-  Ferro & Engrenagem: uma ferramenta para os três trabalhos repetitivos do mod.
+  ForgedInAshes: uma ferramenta para os três trabalhos repetitivos do mod.
 
 .DESCRIPTION
-  1. modelos  Recompila os modelos 3D alterados no Blender e gera o bundle do Unity (ferroengrenagem.unity3d).
+  1. modelos  Recompila os modelos 3D alterados no Blender e gera o bundle do Unity (forgedinashes.unity3d).
               Para cada Art/<modelo>/hd:
                 - <modelo>_HD.blend mais novo que o <modelo>_HD.fbx (editado à mão no Blender)
                     -> reexporta o FBX desse .blend (tools/blender_export_hd.py);
@@ -42,8 +42,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $art = Join-Path $repo 'Art'
-$mod = Join-Path $repo 'Mods\FerroEngrenagem'
-$bundle = Join-Path $mod 'Resources\ferroengrenagem.unity3d'
+$mod = Join-Path $repo 'Mods\ForgedInAshes'
+$bundle = Join-Path $mod 'Resources\forgedinashes.unity3d'
 $icons = Join-Path $mod 'UIAtlases\ItemIconAtlas'
 
 # ------------------------------------------------------------------ caminhos das ferramentas (ajuste aqui se mudar)
@@ -162,7 +162,7 @@ function Mostrar-Estado {
     if (Bundle-Desatualizado) { Info 'Bundle do Unity: desatualizado' } else { Ok 'Bundle do Unity: em dia' }
     $ic = @(Icones-Velhos)
     if ($ic.Count -gt 0) { Info ("Ícones desatualizados: " + ($ic -join ', ')) } else { Ok 'Ícones: em dia' }
-    $dll = Join-Path $mod 'FerroEngrenagem.dll'
+    $dll = Join-Path $mod 'ForgedInAshes.dll'
     $cs = Get-ChildItem (Join-Path $repo 'src') -Recurse -Filter *.cs | Where-Object { $_.LastWriteTime -gt ((Hora $dll) + $Folga) } | Select-Object -First 1
     if ($cs) { Info 'DLL: o código mudou depois da última compilação' } else { Ok 'DLL: em dia' }
     if (Jogo-Aberto) { Aviso 'O jogo está aberto: feche antes de instalar o mod (os arquivos ficam presos).' }
@@ -291,7 +291,7 @@ function Fazer-Site {
 # ------------------------------------------------------------------ menu
 if ($Acao -eq '') {
     Write-Host ''
-    Write-Host 'Ferro & Engrenagem - ferramenta' -ForegroundColor Cyan
+    Write-Host 'ForgedInAshes - ferramenta' -ForegroundColor Cyan
     Write-Host '  1  Modelos 3D alterados -> FBX -> bundle do Unity'
     Write-Host '  2  Ícones do inventário dos modelos alterados'
     Write-Host '  3  Mod: validar, compilar a DLL e instalar no jogo'

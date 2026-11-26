@@ -11,7 +11,7 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
-OUT_DIR = r"E:\ModGameDev\ForgedInAshes\Mods\FerroEngrenagem\UIAtlases\ItemIconAtlas"
+OUT_DIR = r"E:\ModGameDev\ForgedInAshes\Mods\ForgedInAshes\UIAtlases\ItemIconAtlas"
 SIZE = 160
 PIECES = {"feConveyor": 0.0, "feConveyorRamp": 1.6, "feConveyorDown": 3.2, "feConveyorStand": 4.8}
 SHOW = {"feConveyor": {"FeBeltBed", "FeBeltSlats", "FeSpin_BeltRollerFront", "FeSpin_BeltRollerBack",

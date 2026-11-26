@@ -46,7 +46,7 @@ que gira a raiz do modelo e o deslocamento de −0,5 m do FeBuild a derrubava no
 
 Passos aplicados no `blocks.xml`:
 
-- `feTorqueCrank`: `Model` → `#@modfolder:Resources/ferroengrenagem.unity3d?feTorqueCrankPrefab`.
+- `feTorqueCrank`: `Model` → `#@modfolder:Resources/forgedinashes.unity3d?feTorqueCrankPrefab`.
 - `feShaft`: `Shape` → `ModelEntity`, `Model` → `...?feShaftPrefab` (tirar `Texture`). Os blocos que estendem o
   Eixo herdam o Shape: `feSpeedBox`, `feGearbox`, `feSpinInverter`, `feTorqueRegulator` ganham cada um o seu
   `Model` `...?<bloco>Prefab`; o `feTorqueGauge` (ainda o cano `pipe_cap.fbx`) precisa de `Shape=New` próprio.

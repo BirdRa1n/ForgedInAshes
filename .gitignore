@@ -18,7 +18,7 @@ src/**/obj/
 *.suo
 
 # DLL do mod: gerada por tools/build.ps1 (vai no pacote de release, não no git)
-Mods/FerroEngrenagem/*.dll
+Mods/ForgedInAshes/*.dll
 
 # DLLs do jogo nunca vão para o repositório (não redistribuir)
 src/**/GameRefs/
@@ -47,8 +47,8 @@ Art/UnityProject/Assets/Models.meta
 Art/UnityProject/Assets/Prefabs/
 Art/UnityProject/Assets/Prefabs.meta
 
-# local switch for the verbose mod log (FerroEngrenagemMod.Verbose)
-Mods/FerroEngrenagem/debug.txt
+# local switch for the verbose mod log (ForgedInAshesMod.Verbose)
+Mods/ForgedInAshes/debug.txt
 
 # Site de tutoriais (site/): dependências e build local (a Vercel compila no deploy)
 site/node_modules/

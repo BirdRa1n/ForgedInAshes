@@ -8,7 +8,7 @@ Every contract of the original models (Art/feKinetic/build_feKinetic.py) is kept
 port heights and flange sizes (FeArm_*, FeSpin_*, FeCastMetal, FeCastReady, FeLevelGas, FeLevelLiquid, FeFan_*,
 WireOffset). Units: 1 m = 1 block, origin at the floor centre, front = Blender -Y.
 
-New effect contract (read by Art/UnityProject/Assets/Editor/FeBuild.cs and src/FerroEngrenagem/FxVisual.cs):
+New effect contract (read by Art/UnityProject/Assets/Editor/FeBuild.cs and src/ForgedInAshes/FxVisual.cs):
   materials  feHD_Molten  glowing metal (emission = metal colour, scrolls while it flows, dark crust when cold)
              feHD_Liquid  fluid seen through sight glasses (colour = the fluid in it)
              feHD_Gas     translucent steam chamber
@@ -2424,7 +2424,7 @@ def model_belt_crate():
 
 
 # ================================================================ D12 blocks (PLANO_CADEIA.md section 7), all 1 x 1
-# Contracts (src/FerroEngrenagem): valves / compressor: fluid IN at the back (Blender +Y), OUT at the front (-Y), at
+# Contracts (src/ForgedInAshes): valves / compressor: fluid IN at the back (Blender +Y), OUT at the front (-Y), at
 # 0.5; gauge / burner: port at the back; tapper: latex OUT at the front (its back hugs the tree); tanks: any face;
 # tower section: 4 sides; processors: fluid in at the back (0.5), products onto the LOW belt in front (lona 0.175);
 # torque machines: drive shaft across (Blender X) at 0.5; powered blocks: a WireOffset; in-line stations sit on the

@@ -1,5 +1,5 @@
 """Inventory icons (160 x 160, transparent) from the HD models: one per block, written to
-Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<block>.png (then run tools/apply_icons.py).
+Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/<block>.png (then run tools/apply_icons.py).
 
     blender -b --factory-startup --python Art/feHD/render_icons_hd.py [-- feCaster feFunnel ...]
 
@@ -13,7 +13,7 @@ import bpy
 from mathutils import Vector
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(REPO, "Mods", "FerroEngrenagem", "UIAtlases", "ItemIconAtlas")
+OUT = os.path.join(REPO, "Mods", "ForgedInAshes", "UIAtlases", "ItemIconAtlas")
 # model (Art/<model>/hd) -> block names that use it
 BLOCKS = {
     "feM_Foundry": ["feFoundry"], "feM_Lathe": ["feLathe"], "feM_Ammo": ["feAmmoPress"],

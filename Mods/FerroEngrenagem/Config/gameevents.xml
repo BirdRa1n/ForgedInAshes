@@ -1,4 +1,0 @@
-<configs>
-	<!-- F2-T04 had the "fe_crank_charge" sequence (25% chance of 1 Charge per hit on the Crank). Replaced by
-	     "hold E" in C# (F2-T04b, src/FerroEngrenagem/Crank.cs); nothing is patched here now. -->
-</configs>

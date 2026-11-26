@@ -7,7 +7,7 @@ export const GUIDES = [
     sub: "Da manivela à primeira linha automática",
     icon: "feCrank",
     blocks: [
-      { p: "Ferro & Engrenagem troca a bancada de um clique por linhas de produção: o material muda de forma em cada etapa (sucata → metal fundido → peça moldada → peça usinada → montagem), e cada etapa usa uma energia: torque, vapor, eletricidade, calor ou pressão." },
+      { p: "ForgedInAshes troca a bancada de um clique por linhas de produção: o material muda de forma em cada etapa (sucata → metal fundido → peça moldada → peça usinada → montagem), e cada etapa usa uma energia: torque, vapor, eletricidade, calor ou pressão." },
       { h: "1. Energia de começo" },
       { p: "A [[feCrank]] e a [[feTorqueCrank]] dão o primeiro torque à mão. A [[feWaterWheel]] gira sozinha num rio. Um [[feShaft]] leva o giro até as máquinas; cada máquina pede seu custo em UT e a rede mostra o total ao mirar." },
       { h: "2. As bancadas do mod" },

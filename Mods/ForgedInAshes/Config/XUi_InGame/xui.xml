@@ -1,0 +1,46 @@
+<configs>
+	<!-- Recipe book: hold E on a mod machine -> "Recipes" (src/ForgedInAshes/RecipeBook.cs) -->
+	<append xpath="/xui">
+		<window_group name="feRecipes" defaultselected="feRecipesClose">
+			<window name="feRecipes" />
+		</window_group>
+	</append>
+	<!-- BEGIN D12 windows (gen by hand, see FeUi.cs) -->
+	<append xpath="/xui">
+		<window_group name="feMachine" defaultselected="feMBtnClose">
+			<window name="feMachine" />
+		</window_group>
+		<window_group name="fePicker" defaultselected="fePClose">
+			<window name="fePicker" />
+		</window_group>
+		<window_group name="feConfig" defaultselected="feCClose">
+			<window name="feConfig" />
+		</window_group>
+		<window_group name="feNetwork" defaultselected="feNClose">
+			<window name="feNetwork" />
+		</window_group>
+		<window_group name="feGuide" defaultselected="feGClose">
+			<window name="feGuide" />
+		</window_group>
+	</append>
+	<!-- END D12 windows -->
+	<!-- BEGIN D12 windows (tools/gen_ui.py, controllers in FeUi.cs) -->
+	<append xpath="/xui">
+		<window_group name="feMachine" defaultselected="feMBtnClose">
+			<window name="feMachine" />
+		</window_group>
+		<window_group name="fePicker" defaultselected="fePClose">
+			<window name="fePicker" />
+		</window_group>
+		<window_group name="feConfig" defaultselected="feCClose">
+			<window name="feConfig" />
+		</window_group>
+		<window_group name="feNetwork" defaultselected="feNClose">
+			<window name="feNetwork" />
+		</window_group>
+		<window_group name="feGuide" defaultselected="feGClose">
+			<window name="feGuide" />
+		</window_group>
+	</append>
+	<!-- END D12 windows -->
+</configs>

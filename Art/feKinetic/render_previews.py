@@ -8,7 +8,7 @@ import bpy
 from mathutils import Vector
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
-    r"F:\Github\FerroEngrenagem\Art"
+    r"F:\Github\ForgedInAshes\Art"
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
          "feClutch", "feTorqueGauge", "feWaterWheel",
          "feSteamEngine", "fePipe", "feWaterTank", "feMechPump", "feElecPump", "feCondenser",

@@ -31,7 +31,7 @@ Ao ganhar modelo próprio, o `blocks.xml` deve apontar `Model` para `...unity3d?
 ## Itens sem ícone próprio (0)
 
 Usam o ícone de um item do jogo com tinta. Um ícone 160x160 transparente em
-`Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<item>.png` + `python tools/apply_icons.py` resolve.
+`Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/<item>.png` + `python tools/apply_icons.py` resolve.
 
 | Item | Nome | Ícone emprestado (tinta) |
 |---|---|---|

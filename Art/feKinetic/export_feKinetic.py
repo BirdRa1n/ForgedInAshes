@@ -7,7 +7,7 @@ import os
 import bpy
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else \
-    r"F:\Github\FerroEngrenagem\Art"
+    r"F:\Github\ForgedInAshes\Art"
 # feConveyor, feConveyorRamp, feConveyorDown: our low belt, built by Art/feConveyor/build_feConveyor.py
 NAMES = ["feTorqueCrank", "feShaft", "feSpeedBox", "feGearbox", "feSpinInverter", "feTorqueRegulator",
          "feClutch", "feTorqueGauge", "feWaterWheel",

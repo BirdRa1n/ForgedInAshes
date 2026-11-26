@@ -199,7 +199,7 @@ pela Embreagem. Isso já existe na rede de torque; basta ligar a Embreagem ao fi
 ## 5. Menus próprios (interface do mod)
 
 Hoje a interação é o texto de mira mais o menu radial (segurar E). A janela de Receitas mostrou que a janela própria
-do XUi funciona (`Config/XUi_InGame`, controller `FerroEngrenagem.XUiC_*`). A proposta tem cinco janelas, todas no
+do XUi funciona (`Config/XUi_InGame`, controller `ForgedInAshes.XUiC_*`). A proposta tem cinco janelas, todas no
 mesmo estilo (cabeçalho, ícones do atlas do mod, cores do jogo).
 
 ### 5.1 Painel da Máquina (todas as máquinas de processo)

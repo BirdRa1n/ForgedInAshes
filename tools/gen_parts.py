@@ -1,6 +1,6 @@
 """F3-T04: add the mod's intermediate parts to the weapon and tool recipes (Assembler, M05).
 
-Writes a GENERATED region in Mods/FerroEngrenagem/Config/recipes.xml with
+Writes a GENERATED region in Mods/ForgedInAshes/Config/recipes.xml with
 <append xpath="/recipes/recipe[@name='X'][@craft_area='feAssembler']"> <ingredient .../> </append>.
 The region must come AFTER the gen_remap.py region (that one moves the recipes to feAssembler); on first run
 it is placed just before </configs>, i.e. after every other region.

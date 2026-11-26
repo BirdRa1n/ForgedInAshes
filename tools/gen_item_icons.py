@@ -3,7 +3,7 @@
 For each line of Art/feIcons/prompts.txt (<item>|<description>|<seed>) without an icon yet (or all with --force):
 SDXL draws the object on a plain white background (F:\\IA\\saida\\icones\\<item>.png, kept to pick / redo), the white
 connected to the border is cut away, the object is cropped, padded and scaled to the game's 160 x 160 transparent
-icon in Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<item>.png. Then run tools/apply_icons.py.
+icon in Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/<item>.png. Then run tools/apply_icons.py.
 
     F:\\IA\\iniciar_comfyui.bat            (leave it open)
     python tools/gen_item_icons.py [--force] [--only feTire,feRim] [--passos 24]
@@ -19,7 +19,7 @@ IA = os.environ.get("FE_IA", r"F:\IA")
 sys.path.insert(0, os.path.join(IA, "fe_ia"))
 import fe_ia  # noqa: E402  (ComfyUI client: grafo_sdxl, executar, baixar)
 
-ICONS = os.path.join(REPO, "Mods", "FerroEngrenagem", "UIAtlases", "ItemIconAtlas")
+ICONS = os.path.join(REPO, "Mods", "ForgedInAshes", "UIAtlases", "ItemIconAtlas")
 RAW = os.path.join(IA, "saida", "icones")
 STYLE = ("game inventory icon of a {d}, single isolated object, centered, whole object visible, three-quarter view "
          "from above, worn used post-apocalyptic look, gritty realistic, soft even studio light, sharp, "

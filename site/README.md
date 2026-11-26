@@ -1,4 +1,4 @@
-# Site de tutoriais do Ferro & Engrenagem
+# Site de tutoriais do ForgedInAshes
 
 App Vite + React + three.js. Todas as páginas de item, máquina e linha são montadas a partir de
 `public/data/mod.json`, gerado dos arquivos do mod; só os guias de conceito (`src/guides.js`) são escritos à mão.

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<xml>
-	<Name value="FerroEngrenagem" />
-	<DisplayName value="Ferro &amp; Engrenagem" />
-	<Description value="Crafting depends on a chain of machines, power and intermediate parts." />
-	<Author value="Dário Jr" />
-	<Version value="0.1.0" />
-	<Website value="" />
-</xml>

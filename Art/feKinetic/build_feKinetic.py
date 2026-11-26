@@ -21,7 +21,7 @@ Conventions (same as Art/feCrank):
     - the block axis is the model's local Z in Unity (what the mod expects, FeShaftAxis = z);
     - INPUT ends (Speed Box, Inverter, Regulator) are at Blender +Y (Unity -Z), OUTPUT ends at Blender -Y
       (Unity +Z). Input rings are green, output rings orange.
-  Spinning parts (contract in ART_BRIEF.md / src/FerroEngrenagem/KineticSpinner.cs) are objects named
+  Spinning parts (contract in ART_BRIEF.md / src/ForgedInAshes/KineticSpinner.cs) are objects named
   FeSpin, FeSpinIn, FeSpinOut, with tokens _Rev and _x<ratio> plus a unique suffix (the mod ignores unknown
   tokens; Blender needs unique names), e.g. FeSpinIn_SpeedBox. Each one has its PIVOT on its rotation axis and
   spins around its own local Blender Y (Unity local Z). Parts that turn around another axis are rotated objects

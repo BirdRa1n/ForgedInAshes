@@ -5,7 +5,7 @@ Antes de começar:
 - Use o save de teste (ModTester2) com o modo criativo para pegar os blocos.
 - **Pegue e coloque de novo** tudo o que foi colocado antes destas mudanças: Condensadora, Refinaria e as máquinas de
   produção. Blocos antigos ficam com o modelo novo, mas sem as células ou registros novos.
-- No fim, feche o jogo e peça para ler o log. As linhas `[FerroEngrenagem] belt -> ...` e `autocraft at ...` mostram
+- No fim, feche o jogo e peça para ler o log. As linhas `[ForgedInAshes] belt -> ...` e `autocraft at ...` mostram
   o que as esteiras entregaram ou recusaram e quando a receita fixa ligou.
 
 ## 1. Condensadora
@@ -103,7 +103,7 @@ Antes de começar:
    - Aparece "Produção 1/N: <item>" e a receita fixa liga sem fabricar à mão.
    - "Próxima produção" e "Produção anterior" percorrem a lista; ao trocar, os ingredientes guardados caem no chão.
 2. Leve os ingredientes por esteira: a máquina fabrica sozinha, como na parte 4.
-3. No log, ao abrir o jogo, aparece `[FerroEngrenagem] processes: 0 active, 10 planned`.
+3. No log, ao abrir o jogo, aparece `[ForgedInAshes] processes: 0 active, 10 planned`.
 
 ## 8. Metalurgia (F8.1)
 

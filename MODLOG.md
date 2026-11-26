@@ -1,4 +1,4 @@
-# MODLOG — Ferro & Engrenagem
+# MODLOG — ForgedInAshes
 
 Diário de trabalho (fatos, caminhos, o que falhou e por quê, próximo passo). O plano está em `PLANO_MOD.md`;
 aqui fica só o que foi medido/verificado.
@@ -19,7 +19,7 @@ aqui fica só o que foi medido/verificado.
 ## Rota escolhida
 
 **Sistema de mods oficial do jogo**, não BepInEx (a rota 1 sugerida pelo `um scan`).
-- Fases 0, 1 e 3: só XML (patches XPath em `Mods/FerroEngrenagem/Config/`). Sem DLL.
+- Fases 0, 1 e 3: só XML (patches XPath em `Mods/ForgedInAshes/Config/`). Sem DLL.
 - Fase 2+ (se a rota B de energia for necessária): DLL C# carregada pelo próprio jogo (o log mostra
   `Found ModAPI in assembly ... creating instance`) + Harmony do `0_TFP_Harmony`.
 - Motivo: o jogo tem loader oficial com XML patching e Harmony embutidos; BepInEx seria uma segunda camada
@@ -28,7 +28,7 @@ aqui fica só o que foi medido/verificado.
 ## Oráculo (como verificar no jogo)
 
 - Linhas do log por mod: `[MODS]   Trying to load from folder: '<pasta>'` e `[MODS]     Loaded Mod: <Name> (<Version>)`.
-- Erros de XML/XPath: procurar `ERR`, `WRN`, `XPath` e `FerroEngrenagem` no log mais recente.
+- Erros de XML/XPath: procurar `ERR`, `WRN`, `XPath` e `ForgedInAshes` no log mais recente.
 - Antes de todo teste: `python tools/check_xpath.py` (deve terminar com 0 problemas).
 
 ## Backups / restauração
@@ -58,9 +58,9 @@ aqui fica só o que foi medido/verificado.
   - "Wood Log" não existe; madeira é só `resourceWood`.
 
 - F0-T06 **verificado no jogo** (13:04, `-noeac`, mundo criativo):
-  - log: `[MODS] Trying to load from folder: 'FerroEngrenagem'` → `Loaded Mod: FerroEngrenagem (0.1.0)` →
-    `[MODS] Loading localization from mod: FerroEngrenagem`; nenhum ERR/WRN do mod.
-  - tela: menu criativo, busca "test" → "Item de Teste Ferro & Engrenagem (1435) feTestItem", ícone laranja.
+  - log: `[MODS] Trying to load from folder: 'ForgedInAshes'` → `Loaded Mod: ForgedInAshes (0.1.0)` →
+    `[MODS] Loading localization from mod: ForgedInAshes`; nenhum ERR/WRN do mod.
+  - tela: menu criativo, busca "test" → "Item de Teste ForgedInAshes (1435) feTestItem", ícone laranja.
   - Fatos confirmados: mod XML-only carrega por junction; `Config/Localization.csv` com o cabeçalho completo
     vanilla funciona; a coluna `brazilian` é usada quando o idioma da plataforma é brazilian; `CustomIcon` +
     `CustomIconTint` reaproveitam ícones vanilla.
@@ -69,7 +69,7 @@ aqui fica só o que foi medido/verificado.
   Editar arquivos com acento só pelas ferramentas de edição ou por Python.
 - **Fase 0 concluída.**
 
-- F1-T01 testado (13:13): log limpo (`Loaded Mod: FerroEngrenagem (0.1.0)`, 0 linhas marcadas). Visual dos
+- F1-T01 testado (13:13): log limpo (`Loaded Mod: ForgedInAshes (0.1.0)`, 0 linhas marcadas). Visual dos
   3 itens confirmado pelo usuário (nomes PT-BR, ícones tingidos, descrições).
 
 - F1-T02 (blocos M01/M02/M03 + receitas de construção). Fatos lidos no IL do `Assembly-CSharp.dll`
@@ -114,7 +114,7 @@ aqui fica só o que foi medido/verificado.
   Alternativa futura: patch Harmony estendendo o filtro (fase 2+).
 - Arte em paralelo: usuário vai rodar outra sessão em outro PC; regras e escopo em `ART_BRIEF.md`
   (só `Art/`, não tocar em `Config/`). Remoto: `origin` = GitHub `BirdRa1n/ForgedInAshes` (repositório
-  renomeado de `FerroEngrenagem` em 2026-11-22; URL local atualizada).
+  renomeado de `ForgedInAshes` em 2026-11-22; URL local atualizada).
 
 - F1-T05 (salvage e loot de MP/Spring), validado offline:
   - `blocks.xml`: `<set>` renomeia 48 drops `Destroy` de MP/Spring para `resourceScrapIron` (mesma contagem);
@@ -147,11 +147,11 @@ aqui fica só o que foi medido/verificado.
     (`mscorlib`, `System`, `System.Core`, `System.Xml`, `netstandard`, `Assembly-CSharp`, `LogLibrary`,
     `UnityEngine*`, `0Harmony` 2.13 do `0_TFP_Harmony`). Sem `System.Xml` dá CS0012.
   - TfpHarmony mira .NET Framework 4.8; 0Harmony 2.13 mira 4.5.2.
-  - `src/FerroEngrenagem/ModApi.cs`: loga `[FerroEngrenagem] InitMod` e aplica `PatchAll` (0 patches ainda).
+  - `src/ForgedInAshes/ModApi.cs`: loga `[ForgedInAshes] InitMod` e aplica `PatchAll` (0 patches ainda).
   - DLL gerada fica fora do git (`.gitignore`).
-  - **Verificado no jogo** (15:12, `-noeac`): `Loaded assembly FerroEngrenagem` → `Found ModAPI ... creating instance`
-    → `[FerroEngrenagem] InitMod: code loaded (0.1.0.0)` → `Harmony: 0 method(s) patched` →
-    `Initialized code in mod 'FerroEngrenagem'`. Log sem erros. A DLL compilada com csc C# 5 contra o mscorlib
+  - **Verificado no jogo** (15:12, `-noeac`): `Loaded assembly ForgedInAshes` → `Found ModAPI ... creating instance`
+    → `[ForgedInAshes] InitMod: code loaded (0.1.0.0)` → `Harmony: 0 method(s) patched` →
+    `Initialized code in mod 'ForgedInAshes'`. Log sem erros. A DLL compilada com csc C# 5 contra o mscorlib
     do jogo roda no Mono do jogo.
 - F2-T02 (XML, validado offline, falta teste no jogo):
   - `feCharge` (I19): `FuelValue=10` (= 10 s; `getFuelTime` devolve o FuelValue em segundos), material
@@ -228,12 +228,12 @@ aqui fica só o que foi medido/verificado.
     continua fabricando até ele acabar). Log por bloco removido; mantido só o aviso de segurança (uma vez por
     sessão) para máquina fe* que queime sem `FeChargeOnly`. **F3-T02 verificada.**
 - Trabalho do parceiro (Harrison, commit 9618344, integrado por rebase sem conflito):
-  - **F2-T04b: Manivela "segurar E"** em C# (`src/FerroEngrenagem/Crank.cs`, `Class=FerroEngrenagem.FeCrank,
-    FerroEngrenagem`): rotor e polia giram, estamina 25/s (`FeCrankStaminaPerSecond`), 1 Carga a cada 2,5 s
+  - **F2-T04b: Manivela "segurar E"** em C# (`src/ForgedInAshes/Crank.cs`, `Class=ForgedInAshes.FeCrank,
+    ForgedInAshes`): rotor e polia giram, estamina 25/s (`FeCrankStaminaPerSecond`), 1 Carga a cada 2,5 s
     (`FeCrankChargeSeconds`), agachar + E recolhe. Substitui o gancho de `buffs.xml` + `gameevents.xml`
     (esvaziados). Testado por ele no jogo.
-  - **Primeiro modelo próprio integrado:** `Resources/ferroengrenagem.unity3d` (projeto em `Art/UnityProject`,
-    `FeBuild.cs`); `Model="#@modfolder:Resources/ferroengrenagem.unity3d?feCrankPrefab"` (sintaxe lida em
+  - **Primeiro modelo próprio integrado:** `Resources/forgedinashes.unity3d` (projeto em `Art/UnityProject`,
+    `FeBuild.cs`); `Model="#@modfolder:Resources/forgedinashes.unity3d?feCrankPrefab"` (sintaxe lida em
     `DataLoader.ParseDataPathIdentifier`). Responde em parte à integração pendente do `ART_BRIEF.md`.
   - `build.ps1` passou a referenciar `InControl.dll` (tecla Activate).
   - Fetch neste PC: o git do terminal não tem credencial; usar `git -c credential.helper= -c
@@ -532,7 +532,7 @@ aqui fica só o que foi medido/verificado.
   no encaixe de motor (motor / manivela / motor a combustível / eixo)" (também no `gen_phase3.py`; sem vírgula
   para não quebrar o CSV). Manivela sem a frase dos Volantes.
 - Motores a combustível: slots escondidos e shift-click recusado (`EngineSlots`, mesmo mecanismo do CrankSlots).
-- Log: `FerroEngrenagemMod.Verbose` só com `Mods/FerroEngrenagem/debug.txt` (no .gitignore). Sem ele: a linha
+- Log: `ForgedInAshesMod.Verbose` só com `Mods/ForgedInAshes/debug.txt` (no .gitignore). Sem ele: a linha
   `power` só quando a máquina liga/desliga; sem `spin`, sem diagnóstico da manivela, sem a lista de patches.
 - Manivela de Torque tinha `CanPickup`: E em pé pegava a manivela em vez de girar. Trocado por radial próprio
   (agachar + E → pegar), como as peças da rede.
@@ -549,7 +549,7 @@ aqui fica só o que foi medido/verificado.
   --download-directory`; o helper UAC falhou sem console).
 - `FeBuild.BuildAll` em batch: 7 prefabs (inclui `feCrank`), bundle de 636 KB. O log novo confirma pivôs e +Z de
   cada peça. O Eixo precisou de raiz vazia (ver README do feKinetic).
-- `blocks.xml`: os 6 blocos usam `#@modfolder:Resources/ferroengrenagem.unity3d?<bloco>Prefab`; `feShaft` virou
+- `blocks.xml`: os 6 blocos usam `#@modfolder:Resources/forgedinashes.unity3d?<bloco>Prefab`; `feShaft` virou
   `ModelEntity` (o Medidor ficou com `Shape=New` próprio); `FeSpinWhole` saiu do Inversor e do Regulador.
 - Teste: modelos aparecem e a rede roda (1024/1024 UT). Um Inversor ficou "rolado" de lado (24 rotações do
   bloco): Caixa de Velocidade, Inversor e Regulador agora com `OnlySimpleRotations` (só as 4 de pé).
@@ -593,7 +593,7 @@ aqui fica só o que foi medido/verificado.
   vapor atrás, água na frente; motor: água por baixo do bloco pai, vapor por cima da célula central de cima).
   Rede = canos + portas (ou duas portas encostadas). Um fluido por rede, dois = BLOQUEADO. `FluidTicker` (servidor,
   0,5 s): produção → ofertas para demandas, sobra enche tanques, falta esvazia tanques, vapor sem destino escapa.
-- Persistência: `FluidStore` em `<save>/FerroEngrenagem_fluids.txt` (registro dos dispositivos + níveis), salvo a cada
+- Persistência: `FluidStore` em `<save>/ForgedInAshes_fluids.txt` (registro dos dispositivos + níveis), salvo a cada
   30 s e no `SaveWorld`/`SaveAndCleanupWorld`. Registro: `BlockFeFluid`/`BlockFeKinetic` próprios, postfix em
   `BlockPowerSource.OnBlockAdded/Removed`, e em `Block.OnBlockAdded` + `BlockPowered.OnBlockRemoved` para os elétricos
   (BlockPowered não sobrescreve OnBlockAdded, IL 3.4.0 b10).
@@ -681,7 +681,7 @@ aqui fica só o que foi medido/verificado.
 - Torque: cada esteira é nó e máquina (`FeTorqueCost` 8). Faces: laterais (eixo do rolete; não liga em outra esteira
   ao lado) e frente/trás quando uma alimenta a outra (`Belt.Linked`). Entre esteiras a rotação segue W = cima × frente
   (o sentido da esteira não depende do giro), então a linha não trava sozinha.
-- Itens lógicos (`BeltStore`, `<save>/FerroEngrenagem_belts.txt`, ItemValue serializado pelo vanilla em base64),
+- Itens lógicos (`BeltStore`, `<save>/ForgedInAshes_belts.txt`, ItemValue serializado pelo vanilla em base64),
   movidos no servidor a 10 Hz: 1 bloco/s × velocidade da máquina; 4 por esteira, espaço 0,25; passam para a esteira da
   frente (por trás entram no início, pelo lado no meio); no fim, param. Itens soltos (EntityItem) em cima entram na
   esteira. Pegar a esteira solta os itens.
@@ -747,7 +747,7 @@ aqui fica só o que foi medido/verificado.
   `BlockWorkstation.GetBlockActivationCommands`, prefixo no `OnBlockActivated(string,...)`). Liga com a receita da fila;
   ingredientes que chegam pela esteira vão para um estoque interno (até 5 vezes a receita); com a fila vazia e tudo no
   estoque, põe 1 `RecipeQueueItem` na última posição. Desligar ou remover a máquina solta o estoque. Leitura mostra a
-  receita e os ingredientes. Salvo em `FerroEngrenagem_autocraft.txt`.
+  receita e os ingredientes. Salvo em `ForgedInAshes_autocraft.txt`.
 - Esteira de Descida (`feConveyorDown`, `FeBeltRise` -1): recebe da esteira um bloco ACIMA atrás (a de cima a vê como
   saída quando não há nada na frente no nível dela) e entrega na frente no nível dela; modelo = rampa espelhada.
   `Links` também procura entradas um nível acima.
@@ -793,7 +793,7 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 
 ## 2026-11-23: F8.0 (craft em cadeia, D11 aprovado)
 - `tools/craft_matrix.py`: as 600 receitas do jogo recebem um modelo de cadeia (0 sem modelo) → `tools/out/craft_matrix.csv`.
-- `Mods/FerroEngrenagem/Data/fe_processes.xml` (fora de Config/, para o jogo não tratar como patch): fluidos, máquinas, itens e processos. A linha da bala 9mm está toda como `planned`. `Processes.cs` lê o arquivo no InitMod; `tools/check_processes.py` valida.
+- `Mods/ForgedInAshes/Data/fe_processes.xml` (fora de Config/, para o jogo não tratar como patch): fluidos, máquinas, itens e processos. A linha da bala 9mm está toda como `planned`. `Processes.cs` lê o arquivo no InitMod; `tools/check_processes.py` valida.
 - Painel de receita (N10): comandos "Próxima produção" / "Produção anterior" (`AutoCraft.Cycle`, receitas da craft_area = nome do bloco via `CraftingManager.GetAllRecipes()`).
 - Site de tutoriais: `tools/gen_site.py` → `site/` (estático; Vercel com Root Directory = site). Gerado dos dados do mod: página por item fe*, por máquina e por `<chain>`.
 - Nota: no pt-BR do jogo, `resourceBulletCasing` se chama "Revestimento de balas".
@@ -802,7 +802,7 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - Revestimento de argila retirado do plano (usuário): no pt-BR do jogo "Revestimento de balas" = cápsula.
 - Metal fundido é fluido (`molten_brass/lead/iron/steel`), só passa por `feMetalChute` (FeFluid chute). `FluidPort.Metal`: a rede a partir de uma porta de metal só anda por calhas e só junta portas de metal; canos e calhas nunca se ligam (`NetFrom`, `HasPortAt(..., metal)`, PipeArms).
 - Fundição (`feFoundry`, FeFluid smelter, FeMetalBuffer 200): derrete o que chega por esteira ou da mão (`fe_melt`) conforme os processos `melt` do fe_processes.xml, queimando o combustível dos slots (1 s de valor de combustível por s de derretimento). Saída de metal em qualquer lado de fora das 2 células de baixo que tenha calha.
-- Mesa de Moldagem (`feCaster`, FeFluid caster): um molde (item), processos `cast` dizem metal/litros/saída/tempo; esfria (2x com água ao lado), solta na esteira da frente ou "Pegar as peças". FluidState ganhou Mold/Made/Count (salvos no FerroEngrenagem_fluids.txt).
+- Mesa de Moldagem (`feCaster`, FeFluid caster): um molde (item), processos `cast` dizem metal/litros/saída/tempo; esfria (2x com água ao lado), solta na esteira da frente ou "Pegar as peças". FluidState ganhou Mold/Made/Count (salvos no ForgedInAshes_fluids.txt).
 - Modelos feMetalChute (braços FeArm_*.001: PipeArms procura também por prefixo) e feCaster (FeCastMetal, FeCastReady; CasterVisual).
 - Moldes: Cápsula, Ponta, Lingote, Chapa, Tubo, Engrenagem (Torno). Cápsula Bruta → Revestimento de Bala na Prensa de Munição (a Prensa já tinha a receita vanilla da cápsula: regra de duplicata).
 
@@ -828,8 +828,8 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 
 ## 2026-11-24: texto legível, livro de receitas e ícones
 - Texto de foco minúsculo: o rótulo `interactionPrompt/lblText` do jogo tem 70 px e usa ShrinkContent (padrão do XUiV_Label). Patch `Config/XUi/windows.xml`: `overflow="resizeheight"` (cresce em altura, fonte normal). A lista "Faz:" saiu do texto das máquinas de processo (agora "N receitas (segure E: Receitas)").
-- `RecipeBook.cs`: comando "Receitas" (fe_recipes, ícone book) em toda máquina fe* com processos (fe_processes.xml) ou receitas de bancada (craft_area). Abre a janela XUi `feRecipes` (controller `FerroEngrenagem.FeRecipes, FerroEngrenagem` -> `XUiC_FeRecipes`, 20 linhas por página, << >> OK). Se a janela não abrir, mostra as primeiras linhas num tooltip. Ganchos: BlockWorkstation (AutoCraft), BlockPowered (Industrial), BlockFeFluid, BlockFeKinetic.
-- Ícones: `Art/feKinetic/render_icons.py` (rodar depois do build_feKinetic no mesmo namespace) renderiza 160x160 transparente em `Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/`: 55 blocos (do modelo 3D) e 29 itens (modelos de item simples; moldes mostram a cavidade em metal incandescente). `tools/apply_icons.py` aponta CustomIcon de cada um para o próprio ícone, sem tint. Sem ícone próprio ainda: feCrank (outro .blend), feCoalGenerator, feBeltCrate, feCoalEngine, feGasEngine (usam prefab do jogo), feTestItem.
+- `RecipeBook.cs`: comando "Receitas" (fe_recipes, ícone book) em toda máquina fe* com processos (fe_processes.xml) ou receitas de bancada (craft_area). Abre a janela XUi `feRecipes` (controller `ForgedInAshes.FeRecipes, ForgedInAshes` -> `XUiC_FeRecipes`, 20 linhas por página, << >> OK). Se a janela não abrir, mostra as primeiras linhas num tooltip. Ganchos: BlockWorkstation (AutoCraft), BlockPowered (Industrial), BlockFeFluid, BlockFeKinetic.
+- Ícones: `Art/feKinetic/render_icons.py` (rodar depois do build_feKinetic no mesmo namespace) renderiza 160x160 transparente em `Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/`: 55 blocos (do modelo 3D) e 29 itens (modelos de item simples; moldes mostram a cavidade em metal incandescente). `tools/apply_icons.py` aponta CustomIcon de cada um para o próprio ícone, sem tint. Sem ícone próprio ainda: feCrank (outro .blend), feCoalGenerator, feBeltCrate, feCoalEngine, feGasEngine (usam prefab do jogo), feTestItem.
 
 ## 2026-11-24: XUi na pasta certa, escolha de receita, Biodigestor Industrial
 - Log 10-41-58: `GUIWindowManager.Open: Window "feRecipes" unknown!` e o texto continuou pequeno. Nenhum patch de XUi tinha sido aplicado: o jogo procura `XUi_InGame/windows` e `XUi_InGame/xui` (XUi::SetXmlsForUi), então a pasta do mod é `Config/XUi_InGame/`. Uma pasta `Config/XUi/` é ignorada sem erro. Pasta movida; comentário corrigido em fe_common.py.
@@ -983,7 +983,7 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   fluids.txt: Tanks, Out, Off); `FluidNetwork.cs` (gás com bar: tanques de gás, pressão das fontes, cano FeMaxBar
   4/12, vazamento; tanques encostados dividem o conteúdo); `FluidControl.cs` (Registro, Retenção, Reguladora,
   Separador, Alívio, Compressor, Manômetro, Queimador a Gás, Sangrador de Seiva); `Signals.cs` (alavanca, receptor,
-  manômetro, contador -> registro, comporta, embreagem; `FerroEngrenagem_logic.txt`); `Logistics.cs` (divisor,
+  manômetro, contador -> registro, comporta, embreagem; `ForgedInAshes_logic.txt`); `Logistics.cs` (divisor,
   comporta, contador, Braço Mecânico); `Inline.cs` (estações sobre a esteira); `AutoCraft.cs` (baús ligados até 16,
   escolher receita); `FeUi.cs` + `tools/gen_ui.py` (Painel da Máquina, Seletor de Receita, Configurações, Painel de
   Rede, Guia de Produção, Manual e Chave de Engenheiro); `Settings.cs` (`Data/fe_settings.xml`, fallback x3).
@@ -1301,3 +1301,22 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `UiWatchdog.LabelGeometry`: a cada 30 s com texto de bloco "fe" aberto loga altura, posição local e na tela,
   visível/alfa/ativo e linhas. `build.ps1` passa a referenciar `NGUI.dll`.
 - **Não verificado no jogo.**
+
+## 2026-11-26: projeto renomeado para ForgedInAshes; documentação EN / PT-BR / ES; AGENTS.md
+
+- Nome: "Ferro & Engrenagem" / `FerroEngrenagem` → **ForgedInAshes** (repositório BirdRa1n/ForgedInAshes). Pastas
+  `src/ForgedInAshes`, `Mods/ForgedInAshes`, DLL `ForgedInAshes.dll`, namespace e classes XML
+  `ForgedInAshes.<Classe>, ForgedInAshes`, Harmony `com.forgedinashes.mod`, prefixo de log `[ForgedInAshes]`,
+  pacote `Resources/forgedinashes.unity3d` (`FeBuild.BundleName` também), ferramentas, site e textos.
+- **IDs `fe*` de blocos e itens mantidos** (estão nos saves).
+- Saves: `ForgedInAshesMod.SaveFile(nome)` usa `ForgedInAshes_<nome>.txt` e renomeia uma vez o
+  `FerroEngrenagem_<nome>.txt` antigo (esteiras, fluidos, sinais, autocraft).
+- `install.ps1` remove o link/cópia antigo `Mods/FerroEngrenagem` do jogo (senão o mod carregaria duas vezes).
+  Reinstalado: junction `Mods/ForgedInAshes`. A DLL antiga `FerroEngrenagem.dll` foi apagada da pasta do mod.
+- `ModInfo.xml`: descrição nova e Website = GitHub.
+- Documentação: `README.md` (EN, principal), `README.pt-BR.md`, `README.es.md`, `CONTRIBUTING.md`,
+  `docs/{en,pt-BR,es}/` (índice, instalação, guia de jogo, solução de problemas, desenvolvimento), arte em
+  `docs/assets` gerada por `tools/gen_docs_art.py` só com ícones do mod. Links e âncoras conferidos (0 problemas).
+- `AGENTS.md` na raiz e em `src/ForgedInAshes`, `tools`, `Art`, `site`, `docs`.
+- Validadores: check_xpath 778/0, processes 223/0, phase3 23/23, coverage 0 sobrando; DLL compila; site compila.
+- **Não verificado no jogo** (carregar o mod com o nome novo e um save antigo).

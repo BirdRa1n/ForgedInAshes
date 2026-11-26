@@ -1,7 +1,7 @@
 """F3-T03: move vanilla recipes to the mod machines with <set> on craft_area (PLANO_MOD.md section 10.1).
 
 Reads the proposal from tools/remap_proposal.py (recomputed here, not from the CSV, so it is always current)
-and writes a GENERATED region in Mods/FerroEngrenagem/Config/recipes.xml with, per enabled machine:
+and writes a GENERATED region in Mods/ForgedInAshes/Config/recipes.xml with, per enabled machine:
   - <set .../@craft_area> on the recipe(s) with that name in the original vanilla station;
   - for forge recipes: only the non-use_smelter variant moves; its use_smelter twin is <remove>d
     (the game only filters smelter variants when craft_area == "forge", so both would show);

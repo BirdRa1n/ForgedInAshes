@@ -42,7 +42,7 @@ das flanges (0,5 m) e da calha.
 
 ## Contrato de efeitos (novo)
 
-| No Blender | No Unity (FeBuild) | No jogo (`src/FerroEngrenagem/FxVisual.cs`) |
+| No Blender | No Unity (FeBuild) | No jogo (`src/ForgedInAshes/FxVisual.cs`) |
 |---|---|---|
 | material `feHD_Molten` | `FeMolten.mat` (Standard; albedo `molten_crust`, emissão `molten_heat`) | `_EmissionColor` = cor do metal × calor; `_MainTex_ST` rola enquanto corre |
 | material `feHD_Liquid` | `FeLiquid.mat` (Standard transparente, liso) | `_Color` = cor do fluido |

@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  Compiles src\FerroEngrenagem\*.cs into Mods\FerroEngrenagem\FerroEngrenagem.dll.
+  Compiles src\ForgedInAshes\*.cs into Mods\ForgedInAshes\ForgedInAshes.dll.
 
 .DESCRIPTION
   Uses the C# compiler that ships with Windows (.NET Framework 4, C# 5), because the local
@@ -20,8 +20,8 @@ $harmonyDir = Join-Path $game 'Mods\0_TFP_Harmony'
 $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path $csc)) { throw "csc not found: $csc" }
 
-$src = Get-ChildItem (Join-Path $repo 'src\FerroEngrenagem') -Recurse -Filter *.cs | ForEach-Object { $_.FullName }
-$out = if ($Out) { $Out } else { Join-Path $repo 'Mods\FerroEngrenagem\FerroEngrenagem.dll' }
+$src = Get-ChildItem (Join-Path $repo 'src\ForgedInAshes') -Recurse -Filter *.cs | ForEach-Object { $_.FullName }
+$out = if ($Out) { $Out } else { Join-Path $repo 'Mods\ForgedInAshes\ForgedInAshes.dll' }
 $refs = @(
     (Join-Path $managed 'mscorlib.dll'),
     (Join-Path $managed 'System.dll'),

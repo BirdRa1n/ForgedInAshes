@@ -1,4 +1,4 @@
-"""Shared helpers for the Ferro & Engrenagem tools.
+"""Shared helpers for the ForgedInAshes tools.
 
 - Locates the game install (tools/game_path.txt).
 - Loads vanilla Data/Config XML files.
@@ -23,7 +23,7 @@ except ImportError:  # pragma: no cover
     sys.exit("lxml is missing: python -m pip install lxml")
 
 REPO = Path(__file__).resolve().parent.parent
-MOD_DIR = REPO / "Mods" / "FerroEngrenagem"
+MOD_DIR = REPO / "Mods" / "ForgedInAshes"
 MOD_CONFIG = MOD_DIR / "Config"
 
 PATCH_OPS = {

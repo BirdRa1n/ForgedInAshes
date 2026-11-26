@@ -1,7 +1,7 @@
 # feConveyor — Esteira baixa (reta, curvas, divisão, rampas)
 
 Esteira na altura das portas das máquinas (padrão em `Art/CONVEYOR_PORTS.md`). Substitui o modelo alto
-(mesa de 0,62 m) da D10 desde 2026-11-24, a pedido do usuário. A lógica é a mesma: `src/FerroEngrenagem/Belt.cs`.
+(mesa de 0,62 m) da D10 desde 2026-11-24, a pedido do usuário. A lógica é a mesma: `src/ForgedInAshes/Belt.cs`.
 Feita no Blender 5.3 por script.
 
 | Peça (bloco) | O que é | FBX |
@@ -18,7 +18,7 @@ A Esteira com Filtro (`feConveyorFilter`) usa o modelo da `feConveyor`. O Duto (
 | `build_feConveyor.py` | Gera as três peças (uma coleção cada). **Limpa a cena** antes |
 | `export_feConveyor.py` | Salva `feConveyor.blend` e exporta os três FBX |
 | `render_previews.py` | `preview_line.png` (linha montada), `preview_modes.png` (cada forma), `preview_front.png` |
-| `render_icons.py` | Ícones 160×160 das quatro esteiras em `Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas` |
+| `render_icons.py` | Ícones 160×160 das quatro esteiras em `Mods/ForgedInAshes/UIAtlases/ItemIconAtlas` |
 
 Tudo em uma passada (sem interface):
 

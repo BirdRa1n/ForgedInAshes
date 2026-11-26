@@ -1,4 +1,4 @@
-"""F8.0: validate Mods/FerroEngrenagem/Data/fe_processes.xml (the chain craft, PLANO_CRAFT.md).
+"""F8.0: validate Mods/ForgedInAshes/Data/fe_processes.xml (the chain craft, PLANO_CRAFT.md).
 
 Checks:
   - every item / machine / fluid a process names exists (game + mod, after the mod's patches) or is declared in the
@@ -24,7 +24,7 @@ BASE_FLUIDS = set()
 
 
 def base_fluids():
-    src = (fe.REPO / "src" / "FerroEngrenagem" / "FluidNetwork.cs").read_text(encoding="utf-8")
+    src = (fe.REPO / "src" / "ForgedInAshes" / "FluidNetwork.cs").read_text(encoding="utf-8")
     return set(re.findall(r'public const string \w+ = "(\w+)";', src))
 
 

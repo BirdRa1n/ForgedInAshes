@@ -1,0 +1,1716 @@
+<configs>
+	<!-- F0-T06: test item, only to prove the mod loads. Remove before release. -->
+	<append xpath="/items">
+		<item name="feTestItem">
+			<property name="CustomIcon" value="feTestItem"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Weight" value="1"/>
+			<property name="Stacknumber" value="100"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feTestItemDesc"/>
+			<property name="CreativeMode" value="Player"/>
+		</item>
+	</append>
+
+	<!-- F1-T01: intermediate parts (I03, I04, I05). Modeled on vanilla resourceForgedIron.
+	     Material MresourceForgedIron: forge_category "iron", so scrapping returns iron, never Mechanical Parts.
+	     Icons are vanilla placeholders (CustomIcon + tint) until phase 6.
+	     Balance: EconomicValue follows Forged Iron = 12 per unit used (see PLANO_MOD.md section 9). -->
+	<append xpath="/items">
+		<!-- I03 Iron Plate: made in fePress (M02), 2 Forged Iron -> 1 -->
+		<item name="feResourceIronPlate">
+			<property name="CustomIcon" value="feResourceIronPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="24"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceIronPlateDesc"/>
+			<property name="SoundPickup" value="forgedmetal_grab"/>
+			<property name="SoundPlace" value="forgedmetal_place"/>
+		</item>
+		<!-- I04 Iron Shaft: made in feLathe (M03), 2 Forged Iron -> 1 -->
+		<item name="feResourceIronShaft">
+			<property name="CustomIcon" value="feResourceIronShaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="24"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceIronShaftDesc"/>
+			<property name="SoundPickup" value="ironpipe_grab"/>
+			<property name="SoundPlace" value="ironpipe_place"/>
+		</item>
+		<!-- I05 Gear: made in feLathe (M03), 1 Iron Plate -> 2 -->
+		<item name="feResourceGear">
+			<property name="CustomIcon" value="feResourceGear"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="12"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceGearDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<!-- D9: Steam Engine Piston (2 per Steam Engine) -->
+		<item name="feSteamPiston">
+			<property name="CustomIcon" value="feSteamPiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="120"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSteamPistonDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+	</append>
+
+	<!-- F2-T02: energy items (route A). FuelValue is burn time in SECONDS (TileEntityWorkstation.getFuelTime).
+	     Both use materials WITHOUT forge_category, so they cannot be scrapped into iron (the crank makes
+	     Charge from stamina alone; a scrappable Charge would be an infinite iron source). -->
+	<append xpath="/items">
+		<!-- I02 Flywheel: made in the Lathe. Catalyst of the Coal Generator (D2: ingredient of the generator);
+		     not consumed, each installed flywheel multiplies the Charge output (BlockCollector catalyst system). -->
+		<item name="feFlywheel">
+			<property name="CustomIcon" value="feFlywheel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feFlywheelDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+
+		<!-- Battery Bank Module (user, 2026-11-22): goes in the Crank's module slot (like the forge's crucible) and
+		     unlocks its battery slot (src/ForgedInAshes/CrankSlots.cs). Made in the Electronics Bench. -->
+		<item name="feBatteryModule">
+			<property name="CustomIcon" value="feBatteryModule"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MelectricParts"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="300"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBatteryModuleDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<!-- I01 Charcoal: made in the Charcoal Kiln (E02) from Wood; burned by the Coal Generator (E03).
+		     Same FuelValue as vanilla coal, so it also works in forge/campfire. -->
+		<item name="feResourceCharcoal">
+			<property name="CustomIcon" value="feResourceCharcoal"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="FuelValue" value="100"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="EconomicBundleSize" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceCharcoalDesc"/>
+			<property name="SoundPickup" value="coal_grab"/>
+			<property name="SoundPlace" value="coal_place"/>
+		</item>
+	</append>
+	<!-- BEGIN GENERATED by tools/gen_phase3.py: do not edit by hand -->
+	<append xpath="/items">
+		<!-- I08 Brass Wire -->
+		<item name="feResourceBrassWire">
+			<property name="CustomIcon" value="feResourceBrassWire"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceScrapBrassSmall"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="7"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceBrassWireDesc"/>
+		</item>
+		<!-- I09 Electric Coil -->
+		<item name="feResourceCoil">
+			<property name="CustomIcon" value="feResourceCoil"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="200"/>
+			<property name="EconomicValue" value="40"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceCoilDesc"/>
+		</item>
+		<!-- I11 Lubricant -->
+		<item name="feResourceLubricant">
+			<property name="CustomIcon" value="feResourceLubricant"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceOil"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="120"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceLubricantDesc"/>
+		</item>
+		<!-- I13 Wood Plank -->
+		<item name="feResourcePlank">
+			<property name="CustomIcon" value="feResourcePlank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceWood"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="12"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourcePlankDesc"/>
+		</item>
+		<!-- I14 Wood Beam -->
+		<item name="feResourceBeam">
+			<property name="CustomIcon" value="feResourceBeam"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceWood"/>
+			<property name="Stacknumber" value="200"/>
+			<property name="EconomicValue" value="40"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceBeamDesc"/>
+		</item>
+		<!-- I15 Cloth Roll -->
+		<item name="feResourceClothRoll">
+			<property name="CustomIcon" value="feResourceClothRoll"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mcloth"/>
+			<property name="Stacknumber" value="100"/>
+			<property name="EconomicValue" value="100"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feResourceClothRollDesc"/>
+		</item>
+		<!-- I16 Gun Barrel -->
+		<item name="feGunBarrel">
+			<property name="CustomIcon" value="feGunBarrel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedSteel"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="70"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGunBarrelDesc"/>
+		</item>
+		<!-- I17 Firing Mechanism -->
+		<item name="feGunMechanism">
+			<property name="CustomIcon" value="feGunMechanism"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="150"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGunMechanismDesc"/>
+		</item>
+		<!-- I18 Gun Stock -->
+		<item name="feGunStock">
+			<property name="CustomIcon" value="feGunStock"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceWood"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="60"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGunStockDesc"/>
+		</item>
+		<!-- F8.1: molds for the Casting Table (which metal and what they make: Data/fe_processes.xml) -->
+		<item name="feMoldCasing">
+			<property name="CustomIcon" value="feMoldCasing"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldCasingDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldBulletTip">
+			<property name="CustomIcon" value="feMoldBulletTip"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBulletTipDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldIngot">
+			<property name="CustomIcon" value="feMoldIngot"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldIngotDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldPlate">
+			<property name="CustomIcon" value="feMoldPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldPlateDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldPipe">
+			<property name="CustomIcon" value="feMoldPipe"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldPipeDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feMoldGear">
+			<property name="CustomIcon" value="feMoldGear"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="80"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldGearDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<item name="feCasingRaw">
+			<property name="CustomIcon" value="feCasingRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceForgedIron"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="2"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCasingRawDesc"/>
+			<property name="SoundPickup" value="parts_grab"/>
+			<property name="SoundPlace" value="parts_place"/>
+		</item>
+		<!-- F8.2: chemistry intermediates (gunpowder line) -->
+		<item name="feCoalDust">
+			<property name="CustomIcon" value="feCoalDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="EconomicValue" value="2"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCoalDustDesc"/>
+		</item>
+		<item name="feNitratePure">
+			<property name="CustomIcon" value="feNitratePure"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="EconomicValue" value="3"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feNitratePureDesc"/>
+		</item>
+		<item name="feGunPowderWet">
+			<property name="CustomIcon" value="feGunPowderWet"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="1000"/>
+			<property name="EconomicValue" value="3"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGunPowderWetDesc"/>
+		</item>
+		<!-- Biodigester products: Nitre Earth (saltpeter), Organic Mash and Biofuel -->
+		<item name="feNitreEarth">
+			<property name="CustomIcon" value="feNitreEarth"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="8"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feNitreEarthDesc"/>
+		</item>
+		<item name="feBioMash">
+			<property name="CustomIcon" value="feBioMash"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBioMashDesc"/>
+		</item>
+		<item name="feBiofuel">
+			<property name="CustomIcon" value="feBiofuel"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="MresourceCoal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="15"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBiofuelDesc"/>
+		</item>
+	</append>
+	<!-- END GENERATED by tools/gen_phase3.py -->
+	<!-- BEGIN GENERATED by tools/gen_chain.py: do not edit by hand -->
+	<append xpath="/items">
+		<item name="feShaleCrushed">
+			<property name="CustomIcon" value="feShaleCrushed"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feShaleCrushedDesc"/>
+		</item>
+		<item name="feShaleAsh">
+			<property name="CustomIcon" value="feShaleAsh"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feShaleAshDesc"/>
+		</item>
+		<item name="feSulfur">
+			<property name="CustomIcon" value="feSulfur"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSulfurDesc"/>
+		</item>
+		<item name="feGasCanister">
+			<property name="CustomIcon" value="feGasCanister"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGasCanisterDesc"/>
+		</item>
+		<item name="feEthanol">
+			<property name="CustomIcon" value="feEthanol"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEthanolDesc"/>
+		</item>
+		<item name="feRubberCoagulum">
+			<property name="CustomIcon" value="feRubberCoagulum"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberCoagulumDesc"/>
+		</item>
+		<item name="feRubberSheetRaw">
+			<property name="CustomIcon" value="feRubberSheetRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberSheetRawDesc"/>
+		</item>
+		<item name="feRubberRaw">
+			<property name="CustomIcon" value="feRubberRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberRawDesc"/>
+		</item>
+		<item name="feCarbonBlack">
+			<property name="CustomIcon" value="feCarbonBlack"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCarbonBlackDesc"/>
+		</item>
+		<item name="feRubberCompound">
+			<property name="CustomIcon" value="feRubberCompound"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberCompoundDesc"/>
+		</item>
+		<item name="feTire">
+			<property name="CustomIcon" value="feTire"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feTireDesc"/>
+		</item>
+		<item name="feGasket">
+			<property name="CustomIcon" value="feGasket"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGasketDesc"/>
+		</item>
+		<item name="feRubberBelt">
+			<property name="CustomIcon" value="feRubberBelt"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberBeltDesc"/>
+		</item>
+		<item name="feHose">
+			<property name="CustomIcon" value="feHose"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="100"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feHoseDesc"/>
+		</item>
+		<item name="feRubberSole">
+			<property name="CustomIcon" value="feRubberSole"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRubberSoleDesc"/>
+		</item>
+		<item name="fePolymerDust">
+			<property name="CustomIcon" value="fePolymerDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePolymerDustDesc"/>
+		</item>
+		<item name="feCircuitBase">
+			<property name="CustomIcon" value="feCircuitBase"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCircuitBaseDesc"/>
+		</item>
+		<item name="feBatteryCase">
+			<property name="CustomIcon" value="feBatteryCase"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBatteryCaseDesc"/>
+		</item>
+		<item name="feLensRaw">
+			<property name="CustomIcon" value="feLensRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feLensRawDesc"/>
+		</item>
+		<item name="feGlassPane">
+			<property name="CustomIcon" value="feGlassPane"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGlassPaneDesc"/>
+		</item>
+		<item name="feBulb">
+			<property name="CustomIcon" value="feBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBulbDesc"/>
+		</item>
+		<item name="feLightBulb">
+			<property name="CustomIcon" value="feLightBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feLightBulbDesc"/>
+		</item>
+		<item name="feInsulator">
+			<property name="CustomIcon" value="feInsulator"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feInsulatorDesc"/>
+		</item>
+		<item name="feSparkPlugCeramic">
+			<property name="CustomIcon" value="feSparkPlugCeramic"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSparkPlugCeramicDesc"/>
+		</item>
+		<item name="feSparkPlug">
+			<property name="CustomIcon" value="feSparkPlug"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSparkPlugDesc"/>
+		</item>
+		<item name="feRod">
+			<property name="CustomIcon" value="feRod"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRodDesc"/>
+		</item>
+		<item name="feRodBrass">
+			<property name="CustomIcon" value="feRodBrass"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRodBrassDesc"/>
+		</item>
+		<item name="feWireThick">
+			<property name="CustomIcon" value="feWireThick"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feWireThickDesc"/>
+		</item>
+		<item name="feSteelWire">
+			<property name="CustomIcon" value="feSteelWire"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSteelWireDesc"/>
+		</item>
+		<item name="feSteelPlate">
+			<property name="CustomIcon" value="feSteelPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSteelPlateDesc"/>
+		</item>
+		<item name="feArmorPlate">
+			<property name="CustomIcon" value="feArmorPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feArmorPlateDesc"/>
+		</item>
+		<item name="feLeadPlate">
+			<property name="CustomIcon" value="feLeadPlate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feLeadPlateDesc"/>
+		</item>
+		<item name="feProfile">
+			<property name="CustomIcon" value="feProfile"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feProfileDesc"/>
+		</item>
+		<item name="feRim">
+			<property name="CustomIcon" value="feRim"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRimDesc"/>
+		</item>
+		<item name="feHub">
+			<property name="CustomIcon" value="feHub"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feHubDesc"/>
+		</item>
+		<item name="feChassisFrame">
+			<property name="CustomIcon" value="feChassisFrame"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feChassisFrameDesc"/>
+		</item>
+		<item name="feToolHeadRaw">
+			<property name="CustomIcon" value="feToolHeadRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feToolHeadRawDesc"/>
+		</item>
+		<item name="feToolHead">
+			<property name="CustomIcon" value="feToolHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feToolHeadDesc"/>
+		</item>
+		<item name="feNeedle">
+			<property name="CustomIcon" value="feNeedle"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feNeedleDesc"/>
+		</item>
+		<item name="feHinge">
+			<property name="CustomIcon" value="feHinge"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feHingeDesc"/>
+		</item>
+		<item name="feLock">
+			<property name="CustomIcon" value="feLock"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feLockDesc"/>
+		</item>
+		<item name="feBuckle">
+			<property name="CustomIcon" value="feBuckle"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBuckleDesc"/>
+		</item>
+		<item name="feZipper">
+			<property name="CustomIcon" value="feZipper"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feZipperDesc"/>
+		</item>
+		<item name="feTinCan">
+			<property name="CustomIcon" value="feTinCan"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feTinCanDesc"/>
+		</item>
+		<item name="feGrenadeShell">
+			<property name="CustomIcon" value="feGrenadeShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGrenadeShellDesc"/>
+		</item>
+		<item name="feGrenadeFilled">
+			<property name="CustomIcon" value="feGrenadeFilled"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feGrenadeFilledDesc"/>
+		</item>
+		<item name="feRocketFilled">
+			<property name="CustomIcon" value="feRocketFilled"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRocketFilledDesc"/>
+		</item>
+		<item name="feEngineBlock">
+			<property name="CustomIcon" value="feEngineBlock"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineBlockDesc"/>
+		</item>
+		<item name="feEngineBlockBored">
+			<property name="CustomIcon" value="feEngineBlockBored"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineBlockBoredDesc"/>
+		</item>
+		<item name="fePiston">
+			<property name="CustomIcon" value="fePiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePistonDesc"/>
+		</item>
+		<item name="feCrankshaft">
+			<property name="CustomIcon" value="feCrankshaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="20"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCrankshaftDesc"/>
+		</item>
+		<item name="feEngineStage1">
+			<property name="CustomIcon" value="feEngineStage1"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineStage1Desc"/>
+		</item>
+		<item name="feEngineStage2">
+			<property name="CustomIcon" value="feEngineStage2"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineStage2Desc"/>
+		</item>
+		<item name="feEngineStage3">
+			<property name="CustomIcon" value="feEngineStage3"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineStage3Desc"/>
+		</item>
+		<item name="feEngineStage4">
+			<property name="CustomIcon" value="feEngineStage4"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineStage4Desc"/>
+		</item>
+		<item name="feElectricMotorSmall">
+			<property name="CustomIcon" value="feElectricMotorSmall"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feElectricMotorSmallDesc"/>
+		</item>
+		<item name="feServo">
+			<property name="CustomIcon" value="feServo"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="50"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feServoDesc"/>
+		</item>
+		<item name="feBrassDust">
+			<property name="CustomIcon" value="feBrassDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBrassDustDesc"/>
+		</item>
+		<item name="feCircuitTraced">
+			<property name="CustomIcon" value="feCircuitTraced"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCircuitTracedDesc"/>
+		</item>
+		<item name="feCircuitPopulated">
+			<property name="CustomIcon" value="feCircuitPopulated"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCircuitPopulatedDesc"/>
+		</item>
+		<item name="feCircuitBoard">
+			<property name="CustomIcon" value="feCircuitBoard"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCircuitBoardDesc"/>
+		</item>
+		<item name="feRoundPrimed">
+			<property name="CustomIcon" value="feRoundPrimed"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRoundPrimedDesc"/>
+		</item>
+		<item name="feRoundTipped">
+			<property name="CustomIcon" value="feRoundTipped"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feRoundTippedDesc"/>
+		</item>
+		<item name="feArrowShaft">
+			<property name="CustomIcon" value="feArrowShaft"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feArrowShaftDesc"/>
+		</item>
+		<item name="feArrowHeaded">
+			<property name="CustomIcon" value="feArrowHeaded"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feArrowHeadedDesc"/>
+		</item>
+		<item name="feThread">
+			<property name="CustomIcon" value="feThread"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feThreadDesc"/>
+		</item>
+		<item name="feLeatherTanned">
+			<property name="CustomIcon" value="feLeatherTanned"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feLeatherTannedDesc"/>
+		</item>
+		<item name="feBarkDust">
+			<property name="CustomIcon" value="feBarkDust"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBarkDustDesc"/>
+		</item>
+		<item name="fePulp">
+			<property name="CustomIcon" value="fePulp"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePulpDesc"/>
+		</item>
+		<item name="feWetPaper">
+			<property name="CustomIcon" value="feWetPaper"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feWetPaperDesc"/>
+		</item>
+		<item name="fePigment">
+			<property name="CustomIcon" value="fePigment"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePigmentDesc"/>
+		</item>
+		<item name="feFruitConcentrate">
+			<property name="CustomIcon" value="feFruitConcentrate"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feFruitConcentrateDesc"/>
+		</item>
+		<item name="feHerbExtract">
+			<property name="CustomIcon" value="feHerbExtract"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feHerbExtractDesc"/>
+		</item>
+		<item name="feCultureBroth">
+			<property name="CustomIcon" value="feCultureBroth"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCultureBrothDesc"/>
+		</item>
+		<item name="feCultureExtract">
+			<property name="CustomIcon" value="feCultureExtract"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feCultureExtractDesc"/>
+		</item>
+		<item name="feAntibioticPowder">
+			<property name="CustomIcon" value="feAntibioticPowder"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feAntibioticPowderDesc"/>
+		</item>
+		<item name="fePlaster">
+			<property name="CustomIcon" value="fePlaster"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="500"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePlasterDesc"/>
+		</item>
+		<item name="feEngineerWrench">
+			<property name="CustomIcon" value="feEngineerWrench"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineerWrenchDesc"/>
+		</item>
+		<item name="feEngineerManual">
+			<property name="CustomIcon" value="feEngineerManual"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feEngineerManualDesc"/>
+			<property class="Action0">
+				<property name="Class" value="ForgedInAshes.FeGuide, ForgedInAshes"/>
+				<property name="Delay" value="0.5"/>
+			</property>
+		</item>
+		<item name="feMoldPellet">
+			<property name="CustomIcon" value="feMoldPellet"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldPelletDesc"/>
+		</item>
+		<item name="feMoldBoard">
+			<property name="CustomIcon" value="feMoldBoard"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBoardDesc"/>
+		</item>
+		<item name="feMoldBatteryCase">
+			<property name="CustomIcon" value="feMoldBatteryCase"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBatteryCaseDesc"/>
+		</item>
+		<item name="feMoldStock">
+			<property name="CustomIcon" value="feMoldStock"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldStockDesc"/>
+		</item>
+		<item name="feMoldJar">
+			<property name="CustomIcon" value="feMoldJar"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldJarDesc"/>
+		</item>
+		<item name="feMoldLens">
+			<property name="CustomIcon" value="feMoldLens"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldLensDesc"/>
+		</item>
+		<item name="feMoldBeaker">
+			<property name="CustomIcon" value="feMoldBeaker"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBeakerDesc"/>
+		</item>
+		<item name="feMoldGlassPane">
+			<property name="CustomIcon" value="feMoldGlassPane"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldGlassPaneDesc"/>
+		</item>
+		<item name="feMoldBulb">
+			<property name="CustomIcon" value="feMoldBulb"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBulbDesc"/>
+		</item>
+		<item name="feMoldRod">
+			<property name="CustomIcon" value="feMoldRod"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldRodDesc"/>
+		</item>
+		<item name="feMoldToolHead">
+			<property name="CustomIcon" value="feMoldToolHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldToolHeadDesc"/>
+		</item>
+		<item name="feMoldShell">
+			<property name="CustomIcon" value="feMoldShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldShellDesc"/>
+		</item>
+		<item name="feMoldEngineBlock">
+			<property name="CustomIcon" value="feMoldEngineBlock"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldEngineBlockDesc"/>
+		</item>
+		<item name="feMoldPiston">
+			<property name="CustomIcon" value="feMoldPiston"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldPistonDesc"/>
+		</item>
+		<item name="feMoldCrank">
+			<property name="CustomIcon" value="feMoldCrank"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldCrankDesc"/>
+		</item>
+		<item name="feMoldArrowHead">
+			<property name="CustomIcon" value="feMoldArrowHead"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldArrowHeadDesc"/>
+		</item>
+		<item name="feMoldBuckshot">
+			<property name="CustomIcon" value="feMoldBuckshot"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldBuckshotDesc"/>
+		</item>
+		<item name="feMoldRocket">
+			<property name="CustomIcon" value="feMoldRocket"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldRocketDesc"/>
+		</item>
+		<item name="feBoilerShell">
+			<property name="CustomIcon" value="feBoilerShell"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="5"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feBoilerShellDesc"/>
+		</item>
+		<item name="feFirebox">
+			<property name="CustomIcon" value="feFirebox"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="5"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feFireboxDesc"/>
+		</item>
+		<item name="feSteamCylinderRaw">
+			<property name="CustomIcon" value="feSteamCylinderRaw"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSteamCylinderRawDesc"/>
+		</item>
+		<item name="feSteamCylinder">
+			<property name="CustomIcon" value="feSteamCylinder"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSteamCylinderDesc"/>
+		</item>
+		<item name="feTurbineRotor">
+			<property name="CustomIcon" value="feTurbineRotor"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feTurbineRotorDesc"/>
+		</item>
+		<item name="feSafetyValve">
+			<property name="CustomIcon" value="feSafetyValve"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feSafetyValveDesc"/>
+		</item>
+		<item name="fePressureGaugeItem">
+			<property name="CustomIcon" value="fePressureGaugeItem"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="fePressureGaugeItemDesc"/>
+		</item>
+		<item name="feValveGear">
+			<property name="CustomIcon" value="feValveGear"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="10"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feValveGearDesc"/>
+		</item>
+		<item name="feMoldCylinder">
+			<property name="CustomIcon" value="feMoldCylinder"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="HoldType" value="45"/>
+			<property name="Meshfile" value="@:Other/Items/Misc/sackPrefab.prefab"/>
+			<property name="DropMeshfile" value="@:Other/Items/Misc/sack_droppedPrefab.prefab"/>
+			<property name="Material" value="Mmetal"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="EconomicValue" value="10"/>
+			<property name="Group" value="Resources"/>
+			<property name="DescriptionKey" value="feMoldCylinderDesc"/>
+		</item>
+	</append>
+	<!-- END GENERATED by tools/gen_chain.py -->
+</configs>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ForgedInAshes settings (Settings.cs).
+     VanillaShortcuts: remove (default) = the shortcuts the chains replace are gone;
+                       expensive = they come back at 3x their cost (Data/fe_fallback.xml). -->
+<settings>
+	<setting name="VanillaShortcuts" value="remove"/>
+</settings>

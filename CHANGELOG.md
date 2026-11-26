@@ -4,6 +4,10 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 
 ## [Não lançado]
 
+### Renomeação
+- O projeto passa a se chamar **ForgedInAshes** (antes Ferro & Engrenagem). IDs de blocos e itens mantidos; arquivos de estado dos saves migrados automaticamente.
+- Documentação em inglês (principal), português (Brasil) e espanhol; `CONTRIBUTING.md` e `AGENTS.md`.
+
 ### Fase 0
 - F0-T01: caminho da instalação e versão do jogo (3.4.0 B10) registrados.
 - F0-T02: estrutura do repositório, `.gitignore`, `CHANGELOG.md`.
@@ -24,7 +28,7 @@ Formato: uma entrada por tarefa (`F<fase>-T<n>`).
 
 ### Fase 2
 - F2-T01: pesquisa de energia (P02, P03, P04 resolvidas no papel); proposta de Rota A 100% XML; ferramenta `tools/il_inspect.ps1`.
-- D6: Carga será combustível com Harmony. Infra C#: `src/FerroEngrenagem` (entrada `IModApi` + Harmony `PatchAll`), `tools/build.ps1`; `check_log.py` mostra as linhas `[FerroEngrenagem]`.
+- D6: Carga será combustível com Harmony. Infra C#: `src/ForgedInAshes` (entrada `IModApi` + Harmony `PatchAll`), `tools/build.ps1`; `check_log.py` mostra as linhas `[ForgedInAshes]`.
 - F2-T02: itens Carga (`feCharge`) e Carvão Vegetal (`feResourceCharcoal`); Carvoeira (`feCharcoalKiln`, coletor: 5 Madeira → 1 Carvão Vegetal) com receita no inventário.
 - F2-T03: Gerador a Carvão (`feCoalGenerator`, coletor com catalisador: 1 Carvão Vegetal → 5 Cargas por Volante), Volante de Inércia (`feFlywheel`, no Torno); Prensa e Torno passam a ter slot de combustível e, por patch Harmony, queimam só Carga.
 - F2-T04: Manivela (`feCrank`): cada golpe nela gasta estamina e dá 1 Carga (gancho em `buffStatusCheck01` + GameEvent `fe_crank_charge`); receita no inventário.

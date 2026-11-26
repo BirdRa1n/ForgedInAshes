@@ -1,4 +1,4 @@
-# Plano do mod: Ferro & Engrenagem (7 Days to Die)
+# Plano do mod: ForgedInAshes (7 Days to Die)
 
 > Documento de trabalho para o Claude Code. Coloque este arquivo na raiz do repositório do mod (por exemplo `PLANO_MOD.md`) e peça para o Claude Code lê-lo antes de começar. O nome do mod e o prefixo de IDs são provisórios; troque à vontade, mas de forma consistente.
 
@@ -25,7 +25,7 @@
 
 1. **Nunca invente nomes do jogo.** Todo nome de item, bloco, receita, janela XUi, propriedade ou classe vanilla precisa ser confirmado com busca (`grep`/`rg`) nos arquivos da instalação do jogo antes de ser usado em XML ou C#. Se não encontrar, pare e registre na seção 12 (Pendências), não chute.
 2. **Fonte da verdade:** a pasta `Data/Config` da instalação do jogo do usuário. Peça o caminho ao usuário na primeira sessão e grave-o em `tools/game_path.txt` (não versionar se tiver caminho pessoal). Caminho típico no Windows: `C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die`.
-3. **Não edite nada dentro da instalação do jogo.** Todo o trabalho fica no repositório do mod. A instalação para teste é uma cópia/link de `Mods/FerroEngrenagem` para a pasta `Mods` do jogo.
+3. **Não edite nada dentro da instalação do jogo.** Todo o trabalho fica no repositório do mod. A instalação para teste é uma cópia/link de `Mods/ForgedInAshes` para a pasta `Mods` do jogo.
 4. **Patches, não cópias.** Altere o vanilla com `<set>`, `<append>`, `<insertAfter>`, `<remove>` etc. via XPath. Para mudar a estação de uma receita vanilla, use `<set>` no atributo `craft_area`, nunca reescreva a receita inteira. Isso reduz conflito com outros mods e quebra menos em updates.
 5. **Uma fase por vez.** Não comece a fase N+1 sem o critério de pronto da fase N cumprido e confirmado pelo usuário no jogo. O Claude Code não consegue rodar o jogo: ao fim de cada tarefa, escreva um **roteiro de teste manual** curto (o que o usuário faz no jogo e o que deve ver) e pare.
 6. **Ler o log.** Depois de cada teste, peça ao usuário o log do jogo (`output_log*.txt` / `Player.log`, confirme o local) e procure por `ERR`, `WRN`, `XPath` e o nome do mod.
@@ -74,15 +74,15 @@ Protótipo visual de referência (só para sentir o fluxo, não é o jogo): http
 ## 3. Estrutura do repositório
 
 ```
-FerroEngrenagem/                 ← raiz do repo
+ForgedInAshes/                 ← raiz do repo
 ├─ PLANO_MOD.md                  ← este arquivo
 ├─ CHANGELOG.md
 ├─ tools/
 │  ├─ game_path.txt              ← caminho da instalação (fora do git se pessoal)
-│  ├─ install.ps1 / install.sh   ← copia/linka Mods/FerroEngrenagem para o jogo
+│  ├─ install.ps1 / install.sh   ← copia/linka Mods/ForgedInAshes para o jogo
 │  ├─ check_xpath.py             ← valida cada xpath dos patches contra Data/Config vanilla
 │  └─ recipe_report.py           ← lista receitas vanilla por craft_area e confere o remapeamento
-├─ Mods/FerroEngrenagem/         ← o mod em si
+├─ Mods/ForgedInAshes/         ← o mod em si
 │  ├─ ModInfo.xml
 │  ├─ Config/
 │  │  ├─ items.xml
@@ -97,10 +97,10 @@ FerroEngrenagem/                 ← raiz do repo
 │  │     ├─ windows.xml
 │  │     └─ xui.xml
 │  ├─ Harmony/  (ou a DLL na raiz do mod — confirmar o padrão atual)
-│  │  └─ FerroEngrenagem.dll
+│  │  └─ ForgedInAshes.dll
 │  └─ Resources/                 ← asset bundles (fase 6)
 └─ src/                          ← projeto C# (fase 2+)
-   └─ FerroEngrenagem.csproj
+   └─ ForgedInAshes.csproj
 ```
 
 Convenções:
@@ -113,7 +113,7 @@ Convenções:
 
 ## 4. Ferramentas de apoio que o Claude Code deve escrever (fase 0)
 
-1. **`tools/check_xpath.py`** — lê cada arquivo em `Mods/FerroEngrenagem/Config/*.xml`, extrai os `xpath` de cada comando de patch e testa contra o XML vanilla correspondente (usando `lxml`). Para `<set>`/`<remove>`, o xpath precisa achar pelo menos 1 nó; reporte os que acham 0. Rodar antes de todo teste no jogo.
+1. **`tools/check_xpath.py`** — lê cada arquivo em `Mods/ForgedInAshes/Config/*.xml`, extrai os `xpath` de cada comando de patch e testa contra o XML vanilla correspondente (usando `lxml`). Para `<set>`/`<remove>`, o xpath precisa achar pelo menos 1 nó; reporte os que acham 0. Rodar antes de todo teste no jogo.
 2. **`tools/recipe_report.py`** — lê `recipes.xml` vanilla e gera um CSV: nome da receita, `craft_area` atual (vazio = inventário do jogador), item de saída, ingredientes. Depois aplica os patches do mod e mostra o `craft_area` final. Serve para conferir a fase 3 e detectar receitas esquecidas.
 3. **`tools/find_sources.py <item>`** — procura um item em `recipes.xml`, `loot.xml`, `blocks.xml` (drops de salvage/harvest/destroy), `traders.xml` e quests. Resolve as pendências P05, P06 e P11.
 4. **`tools/install`** — copia ou cria link simbólico do mod para a pasta `Mods` do jogo.
@@ -393,7 +393,7 @@ Cada tarefa tem ID `F<fase>-T<n>`. Ao terminar uma tarefa: rodar `check_xpath.py
 
 **Pronto quando:** o mod carrega sem erros e o item de teste aparece; P01 e P05 resolvidas.
 
-**Status: CONCLUÍDA em 2026-11-22.** Log: `Loaded Mod: FerroEngrenagem (0.1.0)` e `Loading localization from mod: FerroEngrenagem`, sem erros do mod. No jogo (criativo, idioma brazilian), `feTestItem` aparece como "Item de Teste Ferro & Engrenagem" (ID 1435), com o ícone do Mechanical Parts tingido de laranja.
+**Status: CONCLUÍDA em 2026-11-22.** Log: `Loaded Mod: ForgedInAshes (0.1.0)` e `Loading localization from mod: ForgedInAshes`, sem erros do mod. No jogo (criativo, idioma brazilian), `feTestItem` aparece como "Item de Teste ForgedInAshes" (ID 1435), com o ícone do Mechanical Parts tingido de laranja.
 
 ### Fase 1 — Fatia vertical em XML, sem energia (dificuldade 2)
 
@@ -588,7 +588,7 @@ Gerada por `python tools/remap_proposal.py` → `tools/out/remap_proposal.csv` (
 | P10 | Equilíbrio de estamina × carga da manivela | Teste no jogo (F2-T07) | 2 | Aberta |
 | P11 | Cortar peças de loot/salvage/traders sem quebrar quests | `find_sources.py` + teste | 1, 3 | Parcial: lista de fontes em 12.1; falta testar no jogo |
 | P12 | Nome real dos itens vanilla usados no plano (Short Iron Pipe, Nails, Wood Log, Engine, Cloth Fragment etc.) | `find_sources.py --search` + `Localization.csv` | 0 | **Resolvida** (tabela em 12.2) |
-| P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | **Resolvida no código:** `Mod.LoadAssemblies` carrega todo `*.dll` da **raiz** da pasta do mod; `Mod.InitModCode` instancia a classe que implementa `IModApi` e chama `InitMod(Mod)`. Com EAC ligado: aviso "AntiCheat needs to be disabled", ou mod pulado se `SkipWithAntiCheat=true`. Build: `tools/build.ps1` (csc .NET 4 / C# 5, refs da instalação). **Confirmado no jogo** (2026-11-22 15:12): `Loaded assembly FerroEngrenagem` → `Found ModAPI` → `[FerroEngrenagem] InitMod` → `Initialized code in mod` |
+| P13 | Onde a DLL do mod deve ficar e como o jogo a carrega na versão atual | Comparar com um mod de código que funcione nessa versão | 2 | **Resolvida no código:** `Mod.LoadAssemblies` carrega todo `*.dll` da **raiz** da pasta do mod; `Mod.InitModCode` instancia a classe que implementa `IModApi` e chama `InitMod(Mod)`. Com EAC ligado: aviso "AntiCheat needs to be disabled", ou mod pulado se `SkipWithAntiCheat=true`. Build: `tools/build.ps1` (csc .NET 4 / C# 5, refs da instalação). **Confirmado no jogo** (2026-11-22 15:12): `Loaded assembly ForgedInAshes` → `Found ModAPI` → `[ForgedInAshes] InitMod` → `Initialized code in mod` |
 | P14 | Nome da subpasta XUi dentro do mod: `Config/XUi/` aplica sobre `XUi_InGame`? | `tools/fe_common.py` assume que sim (`SUBDIR_MAP`); confirmar com mod de referência ou ILSpy antes de criar a primeira XUi própria | 2 | Adiada (F1 não precisa de XUi; ver F1-T03) |
 | P15 | Mod só de XML precisa de `SkipWithAntiCheat` ou EAC desligado? | O Harmony vanilla usa `SkipWithAntiCheat=true`; o nosso `ModInfo.xml` não usa. Testar com EAC ligado | 0 | Parcial: funciona com `-noeac` (F0-T06); com EAC ligado ainda não testado |
 

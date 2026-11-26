@@ -130,7 +130,7 @@ def main():
         out.append(f"| `{n}` | {loc.get(n, '')} | {k or '-'} | `{borrowed}` | {m} | {i} |")
     out += ["", f"## Itens sem ícone próprio ({len(rows_i)})", "",
             "Usam o ícone de um item do jogo com tinta. Um ícone 160x160 transparente em",
-            "`Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/<item>.png` + `python tools/apply_icons.py` resolve.", "",
+            "`Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/<item>.png` + `python tools/apply_icons.py` resolve.", "",
             "| Item | Nome | Ícone emprestado (tinta) |", "|---|---|---|"]
     for n, icon, tint in sorted(rows_i):
         out.append(f"| `{n}` | {loc.get(n, '')} | `{icon}` ({tint}) |")

@@ -19,7 +19,7 @@ function Viewer({ model, height }) {
 
 function useTitle(t) {
   useEffect(() => {
-    document.title = (t ? t + " · " : "") + "Ferro & Engrenagem";
+    document.title = (t ? t + " · " : "") + "ForgedInAshes";
   }, [t]);
 }
 

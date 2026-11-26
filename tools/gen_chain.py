@@ -1,11 +1,11 @@
 """D12 generator (PLANO_CADEIA.md): the full production chain of the game's items.
 
 Writes marked GENERATED regions in
-  Mods/FerroEngrenagem/Config/{blocks,items,recipes}.xml   new machines / control blocks, intermediate items, their
+  Mods/ForgedInAshes/Config/{blocks,items,recipes}.xml   new machines / control blocks, intermediate items, their
                                                             recipes, and the chain parts added to (or the shortcuts
                                                             removed from) the game's recipes
-  Mods/FerroEngrenagem/Data/fe_processes.xml               fluids, machines, items and processes of the chains
-  Mods/FerroEngrenagem/Config/Localization.csv             names and descriptions (english + brazilian)
+  Mods/ForgedInAshes/Data/fe_processes.xml               fluids, machines, items and processes of the chains
+  Mods/ForgedInAshes/Config/Localization.csv             names and descriptions (english + brazilian)
 Re-running replaces the regions (idempotent). Edit the tables below, not the output. No 3D models yet (user,
 2026-11-24): every new block reuses a model of the mod; its icon is that block's icon with a tint.
 
@@ -230,11 +230,11 @@ block("feBeltCounter", "Counter Belt", "Esteira Contadora", "Counts the items th
       [("feConveyor", 1), (R_GEAR, 1), (SPRING, 1)])
 block("feMechArm", "Mechanical Arm", "Braço Mecânico", "Powered (60 W). Takes from behind it (a crate, a machine's products, the end of a belt) and gives in front (1 or 2 blocks): machines, crates, burners, belts.",
       "Elétrico (60 W). Pega atrás (baú, produtos de máquina, fim de esteira) e põe na frente (1 ou 2 blocos): máquinas, baús, queimadores, esteiras.",
-      "feElecPump", {"Class": "FerroEngrenagem.FeArm, FerroEngrenagem", "FeFluid": "none", "RequiredPower": "60", "FeArmSeconds": "1"},
+      "feElecPump", {"Class": "ForgedInAshes.FeArm, ForgedInAshes", "FeFluid": "none", "RequiredPower": "60", "FeArmSeconds": "1"},
       "feTorqueRegulatorPrefab", "feTorqueRegulator", "ffa040", [("feElectricMotorSmall", 1), (R_GEAR, 2), (R_SHAFT, 2), (R_PLATE, 2)])
 block("feSignalLever", "Signal Lever", "Alavanca de Sinal", "E: on / off. Gives a signal to the blocks touching it (valves, gates, clutches).",
       "E: liga / desliga. Dá sinal aos blocos encostados (registros, comportas, embreagens).", "fePipe",
-      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "lever"}, "feClutchPrefab", "feClutch", "ff4040",
+      {"Class": "ForgedInAshes.FeLever, ForgedInAshes", "FeFluid": "none", "FeSignal": "lever"}, "feClutchPrefab", "feClutch", "ff4040",
       [(R_PLATE, 1), (R_SHAFT, 1)])
 block("feSignalReceiver", "Signal Receiver", "Receptor de Sinal", "Wire it like a lamp (switch, timer, motion sensor, pressure plate): while powered it gives a signal to the blocks touching it.",
       "Ligue com fio como uma lâmpada (interruptor, timer, sensor, placa de pressão): com energia dá sinal aos blocos encostados.",
@@ -679,11 +679,11 @@ block("fePistonHead", "Piston Head", "Cabeça de Pistão", "Part of an extended 
       {"CreativeMode": "None", "Shape": "ModelEntity"}, "fePipePrefab", "fePipe", "a0a0ff", [])
 block("feItemChute", "Item Chute", "Calha Vertical", "A closed vertical chute: items put into it fall to what is under the column (crate, machine, belt). A fan under it blowing up lifts them.",
       "Calha vertical fechada: os itens caem até o que está embaixo da coluna (baú, máquina, esteira). Um ventilador embaixo, para cima, sobe os itens.",
-      PLAIN, {"Class": "FerroEngrenagem.FeHolder, FerroEngrenagem", "FeChute": "true", "Shape": "ModelEntity"}, "fePipePrefab", "fePipe", "c0c0c0",
+      PLAIN, {"Class": "ForgedInAshes.FeHolder, ForgedInAshes", "FeChute": "true", "Shape": "ModelEntity"}, "fePipePrefab", "fePipe", "c0c0c0",
       [(R_PLATE, 3)], 2)
 block("feDepot", "Depot", "Depósito", "Holds one stack in view. Belts, funnels and arms put; arms take; a station on top (press, inserter, doser) works on it.",
       "Guarda uma pilha à vista. Esteiras, funis e braços põem; braços pegam; uma estação em cima (prensa, encaixador, dosador) trabalha nela.",
-      PLAIN, {"Class": "FerroEngrenagem.FeHolder, FerroEngrenagem", "FeDepot": "true", "Shape": "ModelEntity"}, "feCasterPrefab", "feCaster", "e0e0a0",
+      PLAIN, {"Class": "ForgedInAshes.FeHolder, ForgedInAshes", "FeDepot": "true", "Shape": "ModelEntity"}, "feCasterPrefab", "feCaster", "e0e0a0",
       [(R_PLATE, 2), ("resourceWood", 4)])
 block("feItemVault", "Item Vault", "Cofre Modular", "A big crate. Vaults touching each other are one storage: belts fill the cluster, arms take from it.",
       "Um baú grande. Cofres encostados são um armazém só: esteiras enchem o conjunto, braços tiram dele.",
@@ -704,17 +704,17 @@ block("feCogwheel", "Cogwheel", "Engrenagem", "A shaft with a gear: cogs side by
       "feShaft", {"FeKinetic": "cog"}, "feSpinInverterPrefab", "feSpinInverter", "e0c060", [(R_GEAR, 2), (R_SHAFT, 1)], 2)
 block("feSignalAnalog", "Analog Lever", "Alavanca Analógica", "E: signal strength 0 to 15. Regulator valves next to it open that much.",
       "E: força do sinal de 0 a 15. Válvulas reguladoras encostadas abrem nessa medida.", "fePipe",
-      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "analog"}, "feClutchPrefab", "feClutch", "ffff40", [(R_PLATE, 1), (SPRING, 1)])
+      {"Class": "ForgedInAshes.FeLever, ForgedInAshes", "FeFluid": "none", "FeSignal": "analog"}, "feClutchPrefab", "feClutch", "ffff40", [(R_PLATE, 1), (SPRING, 1)])
 block("feWirelessTx", "Wireless Transmitter", "Transmissor de Sinal", "Sends the signal it gets (lever, gauge, wire) to every receiver with the same frequency (an item, set in its settings).",
       "Envia o sinal que recebe (alavanca, manômetro, fio) a todo receptor com a mesma frequência (um item, nas configurações).", "fePipe",
-      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "wtx"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff8040",
+      {"Class": "ForgedInAshes.FeLever, ForgedInAshes", "FeFluid": "none", "FeSignal": "wtx"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff8040",
       [("feCircuitBoard", 1), (COIL, 1), (R_PLATE, 1)])
 block("feWirelessRx", "Wireless Receiver", "Receptor sem Fio", "Gives the signal of its frequency to the blocks touching it.", "Dá o sinal da sua frequência aos blocos encostados.", "fePipe",
-      {"Class": "FerroEngrenagem.FeLever, FerroEngrenagem", "FeFluid": "none", "FeSignal": "wrx"}, "feTorqueGaugePrefab", "feTorqueGauge", "40c0ff",
+      {"Class": "ForgedInAshes.FeLever, ForgedInAshes", "FeFluid": "none", "FeSignal": "wrx"}, "feTorqueGaugePrefab", "feTorqueGauge", "40c0ff",
       [("feCircuitBoard", 1), (COIL, 1), (R_PLATE, 1)])
 block("feDisplayPanel", "Display Panel", "Painel Numérico", "Shows in big digits what the block behind it reads: gauge, tank, counter, crate, machine or shaft.",
       "Mostra em números grandes o que o bloco de trás lê: manômetro, tanque, contador, baú, máquina ou eixo.", PLAIN,
-      {"Class": "FerroEngrenagem.FeDisplay, FerroEngrenagem", "Shape": "ModelEntity"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff9030",
+      {"Class": "ForgedInAshes.FeDisplay, ForgedInAshes", "Shape": "ModelEntity"}, "feTorqueGaugePrefab", "feTorqueGauge", "ff9030",
       [("feLightBulb", 4), ("feCircuitBoard", 1), (R_PLATE, 2)])
 machine("feItemDrain", "Item Drain", "Dreno de Itens", "Empties fluid items (jars of water, oil, gas cans, lubricant, ethanol, gas canisters) into the pipe on its top; the empty jars go out in front.",
         "Esvazia itens com fluido (potes de água, óleo, latas de gasolina, lubrificante, álcool, botijões) no cano de cima; os potes vazios saem na frente.",
@@ -808,7 +808,7 @@ def item_xml(i):
     if name == "feEngineerManual":
         extra = """
 			<property class="Action0">
-				<property name="Class" value="FerroEngrenagem.FeGuide, FerroEngrenagem"/>
+				<property name="Class" value="ForgedInAshes.FeGuide, ForgedInAshes"/>
 				<property name="Delay" value="0.5"/>
 			</property>"""
     return f"""		<item name="{name}">
@@ -839,7 +839,7 @@ def block_xml(b):
              f'\t\t\t<property name="CustomIconTint" value="{tint}"/>',
              f'\t\t\t<property name="CreativeMode" value="Player"/>',
              f'\t\t\t<property name="DescriptionKey" value="{name}Desc"/>',
-             f'\t\t\t<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?{model}"/>']
+             f'\t\t\t<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?{model}"/>']
     for k, v in props.items():
         lines.append(f'\t\t\t<property name="{k}" value="{v}"/>')
     lines.append('\t\t</block>')
@@ -1206,7 +1206,7 @@ def write_fallback():
     (fe.MOD_DIR / "Data" / "fe_fallback.xml").write_text("\n".join(out) + "\n", encoding="utf-8")
     st = fe.MOD_DIR / "Data" / "fe_settings.xml"
     if not st.exists():
-        st.write_text('<?xml version="1.0" encoding="UTF-8"?>\n<!-- Ferro & Engrenagem settings (Settings.cs).\n'
+        st.write_text('<?xml version="1.0" encoding="UTF-8"?>\n<!-- ForgedInAshes settings (Settings.cs).\n'
                       '     VanillaShortcuts: remove (default) = the shortcuts the chains replace are gone;\n'
                       '                       expensive = they come back at 3x their cost (Data/fe_fallback.xml). -->\n'
                       '<settings>\n\t<setting name="VanillaShortcuts" value="remove"/>\n</settings>\n', encoding="utf-8")

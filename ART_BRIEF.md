@@ -5,9 +5,9 @@ Este arquivo é para o agente/sessão que vai fazer a **arte** do mod em **outro
 
 ## Regras para não conflitar com o trabalho de XML
 
-- Trabalhe **só** na pasta `Art/` (criar) e, quando chegar a hora de integrar, em `Mods/FerroEngrenagem/Resources/`
-  e `Mods/FerroEngrenagem/UIAtlases/` (ou o que for confirmado; ver "Integração").
-- **Não edite** `Mods/FerroEngrenagem/Config/*`, `tools/*`, `PLANO_MOD.md` nem `MODLOG.md`: são da sessão de XML.
+- Trabalhe **só** na pasta `Art/` (criar) e, quando chegar a hora de integrar, em `Mods/ForgedInAshes/Resources/`
+  e `Mods/ForgedInAshes/UIAtlases/` (ou o que for confirmado; ver "Integração").
+- **Não edite** `Mods/ForgedInAshes/Config/*`, `tools/*`, `PLANO_MOD.md` nem `MODLOG.md`: são da sessão de XML.
   Se a arte precisar de mudança em XML (trocar `Model`, `CustomIcon`), escreva o pedido em `Art/PEDIDOS_XML.md`.
 - Commits pequenos com prefixo `F6-ART:`; faça `git pull --rebase` antes de cada push.
 - **Não redistribuir assets do jogo**: nada de exportar modelos/texturas vanilla (AssetRipper etc.) para dentro do
@@ -49,9 +49,9 @@ e das máquinas acima. 160×160 RGBA, nome do arquivo = nome do item (`feResourc
 ### 3. Depois (fases 2–4): `E01` Manivela, `E02` Carvoeira, `E03` Gerador a Carvão, `I01` Carvão Vegetal,
 `I02` Volante de Inércia — ver tabelas em `PLANO_MOD.md`.
 
-## Animação de giro da rede de torque (contrato, D8 — src/FerroEngrenagem/KineticSpinner.cs)
+## Animação de giro da rede de torque (contrato, D8 — src/ForgedInAshes/KineticSpinner.cs)
 
-Vale para os modelos (prefab no `ferroengrenagem.unity3d`, bloco com `Shape=ModelEntity`) de: Eixo, Caixa de
+Vale para os modelos (prefab no `forgedinashes.unity3d`, bloco com `Shape=ModelEntity`) de: Eixo, Caixa de
 Transmissão, Caixa de Velocidade, Embreagem, Regulador, Medidor, Inversor de Giro, Motor Elétrico, Manivela de
 Torque e as máquinas com encaixe de motor. O mod lê a rede a cada 0,25 s e anima sozinho; o asset só precisa
 seguir os nomes abaixo (nenhum script dentro do bundle).
@@ -87,7 +87,7 @@ vanilla, só para ver que os eventos chegam (os canos `Shape=New` não têm obje
 
 ## Integração pendente (auditoria de 2026-11-22, sessão de XML)
 
-Já no jogo: **feCrank** (Manivela), via `Resources/ferroengrenagem.unity3d` + `FeBuild.cs`.
+Já no jogo: **feCrank** (Manivela), via `Resources/forgedinashes.unity3d` + `FeBuild.cs`.
 
 Prontos em `Art/` mas **fora do bundle** (o `FeBuild.cs` só tem `Blocks = { "feCrank" }`):
 
@@ -101,10 +101,10 @@ Prontos em `Art/` mas **fora do bundle** (o `FeBuild.cs` só tem `Blocks = { "fe
 | `feCoalGenerator` | 1×1×1 | gerador vanilla |
 
 Pedido para quem tem o Unity 2022.3.62f2:
-1. Acrescentar esses nomes ao array `Blocks` do `Art/UnityProject/Assets/Editor/FeBuild.cs` e rodar **FerroEngrenagem > Build All**.
-2. Commitar o `Mods/FerroEngrenagem/Resources/ferroengrenagem.unity3d` novo.
+1. Acrescentar esses nomes ao array `Blocks` do `Art/UnityProject/Assets/Editor/FeBuild.cs` e rodar **ForgedInAshes > Build All**.
+2. Commitar o `Mods/ForgedInAshes/Resources/forgedinashes.unity3d` novo.
 3. Avisar a sessão de XML, que troca em `blocks.xml`, para cada bloco:
-   `<property name="Model" value="#@modfolder:Resources/ferroengrenagem.unity3d?<bloco>Prefab"/>`
+   `<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?<bloco>Prefab"/>`
    **e** ajusta o `ModelOffset` ao pivô do prefab novo. O padrão do jogo é `(0, 0.5, 0)` quando a propriedade
    não existe; os blocos que hoje copiam um modelo vanilla podem ter `0,0,0` ou nada (ver MODLOG, bug da
    Cozinha/Serraria afundadas). Dizer qual pivô o prefab usa (base no chão ou centro).
@@ -117,6 +117,6 @@ Outros: `feFlywheel` é **item** (precisa de `Meshfile`, não de `Model`; format
 - Modelos de mod entram como **asset bundle** do Unity 2022.3.62f2 e o bloco aponta `Model` para o bundle.
   A sintaxe exata do caminho (`#@modfolder:Resources/<bundle>.unity3d?<Prefab>` ou outra) **precisa ser confirmada**
   nos arquivos/código do jogo 3.4.0 antes de usar — não chutar.
-- Ícones de mod: confirmar se a pasta `Mods/FerroEngrenagem/UIAtlases/ItemIconAtlas/` é o caminho lido pela 3.4.0.
+- Ícones de mod: confirmar se a pasta `Mods/ForgedInAshes/UIAtlases/ItemIconAtlas/` é o caminho lido pela 3.4.0.
 - Entregável mínimo antes da integração: `Art/<maquina>/<maquina>.blend` + `.fbx` exportado + PNGs de preview,
   e os ícones em `Art/icons/`.

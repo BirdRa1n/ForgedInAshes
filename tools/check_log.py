@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 LOG_DIR = Path(os.environ.get("APPDATA", "")) / "7DaysToDie" / "logs"
-MOD = "FerroEngrenagem"
+MOD = "ForgedInAshes"
 # Case-insensitive words, plus our id prefix "fe" + Uppercase matched case-SENSITIVELY
 # (with re.I, "fe[A-Z]" also matched "featured" in EOS news warnings).
 KEYWORDS_I = re.compile(r"xml|xpath|locali|" + MOD, re.I)

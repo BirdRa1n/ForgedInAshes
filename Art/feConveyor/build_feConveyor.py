@@ -1,4 +1,4 @@
-"""Builds our low conveyor (belt top at port height) for the D10 belt code (src/FerroEngrenagem/Belt.cs).
+"""Builds our low conveyor (belt top at port height) for the D10 belt code (src/ForgedInAshes/Belt.cs).
 
 Run inside Blender (Scripting tab, the Blender MCP server, or `blender --background --python`).
 Units: 1 Blender unit = 1 m = 1 game block; origin at the floor centre of the block.

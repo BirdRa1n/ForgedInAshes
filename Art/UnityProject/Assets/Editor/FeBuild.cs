@@ -1,4 +1,4 @@
-// Ferro & Engrenagem: turns the Blender FBX exports in Art/<block>/<block>.fbx into
+// ForgedInAshes: turns the Blender FBX exports in Art/<block>/<block>.fbx into
 // 7DTD block prefabs and builds the mod's asset bundle.
 //
 // Prefab layout copied from vanilla block prefabs of 7DTD 3.4.0 (forgeWorkstationPrefab,
@@ -9,9 +9,9 @@
 //   child  : the model, layer 0, moved -0.5 m in Y (the block origin is the center of the
 //            bottom block; our Blender models have their origin on the floor)
 // Model path in blocks.xml (DataLoader.ParseDataPathIdentifier):
-//   Model="#@modfolder:Resources/ferroengrenagem.unity3d?<block>Prefab"
+//   Model="#@modfolder:Resources/forgedinashes.unity3d?<block>Prefab"
 //
-// Menu: FerroEngrenagem > Build All. Batch:
+// Menu: ForgedInAshes > Build All. Batch:
 //   Unity.exe -batchmode -quit -projectPath Art/UnityProject -executeMethod FeBuild.BuildAll
 using System.IO;
 using System.Linq;
@@ -42,15 +42,15 @@ public static class FeBuild
 
     const string ModelsDir = "Assets/Models";
     const string PrefabDir = "Assets/Prefabs";
-    const string BundleName = "ferroengrenagem.unity3d";
+    const string BundleName = "forgedinashes.unity3d";
     const int BlockLayer = 16;          // TerrainCollision
     const string BlockTag = "T_Block";
 
     static string ProjectRoot => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
     static string ArtDir => Path.GetFullPath(Path.Combine(ProjectRoot, ".."));
-    static string OutDir => Path.GetFullPath(Path.Combine(ProjectRoot, "..", "..", "Mods", "FerroEngrenagem", "Resources"));
+    static string OutDir => Path.GetFullPath(Path.Combine(ProjectRoot, "..", "..", "Mods", "ForgedInAshes", "Resources"));
 
-    [MenuItem("FerroEngrenagem/Build All")]
+    [MenuItem("ForgedInAshes/Build All")]
     public static void BuildAll()
     {
         SyncModels();
@@ -58,7 +58,7 @@ public static class FeBuild
         BuildBundle();
     }
 
-    [MenuItem("FerroEngrenagem/1. Sync FBX from Art")]
+    [MenuItem("ForgedInAshes/1. Sync FBX from Art")]
     public static void SyncModels()
     {
         Directory.CreateDirectory(Path.Combine(ProjectRoot, ModelsDir));
@@ -341,7 +341,7 @@ public static class FeBuild
         }
     }
 
-    [MenuItem("FerroEngrenagem/2. Build Prefabs")]
+    [MenuItem("ForgedInAshes/2. Build Prefabs")]
     public static void BuildPrefabs()
     {
         Directory.CreateDirectory(Path.Combine(ProjectRoot, PrefabDir));
@@ -445,7 +445,7 @@ public static class FeBuild
         return null;
     }
 
-    [MenuItem("FerroEngrenagem/3. Build Bundle")]
+    [MenuItem("ForgedInAshes/3. Build Bundle")]
     public static void BuildBundle()
     {
         var tmp = Path.Combine(ProjectRoot, "Build", "Bundles");
