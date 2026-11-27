@@ -83,6 +83,20 @@ namespace ForgedInAshes
             public float L;
         }
         readonly List<Linkage> links = new List<Linkage>();
+
+        // Walking beam (Oil Extractor pumpjack, 2026-11-27): FeRock_<n> (the beam, pivot at its fulcrum, rocks about
+        // its local +Z) is driven by the crank through a rod of fixed length from FeRockPin_<n> (empty on the crank)
+        // to FeRockEnd_<n> (empty on the beam); FeRockRod_<n> (pivot at the crank pin) follows that rod; FeRockSlide_<n>
+        // (the polished rod) moves up and down with FeRockHead_<n> (empty on the horsehead). The beam angle is solved
+        // every frame from the crank's real angle (no stretch), in the model root's space.
+        class Rock
+        {
+            public Transform Beam, Rod, Slide;
+            public Vector3 Pivot, Axis, End0, Head0, PinInCrank, Dir0, Slide0;
+            public Quaternion Beam0, Rod0;
+            public float L, Theta;
+        }
+        readonly List<Rock> rocks = new List<Rock>();
         Transform crank;
         bool linksCaptured, linksSolved;
         Vector3 omega = Vector3.forward;
@@ -143,6 +157,8 @@ namespace ForgedInAshes
                 Transform c = t.GetChild(i);
                 // case-sensitive: the Spin Inverter model itself is named "feSpinInverter" and must not spin as a whole
                 if (c.name.StartsWith("FeSpin", System.StringComparison.Ordinal)) parts.Add(Parse(c));
+                else if (c.name.StartsWith("FeRock", System.StringComparison.Ordinal))
+                    linkParts[c.name] = c;
                 else if (c.name.StartsWith("FeCrosshead_", System.StringComparison.Ordinal) ||
                          c.name.StartsWith("FeConrod_", System.StringComparison.Ordinal) ||
                          c.name.StartsWith("FeCrankPin_", System.StringComparison.Ordinal))
@@ -167,6 +183,7 @@ namespace ForgedInAshes
             if (linksCaptured) return;
             linksCaptured = true;
             links.Clear();
+            rocks.Clear();
             crank = null;
             foreach (Part p in parts)
                 if (p.T != null && (p.T.name.Contains("Flywheel") || p.T.name.Contains("Crank"))) { crank = p.T; break; }
@@ -190,6 +207,85 @@ namespace ForgedInAshes
                 l.Dir0 = (p0 - l.Cross0).normalized;
                 l.Rod0 = Quaternion.Inverse(transform.rotation) * rod.rotation;
                 links.Add(l);
+            }
+            for (int n = 1; n <= 4; n++)
+            {
+                Transform beam, pin, end, rod, slide, head;
+                if (!linkParts.TryGetValue("FeRock_" + n, out beam) | !linkParts.TryGetValue("FeRockPin_" + n, out pin) |
+                    !linkParts.TryGetValue("FeRockEnd_" + n, out end)) continue;
+                linkParts.TryGetValue("FeRockRod_" + n, out rod);
+                linkParts.TryGetValue("FeRockSlide_" + n, out slide);
+                linkParts.TryGetValue("FeRockHead_" + n, out head);
+                Rock r = new Rock();
+                r.Beam = beam;
+                r.Rod = rod;
+                r.Slide = head != null ? slide : null;
+                r.Pivot = transform.InverseTransformPoint(beam.position);
+                r.Axis = transform.InverseTransformDirection(beam.forward).normalized;
+                r.End0 = transform.InverseTransformPoint(end.position);
+                r.Head0 = head != null ? transform.InverseTransformPoint(head.position) : Vector3.zero;
+                r.PinInCrank = crank.InverseTransformPoint(pin.position);
+                Vector3 p0 = transform.InverseTransformPoint(pin.position);
+                r.L = (r.End0 - p0).magnitude;
+                r.Dir0 = (r.End0 - p0).normalized;
+                r.Beam0 = beam.localRotation;
+                if (rod != null) r.Rod0 = Quaternion.Inverse(transform.rotation) * rod.rotation;
+                if (r.Slide != null) r.Slide0 = transform.InverseTransformPoint(slide.position);
+                rocks.Add(r);
+            }
+        }
+
+        Vector3 RockEnd(Rock r, float deg)
+        {
+            return r.Pivot + Quaternion.AngleAxis(deg, r.Axis) * (r.End0 - r.Pivot);
+        }
+
+        void SolveRocks()
+        {
+            if (crank == null) return;
+            foreach (Rock r in rocks)
+            {
+                if (r.Beam == null) continue;
+                Vector3 pin = transform.InverseTransformPoint(crank.TransformPoint(r.PinInCrank));
+                // the beam angle that keeps the rod length: scan near the last angle for the sign change, then bisect
+                float best = r.Theta, lo = float.NaN, hi = float.NaN;
+                float prevA = r.Theta - 40f, prevF = (RockEnd(r, prevA) - pin).magnitude - r.L;
+                float bestGap = float.MaxValue;
+                for (float a = r.Theta - 39f; a <= r.Theta + 40f; a += 1f)
+                {
+                    float f = (RockEnd(r, a) - pin).magnitude - r.L;
+                    if ((f <= 0f) != (prevF <= 0f))
+                    {
+                        float gap = Mathf.Abs((a + prevA) * 0.5f - r.Theta);
+                        if (gap < bestGap) { bestGap = gap; lo = prevA; hi = a; }
+                    }
+                    prevA = a;
+                    prevF = f;
+                }
+                if (!float.IsNaN(lo))
+                {
+                    float flo = (RockEnd(r, lo) - pin).magnitude - r.L;
+                    for (int i = 0; i < 18; i++)
+                    {
+                        float mid = (lo + hi) * 0.5f;
+                        float fm = (RockEnd(r, mid) - pin).magnitude - r.L;
+                        if ((fm <= 0f) == (flo <= 0f)) { lo = mid; flo = fm; } else hi = mid;
+                    }
+                    best = (lo + hi) * 0.5f;
+                }
+                r.Theta = Mathf.Clamp(best, -60f, 60f);
+                r.Beam.localRotation = r.Beam0 * Quaternion.AngleAxis(r.Theta, Vector3.forward);
+                Vector3 end = RockEnd(r, r.Theta);
+                if (r.Rod != null)
+                {
+                    r.Rod.position = transform.TransformPoint(pin);
+                    r.Rod.rotation = transform.rotation * (Quaternion.FromToRotation(r.Dir0, (end - pin).normalized) * r.Rod0);
+                }
+                if (r.Slide != null)
+                {
+                    Vector3 head = r.Pivot + Quaternion.AngleAxis(r.Theta, r.Axis) * (r.Head0 - r.Pivot);
+                    r.Slide.position = transform.TransformPoint(r.Slide0 + Vector3.up * (head.y - r.Head0.y));
+                }
             }
         }
 
@@ -250,6 +346,8 @@ namespace ForgedInAshes
                 if (net == null) return;
                 wrong = net.WrongSpin.ContainsKey(pos);
                 running = net.Running && net.Machines.ContainsKey(pos);
+                // a giant machine switched off (or the sim paused it) stands still though its socket turns
+                if (running && world.GetBlock(pos).Block is BlockFeGiant && GiantMachines.Off(pos)) running = false;
                 if (running) targetRpm = net.MachineSpeed(pos) * Kinetic.BaseRpm;
             }
             else
@@ -310,7 +408,12 @@ namespace ForgedInAshes
                 }
             }
 
-            if (links.Count > 0 && (rpm > 0.01f || !linksSolved)) { SolveLinks(); linksSolved = true; }
+            if ((links.Count > 0 || rocks.Count > 0) && (rpm > 0.01f || !linksSolved))
+            {
+                SolveLinks();
+                SolveRocks();
+                linksSolved = true;
+            }
 
             if (pistons.Count > 0)
             {

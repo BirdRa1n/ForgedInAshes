@@ -1,0 +1,16 @@
+{
+ "nome": "feMiningRig",
+ "config": "F:\\IA\\fe_blender\\configs\\feMiningRig.json",
+ "triangulos_antes": 39740,
+ "triangulos_depois": 13500,
+ "atlas": 4096,
+ "arquivos": [
+  "feMiningRig_Albedo.png",
+  "feMiningRig_Normal.png",
+  "feMiningRig_MetallicSmoothness.png",
+  "feMiningRig_Roughness.png",
+  "feMiningRig_HD.fbx",
+  "feMiningRig_HD.blend"
+ ],
+ "segundos": 176.0
+}

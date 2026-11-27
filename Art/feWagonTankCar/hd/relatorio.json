@@ -1,0 +1,16 @@
+{
+ "nome": "feWagonTankCar",
+ "config": "F:\\IA\\fe_blender\\configs\\feWagonTankCar.json",
+ "triangulos_antes": 20532,
+ "triangulos_depois": 8724,
+ "atlas": 4096,
+ "arquivos": [
+  "feWagonTankCar_Albedo.png",
+  "feWagonTankCar_Normal.png",
+  "feWagonTankCar_MetallicSmoothness.png",
+  "feWagonTankCar_Roughness.png",
+  "feWagonTankCar_HD.fbx",
+  "feWagonTankCar_HD.blend"
+ ],
+ "segundos": 105.6
+}

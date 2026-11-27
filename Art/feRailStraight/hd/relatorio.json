@@ -1,0 +1,16 @@
+{
+ "nome": "feRailStraight",
+ "config": "F:\\IA\\fe_blender\\configs\\feRailStraight.json",
+ "triangulos_antes": 1392,
+ "triangulos_depois": 420,
+ "atlas": 2048,
+ "arquivos": [
+  "feRailStraight_Albedo.png",
+  "feRailStraight_Normal.png",
+  "feRailStraight_MetallicSmoothness.png",
+  "feRailStraight_Roughness.png",
+  "feRailStraight_HD.fbx",
+  "feRailStraight_HD.blend"
+ ],
+ "segundos": 18.8
+}

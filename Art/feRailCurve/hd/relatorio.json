@@ -1,0 +1,16 @@
+{
+ "nome": "feRailCurve",
+ "config": "F:\\IA\\fe_blender\\configs\\feRailCurve.json",
+ "triangulos_antes": 11784,
+ "triangulos_depois": 4900,
+ "atlas": 4096,
+ "arquivos": [
+  "feRailCurve_Albedo.png",
+  "feRailCurve_Normal.png",
+  "feRailCurve_MetallicSmoothness.png",
+  "feRailCurve_Roughness.png",
+  "feRailCurve_HD.fbx",
+  "feRailCurve_HD.blend"
+ ],
+ "segundos": 45.8
+}

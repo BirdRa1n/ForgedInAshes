@@ -17,6 +17,9 @@ OUT = os.path.join(REPO, "Mods", "ForgedInAshes", "UIAtlases", "ItemIconAtlas")
 # model (Art/<model>/hd) -> block names that use it
 BLOCKS = {
     "feM_Foundry": ["feFoundry"], "feM_Lathe": ["feLathe"], "feM_Ammo": ["feAmmoPress"],
+    # train kits (crates) show the car they become
+    "feTrainLocoCar": ["feTrainLoco"], "feWagonCargoCar": ["feWagonCargo"], "feWagonTankCar": ["feWagonTank"],
+    "feWagonPassengerCar": ["feWagonPassenger"],
 }
 HIDE = ("fePreview", "FePour", "FeFx", "FeDuctSide", "FeDuctHatch", "FeDuctBoot", "FeDuctRamp", "FeDuctCapF", "FeCurve",
         "FeJunction", "FeMerge", "FeBeltChute", "FeFunnelSpoutDuct", "FeLevelGas", "FeReach")

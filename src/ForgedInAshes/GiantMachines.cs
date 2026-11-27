@@ -426,6 +426,15 @@ namespace ForgedInAshes
             if (!_blockValue.ischild) WorldMachines.Register(_blockPos);
         }
 
+        // The model's moving parts (drill string, crown, drum, trommel; the pumpjack's crank and walking beam) turn
+        // with the torque in the motor socket (KineticSpinner, machine mode: the parent block is the machine).
+        public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos,
+                                                                  BlockValue _blockValue, BlockEntityData _ebcd)
+        {
+            base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _blockValue, _ebcd);
+            if (!_blockValue.ischild) KineticSpinner.AttachMachine(_ebcd, _blockPos, this);
+        }
+
         public override bool HasBlockActivationCommands(WorldBase _world, BlockValue _blockValue, Vector3i _blockPos, EntityAlive _entityFocusing)
         {
             return true;

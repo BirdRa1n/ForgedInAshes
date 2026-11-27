@@ -419,3 +419,28 @@ modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
 - [ ] Vagão-tanque: cano enchendo a estação A; descarrega na B; cano saindo da B.
 - [ ] Vagão de passageiros: E senta, viaja junto, E ou pulo desce (ver se não treme nem dá dano).
 - [ ] Sair e voltar ao mundo: trens, rota, carga e combustível continuam.
+
+## 26. Modelos D14 (trilhos, gigantes, tanque, estação, trens)
+
+- [ ] Trilho reto em fila: dormentes com passo contínuo nas emendas, trilhos alinhados. Curva e desvios fechando com
+      retos nas pontas (sem degrau, sem trilho torto); rampa sobe 1 bloco em 3 sem buraco nas pontas.
+- [ ] Dá para pôr blocos ao lado do trilho (o colisor fica só na célula do trilho).
+- [ ] Mineradora: com torque no encaixe (atrás, no meio) giram haste/mesa rotativa, roldanas do topo, tambor,
+      trommel e roletes; desligada (E), para. Saída: esteira no meio da frente, no chão.
+- [ ] Extratora: com torque, a manivela gira e o **balancim sobe e desce** sem a biela esticar; a haste polida entra
+      e sai da árvore de natal. Flange de saída no meio da frente, a 0,5 m.
+- [ ] Tanque de Armazenamento: a boia vermelha sobe na régua conforme enche; o manômetro acompanha.
+- [ ] Estação: subir pelos degraus e andar na plataforma sob o teto; escrever o nome na etiqueta e ler na placa
+      (dos dois lados; tamanho da letra a conferir). Deixe **um bloco livre** entre a estação e o trilho, senão o vagão
+      (2,6 m) entra na plataforma.
+- [ ] Kits: caixote com a silhueta do vagão; ícone mostra o vagão.
+- [ ] Trem andando: rodas giram no sentido certo, bielas da locomotiva acompanham (cruzeta corre na guia, sem
+      atravessar o cilindro), fumaça na chaminé e vapor nos cilindros só andando. Vagão de passageiros: sentado no
+      meio, no piso (1 m).
+- [ ] Andar contra a locomotiva e os vagões: não atravessa (lados e pontas). Pular no teto: fica em pé; com o trem
+      andando, é levado junto sem cair nem tremer. Ficar no trilho na frente do trem: é empurrado para o lado.
+- [ ] Embarque: E na locomotiva entra na cabine (E = painel, pulo = desce); E no vagão de passageiros senta.
+- [ ] Cabine: E na locomotiva → câmera externa; W acelera, S freia e dá ré, espaço freia; A/D muda "próximo desvio"
+      no texto e o trem segue aquele ramo; agachar abre o Painel; E desce (volta para a primeira pessoa).
+- [ ] No Painel, "Ligar" volta ao piloto automático da rota; apertar W/S na cabine assume de novo.
+- [ ] Vagão de passageiros: E senta com visão externa; E ou pulo desce.

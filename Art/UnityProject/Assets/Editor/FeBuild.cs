@@ -37,10 +37,19 @@ public static class FeBuild
         "feBoilerFirebox", "feBoilerDrum", "feSteamTurbine",
         // machine farming (2026-11-27)
         "feHydroTower",
+        // D14: giant machines, storage tank, railways, station, train kits (D14_MODELS)
+        "feMiningRig", "feOilExtractor", "feStorageTank", "feTrainStation",
+        "feRailStraight", "feRailCurve", "feRailRamp", "feRailSwitchR", "feRailSwitchL",
+        "feTrainLoco", "feWagonCargo", "feWagonTank", "feWagonPassenger",
+        // train cars: loose prefabs drawn by TrainView (not blocks): origin on the rail top, no collider
+        "feTrainLocoCar", "feWagonCargoCar", "feWagonTankCar", "feWagonPassengerCar",
         // D12 (Art/feHD/build_feHD.py, D12_MODELS)
         "fePipeHP", "feValveShutoff", "feValveCheck", "feValveRegulator", "feValveSeparator", "feValveRelief", "feGauge", "feCompressor", "feTankLiquid", "feTankGas", "feGasBurner", "feSapTapper", "feTowerSection", "feDistillTower", "feShaleRetort", "feCracker", "feGasScrubber", "fePolymerReactor", "feCoagTank", "feCalender", "feVulcanizer", "feSteelConverter", "feSpringCoiler", "feTemperFurnace", "feSpinner", "feTannery", "feFermenter", "feCentrifuge", "feAutoclave", "feCookerIndustrial", "feMill", "feJuicePress", "feCanner", "feInjector", "feGasMotor", "feInlinePress", "feDoser", "feInserter", "feCrimper", "feWireDrawer", "feGrinder", "feBender", "feWelder", "feReflowOven", "feMechArm", "feSignalLever", "feSignalReceiver", "feBeltSplitter", "feBeltGate", "feBeltCounter",
         "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"
     };
+
+    // Loose prefabs (not blocks): no block layer / tag, no floor offset, no collider (TrainView.cs)
+    static readonly string[] Loose = { "feTrainLocoCar", "feWagonCargoCar", "feWagonTankCar", "feWagonPassengerCar" };
 
     const string ModelsDir = "Assets/Models";
     const string PrefabDir = "Assets/Prefabs";
@@ -385,12 +394,13 @@ public static class FeBuild
             var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{ModelsDir}/{b}.fbx");
             if (model == null) { Debug.LogError($"[FE] FBX not imported: {b}"); continue; }
 
-            var root = new GameObject(b + "Prefab") { layer = BlockLayer, tag = BlockTag };
+            bool loose = Loose.Contains(b);
+            var root = loose ? new GameObject(b + "Prefab") : new GameObject(b + "Prefab") { layer = BlockLayer, tag = BlockTag };
             var inst = (GameObject)PrefabUtility.InstantiatePrefab(model);
             PrefabUtility.UnpackPrefabInstance(inst, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             inst.name = b;
             inst.transform.SetParent(root.transform, false);
-            inst.transform.localPosition = new Vector3(0f, -0.5f, 0f);
+            inst.transform.localPosition = loose ? Vector3.zero : new Vector3(0f, -0.5f, 0f);
             ApplyMaterials(inst, HdMaterial(b));
             // falling metal streams only show while metal flows (FxVisual); hidden before the collider is measured
             foreach (var t in inst.GetComponentsInChildren<Transform>(true))
@@ -415,6 +425,43 @@ public static class FeBuild
             // optional joint pieces that reach into the next block (shown by Belt.cs) do not size the collider
             var rends = root.GetComponentsInChildren<Renderer>()
                 .Where(r => !OptionalParts.Any(o => r.name.StartsWith(o))).ToArray();
+            // FeCol_<n>_<sx>x<sy>x<sz> empties (cm, Blender axes): the model's own collider boxes replace the single
+            // box (rails must stay inside their cells; the station's deck is walkable under its roof)
+            var cols = root.GetComponentsInChildren<Transform>(true).Where(c => c.name.StartsWith("FeCol_")).ToArray();
+            if (loose) rends = new Renderer[0];
+            if (cols.Length > 0)
+            {
+                foreach (var c in cols)
+                {
+                    var tok = c.name.Split('_');
+                    var dims = tok[tok.Length - 1].Split('x');
+                    if (dims.Length != 3) { Debug.LogError($"[FE] {b}: bad collider name {c.name}"); continue; }
+                    float bx = int.Parse(dims[0]) / 100f, by = int.Parse(dims[1]) / 100f, bz = int.Parse(dims[2]) / 100f;
+                    var box = root.AddComponent<BoxCollider>();
+                    box.center = root.transform.InverseTransformPoint(c.position);
+                    box.size = new Vector3(bx, bz, by);              // Blender (x, y, z) -> Unity (x, z, y)
+                    Debug.Log($"[FE] {b}: collider {c.name} center {box.center} size {box.size}");
+                }
+                foreach (var c in cols) Object.DestroyImmediate(c.gameObject);
+                rends = new Renderer[0];
+            }
+            // FeSignText_F / _B: TextMesh children for the vanilla writable label (TEFeatureSignable sets the font
+            // size, character size and text); _F reads from the front (+Z), _B from the back
+            foreach (var st in root.GetComponentsInChildren<Transform>(true).Where(c => c.name.StartsWith("FeSignText")).ToArray())
+            {
+                st.rotation = root.transform.rotation * Quaternion.Euler(0f, st.name.EndsWith("_B") ? 0f : 180f, 0f);
+                st.localScale = Vector3.one * 2.5f;
+                var tm = st.gameObject.AddComponent<TextMesh>();
+                var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                tm.font = font;
+                tm.anchor = TextAnchor.MiddleCenter;
+                tm.alignment = TextAlignment.Center;
+                tm.color = new Color(0.08f, 0.08f, 0.08f);
+                tm.text = "";
+                var mr = st.GetComponent<MeshRenderer>();
+                if (mr != null && font != null) mr.sharedMaterial = font.material;
+                Debug.Log($"[FE] {b}: sign text {st.name}");
+            }
             if (rends.Length > 0)
             {
                 var bounds = rends[0].bounds;

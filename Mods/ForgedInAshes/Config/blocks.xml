@@ -2686,12 +2686,12 @@
 			<property name="FeMinBar" value="1.5"/>
 		</block>
 		<block name="feMiningRig">
+			<property name="CustomIcon" value="feMiningRig"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feMechDrill"/>
-			<property name="CustomIconTint" value="ffb060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feMiningRigDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feCrusherPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feMiningRigPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeGiant, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -2708,12 +2708,12 @@
 			<property name="FeMineBuffer" value="40"/>
 		</block>
 		<block name="feOilExtractor">
+			<property name="CustomIcon" value="feOilExtractor"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feMechPump"/>
-			<property name="CustomIconTint" value="303030"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feOilExtractorDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRetortKilnPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feOilExtractorPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeGiant, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -2734,24 +2734,24 @@
 			<property name="FeNeedPipeBar" value="12"/>
 		</block>
 		<block name="feStorageTank">
+			<property name="CustomIcon" value="feStorageTank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feTankLiquid"/>
-			<property name="CustomIcon" value="feWaterTank"/>
-			<property name="CustomIconTint" value="c08040"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feStorageTankDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWaterTankPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feStorageTankPrefab"/>
 			<property name="MultiBlockDim" value="5,6,5"/>
 			<property name="DisplayType" value="blockMulti"/>
 			<property name="FeFluidCapacity" value="100000"/>
 			<property name="MaxDamage" value="12000"/>
 		</block>
 		<block name="feTrainStation">
+			<property name="CustomIcon" value="feTrainStation"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="feBeltCrate"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="4cc3d9"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feTrainStationDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTrainStationPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeStation, ForgedInAshes"/>
 			<property name="MultiBlockDim" value="9,4,3"/>
 			<property name="DisplayType" value="blockMulti"/>
@@ -2773,12 +2773,12 @@
 			</property>
 		</block>
 		<block name="feRailStraight">
+			<property name="CustomIcon" value="feRailStraight"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feConveyor"/>
-			<property name="CustomIconTint" value="a08060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRailStraightDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRailStraightPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeRail, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2792,12 +2792,12 @@
 			<property name="MultiBlockDim" value="1,1,1"/>
 		</block>
 		<block name="feRailCurve">
+			<property name="CustomIcon" value="feRailCurve"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feConveyor"/>
-			<property name="CustomIconTint" value="a08060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRailCurveDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRailCurvePrefab"/>
 			<property name="Class" value="ForgedInAshes.FeRail, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2811,12 +2811,12 @@
 			<property name="MultiBlockDim" value="5,1,5"/>
 		</block>
 		<block name="feRailRamp">
+			<property name="CustomIcon" value="feRailRamp"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feConveyor"/>
-			<property name="CustomIconTint" value="a08060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRailRampDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRailRampPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeRail, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2830,12 +2830,12 @@
 			<property name="MultiBlockDim" value="1,2,3"/>
 		</block>
 		<block name="feRailSwitchR">
+			<property name="CustomIcon" value="feRailSwitchR"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feConveyor"/>
-			<property name="CustomIconTint" value="a08060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRailSwitchRDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRailSwitchRPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeRail, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2849,12 +2849,12 @@
 			<property name="MultiBlockDim" value="5,1,5"/>
 		</block>
 		<block name="feRailSwitchL">
+			<property name="CustomIcon" value="feRailSwitchL"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feConveyor"/>
-			<property name="CustomIconTint" value="a08060"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feRailSwitchLDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feConveyorPrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feRailSwitchLPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeRail, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2868,12 +2868,12 @@
 			<property name="MultiBlockDim" value="5,1,5"/>
 		</block>
 		<block name="feTrainLoco">
+			<property name="CustomIcon" value="feTrainLoco"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="c05030"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feTrainLocoDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feTrainLocoPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeTrainKit, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2881,12 +2881,12 @@
 			<property name="AllowedRotations" value="Basic90"/>
 		</block>
 		<block name="feWagonCargo">
+			<property name="CustomIcon" value="feWagonCargo"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="c05030"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWagonCargoDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWagonCargoPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeTrainKit, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2894,12 +2894,12 @@
 			<property name="AllowedRotations" value="Basic90"/>
 		</block>
 		<block name="feWagonTank">
+			<property name="CustomIcon" value="feWagonTank"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="c05030"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWagonTankDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWagonTankPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeTrainKit, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>
@@ -2907,12 +2907,12 @@
 			<property name="AllowedRotations" value="Basic90"/>
 		</block>
 		<block name="feWagonPassenger">
+			<property name="CustomIcon" value="feWagonPassenger"/>
+			<property name="CustomIconTint" value="ffffff"/>
 			<property name="Extends" value="corrugatedMetalNoUpgradeMaster"/>
-			<property name="CustomIcon" value="feBeltCrate"/>
-			<property name="CustomIconTint" value="c05030"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWagonPassengerDesc"/>
-			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feBeltCratePrefab"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWagonPassengerPrefab"/>
 			<property name="Class" value="ForgedInAshes.FeTrainKit, ForgedInAshes"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="Material" value="Mmetal"/>

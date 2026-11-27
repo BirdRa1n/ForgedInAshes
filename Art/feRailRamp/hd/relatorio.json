@@ -1,0 +1,16 @@
+{
+ "nome": "feRailRamp",
+ "config": "F:\\IA\\fe_blender\\configs\\feRailRamp.json",
+ "triangulos_antes": 4060,
+ "triangulos_depois": 1228,
+ "atlas": 2048,
+ "arquivos": [
+  "feRailRamp_Albedo.png",
+  "feRailRamp_Normal.png",
+  "feRailRamp_MetallicSmoothness.png",
+  "feRailRamp_Roughness.png",
+  "feRailRamp_HD.fbx",
+  "feRailRamp_HD.blend"
+ ],
+ "segundos": 19.0
+}

@@ -39,6 +39,7 @@ namespace ForgedInAshes
             { "feSpinner", "fe_gear_lp" }, { "feChemMixer", "fe_gear_lp" }, { "feWasher", "fe_gear_lp" },
             { "feSteamDryer", "fe_gear_lp" }, { "feMechHarvester", "fe_gear_lp" }, { "feDeployer", "fe_gear_lp" },
             { "feCrusher", "fe_crusher_lp" }, { "feMill", "fe_crusher_lp" }, { "feGrinder", "fe_crusher_lp" },
+            { "feMiningRig", "fe_drill_lp" }, { "feOilExtractor", "fe_pump_lp" },
             { "feMechDrill", "fe_drill_lp" }, { "feMechSaw", "fe_saw_lp" }, { "feSawmill", "fe_saw_lp" },
             { "feFan", "fe_fan_lp" },
             { "feMechPump", "fe_pump_lp" }, { "feElecPump", "fe_pump_lp" }, { "feCompressor", "fe_pump_lp" },

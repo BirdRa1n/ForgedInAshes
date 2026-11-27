@@ -247,6 +247,22 @@ namespace ForgedInAshes
         /// (used to lay the track behind a new train).</summary>
         public static List<Vector3> Walk(RailEdge e, float s, int dir, float len)
         {
+            return Walk(e, s, dir, len, 0);
+        }
+
+        /// <summary>Walk on from the point p (on a rail, within 0.6 m) going along heading, up to len metres; at a
+        /// junction prefer = -1 takes the leftmost branch, +1 the rightmost, 0 the straightest (manual driving,
+        /// user 2026-11-27). Empty when p is not on a rail.</summary>
+        public static List<Vector3> WalkFrom(Vector3 p, Vector3 heading, float len, int prefer)
+        {
+            RailPos at = Locate(p, 0.6f);
+            if (at.Edge == null) return new List<Vector3>();
+            int dir = Vector3.Dot(Heading(at.Edge, at.S, 1), heading) >= 0f ? 1 : -1;
+            return Walk(at.Edge, at.S, dir, len, prefer);
+        }
+
+        public static List<Vector3> Walk(RailEdge e, float s, int dir, float len, int prefer)
+        {
             Build();
             List<Vector3> pts = new List<Vector3> { e.At(s) };
             float left = len;
@@ -265,7 +281,11 @@ namespace ForgedInAshes
                 float bestDot = -2f;
                 foreach (KeyValuePair<RailEdge, int> c in nx)
                 {
-                    float d = Vector3.Dot(tin, c.Value > 0 ? c.Key.TanA : -c.Key.TanB);
+                    // how far the branch bends away (seen a few metres on, where the curve has opened up)
+                    Vector3 far = c.Value > 0 ? c.Key.At(Mathf.Min(c.Key.Length, 3f)) : c.Key.At(Mathf.Max(0f, c.Key.Length - 3f));
+                    Vector3 from = c.Value > 0 ? c.Key.At(0f) : c.Key.At(c.Key.Length);
+                    float side = Vector3.Cross(tin, (far - from).normalized).y;       // > 0: to the right
+                    float d = prefer == 0 ? Vector3.Dot(tin, c.Value > 0 ? c.Key.TanA : -c.Key.TanB) : prefer * side;
                     if (d > bestDot) { bestDot = d; pick = c; }
                 }
                 e = pick.Key;

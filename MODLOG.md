@@ -1487,3 +1487,84 @@ sem licença declarada; modelos CC BY de terceiros). Tudo aqui é código própr
 - **Não verificado no jogo.** Riscos conhecidos: andar sentado no vagão (o controle do jogador pode brigar com a
   posição presa), modelos provisórios (caixas), desempenho do Painel com muitas estações, a Mineradora gera muitos
   itens (só anda na velocidade em que a saída escoa).
+
+## 2026-11-27 — Modelos D14: trilhos, máquinas gigantes, tanque, estação, kits e vagões do trem
+
+Pedido: "Analise o PENDENCIAS_ASSETS.md e crie os modelos pendentes com cuidado com qualidade animações e posições
+corretas." Os 13 blocos e os 4 vagões da lista ganharam modelo próprio (`Art/feHD/build_feHD.py`, `D14_MODELS`),
+textura PBR (F:\IA, atlas 4096 nos grandes) e ícone.
+
+- **Eixos conferidos no código**: Blender (x, y, z) = jogo local (-x, -z, y); origem = chão da célula-pai (célula do
+  meio da camada de baixo). Trilhos batem com `Rails.LocalPaths` (topo do trilho a 0,15; bitola 1,435 entre as faces
+  internas; curva com centro (-2,5; 2,5) no Blender = (2,5; -2,5) no jogo); vagões com origem no topo do trilho, +Z
+  = frente (`Train.CarPose`).
+- **Trilhos** (reto, curva 5x5, rampa 1x2x3, desvio D/E): lastro de brita, dormentes a cada 0,5 m (a emenda entre
+  peças mantém o passo), placas e grampos, trilho de perfil real varrido no caminho, talas de junção; desvio com
+  agulhas (o trilho da curva começa onde se afasta do reto), dormentes longos sob os dois ramos, coração (jacaré) e
+  aparelho de manobra; rampa sobre aterro com escoramento de madeira.
+- **Mineradora** (7x9x7): base de vigas I, subestrutura, piso gradeado a 2,4 m com guarda-corpo e escada, torre
+  treliçada até 9 m, catarina, cabine do sondador, BOP; peças que giram com o torque do encaixe: haste/mesa rotativa,
+  roldanas do topo, tambor do guincho, eixo de entrada, roda dentada, peneira rotativa (trommel) e roletes da esteira
+  de saída (frente, no meio, no chão).
+- **Extratora de Petróleo** (5x11x5): cavalo-de-pau sob uma torre de workover; **balancim de verdade**: manivela com
+  contrapesos (`FeSpin_x0.25_Crank`), bielas (`FeRockRod_1`), balancim (`FeRock_1`) e haste polida (`FeRockSlide_1`)
+  resolvidos a partir do ângulo real da manivela (comprimento da biela constante); árvore de natal, separador, flange
+  de alta pressão na frente.
+- **Tanque de Armazenamento** (5x6x5): costado soldado, teto cônico com guarda-corpo, escada em espiral, bocais com
+  válvula no meio de cada lado, boca de visita, **indicador de boia** subindo numa régua (`FeSurface_r4.60_Float`) e
+  manômetro de nível (`FeNeedle_Level`).
+- **Estação** (9x4x3): plataforma de concreto com face de tijolo, faixa amarela, degraus nas pontas, cobertura em
+  colunas de ferro com lambrequim, escritório (armazém), caixotes, carvoeira (combustível), tanque de 20.000 L com
+  cano de enchimento no fundo, bancos, lampiões, relógio; **placa de nome** com `TextMesh` dos dois lados para a
+  etiqueta do jogo. Colisores por caixa (`FeCol_*`): dá para andar na plataforma sob o teto.
+- **Kits** (1x1): caixote em palete com a silhueta do vagão pintada (cor por tipo); o ícone mostra o vagão.
+- **Vagões** (`<kit>CarPrefab`, prefabs soltos): locomotiva-tanque (caixa de fumaça, chaminé, domos, tanques laterais,
+  cabine, carvoeira, cilindros, 3 eixos acoplados + truque + eixo traseiro), vagão fechado, vagão-tanque, vagão de
+  passageiros (piso a 1 m, bancos frente a frente, corredor livre, plataformas nas pontas).
+- **Código**:
+  - `KineticSpinner`: balancim `FeRock_*` (busca do ângulo + bisseção); máquina gigante desligada fica parada.
+  - `BlockFeGiant` liga o animador de giro no modelo. `MachineSound`: Mineradora = broca, Extratora = bomba.
+  - `TrainView`: carrega `<kit>CarPrefab` (antes `<kit>Prefab`, que agora é o caixote do kit); `TrainCarVisual` gira
+    as rodas pela distância andada, move bielas de acoplamento, cruzetas e bielas motrizes a partir dos pinos (90° de
+    defasagem entre os lados) e solta fumaça/vapor andando.
+  - `FeBuild`: lista `Loose` (vagões: sem camada de bloco, sem deslocamento de -0,5, sem colisor), colisores
+    `FeCol_<n>_<x>x<y>x<z>` (cm), `FeSignText_F/_B` vira `TextMesh`.
+  - `build_feHD.build()`: atualiza a cena antes de parentear (raiz com transformação deslocava as peças).
+  - Materiais novos `feHD_Concrete` e `feHD_Ballast`.
+- Verificação: validadores check_xpath 780/0, processes 243/0, phase3 23/23, coverage 0; `list_assets.py`: 0 blocos,
+  0 itens, 0 vagões pendentes. DLL compilada. FeBuild: colisores e eixos conferidos no log (estação 11 caixas,
+  trilhos dentro das células, rodas no eixo X a 0,40/0,42/0,70 m, manivela da Extratora atrás). Pacote 898 MB.
+- Corrigido no caminho: raiz do `_HD` precisa estar na origem (a texturização exporta relativo a ela): `build()` põe
+  como raiz o primeiro objeto sem transformação.
+- **Não verificado no jogo** (roteiro: TESTE_GERAL seção 26). Riscos: tamanho da letra da placa da estação
+  (`TextMesh` escala 2,5), sentido do giro das rodas, o concreto ficou com textura de pedra.
+- **Teste 17:05** ("não consegui entrar na cabine do trem para controlar ele, nem no vagão de passageiros"): o log
+  mostra a locomotiva colocada (`train 1 placed`) e nenhum registro de mira/E. Mudanças: E na locomotiva = **entrar
+  na cabine** (assento no piso da cabine do modelo, 1,47 m, 2,2 m atrás do meio); na cabine, E = Painel do Trem e
+  pulo = descer; agachado + E = painel de fora. Vagão de passageiros: assento no piso (1,02 m) girando com o vagão.
+  Mira até 6 m e um bloco dentro da caixa do vagão (trilho, chão) não esconde mais o vagão. Log novo: `train use:`
+  (cada E perto de trem: mirou?, distância, bloco, janela livre) e `wagon coupled` (distância, trilho atrás da
+  cabeça). Traduções `feTrainCab` / `feTrainDriving`. **Não verificado no jogo.**
+- **Vagões sólidos para o jogador** ("analise o motivo pelo qual o jogador está atravessando a locomotiva" → "Sim,
+  sólidos"): o atravessar era de propósito (pedido do D14 "sem colisão": colisores desligados no `TrainView`, prefabs
+  `Loose` sem colisor). Agora `TrainView.Solid()` tira o jogador de dentro da forma de cada vagão a cada quadro
+  (caixas por tipo; locomotiva baixa na caldeira e alta na cabine), pela lateral ou ponta mais perto; até 0,55 m
+  abaixo do teto ele sobe e fica em pé no teto, levado junto quando o trem anda e faz curva. Sem colisores físicos:
+  trens continuam sem bater em blocos nem entre si e a mira de blocos não muda. **Não verificado no jogo** (riscos:
+  tremida em pé no teto com o trem andando; o trem empurra quem estiver na frente).
+- **Teste 17:25** ("fiquei preso na cabine"; "talvez precise alterar uma lógica grande para o jogo entender como um
+  automóvel"; "o vagão de passageiros: só quando apertam E, com visão externa do vagão"). Logs 17:13 e 17:24: nenhuma
+  linha `train use`/`boards`: o E nunca chegava ao trem. Causa: o jogo entrega Activate pelo `PlayerActionsPermanent`;
+  o `TrainView` lia só `PlayerActionsLocal.Activate.WasPressed`. Agora lê os dois com detecção de borda (como
+  `Crank.IsActivateHeld`). Decisões do usuário: direção **manual + rota**; passageiro **só viaja**.
+  - **Locomotiva como veículo** (sem `EntityVehicle`, cujas rodas físicas brigariam com o trilho): E entra na cabine e
+    a câmera vai para **terceira pessoa** afastada (`SetFirstPersonView(false)` + `vp_FPCamera.Position3rdPersonOffset`,
+    o mesmo campo que os veículos usam em `RefreshDrivingCameraPositions`, IL 3.4.0 b10). W acelera, S freia e dá ré
+    (até 18 km/h), espaço freia, A/D escolhe o ramo nos próximos desvios (fica marcado), agachar abre o Painel, E desce.
+    Apertar W/S assume o trem (`Manual`, desliga a rota); "Ligar" no Painel volta ao piloto automático.
+  - `TrainSim.StepManual`: velocidade pela manete, trilho à frente refeito (60 m) quando o desvio escolhido muda ou o
+    fim chega perto, trilho atrás estendido na ré, fim de linha para o trem; sem maquinista o trem manual freia.
+    `Rails.WalkFrom/Walk(prefer)`: ramo mais à esquerda/direita pelo lado para onde a curva abre.
+  - Passageiro: E senta com a mesma visão externa; E ou pulo desce. Traduções novas EN/PT.
+  - **Não verificado no jogo** (riscos: a animação de andar do jogador na cabine; a câmera de terceira pessoa pode
+    bater em blocos; A/D só valem para desvios ainda a mais de ~2 m).

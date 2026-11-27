@@ -1,0 +1,16 @@
+{
+ "nome": "feWagonCargoCar",
+ "config": "F:\\IA\\fe_blender\\configs\\feWagonCargoCar.json",
+ "triangulos_antes": 16428,
+ "triangulos_depois": 6548,
+ "atlas": 4096,
+ "arquivos": [
+  "feWagonCargoCar_Albedo.png",
+  "feWagonCargoCar_Normal.png",
+  "feWagonCargoCar_MetallicSmoothness.png",
+  "feWagonCargoCar_Roughness.png",
+  "feWagonCargoCar_HD.fbx",
+  "feWagonCargoCar_HD.blend"
+ ],
+ "segundos": 111.8
+}

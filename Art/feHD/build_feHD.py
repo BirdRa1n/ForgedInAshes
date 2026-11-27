@@ -53,10 +53,12 @@ MATS = {
     "feHD_Red":       ((0.45, 0.07, 0.05), 0.65, 0.20, 0),    # handwheels, gas bottles, pressure bands
     "feHD_Leather":   ((0.36, 0.22, 0.12), 0.85, 0.00, 0),    # hides
     "feHD_Leaf":      ((0.22, 0.48, 0.12), 0.60, 0.00, 0),    # plants (Hydroponic Tower)
+    "feHD_Concrete":  ((0.42, 0.41, 0.38), 0.90, 0.00, 0),    # platforms, pads, foundations (D14)
+    "feHD_Ballast":   ((0.30, 0.28, 0.25), 0.95, 0.00, 0),    # track ballast (D14)
 }
 MI = {n: i for i, n in enumerate(MATS)}
 (IRON, CAST, STEEL, RUST, PAINT, HAZ, BRICK, SOOT, SAND, BRASS, COPPER, WOOD, GLASS, IN, OUT,
- MOLTEN, LIQUID, GAS, GLOW, RED, LEATHER, LEAF) = range(len(MATS))
+ MOLTEN, LIQUID, GAS, GLOW, RED, LEATHER, LEAF, CONCRETE, BALLAST) = range(len(MATS))
 
 AXIS = {"Z": Matrix.Identity(4), "Y": Matrix.Rotation(math.pi / 2, 4, "X"), "X": Matrix.Rotation(math.pi / 2, 4, "Y")}
 
@@ -4527,6 +4529,1381 @@ def model_water_wheel():
     return objs
 
 
+# ================================================================ D14: railways, giant machines, storage tank, station, trains
+# (2026-11-27, PENDENCIAS_ASSETS.md). Axes: Blender (x, y, z) = game local (-x, -z, y): front (game +Z) = Blender -Y,
+# game +X (right) = Blender -X. Units: 1 m = 1 block; origin = floor centre of the PARENT cell (the bottom middle cell
+# of a multi-block).
+#
+# Extra contracts read by Art/UnityProject/Assets/Editor/FeBuild.cs:
+#   FeCol_<n>_<sx>x<sy>x<sz>   empty: a box collider centred on it, size in cm along Blender x, y, z. When a model has
+#                              any, they replace the single box round the whole model (rails must not reach into the
+#                              cells beside them; the station has a walkable deck under its roof).
+#   FeSignText_F / _B          empty: a TextMesh for the vanilla writable label (TEFeatureSignable), facing the front
+#                              (game +Z) / the back.
+# Moving parts: FeSpin_* (KineticSpinner: giant machines turn with the torque in their socket), FeRock_* (walking
+# beam rocked by a crank, KineticSpinner), train wheels FeSpin_r<radius>_* and the locomotive's rods FeTrainPin_* /
+# FeTrainCouple_* / FeTrainCross_* / FeTrainMain_* (TrainView), FeFx_Smoke / FeFx_Steam on the locomotive.
+RAIL_TOP = 0.15                     # Rails.RailY
+RAIL_C = 0.7425                     # rail centre lines: 1.435 m between the inner faces of the heads (head 0.05)
+RAIL_PROFILE = [(-0.055, 0.0), (0.055, 0.0), (0.055, 0.010), (0.008, 0.020), (0.008, 0.056), (0.025, 0.060),
+                (0.025, 0.082), (-0.025, 0.082), (-0.025, 0.060), (-0.008, 0.056), (-0.008, 0.020), (-0.055, 0.010)]
+RAIL_BASE = RAIL_TOP - 0.082        # 0.068: foot of the rail on the tie plate
+BALLAST_PROFILE = [(-1.42, 0.0), (1.42, 0.0), (1.24, 0.034), (-1.24, 0.034)]
+
+
+def col_box(objs, n, centre, size):
+    """A collider box (FeBuild): centre in Blender coordinates, size (x, y, z) in metres."""
+    sx, sy, sz = (int(round(v * 100)) for v in size)
+    objs.append(empty("FeCol_%d_%dx%dx%d" % (n, sx, sy, sz), tuple(centre), 0.2))
+
+
+def sweep(bm, pts, profile, mat, closed=False, cap=True, up=Vector((0, 0, 1))):
+    """Sweep a 2D profile (u = sideways, v = up) along a polyline of 3D points (the profile stays upright, tilting
+    with the slope)."""
+    pts = [Vector(p) for p in pts]
+    rings = []
+    for i, p in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+        side = t.cross(up).normalized()
+        upv = side.cross(t).normalized()
+        rings.append([bm.verts.new(p + side * u + upv * v) for u, v in profile])
+    n = len(profile)
+    faces = []
+    for i in range(len(rings) - 1):
+        for j in range(n if closed or True else n - 1):
+            jn = (j + 1) % n
+            faces.append(bm.faces.new((rings[i][j], rings[i][jn], rings[i + 1][jn], rings[i + 1][j])))
+    if cap:
+        faces.append(bm.faces.new(list(reversed(rings[0]))))
+        faces.append(bm.faces.new(rings[-1]))
+    for f in faces:
+        f.material_index = mat
+    return faces
+
+
+def offset_line(pts, d):
+    """The polyline moved sideways by d (positive = to the right of the direction of travel, seen from above)."""
+    pts = [Vector(p) for p in pts]
+    out = []
+    for i, p in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)])
+        t.z = 0
+        t.normalize()
+        side = t.cross(Vector((0, 0, 1))).normalized()
+        out.append(p + side * d)
+    return out
+
+
+def track_frame(p, t):
+    """Matrix at p with its local Y along the track direction t, local X sideways, local Z up (tilted on slopes)."""
+    t = Vector(t).normalized()
+    side = t.cross(Vector((0, 0, 1))).normalized()
+    upv = side.cross(t).normalized()
+    m = Matrix((side, t, upv)).transposed().to_4x4()
+    m.translation = Vector(p)
+    return m
+
+
+def sample(pts, s_list):
+    """Points and tangents of a polyline at the given distances along it."""
+    pts = [Vector(p) for p in pts]
+    cum = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        cum.append(cum[-1] + (b - a).length)
+    out = []
+    for s in s_list:
+        i = 1
+        while i < len(cum) - 1 and cum[i] < s:
+            i += 1
+        a, b = pts[i - 1], pts[i]
+        f = 0.0 if cum[i] == cum[i - 1] else (s - cum[i - 1]) / (cum[i] - cum[i - 1])
+        out.append((a.lerp(b, max(0.0, min(1.0, f))), (b - a).normalized()))
+    return out, cum[-1]
+
+
+def track(bm, centre, rails=True, sleepers=True, ballast=True, sleeper_len=2.5, skip=None, ballast_z=0.0,
+          rail_from=(0, 0), bars=True):
+    """A piece of track along `centre` (polyline at the FLOOR under the track, z = 0 or the slope). Sleepers every
+    ~0.5 m (whole number per piece, so pieces in a row keep the spacing), tie plates and clips, two rails whose top
+    is RAIL_TOP above the centre line, joint bars at both ends. skip(p) -> True leaves that sleeper out.
+    rail_from = (index of the first point of the left rail, of the right rail) (switch blades)."""
+    centre = [Vector(p) for p in centre]
+    _, length = sample(centre, [0])
+    if ballast:
+        sweep(bm, [p + Vector((0, 0, ballast_z)) for p in centre], BALLAST_PROFILE, BALLAST)
+    n = max(1, int(round(length / 0.5)))
+    marks, _ = sample(centre, [(k + 0.5) * length / n for k in range(n)])
+    for p, t in marks:
+        if skip is not None and skip(p):
+            continue
+        m = track_frame(p, t)
+        if sleepers:
+            r = bmesh.ops.create_cube(bm, size=1.0, calc_uvs=True)
+            _fin(bm, WOOD, m @ Matrix.Translation((0, 0, 0.032)) @ Matrix.Diagonal((sleeper_len, 0.22, 0.056, 1)), r["verts"])
+        for sx in (-1, 1):
+            for mt, size, off in ((IRON, (0.30, 0.17, 0.008), (0, 0, 0.064)),
+                                  (STEEL, (0.035, 0.05, 0.022), (-0.09, 0, 0.075)), (STEEL, (0.035, 0.05, 0.022), (0.09, 0, 0.075))):
+                r = bmesh.ops.create_cube(bm, size=1.0, calc_uvs=True)
+                _fin(bm, mt, m @ Matrix.Translation((sx * RAIL_C + off[0], off[1], off[2])) @ Matrix.Diagonal((*size, 1)), r["verts"])
+    if rails:
+        for k, sx in enumerate((-1, 1)):
+            line = offset_line(centre, sx * RAIL_C)[rail_from[k]:]
+            if len(line) < 2:
+                continue
+            sweep(bm, [p + Vector((0, 0, RAIL_BASE)) for p in line], RAIL_PROFILE, STEEL)
+            if bars:
+                for end in (0, -1):
+                    p, q = line[end], line[1] if end == 0 else line[-2]
+                    t = (q - p).normalized() * (1 if end == 0 else -1)
+                    m = track_frame(p, t if end == 0 else -t)
+                    for side in (-1, 1):
+                        r = bmesh.ops.create_cube(bm, size=1.0, calc_uvs=True)
+                        _fin(bm, IRON, m @ Matrix.Translation((side * 0.014, 0.10 * (1 if end == 0 else -1), RAIL_BASE + 0.038))
+                             @ Matrix.Diagonal((0.008, 0.20, 0.032, 1)), r["verts"])
+    return length
+
+
+def arc_pts(cx, cy, r, a0, a1, n=48, z=0.0):
+    return [Vector((cx + r * math.cos(math.radians(a0 + (a1 - a0) * i / n)),
+                    cy + r * math.sin(math.radians(a0 + (a1 - a0) * i / n)), z)) for i in range(n + 1)]
+
+
+def line_pts(a, b, n=4):
+    a, b = Vector(a), Vector(b)
+    return [a.lerp(b, i / n) for i in range(n + 1)]
+
+
+def model_rail_straight():
+    """Rail (1 x 1): south edge to north edge (Rails.cs "straight")."""
+    objs = []
+    b = bmesh.new()
+    track(b, line_pts((0, 0.5, 0), (0, -0.5, 0), 2))
+    objs.append(to_object(b, "feRailStraight_Track", bevel=0.002))
+    col_box(objs, 1, (0, 0, 0.09), (1.0, 1.0, 0.18))
+    return objs
+
+
+def model_rail_curve():
+    """Rail Curve (5 x 1 x 5): a quarter circle of radius 4.5 from the back edge of the game-left column to the
+    game-right edge of the front row (Rails.cs "curve": centre (2.5, -2.5) game = (-2.5, 2.5) Blender)."""
+    objs = []
+    b = bmesh.new()
+    track(b, arc_pts(-2.5, 2.5, 4.5, 0, -90, 64))
+    objs.append(to_object(b, "feRailCurve_Track", bevel=0.002))
+    col_box(objs, 1, (0, 0, 0.09), (5.0, 5.0, 0.18))
+    return objs
+
+
+def model_rail_ramp():
+    """Rail Ramp (1 x 2 x 3): climbs one block over three, from the back (Blender +Y, floor) to the front (top of the
+    next block). The track sits on a ballast bank held by timber walls."""
+    objs = []
+    b = bmesh.new()
+    track(b, line_pts((0, 1.5, 0), (0, -1.5, 1.0), 6), ballast=False)
+    # the bank: wedge of ballast under the slope, timber cribbing on both sides
+    bk = bmesh.new()
+    vs = []
+    for y, z in ((1.5, 0.0), (-1.5, 1.0)):
+        for x, zz in ((-1.42, 0.0), (1.42, 0.0), (1.24, z + 0.034), (-1.24, z + 0.034)):
+            vs.append(bk.verts.new((x, y, zz if zz == 0.0 else zz)))
+    # bottom stays on the floor; top follows the slope
+    for f in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
+        bk.faces.new([vs[i] for i in f]).material_index = BALLAST
+    bm_join(b, bk)
+    for sx in (-1, 1):
+        for k in range(6):
+            y0, y1 = 1.5 - k * 0.5, 1.0 - k * 0.5
+            h = (k + 0.5) / 6.0
+            box(b, (0.08, 0.50, max(0.04, h)), (sx * 1.40, (y0 + y1) / 2, max(0.04, h) / 2), WOOD)          # cribbing
+            box(b, (0.10, 0.10, max(0.04, h) + 0.04), (sx * 1.44, y1 + 0.02, (max(0.04, h) + 0.04) / 2), WOOD)  # posts
+    objs.append(to_object(b, "feRailRamp_Track", bevel=0.002))
+    col_box(objs, 1, (0, 0, 0.6), (1.0, 3.0, 1.2))
+    return objs
+
+
+def bm_join(dst, src):
+    """Copy the geometry of bmesh src into dst (materials kept), then free src."""
+    me = bpy.data.meshes.new("_tmp")
+    src.to_mesh(me)
+    src.free()
+    dst.from_mesh(me)
+    bpy.data.meshes.remove(me)
+
+
+def switch_stand(b, x, y, sx):
+    """Hand switch stand beside the points: cast base on two long timbers, a throw lever, the target disc (red /
+    green) and a lamp on top; a throw rod goes to the points."""
+    box(b, (0.50, 0.30, 0.06), (x, y, 0.09), WOOD)
+    box(b, (0.24, 0.20, 0.26), (x, y, 0.25), CAST)
+    cyl(b, 0.035, 0.90, (x, y, 0.80), "Z", IRON, segs=10)
+    cyl(b, 0.16, 0.02, (x, y + 0.02, 1.05), "Y", RED, segs=20)
+    cyl(b, 0.16, 0.02, (x - sx * 0.02, y, 1.05), "X", IN, segs=20)
+    box(b, (0.10, 0.10, 0.12), (x, y, 1.32), SOOT)
+    cyl(b, 0.035, 0.03, (x, y - 0.05, 1.32), "Y", GLASS, segs=10)
+    beam(b, (x + sx * 0.10, y, 0.40), (x + sx * 0.55, y, 0.62), 0.03, 0.03, IRON)        # lever
+    cyl(b, 0.025, 0.08, (x + sx * 0.57, y, 0.63), "X", RED, segs=8)
+
+
+def model_rail_switch(right=True):
+    """Rail Switch (5 x 1 x 5): the straight of one column plus the curve (Rails.cs "switchR" / "switchL"). The
+    curve's rails start where they leave the straight's (switch blades), long timbers carry both tracks while they
+    are close, a frog plate where the rails cross, the hand switch stand beside the points."""
+    objs = []
+    b = bmesh.new()
+    s = 1 if right else -1                      # right: straight on Blender +X (game left column), curve to Blender -X
+    sx_straight = 2.0 * s
+    straight = line_pts((sx_straight, 2.5, 0), (sx_straight, -2.5, 0), 10)
+    if right:
+        curve = arc_pts(-2.5, 2.5, 4.5, 0, -90, 64)
+    else:
+        curve = arc_pts(2.5, 2.5, 4.5, 180, 270, 64)
+
+    def curve_x(y):
+        dy = y - 2.5
+        q = 4.5 * 4.5 - dy * dy
+        return None if q < 0 else (-2.5 + math.sqrt(q)) if right else (2.5 - math.sqrt(q))
+
+    # straight: long timbers while the curve is near (they reach under its rails)
+    _, length = sample(straight, [0])
+    for k in range(10):
+        y = 2.5 - (k + 0.5) * 0.5
+        cx = curve_x(y)
+        if cx is not None and abs(cx - sx_straight) < 2.6:
+            far = cx - s * 1.25
+            near = sx_straight + s * 1.25
+            box(b, (abs(near - far), 0.22, 0.056), ((near + far) / 2, y, 0.032), WOOD)
+    track(b, straight, sleepers=False, ballast=True)
+    for k in range(10):                                      # plates + clips of the straight's own short sleepers
+        y = 2.5 - (k + 0.5) * 0.5
+        cx = curve_x(y)
+        if cx is not None and abs(cx - sx_straight) < 2.6:
+            continue
+        box(b, (2.5, 0.22, 0.056), (sx_straight, y, 0.032), WOOD)
+
+    # curve: rails from where they are clear of the straight's (blades), sleepers only where the straight's do
+    # not already carry them, ballast a hair lower (no z-fighting where the two beds overlap)
+    starts = []
+    for sxr in (-1, 1):
+        line = offset_line(curve, sxr * RAIL_C)
+        i = 0
+        while i < len(line) - 2 and min(abs(line[i].x - (sx_straight + d)) for d in (-RAIL_C, RAIL_C)) < 0.07:
+            i += 1
+        starts.append(i)
+
+    def near_straight(p):
+        return abs(p.x - sx_straight) < 2.6 - 1.25 * 0 and abs(p.x - sx_straight) < 2.6
+
+    track(b, curve, skip=near_straight, ballast_z=-0.004, rail_from=tuple(starts))
+    # blades: the tapered start of the curve's rails, a slide chair under each
+    for k, sxr in enumerate((-1, 1)):
+        line = offset_line(curve, sxr * RAIL_C)
+        p = line[starts[k]]
+        box(b, (0.16, 0.30, 0.012), (p.x, p.y, RAIL_BASE - 0.004), IRON)
+    # frog: where the curve's outer rail crosses the straight's inner rail
+    outer = offset_line(curve, (-1 if right else 1) * RAIL_C)
+    inner_x = sx_straight - s * RAIL_C
+    for a_, b_ in zip(outer, outer[1:]):
+        if (a_.x - inner_x) * (b_.x - inner_x) <= 0:
+            f = (inner_x - a_.x) / (b_.x - a_.x) if b_.x != a_.x else 0
+            p = a_.lerp(b_, f)
+            box(b, (0.34, 0.90, 0.016), (p.x, p.y, RAIL_BASE - 0.006), CAST)
+            for d in (-0.5, 0.5):
+                box(b, (0.30, 0.06, 0.03), (p.x, p.y + d * 0.8, RAIL_BASE + 0.02), IRON)
+            break
+    # check rail beside the straight's outer rail at the frog, and the throw rod to the blades
+    switch_stand(b, sx_straight - s * 1.65, 2.05, -s)
+    beam(b, (sx_straight - s * 1.55, 2.05, 0.12), (sx_straight + s * 0.75, 2.05, 0.12), 0.03, 0.02, IRON)
+    objs.append(to_object(b, "feRailSwitch%s_Track" % ("R" if right else "L"), bevel=0.002))
+    col_box(objs, 1, (0, 0, 0.09), (5.0, 5.0, 0.18))
+    return objs
+
+
+# ---------------------------------------------------------------- shared structure helpers (giants, station)
+def truss(b, base, top, z0, z1, levels, leg=0.12, brace=0.05, mat=IRON, open_faces=None):
+    """A four-legged lattice tower: base / top = (half-width x, half-width y, centre x, centre y). Horizontal girts
+    and X braces on every face at `levels` panels. open_faces = {face: (z_lo, z_hi)}: faces ("-Y", "+Y", "-X", "+X")
+    left without braces and girts in that band (a walking beam or a pipe passes there)."""
+    open_faces = open_faces or {}
+    bx, by, bcx, bcy = base
+    tx, ty, tcx, tcy = top
+
+    def corner(sx, sy, z):
+        f = (z - z0) / (z1 - z0)
+        return Vector((bcx + (tcx - bcx) * f + sx * (bx + (tx - bx) * f), bcy + (tcy - bcy) * f + sy * (by + (ty - by) * f), z))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            beam(b, corner(sx, sy, z0), corner(sx, sy, z1), leg, leg, mat)
+    faces = {"-Y": ((-1, -1), (1, -1)), "+Y": ((-1, 1), (1, 1)), "-X": ((-1, -1), (-1, 1)), "+X": ((1, -1), (1, 1))}
+    for k in range(levels + 1):
+        z = z0 + (z1 - z0) * k / levels
+        for name, (c0, c1) in faces.items():
+            if name in open_faces and open_faces[name][0] < z < open_faces[name][1]:
+                continue
+            beam(b, corner(*c0, z), corner(*c1, z), brace * 1.2, brace * 1.2, mat)
+    for k in range(levels):
+        za, zb = z0 + (z1 - z0) * k / levels, z0 + (z1 - z0) * (k + 1) / levels
+        for name, (c0, c1) in faces.items():
+            if name in open_faces and za < open_faces[name][1] and zb > open_faces[name][0]:
+                continue
+            beam(b, corner(*c0, za), corner(*c1, zb), brace, brace, mat)
+            beam(b, corner(*c1, za), corner(*c0, zb), brace, brace, mat)
+
+
+def railing(b, pts, h=1.0, post=1.1, mat=HAZ, closed=False):
+    """Hand railing along a polyline: posts every ~`post` m, top and knee rails, toe board."""
+    pts = [Vector(p) for p in pts] + ([Vector(pts[0])] if closed else [])
+    for a, c in zip(pts, pts[1:]):
+        d = c - a
+        n = max(1, int(math.ceil(d.length / post)))
+        for k in range(n + 1):
+            p = a.lerp(c, k / n)
+            cyl(b, 0.022, h, p + Vector((0, 0, h / 2)), "Z", mat, segs=8)
+        for z, r in ((h, 0.022), (h * 0.5, 0.017)):
+            beam(b, a + Vector((0, 0, z)), c + Vector((0, 0, z)), r * 2, r * 2, mat)
+        beam(b, a + Vector((0, 0, 0.05)), c + Vector((0, 0, 0.05)), 0.012, 0.10, IRON)
+
+
+def ladder(b, x, y, z0, z1, along="X", w=0.45, mat=IRON):
+    """A steel ladder: two stiles, rungs every 0.3 m. along = the axis the rungs run along."""
+    for s in (-1, 1):
+        px, py = (x + s * w / 2, y) if along == "X" else (x, y + s * w / 2)
+        box(b, (0.05, 0.05, z1 - z0), (px, py, (z0 + z1) / 2), mat)
+    n = int((z1 - z0) / 0.3)
+    for k in range(1, n + 1):
+        z = z0 + k * (z1 - z0) / (n + 1)
+        cyl(b, 0.014, w, (x, y, z), along, STEEL, segs=6)
+
+
+def grating(b, x0, x1, y0, y1, z, mat=IRON, bars=0.12):
+    """Floor grating: a dark deck, bearing bars and a frame (reads as a steel walkway)."""
+    box(b, (x1 - x0, y1 - y0, 0.03), ((x0 + x1) / 2, (y0 + y1) / 2, z - 0.025), SOOT)
+    n = max(2, int((x1 - x0) / bars))
+    for k in range(n + 1):
+        x = x0 + (x1 - x0) * k / n
+        box(b, (0.012, y1 - y0, 0.04), (x, (y0 + y1) / 2, z - 0.01), mat)
+    for x in (x0, x1):
+        box(b, (0.06, y1 - y0, 0.08), (x, (y0 + y1) / 2, z - 0.03), mat)
+    for y in (y0, y1):
+        box(b, (x1 - x0, 0.06, 0.08), ((x0 + x1) / 2, y, z - 0.03), mat)
+
+
+def i_beam(b, a, c, h=0.30, w=0.18, mat=IRON):
+    """A horizontal I-beam from a to c (web vertical)."""
+    a, c = Vector(a), Vector(c)
+    d = c - a
+    ang = math.atan2(d.y, d.x)
+    m = Matrix.Rotation(ang, 4, "Z")
+    mid = (a + c) / 2
+    L = d.length
+    box(b, (L, 0.02, h), mid, mat, m)
+    for dz in (h / 2 - 0.01, -h / 2 + 0.01):
+        box(b, (L, w, 0.02), mid + Vector((0, 0, dz)), mat, m)
+
+
+def socket_coupling(b, y, z=C, x=0.0, sy=1):
+    """Motor socket on the back face (PowerGate.SocketPos: the cell behind the middle of the back, bottom layer): a
+    bearing pedestal, a yellow socket plate with bolts where the motor's shaft comes in."""
+    box(b, (0.36, 0.30, z - 0.10), (x, y - sy * 0.18, (z - 0.10) / 2), CAST)
+    cyl(b, 0.12, 0.22, (x, y - sy * 0.18, z), "Y", CAST, segs=20)
+    for sx in (-1, 1):
+        cyl(b, 0.02, 0.05, (x + sx * 0.14, y - sy * 0.18, z - 0.12), "Z", STEEL, segs=6)
+    box(b, (0.50, 0.04, 0.50), (x, y - sy * 0.02, z), HAZ)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            cyl(b, 0.018, 0.03, (x + sx * 0.20, y, z + sz * 0.20), "Y", STEEL, segs=6)
+
+
+# ---------------------------------------------------------------- Mining Rig (7 x 9 x 7)
+def model_mining_rig():
+    """Mining Rig (MultiBlockDim 7,9,7; origin = centre of the bottom layer). A drill rig over its own shaft: steel
+    skid and substructure, a grated drill floor at 2.4 m with railings and a stair, a lattice derrick to 9 m with the
+    crown block, the travelling block, the kelly and drill string turning in the rotary table (FeSpin), the
+    drawworks drum, the doghouse cabin; the drive comes in at the back (motor socket, middle of the back face)
+    through a gearbox and a chain case; a trommel screen under the floor turns the cuttings out onto a short belt
+    that leaves by the middle of the front face at ground level (the products' exit)."""
+    objs = []
+    b = bmesh.new()
+    H = 3.5
+    FZ = 2.4
+    for s in (-1, 1):
+        i_beam(b, (-H + 0.1, s * (H - 0.15), 0.15), (H - 0.1, s * (H - 0.15), 0.15), h=0.30, w=0.20)
+        i_beam(b, (s * (H - 0.15), -H + 0.1, 0.15), (s * (H - 0.15), H - 0.1, 0.15), h=0.30, w=0.20)
+    for x in (-1.9, 1.9):
+        i_beam(b, (x, -H + 0.2, 0.15), (x, H - 0.2, 0.15), h=0.28, w=0.18)
+    for y in (-1.9, 1.9):
+        i_beam(b, (-H + 0.2, y, 0.15), (H - 0.2, y, 0.15), h=0.28, w=0.18)
+    hazard(b, 2 * H - 0.3, (0, -H + 0.04, 0.22), "X", h=0.10, n=22)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(b, (0.22, 0.22, FZ - 0.3), (sx * 2.1, sy * 2.1, 0.3 + (FZ - 0.3) / 2), IRON)
+            box(b, (0.36, 0.36, 0.04), (sx * 2.1, sy * 2.1, 0.32), CAST)
+    for sx in (-1, 1):
+        beam(b, (sx * 2.1, -2.1, 0.45), (sx * 2.1, 2.1, FZ - 0.15), 0.08, 0.08, IRON)
+        beam(b, (sx * 2.1, 2.1, 0.45), (sx * 2.1, -2.1, FZ - 0.15), 0.08, 0.08, IRON)
+    beam(b, (-2.1, 2.1, 0.45), (2.1, 2.1, FZ - 0.15), 0.08, 0.08, IRON)
+    beam(b, (2.1, 2.1, 0.45), (-2.1, 2.1, FZ - 0.15), 0.08, 0.08, IRON)
+    grating(b, -2.3, 2.3, -2.3, -0.45, FZ)
+    grating(b, -2.3, 2.3, 0.45, 2.3, FZ)
+    grating(b, -2.3, -0.45, -0.45, 0.45, FZ)
+    grating(b, 0.45, 2.3, -0.45, 0.45, FZ)
+    railing(b, [(2.3, 1.45, FZ), (2.3, 2.3, FZ), (-2.3, 2.3, FZ), (-2.3, -2.3, FZ), (2.3, -2.3, FZ), (2.3, -1.0, FZ)])
+    # stair on the Blender +X side: from the floor's gap in the railing down to the skid
+    for k in range(9):
+        z = FZ - (k + 1) * (FZ - 0.30) / 9
+        box(b, (0.70, 0.26, 0.04), (2.75, 1.25 - k * 0.27, z), IRON)
+    for sx in (2.40, 3.10):
+        beam(b, (sx, 1.40, FZ), (sx, -1.20, 0.30), 0.04, 0.16, IRON)
+        beam(b, (sx, 1.40, FZ + 0.95), (sx, -1.20, 1.25), 0.04, 0.04, HAZ)
+    # wellhead / BOP stack under the rotary
+    cyl(b, 0.42, 0.10, (0, 0, 0.35), "Z", CAST, segs=24)
+    for z, r, h in ((0.65, 0.34, 0.50), (1.20, 0.38, 0.40), (1.70, 0.30, 0.45)):
+        cyl(b, r, h, (0, 0, z), "Z", RED, segs=24)
+        bolt_circle(b, 10, r + 0.02, (0, 0, z + h / 2), "Z", STEEL, r=0.016, d=0.03)
+    for sx in (-1, 1):
+        cyl(b, 0.07, 0.40, (sx * 0.55, 0, 1.20), "X", STEEL, segs=12)
+        cyl(b, 0.12, 0.03, (sx * 0.76, 0, 1.20), "X", RED, segs=16)
+    cyl(b, 0.18, FZ - 1.95, (0, 0, 1.95 + (FZ - 1.95) / 2), "Z", STEEL, segs=16)
+    # derrick
+    truss(b, (1.95, 1.95, 0, 0), (0.55, 0.55, 0, 0), FZ, 8.6, 6, leg=0.14, brace=0.055, open_faces={"-Y": (FZ, FZ + 2.2)})
+    box(b, (1.4, 1.4, 0.10), (0, 0, 8.65), IRON)
+    railing(b, [(-0.7, -0.7, 8.7), (0.7, -0.7, 8.7), (0.7, 0.7, 8.7), (-0.7, 0.7, 8.7)], h=0.25, post=0.7, closed=True)
+    for sx in (-1, 1):
+        box(b, (0.10, 0.9, 0.20), (sx * 0.30, 0, 8.78), CAST)
+    grating(b, -1.45, -0.55, -0.6, 0.6, 5.7, bars=0.15)
+    for k in range(6):
+        y = -0.5 + k * 0.2
+        beam(b, (-1.2, y, FZ + 0.05), (-1.05, y * 0.9, 5.9), 0.07, 0.07, STEEL)
+    ladder(b, 1.45, -1.45, FZ, 8.5, along="X", w=0.40)
+    # drawworks frame
+    for sx in (-1, 1):
+        box(b, (0.12, 0.9, 0.85), (sx * 0.95, 1.55, FZ + 0.43), PAINT)
+    box(b, (2.0, 0.9, 0.08), (0, 1.55, FZ + 0.04), IRON)
+    beam(b, (0.95, 1.20, FZ + 0.80), (1.40, 0.95, FZ + 1.30), 0.04, 0.04, STEEL)
+    cyl(b, 0.012, 8.6 - (FZ + 0.85), (0.3, 1.27, (FZ + 0.85 + 8.6) / 2), "Z", STEEL, segs=6)
+    # doghouse
+    plate(b, (1.2, 1.6, 2.1), (-2.85, 1.2, FZ + 1.05), PAINT, "-X", n=4)
+    box(b, (0.02, 0.6, 0.5), (-2.24, 1.0, FZ + 1.4), GLASS)
+    box(b, (1.3, 1.7, 0.06), (-2.85, 1.2, FZ + 2.12), RUST)
+    box(b, (0.02, 0.6, 1.6), (-2.24, 1.75, FZ + 0.8), SOOT)
+    # gearbox + chain case (the drive from the motor socket up to the floor)
+    box(b, (1.0, 0.9, 0.9), (0, 2.45, 0.75), CAST)
+    for sx in (-1, 1):
+        for z in (0.45, 1.05):
+            box(b, (0.04, 0.92, 0.05), (sx * 0.52, 2.45, z), IRON)
+    box(b, (0.30, 0.55, FZ - 1.2), (0.70, 2.10, 1.2 + (FZ - 1.2) / 2), PAINT)
+    hazard(b, 0.5, (0.70, 1.82, 1.6), "Y", h=0.06, n=6)
+    socket_coupling(b, H, C)
+    # cuttings: chute to the trommel, trommel cradle, hopper, output belt to the front middle
+    pipe_run(b, [(0, -0.2, 1.95), (0, -0.7, 1.75), (0, -0.95, 1.55)], r=0.10, mat=RUST, elbows=False)
+    for y in (-1.0, -2.4):
+        for sx in (-1, 1):
+            box(b, (0.10, 0.10, 0.80), (sx * 0.55, y, 0.7), IRON)
+            cyl(b, 0.08, 0.10, (sx * 0.42, y, 1.10), "Y", CAST, segs=12)
+        box(b, (1.3, 0.20, 0.06), (0, y, 1.10), IRON)
+    for sx in (-1, 1):
+        box(b, (0.04, 0.9, 0.35), (sx * 0.42, -2.75, 0.75), RUST)
+    box(b, (0.88, 0.04, 0.35), (0, -2.32, 0.75), RUST)
+    for sx in (-1, 1):
+        box(b, (0.06, 1.15, 0.12), (sx * 0.36, -2.92, 0.40), IRON)
+        for y in (-2.5, -3.35):
+            box(b, (0.05, 0.05, 0.36), (sx * 0.36, y, 0.18), IRON)
+        box(b, (0.02, 1.0, 0.14), (sx * 0.34, -2.95, 0.55), IRON)
+    box(b, (0.66, 1.10, 0.02), (0, -2.92, 0.47), SOOT)
+    box(b, (0.70, 0.06, 0.05), (0, -3.46, 0.44), OUT)
+    objs.append(to_object(b, "feMiningRig_Base", bevel=0.004))
+
+    # --- moving parts (FeSpin_*: KineticSpinner, with the torque in the socket)
+    k = bmesh.new()                                    # rotary table + kelly + drill string, built along local Y = up
+    cyl(k, 0.38, 0.16, (0, 0, 0), "Y", CAST, segs=28)
+    gear(k, 0.40, 0.06, 40, (0, -0.08, 0), "Y", STEEL, tooth=0.03)
+    box(k, (0.36, 0.20, 0.36), (0, 0.16, 0), IRON)
+    box(k, (0.14, 3.3, 0.14), (0, 1.75, 0), STEEL)
+    cyl(k, 0.10, FZ - 2.0, (0, -(FZ - 2.0) / 2 - 0.08, 0), "Y", STEEL, segs=12)
+    cyl(k, 0.16, 0.30, (0, 3.50, 0), "Y", CAST, segs=16)
+    objs.append(to_object(k, "FeSpin_x0.5_Kelly", location=(0, 0, FZ + 0.08), rotation=(math.pi / 2, 0, 0), bevel=0.002))
+    tb = bmesh.new()                                   # travelling block + hook over the swivel, lines to the crown
+    box(tb, (0.36, 0.30, 0.80), (0, 0, 0.6), PAINT)
+    for sx in (-1, 1):
+        box(tb, (0.04, 0.32, 0.70), (sx * 0.20, 0, 0.6), HAZ)
+    cyl(tb, 0.05, 0.35, (0, 0, 0.05), "Z", CAST, segs=12)
+    top = 8.62 - (FZ + 3.9)
+    for sx in (-0.12, -0.04, 0.04, 0.12):
+        cyl(tb, 0.010, top - 1.0, (sx, 0, 1.0 + (top - 1.0) / 2), "Z", STEEL, segs=6)
+    objs.append(to_object(tb, "feMiningRig_Block", location=(0, 0, FZ + 3.9), bevel=0.002))
+    cr = bmesh.new()
+    for x in (-0.18, -0.06, 0.06, 0.18):
+        cyl(cr, 0.24, 0.07, (0, x, 0), "Y", STEEL, segs=24)
+        ring(cr, 0.25, 0.20, 0.08, (0, x, 0), "Y", CAST, segs=24)
+    cyl(cr, 0.04, 0.6, (0, 0, 0), "Y", STEEL, segs=10)
+    objs.append(to_object(cr, "FeSpin_x2_Crown", location=(0, 0, 8.74), rotation=(0, 0, -math.pi / 2), bevel=0.002))
+    dw = bmesh.new()
+    cyl(dw, 0.32, 1.6, (0, 0, 0), "Y", CAST, segs=28)
+    for y in (-0.80, 0.80):
+        cyl(dw, 0.42, 0.06, (0, y, 0), "Y", STEEL, segs=28)
+    for kk in range(12):
+        cyl(dw, 0.335, 0.04, (0, -0.70 + kk * 0.125, 0), "Y", STEEL, segs=24)
+    box(dw, (0.05, 1.5, 0.03), (0, 0, 0.345), RUST)
+    objs.append(to_object(dw, "FeSpin_x1.5_Drum", location=(0, 1.55, FZ + 0.55), rotation=(0, 0, -math.pi / 2), bevel=0.002))
+    sh = bmesh.new()
+    cyl(sh, SHAFT_R, 0.7, (0, 0, 0), "Y", STEEL, segs=18)
+    cyl(sh, FLANGE_R, 0.04, (0, 0.33, 0), "Y", CAST, segs=20)
+    bolt_circle(sh, 4, 0.072, (0, 0.31, 0), "Y", STEEL, r=0.010, d=0.02)
+    box(sh, (0.02, 0.4, 0.014), (0, 0, SHAFT_R + 0.004), RUST)
+    objs.append(to_object(sh, "FeSpin_DriveShaft", location=(0, H - 0.36, C), bevel=0.002))
+    fw = bmesh.new()
+    gear(fw, 0.34, 0.06, 30, (0, 0, 0), "Y", STEEL, tooth=0.03)
+    for kk in range(3):
+        box(fw, (0.05, 0.05, 0.56), (0, 0, 0), IRON, Matrix.Rotation(kk * math.pi / 3, 4, "Y"))
+    cyl(fw, 0.08, 0.12, (0, 0, 0), "Y", CAST, segs=14)
+    objs.append(to_object(fw, "FeSpin_x0.8_Sprocket", location=(0.56, 2.45, 1.05), rotation=(0, 0, -math.pi / 2), bevel=0.002))
+    tr = bmesh.new()
+    ring(tr, 0.40, 0.36, 1.5, (0, 0, 0), "Y", IRON, segs=24)
+    for kk in range(12):
+        a_ = 2 * math.pi * kk / 12
+        box(tr, (0.03, 1.5, 0.03), (0.40 * math.cos(a_), 0, 0.40 * math.sin(a_)), STEEL)
+    for y in (-0.70, 0.70):
+        ring(tr, 0.43, 0.38, 0.08, (0, y, 0), "Y", CAST, segs=24)
+    for y in (-0.35, 0.0, 0.35):
+        ring(tr, 0.41, 0.385, 0.03, (0, y, 0), "Y", RUST, segs=24)
+    objs.append(to_object(tr, "FeSpin_x0.4_Trommel", location=(0, -1.70, 1.55), bevel=0.002))
+    for n_, y in enumerate((-2.45, -3.40)):
+        rl = bmesh.new()
+        cyl(rl, 0.06, 0.66, (0, 0, 0), "Y", STEEL, segs=14)
+        box(rl, (0.01, 0.6, 0.02), (0, 0, 0.06), RUST)
+        objs.append(to_object(rl, "FeSpin_x3_Roller%d" % n_, location=(0, y, 0.42), rotation=(0, 0, -math.pi / 2)))
+    return objs
+
+
+def to_object_axis(bm, name, location, rotation, bevel=0.0):
+    """to_object for a part whose spin / rock axis must be its local Y (KineticSpinner: Unity local +Z): the mesh is
+    built in world-aligned coordinates around `location`, then turned back so the object can carry `rotation`."""
+    R = mathutils_euler(rotation).to_matrix().to_4x4()
+    bmesh.ops.transform(bm, matrix=R.inverted(), verts=bm.verts)
+    return to_object(bm, name, location=location, rotation=rotation, bevel=bevel)
+
+
+def mathutils_euler(r):
+    from mathutils import Euler
+    return Euler(r, "XYZ")
+
+
+ACROSS = (0, 0, -math.pi / 2)            # rotation that turns local Y onto Blender +X (an axle across the block)
+
+
+# ---------------------------------------------------------------- Oil Extractor (5 x 11 x 5)
+def model_oil_extractor():
+    """Oil Extractor (MultiBlockDim 5,11,5). A beam pumpjack over the well with a workover derrick to 11 m: the
+    walking beam (FeRock_1) rocks on the Samson post, driven by the crank and counterweights (FeSpin_x0.25_Crank) of
+    the gear reducer through the pitman arms (FeRockRod_1); the horsehead lifts the polished rod (FeRockSlide_1) in
+    and out of the stuffing box (KineticSpinner solves the linkage from the crank's angle). The drive comes in at the
+    back (motor socket); the crude leaves by the High Pressure flange in the middle of the front face (0.5 m)."""
+    objs = []
+    b = bmesh.new()
+    H = 2.5
+    WY = -1.22                                         # the well
+    PIV = Vector((0, 0.40, 3.78))                      # saddle bearing (beam pivot)
+    CR = Vector((0, 1.85, 1.50))                       # crank axis
+    R_ = 0.50                                          # crank radius
+    END = Vector((0, 1.85, 3.66))                      # equalizer (pitman top)
+    PIN = CR + Vector((0, R_, 0))                      # built pose: pin level, towards the back
+    box(b, (2 * H, 2 * H, 0.15), (0, 0, 0.075), CONCRETE)
+    for sx in (-1, 1):
+        box(b, (0.08, 2 * H, 0.02), (sx * 2.44, 0, 0.16), HAZ)
+    for sx in (-1, 1):                                 # pumpjack skid
+        i_beam(b, (sx * 0.55, -0.35, 0.30), (sx * 0.55, 2.40, 0.30), h=0.30, w=0.20)
+    for y in (-0.25, 0.9, 2.3):
+        i_beam(b, (-0.65, y, 0.30), (0.65, y, 0.30), h=0.26, w=0.16)
+    # Samson post (A-frame) + saddle bearing + ladder
+    for sx in (-1, 1):
+        for y0 in (-0.15, 0.95):
+            beam(b, (sx * 0.55, y0, 0.45), (sx * 0.16, PIV.y, PIV.z - 0.15), 0.12, 0.10, PAINT)
+        beam(b, (sx * 0.50, -0.05, 1.6), (sx * 0.50, 0.85, 1.6), 0.06, 0.06, PAINT)
+        beam(b, (sx * 0.36, 0.05, 2.6), (sx * 0.36, 0.75, 2.6), 0.06, 0.06, PAINT)
+    box(b, (0.40, 0.40, 0.16), (0, PIV.y, PIV.z - 0.10), CAST)
+    for sx in (-1, 1):
+        cyl(b, 0.10, 0.08, (sx * 0.20, PIV.y, PIV.z), "X", CAST, segs=16)
+    ladder(b, 0, 1.05, 0.45, 3.4, along="X", w=0.36)
+    # gear reducer round the crank axis, input from the socket
+    box(b, (0.84, 0.95, 1.20), (0, CR.y, 0.30 + 0.60), PAINT)
+    cyl(b, 0.48, 0.80, (0, CR.y, CR.z), "X", PAINT, segs=28)
+    for sx in (-1, 1):
+        cyl(b, 0.20, 0.10, (sx * 0.45, CR.y, CR.z), "X", CAST, segs=20)          # crank bearings
+        cyl(b, 0.16, 0.08, (sx * 0.42, CR.y - 0.25, 0.75), "X", CAST, segs=16)   # intermediate shaft caps
+    box(b, (0.86, 0.04, 0.06), (0, CR.y - 0.48, 1.30), IRON)
+    hazard(b, 0.80, (0, CR.y - 0.48, 0.55), "X", h=0.08, n=8)
+    socket_coupling(b, H, C)
+    # guard fence round the crank
+    railing(b, [(-1.15, 1.05, 0.30), (-1.15, 2.45, 0.30), (1.15, 2.45, 0.30), (1.15, 1.05, 0.30)], h=1.1, post=0.7, mat=HAZ)
+    # wellhead: casing head, tee, master valves (red handwheels), stuffing box; flowline to the front flange
+    cyl(b, 0.26, 0.30, (0, WY, 0.30), "Z", CAST, segs=24)
+    bolt_circle(b, 8, 0.22, (0, WY, 0.46), "Z", STEEL, r=0.014, d=0.03)
+    for z in (0.62, 0.98):
+        cyl(b, 0.13, 0.24, (0, WY, z), "Z", STEEL, segs=18)
+        cyl(b, 0.17, 0.04, (0, WY, z + 0.12), "Z", CAST, segs=18)
+        cyl(b, 0.13, 0.03, (0.26, WY, z), "X", RED, segs=18)
+        cyl(b, 0.02, 0.16, (0.18, WY, z), "X", STEEL, segs=6)
+    cyl(b, 0.10, 0.24, (0, WY, 1.26), "Z", CAST, segs=16)                          # stuffing box
+    cyl(b, 0.07, 0.40, (0, WY - 0.2, 0.80), "Y", STEEL, segs=14)                   # tee
+    pipe_run(b, [(0, WY - 0.38, 0.80), (0, -1.85, 0.80), (0, -1.85, C), (0, -2.38, C)], r=0.07, mat=STEEL)
+    cyl(b, 0.10, 0.14, (0, -2.22, C), "Y", CAST, segs=16)                          # check valve body
+    flange(b, (0, -2.485, C), "Y", OUT, r=PIPE_R + 0.06, bolts=8)
+    gauge(objs, b, (0.20, WY - 0.20, 1.10), "FeNeedle_Oil", r=0.06)
+    # separator vessel on the game-right side (Blender -X) and its line from the tree
+    for y in (-0.1, 1.5):
+        box(b, (0.55, 0.14, 0.42), (-1.85, y, 0.36), IRON)
+    cyl(b, 0.38, 2.0, (-1.85, 0.7, 0.86), "Y", PAINT, segs=28)
+    for y in (-0.30, 1.70):
+        cyl(b, 0.34, 0.06, (-1.85, y, 0.86), "Y", CAST, segs=24)
+    for y in (0.1, 0.7, 1.3):
+        cyl(b, 0.395, 0.03, (-1.85, y, 0.86), "Y", IRON, segs=28)
+    pipe_run(b, [(-0.15, WY, 0.62), (-1.0, WY, 0.62), (-1.0, -0.6, 0.62), (-1.85, -0.6, 0.62), (-1.85, -0.6, 1.25),
+                 (-1.85, 0.0, 1.25)], r=0.04, mat=STEEL)
+    cyl(b, 0.05, 0.9, (-1.85, 1.45, 1.6), "Z", STEEL, segs=10)                     # gas vent
+    cyl(b, 0.08, 0.10, (-1.85, 1.45, 2.08), "Z", SOOT, segs=12)
+    # workover derrick over the well: lattice to 10.9 m, open where the beam and the flowline pass
+    truss(b, (1.05, 1.10, 0, WY), (0.28, 0.30, 0, WY), 0.15, 10.40, 7, leg=0.12, brace=0.045,
+          open_faces={"+Y": (2.6, 5.4), "-Y": (0.15, 1.2)})
+    box(b, (0.80, 0.80, 0.10), (0, WY, 10.45), IRON)
+    cyl(b, 0.20, 0.08, (0, WY, 10.68), "X", STEEL, segs=20)                        # crown sheave (static)
+    for sx in (-1, 1):
+        box(b, (0.06, 0.40, 0.18), (sx * 0.10, WY, 10.59), CAST)
+    grating(b, -0.7, 0.7, WY - 0.75, WY - 0.30, 6.4, bars=0.14)                     # monkey board
+    ladder(b, -0.20, WY - 0.26, 0.2, 10.35, along="X", w=0.30)
+    cyl(b, 0.02, 0.2, (0.3, WY, 10.6), "Z", STEEL, segs=6)                         # aircraft lamp post
+    cyl(b, 0.05, 0.08, (0.3, WY, 10.74), "Z", RED, segs=10)
+    objs.append(to_object(b, "feOilExtractor_Base", bevel=0.004))
+
+    # walking beam + horsehead + equalizer, pivot at the saddle; rocks about Blender X
+    wb = bmesh.new()
+    i_beam(wb, (0, -0.85 - PIV.y, 0.22), (0, 2.02 - PIV.y, 0.22), h=0.42, w=0.28)
+    for y in (-0.6, 0.0, 0.6, 1.2):                                                # stiffeners
+        box(wb, (0.26, 0.03, 0.38), (0, y, 0.22), IRON)
+    ra = (Vector((0, WY, 3.78)) - PIV).length
+    n = 14
+    for k in range(n):                                                             # horsehead: curved plates
+        a0 = math.radians(-34 + 70 * k / n)
+        a1 = math.radians(-34 + 70 * (k + 1) / n)
+        am = (a0 + a1) / 2
+        p = Vector((0, -ra * math.cos(am), ra * math.sin(am)))
+        box(wb, (0.36, 0.06, ra * (a1 - a0) + 0.01), p, PAINT, Matrix.Rotation(-am, 4, "X"))
+        for sx in (-1, 1):
+            q = Vector((sx * 0.17, -(ra - 0.25) * math.cos(am), (ra - 0.25) * math.sin(am)))
+            box(wb, (0.02, 0.50, ra * (a1 - a0) + 0.02), q, PAINT, Matrix.Rotation(-am, 4, "X"))
+    box(wb, (0.30, 0.5, 0.20), (0, -ra + 0.45, 0.22), PAINT)
+    eq = END - PIV
+    box(wb, (1.60, 0.20, 0.14), (0, eq.y, eq.z), CAST)                             # equalizer
+    box(wb, (0.20, 0.30, 0.30), (0, eq.y, eq.z + 0.20), CAST)
+    for sx in (-1, 1):
+        cyl(wb, 0.07, 0.10, (sx * 0.75, eq.y, eq.z), "X", STEEL, segs=12)
+    cyl(wb, 0.09, 0.44, (0, 0, 0), "X", STEEL, segs=16)                            # centre bearing pin
+    objs.append(to_object_axis(wb, "FeRock_1", tuple(PIV), ACROSS, bevel=0.002))
+    objs.append(empty("FeRockEnd_1", tuple(END), 0.05))
+    objs.append(empty("FeRockHead_1", (0, WY, 3.78), 0.05))
+    # crank, counterweights, crank pins (spins about Blender X: local Y)
+    ck = bmesh.new()
+    cyl(ck, 0.10, 1.70, (0, 0, 0), "X", STEEL, segs=18)
+    for sx in (-1, 1):
+        x = sx * 0.62
+        beam(ck, (x, 0, 0), (x, R_ + 0.10, 0), 0.10, 0.22, CAST)                   # crank arm towards the pin
+        for k in range(1, 9):
+            a_ = math.radians(180 - 50 + 100 * (k - 0.5) / 8)
+            box(ck, (0.12, 0.20, 0.30), (x, 0.46 * math.cos(a_), 0.46 * math.sin(a_)), CAST, Matrix.Rotation(a_, 4, "X"))
+        box(ck, (0.13, 0.12, 0.62), (x, -0.50, 0.0), IRON)                          # weight clamp bar
+        cyl(ck, 0.06, 0.24, (sx * 0.73, R_, 0), "X", STEEL, segs=12)                # crank pin
+        cyl(ck, 0.09, 0.06, (sx * 0.68, R_, 0), "X", CAST, segs=12)
+    objs.append(to_object_axis(ck, "FeSpin_x0.25_Crank", tuple(CR), ACROSS, bevel=0.002))
+    objs.append(empty("FeRockPin_1", tuple(PIN), 0.05))
+    # pitman arms: pivot at the crank pin, towards the equalizer
+    pm = bmesh.new()
+    d = END - PIN
+    for sx in (-1, 1):
+        beam(pm, (sx * 0.80, 0, 0), (sx * 0.80, d.y, d.z), 0.07, 0.10, PAINT)
+        cyl(pm, 0.09, 0.12, (sx * 0.80, 0, 0), "X", CAST, segs=14)
+        cyl(pm, 0.08, 0.12, (sx * 0.80, d.y, d.z), "X", CAST, segs=14)
+    objs.append(to_object(pm, "FeRockRod_1", location=tuple(PIN), bevel=0.002))
+    # polished rod, carrier bar, bridle (moves up and down with the horsehead)
+    pr = bmesh.new()
+    cyl(pr, 0.025, 2.15, (0, 0, 0.6 + 2.15 / 2), "Z", STEEL, segs=10)
+    box(pr, (0.40, 0.10, 0.06), (0, 0, 2.75), CAST)
+    cyl(pr, 0.05, 0.10, (0, 0, 2.83), "Z", STEEL, segs=10)                         # rod clamp
+    for sx in (-1, 1):
+        cyl(pr, 0.012, 3.95 - 2.75, (sx * 0.17, 0.02, (3.95 + 2.75) / 2), "Z", STEEL, segs=6)
+    objs.append(to_object(pr, "FeRockSlide_1", location=(0, WY - 0.0, 0), bevel=0.001))
+    # input shaft from the socket into the reducer
+    sh = bmesh.new()
+    cyl(sh, SHAFT_R, 0.30, (0, 0, 0), "Y", STEEL, segs=18)
+    cyl(sh, FLANGE_R, 0.04, (0, 0.13, 0), "Y", CAST, segs=20)
+    bolt_circle(sh, 4, 0.072, (0, 0.11, 0), "Y", STEEL, r=0.010, d=0.02)
+    box(sh, (0.02, 0.2, 0.014), (0, 0, SHAFT_R + 0.004), RUST)
+    objs.append(to_object(sh, "FeSpin_DriveShaft", location=(0, H - 0.18, C), bevel=0.002))
+    return objs
+
+
+# ---------------------------------------------------------------- Storage Tank (5 x 6 x 5)
+def model_storage_tank():
+    """Storage Tank (MultiBlockDim 5,6,5): a welded vertical tank on a concrete ring, cone roof with a handrail, a
+    spiral stair round it, a nozzle with a flange in the middle of every side of the bottom layer (pipes connect
+    there), a manway, a float gauge on a scale board (FeSurface_r4.60_Float rises with the level, FxVisual Tank) and
+    a level dial (FeNeedle_Level)."""
+    objs = []
+    b = bmesh.new()
+    R0 = 2.0
+    Z0, Z1 = 0.22, 5.00
+    cyl(b, 2.30, 0.22, (0, 0, 0.11), "Z", CONCRETE, segs=48)
+    cyl(b, R0, Z1 - Z0, (0, 0, (Z0 + Z1) / 2), "Z", PAINT, segs=56)
+    for z in (Z0 + 0.03, 1.18, 2.14, 3.10, 4.06, Z1 - 0.03):                       # course welds
+        cyl(b, R0 + 0.008, 0.025, (0, 0, z), "Z", IRON, segs=56)
+    for k in range(5):                                                             # staggered vertical seams
+        za, zb = 0.25 + k * 0.95, 0.25 + (k + 1) * 0.95
+        for j in range(3):
+            a_ = 2 * math.pi * (j / 3 + (k % 2) / 6)
+            box(b, (0.02, 0.02, zb - za), ((R0 + 0.006) * math.cos(a_), (R0 + 0.006) * math.sin(a_), (za + zb) / 2), IRON)
+    # roof
+    cyl(b, R0 + 0.06, 0.05, (0, 0, Z1 + 0.02), "Z", IRON, segs=56)
+    cyl(b, R0 + 0.03, 0.45, (0, 0, Z1 + 0.25), "Z", RUST, segs=56, r2=0.25)
+    cyl(b, 0.30, 0.18, (0, 0, Z1 + 0.55), "Z", CAST, segs=20)                       # roof vent
+    cyl(b, 0.36, 0.05, (0, 0, Z1 + 0.66), "Z", IRON, segs=20)
+    pts = [((R0 - 0.08) * math.cos(2 * math.pi * k / 20), (R0 - 0.08) * math.sin(2 * math.pi * k / 20), Z1 + 0.05) for k in range(20)]
+    railing(b, pts, h=0.62, post=0.8, mat=HAZ, closed=True)
+    # spiral stair: 22 treads from the ground (angle A0) up to the roof
+    A0, SPAN, N = 300.0, 205.0, 22
+    for k in range(N):
+        a_ = math.radians(A0 + SPAN * (k + 0.5) / N)
+        z = Z0 + (Z1 + 0.05 - Z0) * (k + 1) / N
+        m = Matrix.Rotation(a_, 4, "Z")
+        box(b, (0.40, 0.24, 0.04), m @ Vector((R0 + 0.22, 0, z)), IRON, m)
+        if k % 2 == 0:
+            beam(b, m @ Vector((R0 + 0.40, 0, z)), m @ Vector((R0 + 0.40, 0, z + 0.90)), 0.04, 0.04, HAZ)
+            beam(b, m @ Vector((R0 + 0.04, 0, z - 0.02)), m @ Vector((R0 + 0.04, 0, z - 0.30)), 0.05, 0.05, IRON)
+    for r in (R0 + 0.42,):
+        hp = []
+        for k in range(N + 1):
+            a_ = math.radians(A0 + SPAN * k / N)
+            z = Z0 + (Z1 + 0.05 - Z0) * k / N + 0.90
+            hp.append(Vector((r * math.cos(a_), r * math.sin(a_), z)))
+        for p, q in zip(hp, hp[1:]):
+            beam(b, p, q, 0.04, 0.04, HAZ)
+    # nozzles: middle of every side, bottom layer (pipe ports), with a valve
+    for ax, sg in (("X", 1), ("X", -1), ("Y", 1), ("Y", -1)):
+        v = Vector((sg, 0, 0)) if ax == "X" else Vector((0, sg, 0))
+        cyl(b, PIPE_R, 0.50, v * (R0 + 0.24) + Vector((0, 0, C)), ax, STEEL, segs=16)
+        cyl(b, 0.12, 0.14, v * (R0 + 0.22) + Vector((0, 0, C)), ax, CAST, segs=16)
+        cyl(b, 0.012, 0.16, v * (R0 + 0.22) + Vector((0, 0, C + 0.16)), "Z", STEEL, segs=6)
+        cyl(b, 0.09, 0.02, v * (R0 + 0.22) + Vector((0, 0, C + 0.25)), "Z", RED, segs=14)
+        flange(b, tuple(v * 2.485 + Vector((0, 0, C))), ax, IN)
+    # manway (front-right), placards
+    m = Matrix.Rotation(math.radians(240), 4, "Z")
+    cyl(b, 0.34, 0.10, m @ Vector((R0 + 0.04, 0, 0.95)), "X", CAST, segs=24, rot=m)
+    for k in range(12):
+        a_ = 2 * math.pi * k / 12
+        p = m @ Vector((R0 + 0.10, 0.30 * math.cos(a_), 0.95 + 0.30 * math.sin(a_)))
+        cyl(b, 0.015, 0.04, p, "X", STEEL, segs=6, rot=m)
+    for a_deg in (165.0, 215.0):
+        mm = Matrix.Rotation(math.radians(a_deg), 4, "Z")
+        box(b, (0.02, 0.40, 0.40), mm @ Vector((R0 + 0.01, 0, 2.0)), HAZ, mm @ Matrix.Rotation(math.pi / 4, 4, "X"))
+        box(b, (0.022, 0.30, 0.30), mm @ Vector((R0 + 0.012, 0, 2.0)), RED, mm @ Matrix.Rotation(math.pi / 4, 4, "X"))
+    # float gauge (side away from the stair): a scale board, two guide wires, the float pointer rising with the level
+    AG = math.radians(195)
+    mg = Matrix.Rotation(AG, 4, "Z")
+    box(b, (0.03, 0.22, 4.7), mg @ Vector((R0 + 0.06, 0, 0.30 + 2.35)), SOOT, mg)
+    for k in range(11):
+        z = 0.42 + k * 0.46
+        box(b, (0.01, 0.10 if k % 5 else 0.18, 0.02), mg @ Vector((R0 + 0.08, 0, z)), HAZ, mg)
+    for sy in (-1, 1):
+        cyl(b, 0.006, 4.7, mg @ Vector((R0 + 0.10, sy * 0.14, 0.30 + 2.35)), "Z", STEEL, segs=6)
+    box(b, (0.25, 0.30, 0.20), mg @ Vector((R0 + 0.05, 0, Z1 + 0.15)), CAST, mg)
+    fl = bmesh.new()
+    box(fl, (0.06, 0.30, 0.07), (0, 0, 0), RED)
+    box(fl, (0.04, 0.06, 0.14), (0.02, 0.13, 0), HAZ)
+    objs.append(to_object(fl, "FeSurface_r4.60_Float", location=tuple(mg @ Vector((R0 + 0.13, 0, 0.42))), rotation=(0, 0, AG)))
+    # level dial on the front, on a bracket (the stair passes well above it)
+    GXd = 0.45
+    GYd = -(math.sqrt(R0 * R0 - GXd * GXd))
+    box(b, (0.26, 0.14, 0.26), (GXd, GYd - 0.05, 1.10), IRON)
+    gauge(objs, b, (GXd, GYd - 0.14, 1.10), "FeNeedle_Level", r=0.10)
+    objs.append(to_object(b, "feStorageTank_Base", bevel=0.004))
+    return objs
+
+
+# ---------------------------------------------------------------- Train Station (9 x 4 x 3)
+def model_train_station():
+    """Train Station (MultiBlockDim 9,4,3: 9 along the rails, which run outside its FRONT face = Blender -Y). A brick-
+    faced concrete platform one block high with a yellow edge line and steps at both ends; a canopy on cast-iron
+    columns with a wooden valance; the station office (storage) with a door and windows, crates, the coal bunker
+    (fuel store), a small tank on saddles with its fill pipe to the back face, benches, lamps, a clock; the name
+    board hangs under the canopy with a TextMesh on each side (FeSignText_F / _B: the vanilla label). Colliders
+    (FeCol_*): the deck, the steps, the office, the bunker, the tank and the roof, so players walk on the platform."""
+    objs = []
+    b = bmesh.new()
+    X, Y = 4.5, 1.5
+    D = 1.0                                              # deck height
+    PX = 3.5                                             # deck ends; steps beyond
+    box(b, (2 * PX, 2 * Y, D - 0.08), (0, 0, (D - 0.08) / 2), CONCRETE)
+    box(b, (2 * PX + 0.02, 2 * Y + 0.02, 0.08), (0, 0, D - 0.04), CONCRETE)              # deck slab
+    for k in range(int(2 * PX / 0.6)):                                                  # brick facing on the rail side
+        x = -PX + 0.3 + k * 0.6
+        box(b, (0.58, 0.04, D - 0.14), (x, -Y - 0.01, (D - 0.14) / 2 + 0.02), BRICK)
+    box(b, (2 * PX + 0.04, 0.30, 0.05), (0, -Y + 0.13, D + 0.005), CONCRETE)             # coping
+    box(b, (2 * PX, 0.10, 0.006), (0, -Y + 0.45, D + 0.004), HAZ)                        # keep-back line
+    for k in range(int(2 * PX / 0.5)):                                                   # deck joints
+        box(b, (0.012, 2 * Y - 0.1, 0.004), (-PX + 0.5 * (k + 1), 0.05, D + 0.003), SOOT)
+    for sx in (-1, 1):                                                                   # steps down at both ends
+        for k, h in enumerate((0.75, 0.5, 0.25)):
+            x = sx * (PX + 0.167 + k * 0.333)
+            box(b, (0.333, 2 * Y - 0.1, h), (x, 0.05, h / 2), CONCRETE)
+            box(b, (0.333, 0.10, 0.01), (x, -Y + 0.15, h + 0.005), HAZ)
+    # canopy: columns at the back, cantilever brackets, roof sheets, valance
+    ZR = 3.55
+    for x in (-3.9, -1.3, 1.3, 3.9):
+        z0 = D if abs(x) < PX else 0.0
+        cyl(b, 0.07, ZR - z0, (x, 1.15, z0 + (ZR - z0) / 2), "Z", CAST, segs=12)
+        cyl(b, 0.13, 0.12, (x, 1.15, z0 + 0.06), "Z", CAST, segs=12)
+        cyl(b, 0.10, 0.08, (x, 1.15, ZR - 0.25), "Z", CAST, segs=12)
+        beam(b, (x, 1.25, ZR + 0.05), (x, -1.55, ZR - 0.10), 0.08, 0.16, IRON)          # roof beam
+        beam(b, (x, 1.15, ZR - 0.70), (x, -0.30, ZR - 0.03), 0.05, 0.05, IRON)          # bracket strut
+        for k in range(3):
+            cyl(b, 0.12 - k * 0.03, 0.012, (x, 0.75 - k * 0.35, ZR - 0.30 + k * 0.12), "X", IRON, segs=12)
+    for k in range(18):                                                                  # corrugated sheets
+        x = -X + 0.25 + k * 0.5
+        rot = Matrix.Rotation(math.atan2(-0.15, 2.8), 4, "X")
+        box(b, (0.52, 2.95, 0.03), (x, -0.15, ZR + 0.02 - 0.0), RUST, rot)
+        for j in range(4):
+            box(b, (0.03, 2.95, 0.03), (x - 0.19 + j * 0.125, -0.15, ZR + 0.045), RUST, rot)
+    box(b, (2 * X, 0.05, 0.12), (0, 1.40, ZR + 0.10), IRON)                              # gutter (back)
+    for k in range(36):                                                                  # valance boards (front)
+        x = -X + 0.125 + k * 0.25
+        box(b, (0.22, 0.03, 0.34), (x, -1.62, ZR - 0.25), WOOD)
+        box(b, (0.08, 0.031, 0.08), (x, -1.62, ZR - 0.45), WOOD, Matrix.Rotation(math.pi / 4, 4, "Y"))
+    box(b, (2 * X, 0.06, 0.06), (0, -1.60, ZR - 0.06), PAINT)
+    # station office (the storage), back left: brick walls, door, windows, sign plate
+    OX0, OX1, OY0, OY1 = -3.40, -0.90, 0.05, 1.40
+    ZT = 3.15
+    for (x0, x1, y0, y1) in ((OX0, OX1, OY1 - 0.12, OY1), (OX0, OX0 + 0.12, OY0, OY1), (OX1 - 0.12, OX1, OY0, OY1)):
+        box(b, (x1 - x0, y1 - y0, ZT - D), ((x0 + x1) / 2, (y0 + y1) / 2, D + (ZT - D) / 2), BRICK)
+    # front wall with a door and a window
+    box(b, (0.55, 0.12, ZT - D), (OX0 + 0.275, OY0 + 0.06, D + (ZT - D) / 2), BRICK)
+    box(b, (0.55, 0.12, ZT - D), (OX1 - 0.275, OY0 + 0.06, D + (ZT - D) / 2), BRICK)
+    box(b, (OX1 - OX0 - 1.1, 0.12, 0.85), ((OX0 + OX1) / 2, OY0 + 0.06, D + 0.425), BRICK)
+    box(b, (OX1 - OX0 - 1.1, 0.12, 0.45), ((OX0 + OX1) / 2, OY0 + 0.06, ZT - 0.225), BRICK)
+    box(b, (OX1 - OX0 - 1.1, 0.03, ZT - D - 1.30), ((OX0 + OX1) / 2, OY0 + 0.07, D + 0.85 + (ZT - D - 1.30) / 2), GLASS)
+    for k in range(3):
+        box(b, (0.03, 0.05, ZT - D - 1.30), (OX0 + 0.55 + (k + 1) * (OX1 - OX0 - 1.1) / 4, OY0 + 0.04, D + 0.85 + (ZT - D - 1.30) / 2), WOOD)
+    box(b, (OX1 - OX0 - 1.0, 0.16, 0.05), ((OX0 + OX1) / 2, OY0 - 0.02, D + 0.84), CONCRETE)   # sill
+    box(b, (0.40, 0.04, 1.95), (OX0 + 0.33, OY0 + 0.0, D + 0.975), WOOD)               # door leaf (shut)
+    box(b, (0.04, 0.05, 0.05), (OX0 + 0.47, OY0 - 0.03, D + 1.0), BRASS)
+    box(b, (OX1 - OX0 + 0.10, OY1 - OY0 + 0.10, 0.08), ((OX0 + OX1) / 2, (OY0 + OY1) / 2, ZT + 0.04), CONCRETE)
+    box(b, (0.80, 0.03, 0.22), ((OX0 + OX1) / 2 + 0.3, OY0 - 0.02, ZT - 0.18), PAINT)       # "OFFICE" plate
+    # crates (storage), coal bunker (fuel), small tank on saddles (fluid)
+    for (x, y, z, s) in ((-0.55, 1.05, D, 0.55), (0.05, 1.10, D, 0.50), (-0.30, 1.10, D + 0.55, 0.45)):
+        plate(b, (s, s, s), (x, y, z + s / 2), WOOD, "-Y", n=3)
+        for zz in (z + 0.06, z + s - 0.06):
+            box(b, (s + 0.01, s + 0.01, 0.03), (x, y, zz), IRON)
+    BX0, BX1 = 0.45, 1.85
+    for (x0, x1, y0, y1) in ((BX0, BX1, 1.30, 1.38), (BX0, BX0 + 0.08, 0.35, 1.38), (BX1 - 0.08, BX1, 0.35, 1.38)):
+        box(b, (x1 - x0, y1 - y0, 0.90), ((x0 + x1) / 2, (y0 + y1) / 2, D + 0.45), WOOD)
+    box(b, (BX1 - BX0, 0.08, 0.55), ((BX0 + BX1) / 2, 0.39, D + 0.275), WOOD)
+    for x in (BX0, BX1):
+        for y in (0.35, 1.38):
+            box(b, (0.08, 0.08, 0.95), (x, y, D + 0.475), IRON)
+    cyl(b, 0.62, 0.5, ((BX0 + BX1) / 2, 0.88, D + 0.48), "Z", SOOT, segs=10, r2=0.15)  # coal heap
+    box(b, (BX1 - BX0 - 0.16, 0.9, 0.30), ((BX0 + BX1) / 2, 0.88, D + 0.25), SOOT)
+    box(b, (0.6, 0.03, 0.18), ((BX0 + BX1) / 2, 0.34, D + 0.40), HAZ)                    # "FUEL" plate
+    TX = 2.75
+    for x in (TX - 0.55, TX + 0.55):
+        box(b, (0.14, 0.75, 0.28), (x, 0.95, D + 0.14), CAST)
+    cyl(b, 0.40, 1.5, (TX, 0.95, D + 0.62), "X", PAINT, segs=28)
+    for x in (TX - 0.75, TX + 0.75):
+        cyl(b, 0.36, 0.06, (x, 0.95, D + 0.62), "X", CAST, segs=24)
+    for x in (TX - 0.35, TX + 0.35):
+        cyl(b, 0.405, 0.04, (x, 0.95, D + 0.62), "X", IRON, segs=28)
+    cyl(b, 0.08, 0.10, (TX, 0.95, D + 1.05), "Z", CAST, segs=12)                        # filler cap
+    pipe_run(b, [(TX + 0.75, 0.95, D + 0.45), (TX + 0.95, 0.95, D + 0.45), (TX + 0.95, 1.40, D + 0.45),
+                 (TX + 0.95, 1.40, C), (TX + 0.95, 1.49, C)], r=0.035)
+    flange(b, (TX + 0.95, 1.485, C), "Y", IN)
+    # benches facing the rails, lamps under the canopy, a clock on a bracket
+    for x in (-1.9, 3.1):
+        for sx in (-1, 1):
+            box(b, (0.05, 0.40, 0.42), (x + sx * 0.55, -0.15, D + 0.21), CAST)
+        for k in range(3):
+            box(b, (1.25, 0.10, 0.03), (x, -0.30 + k * 0.12, D + 0.44), WOOD)
+        for k in range(2):
+            box(b, (1.25, 0.03, 0.09), (x, -0.02, D + 0.62 + k * 0.13), WOOD)
+    for x in (-2.6, 0.0, 2.6):
+        cyl(b, 0.008, 0.45, (x, -0.55, ZR - 0.27), "Z", STEEL, segs=6)
+        cyl(b, 0.12, 0.10, (x, -0.55, ZR - 0.52), "Z", PAINT, segs=12, r2=0.03)
+        cyl(b, 0.06, 0.08, (x, -0.55, ZR - 0.60), "Z", GLASS, segs=10)
+    box(b, (0.05, 0.60, 0.05), (1.3, 0.80, ZR - 0.55), IRON)
+    cyl(b, 0.20, 0.10, (1.3, 0.45, ZR - 0.75), "Y", CAST, segs=24)
+    cyl(b, 0.17, 0.11, (1.3, 0.45, ZR - 0.75), "Y", SAND, segs=24)
+    for k in range(12):
+        a_ = 2 * math.pi * k / 12
+        box(b, (0.012, 0.115, 0.03), (1.3 + 0.14 * math.cos(a_), 0.45, ZR - 0.75 + 0.14 * math.sin(a_)), SOOT,
+            Matrix.Rotation(-a_, 4, "Y"))
+    box(b, (0.012, 0.12, 0.12), (1.3, 0.45, ZR - 0.70), SOOT)
+    box(b, (0.08, 0.12, 0.012), (1.34, 0.45, ZR - 0.75), SOOT)
+    # the name board: hangs under the canopy over the middle of the platform
+    for sx in (-1, 1):
+        cyl(b, 0.008, 0.30, (sx * 1.4, -0.60, ZR - 0.18), "Z", STEEL, segs=6)
+    box(b, (3.2, 0.06, 0.62), (0, -0.60, ZR - 0.62), PAINT)
+    box(b, (3.3, 0.08, 0.05), (0, -0.60, ZR - 0.30), IRON)
+    box(b, (3.3, 0.08, 0.05), (0, -0.60, ZR - 0.94), IRON)
+    box(b, (3.04, 0.065, 0.48), (0, -0.60, ZR - 0.62), SAND)
+    objs.append(to_object(b, "feTrainStation_Base", bevel=0.003))
+    objs.append(empty("FeSignText_F", (0, -0.64, ZR - 0.62), 0.2))
+    objs.append(empty("FeSignText_B", (0, -0.56, ZR - 0.62), 0.2))
+    n = 1
+    col_box(objs, n, (0, 0, D / 2), (2 * PX, 2 * Y, D)); n += 1
+    for sx in (-1, 1):
+        for k, h in enumerate((0.75, 0.5, 0.25)):
+            col_box(objs, n, (sx * (PX + 0.167 + k * 0.333), 0, h / 2), (0.333, 2 * Y, h)); n += 1
+    col_box(objs, n, ((OX0 + OX1) / 2, (OY0 + OY1) / 2, (D + ZT) / 2), (OX1 - OX0, OY1 - OY0, ZT - D)); n += 1
+    col_box(objs, n, ((BX0 + BX1) / 2, 0.865, D + 0.45), (BX1 - BX0, 1.03, 0.90)); n += 1
+    col_box(objs, n, (TX, 0.95, D + 0.55), (1.6, 0.85, 1.10)); n += 1
+    col_box(objs, n, (0, -0.05, ZR + 0.05), (2 * X, 3.0, 0.20)); n += 1
+    return objs
+
+
+# ---------------------------------------------------------------- trains (prefabs <kit>CarPrefab, TrainView.cs)
+# Origin = centre of the car on the rail top (y = 0 in the game), front = Blender -Y, no colliders. Wheels sit on
+# the rails (tread centre RAIL_C off the middle, flange inside). Width <= 2.6 m, height <= 3.6 m.
+def wheelset(name, y, r, objs, spokes=0, pins=None, x_wheel=RAIL_C):
+    """An axle with two wheels (FeSpin_r<r>_<name>: TrainView turns it with the distance run). spokes > 0: a spoked
+    driving wheel with a counterweight. pins = [(x, angle_deg, length)]: crank pins on the outer faces (angle 0 =
+    towards the front, 90 = up)."""
+    w = bmesh.new()
+    cyl(w, 0.06, 2 * x_wheel + 0.10, (0, 0, 0), "X", STEEL, segs=14)
+    for sx in (-1, 1):
+        x = sx * x_wheel
+        cyl(w, r, 0.12, (x, 0, 0), "X", STEEL, segs=36)                                # tread
+        cyl(w, r + 0.03, 0.025, (x - sx * 0.055, 0, 0), "X", STEEL, segs=36)           # flange (inside)
+        if spokes:
+            ring(w, r - 0.01, r - 0.09, 0.13, (x, 0, 0), "X", CAST, segs=36)
+            cyl(w, 0.13, 0.15, (x, 0, 0), "X", CAST, segs=20)
+            for k in range(spokes):
+                a_ = 2 * math.pi * k / spokes
+                box(w, (0.07, 0.045, r - 0.18), (x, (r / 2) * math.cos(a_) * 1.0, (r / 2) * math.sin(a_)), CAST,
+                    Matrix.Rotation(a_ - math.pi / 2, 4, "X"))
+            side_pins = [pp for pp in (pins or []) if pp[0] * sx > 0]
+            cw = -side_pins[0][1] if side_pins else 0.0
+            for k in range(5):                                                         # counterweight (opposite the pin)
+                a_ = math.radians(cw - 56 + 28 * k)
+                box(w, (0.09, 0.20, 0.13), (x, (r - 0.16) * math.cos(a_), (r - 0.16) * math.sin(a_)), CAST,
+                    Matrix.Rotation(a_, 4, "X"))
+        else:
+            cyl(w, r - 0.06, 0.13, (x, 0, 0), "X", CAST, segs=28)
+            cyl(w, 0.10, 0.16, (x, 0, 0), "X", CAST, segs=16)
+            box(w, (0.14, 0.03, r - 0.15), (x, 0, (r - 0.15) / 2 + 0.08), RUST)         # a mark: the turn shows
+    for (px, ang, ln) in (pins or []):
+        a_ = math.radians(ang)
+        p = Vector((px, -0.32 * math.cos(a_), 0.32 * math.sin(a_)))
+        cyl(w, 0.045, ln, p, "X", STEEL, segs=12)
+        cyl(w, 0.07, 0.05, p - Vector((math.copysign(ln / 2 - 0.02, px), 0, 0)), "X", CAST, segs=12)
+    objs.append(to_object_axis(w, "FeSpin_r%.2f_%s" % (r, name), (0, y, r), ACROSS, bevel=0.002))
+
+
+def bogie(b, objs, yc, n, r=0.42, sp=1.5):
+    """A two-axle bogie: side frames with axle boxes and leaf springs outside the wheels, a bolster."""
+    for sx in (-1, 1):
+        x = sx * 0.90
+        box(b, (0.10, sp + 0.70, 0.14), (x, yc, r + 0.05), CAST)
+        beam(b, (x, yc - sp / 2 - 0.30, r + 0.05), (x, yc, r - 0.12), 0.09, 0.10, CAST)
+        beam(b, (x, yc + sp / 2 + 0.30, r + 0.05), (x, yc, r - 0.12), 0.09, 0.10, CAST)
+        for dy in (-sp / 2, sp / 2):
+            box(b, (0.16, 0.24, 0.24), (x, yc + dy, r), IRON)                         # axle box
+            for k in range(4):
+                box(b, (0.12, 0.50 - k * 0.09, 0.025), (x, yc + dy, r + 0.16 + k * 0.03), STEEL)  # springs
+    box(b, (1.9, 0.30, 0.14), (0, yc, r + 0.22), CAST)                                 # bolster
+    for k, dy in enumerate((-sp / 2, sp / 2)):
+        wheelset("Bogie%d%d" % (n, k), yc + dy, r, objs)
+
+
+def car_ends(b, L, z=1.02, beam_mat=RED):
+    """Buffer beams with two buffers and a coupler hook at both ends of a car of length L."""
+    for s in (-1, 1):
+        y = s * (L / 2 - 0.40)
+        box(b, (2.4, 0.16, 0.30), (0, y, z), beam_mat)
+        for sx in (-1, 1):
+            cyl(b, 0.07, 0.28, (sx * 0.85, y + s * 0.20, z), "Y", STEEL, segs=14)
+            cyl(b, 0.17, 0.04, (sx * 0.85, y + s * 0.33, z), "Y", STEEL, segs=18)       # buffer heads
+            cyl(b, 0.10, 0.10, (sx * 0.85, y + s * 0.10, z), "Y", CAST, segs=14)
+        box(b, (0.10, 0.30, 0.08), (0, y + s * 0.18, z - 0.05), IRON)                   # coupler
+        cyl(b, 0.05, 0.10, (0, y + s * 0.30, z - 0.05), "Z", IRON, segs=10)
+
+
+def underframe(b, L, z=1.02, axles=()):
+    for sx in (-1, 1):
+        box(b, (0.10, L - 0.3, 0.24), (sx * 1.15, 0, z), IRON)                          # sole bars
+        box(b, (0.08, L - 0.6, 0.18), (sx * 0.40, 0, z), IRON)                          # centre sills
+    for k in range(7):
+        y = -L / 2 + 0.5 + k * (L - 1.0) / 6
+        if any(abs(y - a) < 0.55 for a in axles):
+            continue
+        box(b, (2.30, 0.08, 0.14), (0, y, z), IRON)
+    cyl(b, 0.16, 1.8, (0.55, 0, z - 0.30), "Y", CAST, segs=16)                         # brake cylinder / reservoir
+    for sx in (-1, 1):
+        for k in range(4):
+            box(b, (0.04, 0.04, 0.40), (sx * 1.15, -L / 2 + 1.0 + k * (L - 2.0) / 3, z - 0.30), IRON)
+
+
+def model_loco_car():
+    """Locomotive (8 m): a tank engine. Smokebox with chimney (FeFx_Smoke_1) and lamp, boiler with the steam dome
+    and safety valves, side water tanks, the cab, the coal bunker; pony truck, three coupled driving axles and a
+    trailing axle (FeSpin_r*: TrainView turns them with the distance run); outside cylinders with crossheads
+    (FeTrainCross_n), main rods (FeTrainMain_n) and coupling rods (FeTrainCouple_n) driven from the crank pins
+    (FeTrainPin_n) of the middle driver, quartered at 90 degrees (left at front dead centre, right at the top)."""
+    objs = []
+    b = bmesh.new()
+    L = 8.0
+    RD, RP = 0.70, 0.40
+    AX = (-0.90, 0.55, 2.00)                    # driving axles
+    ZB = 2.05                                   # boiler centre
+    for sx in (-1, 1):                                                                  # main frames
+        box(b, (0.06, 7.2, 0.50), (sx * 0.62, -0.15, 0.85), IRON)
+        for y in AX:
+            box(b, (0.08, 0.30, 0.16), (sx * 0.62, y, RD), CAST)                        # horn blocks
+    car_ends(b, L, z=1.00)
+    # pilot (cow catcher)
+    for k in range(9):
+        x = -0.9 + k * 0.225
+        beam(b, (x * 0.6, -3.95, 0.12), (x, -3.70, 0.80), 0.04, 0.04, IRON)
+    box(b, (2.0, 0.06, 0.06), (0, -3.92, 0.14), IRON)
+    # running boards, splashers over the drivers
+    for sx in (-1, 1):
+        box(b, (0.36, 4.9, 0.04), (sx * 1.07, -1.05, 1.18), IRON)
+        box(b, (0.04, 4.9, 0.10), (sx * 1.25, -1.05, 1.22), IRON)
+    # smokebox, boiler, firebox, domes, chimney
+    cyl(b, 0.76, 1.05, (0, -2.85, ZB), "Y", SOOT, segs=36)
+    cyl(b, 0.70, 0.06, (0, -3.40, ZB), "Y", SOOT, segs=36)                             # smokebox door
+    cyl(b, 0.08, 0.08, (0, -3.46, ZB), "Y", STEEL, segs=12)
+    for k in range(2):
+        box(b, (0.70, 0.04, 0.04), (0, -3.45, ZB + 0.18 - k * 0.36), STEEL)            # door straps
+    cyl(b, 0.74, 3.95, (0, -0.35, ZB), "Y", PAINT, segs=36)
+    for y in (-2.0, -1.0, 0.0, 1.0):
+        cyl(b, 0.75, 0.05, (0, y, ZB), "Y", BRASS, segs=36)                            # boiler bands
+    cyl(b, 0.20, 0.55, (0, -2.95, ZB + 0.95), "Z", SOOT, segs=20)                      # chimney
+    cyl(b, 0.27, 0.12, (0, -2.95, ZB + 1.29), "Z", SOOT, segs=20, r2=0.22)
+    cyl(b, 0.30, 0.10, (0, -2.95, ZB + 0.72), "Z", SOOT, segs=20, r2=0.20)
+    cyl(b, 0.28, 0.45, (0, -0.85, ZB + 0.80), "Z", BRASS, segs=24, r2=0.22)            # steam dome
+    cyl(b, 0.20, 0.25, (0, -1.80, ZB + 0.80), "Z", PAINT, segs=20, r2=0.15)            # sand dome
+    for x in (-0.10, 0.10):
+        cyl(b, 0.05, 0.30, (x, 0.95, ZB + 0.85), "Z", BRASS, segs=10)                  # safety valves
+    cyl(b, 0.035, 0.25, (0.25, 1.55, 3.48), "Z", BRASS, segs=10)                       # whistle
+    for sx in (-1, 1):
+        beam(b, (sx * 0.62, -3.3, ZB + 0.35), (sx * 0.62, 1.2, ZB + 0.35), 0.02, 0.02, BRASS)  # handrails
+    box(b, (0.22, 0.20, 0.22), (0, -3.50, ZB + 0.86), SOOT)                            # head lamp
+    cyl(b, 0.08, 0.04, (0, -3.61, ZB + 0.86), "Y", GLASS, segs=14)
+    for sx in (-1, 1):
+        box(b, (0.16, 0.14, 0.18), (sx * 0.85, -3.70, 1.33), SOOT)                     # buffer-beam lamps
+        cyl(b, 0.05, 0.03, (sx * 0.85, -3.78, 1.33), "Y", RED, segs=12)
+    # side tanks
+    for sx in (-1, 1):
+        plate(b, (0.44, 2.9, 1.25), (sx * 1.04, -0.15, 1.83), PAINT, "+X" if sx > 0 else "-X", n=8)
+        box(b, (0.46, 2.92, 0.05), (sx * 1.04, -0.15, 2.48), IRON)
+        cyl(b, 0.10, 0.08, (sx * 1.04, -1.2, 2.52), "Z", BRASS, segs=12)               # filler
+        box(b, (0.02, 1.2, 0.32), (sx * 1.255, -0.15, 1.95), BRASS)                    # number plate
+    # cab + bunker
+    CY0, CY1 = 1.30, 3.05
+    for sx in (-1, 1):
+        box(b, (0.06, CY1 - CY0, 1.0), (sx * 1.25, (CY0 + CY1) / 2, 1.70), PAINT)
+        box(b, (0.06, 0.35, 1.2), (sx * 1.25, CY0 + 0.175, 2.80), PAINT)
+        box(b, (0.06, 0.35, 1.2), (sx * 1.25, CY1 - 0.175, 2.80), PAINT)
+        cyl(b, 0.02, 1.0, (sx * 1.20, CY0 + 0.55, 1.75), "Z", BRASS, segs=8)           # grab rails
+    box(b, (2.5, 0.08, 2.20), (0, CY0, 2.30), PAINT)                                   # cab front (spectacle plate)
+    for sx in (-1, 1):
+        cyl(b, 0.18, 0.09, (sx * 0.65, CY0 - 0.01, 2.95), "Y", GLASS, segs=18)
+        ring(b, 0.21, 0.17, 0.10, (sx * 0.65, CY0 - 0.01, 2.95), "Y", BRASS, segs=18)
+    box(b, (2.62, CY1 - CY0 + 0.30, 0.08), (0, (CY0 + CY1) / 2, 3.42), SOOT)           # roof
+    box(b, (2.30, CY1 - CY0, 0.10), (0, (CY0 + CY1) / 2, 3.50), SOOT)
+    box(b, (2.4, CY1 - CY0 - 0.1, 0.06), (0, (CY0 + CY1) / 2, 1.45), WOOD)            # cab floor (over the drivers)
+    box(b, (1.2, 0.5, 0.9), (0, CY0 + 0.25, 1.65), CAST)                               # firebox back plate
+    box(b, (0.40, 0.04, 0.32), (0, CY0 + 0.51, 1.55), GLOW)                            # fire door glow
+    gauge(objs, b, (0.45, CY0 + 0.52, 2.55), "FeTrainGauge", r=0.08)
+    plate(b, (2.4, 0.85, 1.35), (0, 3.50, 1.85), PAINT, "+Y", n=6)                     # bunker
+    box(b, (2.2, 0.72, 0.12), (0, 3.50, 2.52), SOOT)                                   # coal
+    cyl(b, 0.34, 0.22, (0, 3.50, 2.66), "Z", SOOT, segs=9, r2=0.12)
+    # cylinders, slide bars, valve chests
+    for sx in (-1, 1):
+        x = sx * 1.02
+        cyl(b, 0.19, 0.70, (x, -2.60, RD), "Y", CAST, segs=24)
+        cyl(b, 0.21, 0.05, (x, -2.95, RD), "Y", CAST, segs=24)
+        cyl(b, 0.21, 0.05, (x, -2.25, RD), "Y", CAST, segs=24)
+        box(b, (0.22, 0.70, 0.22), (x, -2.60, RD + 0.30), CAST)                        # valve chest
+        box(b, (0.30, 0.30, 0.10), (sx * 0.80, -2.60, RD + 0.15), IRON)                # to the frame
+        for dz in (-0.09, 0.09):
+            box(b, (0.05, 1.15, 0.03), (sx * 1.00, -1.65, RD + dz), STEEL)             # slide bars
+        box(b, (0.10, 0.10, 0.30), (sx * 1.00, -1.05, RD), IRON)                       # motion bracket
+        cyl(b, 0.03, 0.10, (x, -2.90, RD - 0.22), "Z", STEEL, segs=8)                  # drain cocks
+    objs.append(empty("FeFx_Smoke_1", (0, -2.95, ZB + 1.36), 0.2))
+    for sx in (-1, 1):
+        objs.append(empty("FeFx_Steam_%d" % (1 if sx > 0 else 2), (sx * 1.02, -2.90, RD - 0.30), 0.1))
+    objs.append(to_object(b, "feTrainLocoCar_Body", bevel=0.003))
+    # wheels
+    wheelset("Pony", -2.85, RP, objs)
+    wheelset("Trail", 3.30, RP, objs)
+    for k, y in enumerate(AX):
+        pins = [(0.88, 0, 0.10), (-0.88, 90, 0.10)]
+        if k == 1:
+            pins = [(0.94, 0, 0.22), (-0.94, 90, 0.22)]
+        wheelset("Drv%d" % (k + 1), y, RD, objs, spokes=12, pins=pins)
+    # rods: side 1 = Blender +X (pin at front dead centre), side 2 = Blender -X (pin at the top)
+    LR = 2.0
+    for n, sx, ang in ((1, 1, 0), (2, -1, 90)):
+        a_ = math.radians(ang)
+        off = Vector((0, -0.32 * math.cos(a_), 0.32 * math.sin(a_)))
+        pin = Vector((sx * 1.00, AX[1], RD)) + off
+        objs.append(empty("FeTrainPin_%d" % n, tuple(pin), 0.05))
+        cr = Vector((sx * 1.00, pin.y - math.sqrt(LR * LR - (pin.z - RD) ** 2), RD))
+        c = bmesh.new()                                                                 # crosshead + piston rod
+        box(c, (0.10, 0.20, 0.15), (0, 0, 0), STEEL)
+        cyl(c, 0.04, 0.10, (0, 0, 0), "X", CAST, segs=10)
+        cyl(c, 0.035, 0.70, (sx * 0.02, -0.45, 0), "Y", STEEL, segs=12)
+        objs.append(to_object(c, "FeTrainCross_%d" % n, location=tuple(cr), bevel=0.001))
+        m = bmesh.new()                                                                 # main rod
+        d = pin - cr
+        beam(m, (0, 0, 0), (0, d.y, d.z), 0.05, 0.09, STEEL)
+        cyl(m, 0.07, 0.06, (0, 0, 0), "X", STEEL, segs=12)
+        cyl(m, 0.09, 0.06, (0, d.y, d.z), "X", STEEL, segs=14)
+        objs.append(to_object(m, "FeTrainMain_%d" % n, location=tuple(cr + Vector((sx * 0.02, 0, 0))), bevel=0.001))
+        cp = bmesh.new()                                                                # coupling rod over all three
+        ys = [y + off.y for y in AX]
+        beam(cp, (0, ys[0] - pin.y, 0), (0, ys[2] - pin.y, 0), 0.04, 0.08, STEEL)
+        for y in ys:
+            cyl(cp, 0.065, 0.05, (0, y - pin.y, 0), "X", STEEL, segs=12)
+        objs.append(to_object(cp, "FeTrainCouple_%d" % n, location=(sx * 0.88, pin.y, pin.z), bevel=0.001))
+    return objs
+
+
+def model_wagon_cargo_car():
+    """Cargo Wagon (7 m): a boxcar on two bogies, sliding doors on both sides, roof walk, ladders, brake wheel."""
+    objs = []
+    b = bmesh.new()
+    L = 7.0
+    underframe(b, L, axles=(-3.05, -1.55, 1.55, 3.05))
+    car_ends(b, L)
+    for k in range(2):
+        bogie(b, objs, (-2.3, 2.3)[k], k)
+    Z0, Z1 = 1.14, 3.25
+    box(b, (2.50, L - 0.4, Z1 - Z0), (0, 0, (Z0 + Z1) / 2), RED)
+    for y in [-(L - 0.4) / 2 + k * (L - 0.4) / 10 for k in range(11)]:                  # side ribs
+        for sx in (-1, 1):
+            box(b, (0.04, 0.07, Z1 - Z0), (sx * 1.265, y, (Z0 + Z1) / 2), IRON)
+    for sy in (-1, 1):                                                                  # end ribs
+        for z in (1.6, 2.2, 2.8):
+            box(b, (2.50, 0.05, 0.07), (0, sy * ((L - 0.4) / 2 + 0.02), z), IRON)
+    for sx in (-1, 1):
+        box(b, (0.03, 1.8, Z1 - Z0 - 0.15), (sx * 1.30, 0, (Z0 + Z1) / 2), RUST)        # door
+        for y in (-0.6, 0.0, 0.6):
+            box(b, (0.035, 0.05, Z1 - Z0 - 0.2), (sx * 1.31, y, (Z0 + Z1) / 2), IRON)
+        box(b, (0.06, 3.8, 0.06), (sx * 1.30, 0.9, Z1 - 0.02), STEEL)                   # door rails
+        box(b, (0.06, 3.8, 0.06), (sx * 1.30, 0.9, Z0 + 0.05), STEEL)
+        box(b, (0.04, 0.04, 0.50), (sx * 1.32, 0.80, (Z0 + Z1) / 2), STEEL)              # handle
+    for k, (w, h) in enumerate(((2.58, 0.06), (2.30, 0.06), (1.80, 0.05), (1.10, 0.04))):   # roof (stepped arch)
+        box(b, (w, L - 0.3, h), (0, 0, Z1 + 0.03 + k * 0.05), RUST)
+    box(b, (0.50, L - 0.4, 0.04), (0, 0, Z1 + 0.24), WOOD)                              # roof walk
+    for sy in (-1, 1):
+        ladder(b, 1.05, sy * (L / 2 - 0.20), 1.2, 3.30, along="X", w=0.36)
+    cyl(b, 0.22, 0.03, (-0.7, L / 2 - 0.08, 2.9), "Y", IRON, segs=18)                  # brake wheel
+    cyl(b, 0.025, 1.7, (-0.7, L / 2 - 0.10, 2.05), "Z", IRON, segs=6)
+    box(b, (0.9, 0.02, 0.35), (0.0, -(L / 2 - 0.19), 2.6), HAZ)                         # stencil plate
+    objs.append(to_object(b, "feWagonCargoCar_Body", bevel=0.003))
+    return objs
+
+
+def model_wagon_tank_car():
+    """Tank Wagon (7 m): a riveted horizontal tank on saddles, dome with hatch, walkways and handrails, ladders,
+    bottom outlet valve, two bogies."""
+    objs = []
+    b = bmesh.new()
+    L = 7.0
+    underframe(b, L, axles=(-3.05, -1.55, 1.55, 3.05))
+    car_ends(b, L)
+    for k in range(2):
+        bogie(b, objs, (-2.3, 2.3)[k], k)
+    ZT, RT = 2.25, 1.05
+    cyl(b, RT, L - 0.9, (0, 0, ZT), "Y", SOOT, segs=48)
+    for sy in (-1, 1):
+        cyl(b, RT, 0.25, (0, sy * ((L - 0.9) / 2 + 0.12), ZT), "Y", SOOT, segs=48, r2=RT * 0.75)  # dished ends
+    for y in (-2.2, -0.8, 0.8, 2.2):
+        cyl(b, RT + 0.012, 0.04, (0, y, ZT), "Y", IRON, segs=48)
+    for y in (-1.9, 1.9):                                                              # saddles + bands
+        box(b, (1.6, 0.30, 0.50), (0, y, 1.38), IRON)
+        ring(b, RT + 0.03, RT, 0.10, (0, y, ZT), "Y", IRON, segs=48)
+    cyl(b, 0.45, 0.30, (0, 0, ZT + RT + 0.05), "Z", SOOT, segs=28)                     # dome
+    cyl(b, 0.30, 0.06, (0, 0, ZT + RT + 0.23), "Z", CAST, segs=24)
+    bolt_circle(b, 10, 0.26, (0, 0, ZT + RT + 0.26), "Z", STEEL, r=0.014, d=0.02)
+    for sx in (-1, 1):                                                                  # walkways + handrails
+        box(b, (0.30, L - 0.6, 0.04), (sx * 1.10, 0, 1.30), WOOD)
+        for y in [-(L - 1.0) / 2 + k * (L - 1.0) / 6 for k in range(7)]:
+            box(b, (0.08, 0.03, 0.03), (sx * 1.07, y, ZT), IRON)                        # handrail brackets
+        beam(b, (sx * 1.11, -(L - 1.0) / 2, ZT), (sx * 1.11, (L - 1.0) / 2, ZT), 0.03, 0.03, HAZ)
+    for sx in (-1, 1):
+        ladder(b, sx * 1.15, 0.0, 1.30, ZT + RT, along="Y", w=0.40)
+    cyl(b, 0.10, 0.35, (0, 0, ZT - RT - 0.12), "Z", CAST, segs=14)                     # bottom outlet
+    cyl(b, 0.10, 0.03, (0.0, 0.22, ZT - RT - 0.22), "Y", RED, segs=14)
+    box(b, (0.02, 1.6, 0.30), (1.06, 1.2, ZT), HAZ)                                    # placard
+    box(b, (0.02, 1.6, 0.30), (-1.06, 1.2, ZT), HAZ)
+    objs.append(to_object(b, "feWagonTankCar_Body", bevel=0.003))
+    return objs
+
+
+def model_wagon_passenger_car():
+    """Passenger Wagon (9 m): a wooden-trimmed coach with windows, an arched clerestory roof, end platforms with
+    railings and steps, benches facing each other along both sides and a clear aisle; the floor is 1.0 m over the
+    rail (TrainView seats the rider at the middle, 1 m up)."""
+    objs = []
+    b = bmesh.new()
+    L = 9.0
+    BL = 8.0                                     # body length; platforms beyond
+    underframe(b, L, z=0.82, axles=(-3.8, -2.4, 2.4, 3.8))
+    car_ends(b, L, z=0.82)
+    for k in range(2):
+        bogie(b, objs, (-3.1, 3.1)[k], k)
+    FZ = 1.0
+    box(b, (2.56, L - 0.2, 0.10), (0, 0, FZ - 0.05), WOOD)                              # floor
+    WZ0, WZ1, ZR = 1.75, 2.45, 2.90
+    # side walls with window openings
+    nwin = 7
+    pitch = (BL - 0.6) / nwin
+    for sx in (-1, 1):
+        x = sx * 1.25
+        box(b, (0.06, BL, WZ0 - FZ), (x, 0, (FZ + WZ0) / 2), PAINT)
+        box(b, (0.06, BL, ZR - WZ1), (x, 0, (WZ1 + ZR) / 2), PAINT)
+        box(b, (0.07, BL, 0.06), (x, 0, WZ0 + 0.03), WOOD)                              # waist rail
+        for k in range(nwin + 1):
+            y = -(BL - 0.6) / 2 + k * pitch
+            box(b, (0.06, 0.34, WZ1 - WZ0), (x, y, (WZ0 + WZ1) / 2), PAINT)              # window posts
+        for k in range(nwin):
+            y = -(BL - 0.6) / 2 + (k + 0.5) * pitch
+            box(b, (0.02, pitch - 0.36, 0.03), (x, y, WZ1 - 0.20), WOOD)                 # window bar (open sash)
+        box(b, (0.065, 0.30, ZR - FZ), (x, sx * 0 + (BL / 2 - 0.15), (FZ + ZR) / 2), PAINT)
+        box(b, (0.065, 0.30, ZR - FZ), (x, -(BL / 2 - 0.15), (FZ + ZR) / 2), PAINT)
+    for sy in (-1, 1):                                                                   # end walls with a doorway
+        y = sy * (BL / 2)
+        for sx in (-1, 1):
+            box(b, (0.85, 0.06, ZR - FZ), (sx * 0.83, y, (FZ + ZR) / 2), PAINT)
+        box(b, (0.80, 0.06, ZR - 2.10), (0, y, (2.10 + ZR) / 2), PAINT)
+        # platform: railings at the sides, steps down, a gate bar
+        for sx in (-1, 1):
+            cyl(b, 0.025, 1.0, (sx * 1.20, sy * (L / 2 - 0.05), FZ + 0.5), "Z", IRON, segs=8)
+            beam(b, (sx * 1.20, y, FZ + 1.0), (sx * 1.20, sy * (L / 2 - 0.05), FZ + 1.0), 0.03, 0.03, IRON)
+            beam(b, (sx * 0.45, sy * (L / 2 - 0.05), FZ + 1.0), (sx * 1.20, sy * (L / 2 - 0.05), FZ + 1.0), 0.03, 0.03, IRON)
+            for k, z in enumerate((0.70, 0.40)):
+                box(b, (0.30, 0.35, 0.04), (sx * (1.10 + 0.0), sy * (BL / 2 + 0.20), z), IRON)
+    # roof: arched, with a clerestory and vents
+    for k, (w, h) in enumerate(((2.62, 0.06), (2.40, 0.07), (2.05, 0.07), (1.55, 0.07))):   # arched roof (stepped)
+        box(b, (w, BL + 0.4, h), (0, 0, ZR + 0.03 + k * 0.065), SOOT)
+    box(b, (1.10, BL - 0.8, 0.26), (0, 0, ZR + 0.36), SOOT)                             # clerestory
+    for k in range(6):
+        cyl(b, 0.09, 0.12, (0, -3.0 + k * 1.2, ZR + 0.55), "Z", CAST, segs=12)
+    # inside: benches facing each other along both sides, the aisle clear (|x| < 0.40); ceiling lamps
+    for sx in (-1, 1):
+        for k in range(nwin):
+            y = -(BL - 0.6) / 2 + (k + 0.5) * pitch
+            for sy in (-1, 1):
+                yb = y + sy * (pitch / 2 - 0.12)
+                box(b, (0.78, 0.44, 0.06), (sx * 0.80, yb - sy * 0.18, FZ + 0.45), WOOD)  # seat
+                box(b, (0.78, 0.06, 0.55), (sx * 0.80, yb, FZ + 0.74), WOOD)             # back
+                box(b, (0.06, 0.44, 0.45), (sx * 0.43, yb - sy * 0.18, FZ + 0.22), CAST)  # end frame
+        box(b, (0.30, BL - 0.8, 0.03), (sx * 1.02, 0, 2.55), IRON)                       # luggage racks
+    for k in range(4):
+        cyl(b, 0.10, 0.10, (0, -3.0 + k * 2.0, ZR - 0.04), "Z", GLASS, segs=14)
+    box(b, (1.6, 0.02, 0.22), (0, -(BL / 2 + 0.035), 2.25), HAZ)                         # destination board
+    objs.append(to_object(b, "feWagonPassengerCar_Body", bevel=0.003))
+    return objs
+
+
+# ---------------------------------------------------------------- train kits (1 x 1 blocks that become a car)
+def model_train_kit(kind):
+    """A train kit: a timber crate on a pallet, banded with steel, the car's silhouette stencilled on its front and
+    sides (colour per kind), a shipping label on the lid."""
+    b = bmesh.new()
+    col = {"loco": OUT, "cargo": RED, "tank": HAZ, "passenger": IN}[kind]
+    for k in range(5):                                                                  # pallet
+        box(b, (0.92, 0.12, 0.02), (0, -0.40 + k * 0.20, 0.13), WOOD)
+    for x in (-0.38, 0.0, 0.38):
+        box(b, (0.12, 0.92, 0.10), (x, 0, 0.06), WOOD)
+    Z0, Z1 = 0.14, 0.86
+    box(b, (0.84, 0.84, Z1 - Z0), (0, 0, (Z0 + Z1) / 2), WOOD)
+    for sx in (-1, 1):                                                                  # crate frame
+        for sy in (-1, 1):
+            box(b, (0.06, 0.06, Z1 - Z0 + 0.01), (sx * 0.41, sy * 0.41, (Z0 + Z1) / 2), WOOD)
+    for z in (Z0 + 0.04, Z1 - 0.04):
+        for s in (-1, 1):
+            box(b, (0.86, 0.06, 0.06), (0, s * 0.41, z), WOOD)
+            box(b, (0.06, 0.86, 0.06), (s * 0.41, 0, z), WOOD)
+    for x in (-0.25, 0.25):                                                             # steel bands
+        box(b, (0.03, 0.87, Z1 - Z0 + 0.02), (x, 0, (Z0 + Z1) / 2), STEEL)
+        box(b, (0.03, 0.87, 0.012), (x, 0, Z1 + 0.006), STEEL)
+    box(b, (0.30, 0.20, 0.006), (0.12, 0.10, Z1 + 0.004), SAND)                         # label
+    for k in range(3):
+        box(b, (0.22, 0.012, 0.004), (0.12, 0.06 + k * 0.04, Z1 + 0.008), SOOT)
+
+    def stencil(face):
+        # face: "-Y" (front) or "+X" / "-X" (sides); draws in a plane just off that face
+        def at(u, v):
+            if face == "-Y":
+                return Vector((u, -0.425, v))
+            return Vector((0.425 if face == "+X" else -0.425, u, v))
+        t = (0.30, 0.006, 0.0) if face == "-Y" else (0.006, 0.30, 0.0)
+
+        def rect(u, v, w, h, mat=col):
+            size = (w, 0.006, h) if face == "-Y" else (0.006, w, h)
+            box(b, size, at(u, v), mat)
+
+        def disc(u, v, r, mat=SOOT):
+            cyl(b, r, 0.008, at(u, v), "Y" if face == "-Y" else "X", mat, segs=16)
+        rect(0, 0.26, 0.70, 0.02, SOOT)                                                 # rail line
+        if kind == "loco":
+            rect(-0.08, 0.45, 0.42, 0.16)                                               # boiler
+            rect(0.20, 0.50, 0.16, 0.30)                                                # cab
+            rect(-0.24, 0.60, 0.05, 0.12)                                               # chimney
+            rect(0.20, 0.67, 0.22, 0.03, SOOT)                                          # cab roof
+            for u in (-0.20, -0.04, 0.12):
+                disc(u, 0.32, 0.055)
+        elif kind == "cargo":
+            rect(0, 0.48, 0.56, 0.30)
+            rect(0, 0.48, 0.14, 0.26, SOOT)
+            for u in (-0.20, -0.10, 0.10, 0.20):
+                disc(u, 0.31, 0.035)
+        elif kind == "tank":
+            cyl(b, 0.14, 0.50, at(0, 0.47), "X" if face == "-Y" else "Y", col, segs=20)
+            rect(0, 0.63, 0.08, 0.05)
+            for u in (-0.20, -0.10, 0.10, 0.20):
+                disc(u, 0.31, 0.035)
+        else:
+            rect(0, 0.48, 0.60, 0.28)
+            for u in (-0.21, -0.07, 0.07, 0.21):
+                rect(u, 0.53, 0.09, 0.08, SAND)
+            rect(0, 0.64, 0.62, 0.03, SOOT)
+            for u in (-0.22, -0.12, 0.12, 0.22):
+                disc(u, 0.31, 0.035)
+    for f in ("-Y", "+X", "-X"):
+        stencil(f)
+    name = {"loco": "feTrainLoco", "cargo": "feWagonCargo", "tank": "feWagonTank", "passenger": "feWagonPassenger"}[kind]
+    return [to_object(b, name + "_Kit", bevel=0.002)]
+
+
+D14_MODELS = {
+    "feRailStraight": model_rail_straight,
+    "feRailCurve": model_rail_curve,
+    "feRailRamp": model_rail_ramp,
+    "feRailSwitchR": lambda: model_rail_switch(True),
+    "feRailSwitchL": lambda: model_rail_switch(False),
+    "feMiningRig": model_mining_rig,
+    "feOilExtractor": model_oil_extractor,
+    "feStorageTank": model_storage_tank,
+    "feTrainStation": model_train_station,
+    "feTrainLoco": lambda: model_train_kit("loco"),
+    "feWagonCargo": lambda: model_train_kit("cargo"),
+    "feWagonTank": lambda: model_train_kit("tank"),
+    "feWagonPassenger": lambda: model_train_kit("passenger"),
+    "feTrainLocoCar": model_loco_car,
+    "feWagonCargoCar": model_wagon_cargo_car,
+    "feWagonTankCar": model_wagon_tank_car,
+    "feWagonPassengerCar": model_wagon_passenger_car,
+}
+
+
 MODELS = {
     "feCoalEngine": model_coal_engine,
     "feBus": model_bus,
@@ -4567,6 +5944,7 @@ MODELS = {
     "feHydroTower": model_hydro_tower,
     "feWaterWheel": model_water_wheel,
     **D13_MODELS,
+    **D14_MODELS,
 }
 
 
@@ -4578,7 +5956,14 @@ def build(name):
     col = bpy.context.scene.collection
     for ob in objs:
         col.objects.link(ob)
+    # the root must sit at the origin unrotated (the texturing step exports the hierarchy relative to it): the first
+    # mesh without its own transform (a needle or a wheel made first must not become the root)
+    for i, ob in enumerate(objs):
+        if ob.type == "MESH" and ob.parent is None and ob.location.length < 1e-6 and Vector(ob.rotation_euler).length < 1e-6:
+            objs.insert(0, objs.pop(i))
+            break
     root = objs[0]
+    bpy.context.view_layer.update()                # world matrices of transformed roots are valid before parenting
     for ob in objs[1:]:
         if ob.parent is not None:                  # parts loaded with their own hierarchy keep it
             continue

@@ -1,0 +1,16 @@
+{
+ "nome": "feWagonPassenger",
+ "config": "F:\\IA\\fe_blender\\configs\\feWagonPassenger.json",
+ "triangulos_antes": 3688,
+ "triangulos_depois": 1320,
+ "atlas": 2048,
+ "arquivos": [
+  "feWagonPassenger_Albedo.png",
+  "feWagonPassenger_Normal.png",
+  "feWagonPassenger_MetallicSmoothness.png",
+  "feWagonPassenger_Roughness.png",
+  "feWagonPassenger_HD.fbx",
+  "feWagonPassenger_HD.blend"
+ ],
+ "segundos": 19.8
+}

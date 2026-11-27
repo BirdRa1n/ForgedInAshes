@@ -1,0 +1,16 @@
+{
+ "nome": "feStorageTank",
+ "config": "F:\\IA\\fe_blender\\configs\\feStorageTank.json",
+ "triangulos_antes": 22092,
+ "triangulos_depois": 8092,
+ "atlas": 4096,
+ "arquivos": [
+  "feStorageTank_Albedo.png",
+  "feStorageTank_Normal.png",
+  "feStorageTank_MetallicSmoothness.png",
+  "feStorageTank_Roughness.png",
+  "feStorageTank_HD.fbx",
+  "feStorageTank_HD.blend"
+ ],
+ "segundos": 65.3
+}

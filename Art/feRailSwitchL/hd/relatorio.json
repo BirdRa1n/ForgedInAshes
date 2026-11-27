@@ -1,0 +1,16 @@
+{
+ "nome": "feRailSwitchL",
+ "config": "F:\\IA\\fe_blender\\configs\\feRailSwitchL.json",
+ "triangulos_antes": 13780,
+ "triangulos_depois": 5612,
+ "atlas": 4096,
+ "arquivos": [
+  "feRailSwitchL_Albedo.png",
+  "feRailSwitchL_Normal.png",
+  "feRailSwitchL_MetallicSmoothness.png",
+  "feRailSwitchL_Roughness.png",
+  "feRailSwitchL_HD.fbx",
+  "feRailSwitchL_HD.blend"
+ ],
+ "segundos": 45.9
+}

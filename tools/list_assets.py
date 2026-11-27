@@ -32,14 +32,15 @@ CONTRACTS = {
     "signal": "a lever / box; the Display Panel writes its digits on the +Z face 0.52 m from the centre (DisplayVisual)",
     "tree": "uses the planted oak models (a Rubber Tree look: lighter bark, the sap cup)",
     "giant": "D14 giant machine, the WHOLE multi-block (MultiBlockDim: Mining Rig 7x9x7, Oil Extractor 5x11x5; origin = centre of the "
-             "bottom layer, +Z = front). Products / oil leave by the middle of the FRONT face at ground level; the motor socket is on its "
-             "side (PowerGate.SocketPos). Mining Rig: a drill tower over the centre, `FeSpin_*` (drill / gears), the shaft hole under the "
+             "bottom layer, +Z = front). Products / oil leave by the middle of the FRONT face at ground level; the motor socket is behind "
+             "the middle of the back (PowerGate.SocketPos). Moving parts turn with the socket torque (KineticSpinner; walking beam "
+             "`FeRock_*`)." " Mining Rig: a drill tower over the centre, `FeSpin_*` (drill / gears), the shaft hole under the "
              "centre. Oil Extractor: a pumpjack / derrick, `FeSpin_*` crank, an outlet flange on the front (High Pressure Pipe size)",
     "rail": "D14 track piece at rail height 0.15 m, two rails 1.435 m apart on sleepers; ends exactly on the cell edges: straight 1x1 "
             "(-Z edge to +Z edge), curve 5x5 (quarter circle radius 4.5: from x=-2 on the -Z edge to z=+2 on the +X edge), ramp 1x2x3 "
             "(rises 1 over 3), switches 5x5 = straight on the left (R) / right (L) column + the curve. Rails.cs LocalPaths is the source of truth",
-    "station": "D14 platform 9x4x3 (9 along the rails, the rails run along its +Z side, outside it): roof, benches, a sign board with a "
-               "`TextMesh` child for the vanilla writable label (TEFeatureSignable), a fuel bunker, a small tank on the side",
+    "station": "D14 platform 9x4x3 (9 along the rails, the rails run along its +Z side, outside it): roof, benches, a sign board with "
+               "`FeSignText_F/_B` empties (FeBuild adds the TextMesh for the vanilla label), `FeCol_*` collider boxes (walkable deck), a fuel bunker, a small tank on the side",
     "trainkit": "D14 kit block (a crate on a pallet with the car's silhouette painted): it turns into the train car when placed. The CARS "
                 "themselves are separate prefabs (section below)",
 }
@@ -153,16 +154,23 @@ def main():
             "| Item | Nome | Ícone emprestado (tinta) |", "|---|---|---|"]
     for n, icon, tint in sorted(rows_i):
         out.append(f"| `{n}` | {loc.get(n, '')} | `{icon}` ({tint}) |")
-    out += ["", "## Vagões do trem (prefabs que não são blocos)", "",
-            "O trem (Trains.cs / TrainView.cs) desenha cada vagão com o prefab `<kit>Prefab` do pacote; sem ele usa uma caixa colorida.",
-            "Precisam entrar no `FeBuild.cs` como prefabs soltos (não são blocos). Origem no centro do vagão, no topo do trilho (y=0),",
-            "+Z = frente, sem colisores (o código desliga os que houver: trens não colidem).", "",
-            "| Prefab | Comprimento | O que é | Partes que ajudam |", "|---|---|---|---|",
-            "| `feTrainLocoPrefab` | 8 m | locomotiva a vapor/fóssil (caldeira, cabine, chaminé) | `FeSpin_*` rodas, `FeFx_Smoke_*` chaminé |",
-            "| `feWagonCargoPrefab` | 7 m | vagão fechado de carga | `FeSpin_*` rodas |",
-            "| `feWagonTankPrefab` | 7 m | vagão-tanque (cilindro deitado) | `FeSpin_*` rodas, `FeLevelLiquid` |",
-            "| `feWagonPassengerPrefab` | 9 m | vagão de passageiros com bancos | `FeSpin_*` rodas, assento a 1 m de altura no centro |",
-            "", "Largura 2,6 m, altura até 3,6 m (o código usa essa caixa para a mira: olhar e apertar E).", ""]
+    cars = [("feTrainLocoCar", "8 m", "locomotiva a vapor (caldeira, cabine, chaminé)"),
+            ("feWagonCargoCar", "7 m", "vagão fechado de carga"),
+            ("feWagonTankCar", "7 m", "vagão-tanque (cilindro deitado)"),
+            ("feWagonPassengerCar", "9 m", "vagão de passageiros com bancos, piso a 1 m")]
+    missing = [c for c in cars if not (fe.REPO / "Art" / c[0] / "hd" / f"{c[0]}_HD.fbx").exists()]
+    out += ["", f"## Vagões do trem (prefabs que não são blocos) ({len(missing)})", "",
+            "O trem (TrainView.cs) desenha cada vagão com o prefab `<kit>CarPrefab` do pacote (feito por `Art/feHD/build_feHD.py`,",
+            "lista `Loose` do `FeBuild.cs`); sem ele usa uma caixa colorida. Origem no centro do vagão, no topo do trilho (y=0),",
+            "+Z = frente, sem colisores. Rodas `FeSpin_r<raio>_*`; locomotiva: `FeTrainPin_n`, `FeTrainCouple_n`, `FeTrainCross_n`,",
+            "`FeTrainMain_n`, `FeFx_Smoke_*` / `FeFx_Steam_*` (TrainCarVisual). Largura 2,6 m, altura até 3,6 m.", ""]
+    if missing:
+        out += ["| Prefab | Comprimento | O que é |", "|---|---|---|"]
+        for n, length, what in missing:
+            out.append(f"| `{n}Prefab` | {length} | {what} |")
+    else:
+        out.append("Todos os vagões têm modelo próprio.")
+    out.append("")
     out += ["", "## Outros assets", "",
             "- **Sons**: nenhuma máquina nova tem som próprio (manivela, prensa, furadeira, serra, ventilador, compressor, pistão).",
             "- **Partículas novas** que ajudariam: vento do Ventilador (`FeFx_Wind`), serragem da Serra, poeira da Furadeira,",

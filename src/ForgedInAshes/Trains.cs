@@ -69,6 +69,13 @@ namespace ForgedInAshes
         public List<Vector3i> Route = new List<Vector3i>();
         public int Leg;                     // index in Route of the station it goes to / stands at
         public bool Run;
+        // manual driving from the cab (TrainView, not saved): Manual = the driver took over (W/S); the route mode
+        // (Run) is the autopilot. Throttle -1..1 (S..W), Brake (space), Steer = the branch to take at the next
+        // switches (-1 left, 0 straight, 1 right), Driver = someone is in the cab.
+        public bool Manual, Driver, Brake;
+        public float Throttle;
+        public int Steer, SteerBuilt = 99;
+        public float NextExtend;
         public float Fuel;
         public string State = "stopped";    // stopped, moving, dwell, noroute, nofuel
         public float Wait;
@@ -345,6 +352,7 @@ namespace ForgedInAshes
         static void Step(World world, Train t, float dt, bool retry)
         {
             if (t.Track.Count < 2) { t.State = "noroute"; return; }
+            if (t.Manual) { StepManual(t, dt); return; }
             if (!t.Run && t.State != "dwell")
             {
                 t.V = Mathf.MoveTowards(t.V, 0f, Brake * 2f * dt);
@@ -389,6 +397,69 @@ namespace ForgedInAshes
                         return;
                     }
             }
+        }
+
+        // ------------------------------------------------------------ manual driving
+        public const float ReverseMax = 5f;
+
+        static void StepManual(Train t, float dt)
+        {
+            float thr = t.Driver && t.Fuel > 0f ? t.Throttle : 0f;
+            if (t.Brake || !t.Driver) t.V = Mathf.MoveTowards(t.V, 0f, Brake * 3f * dt);
+            else if (thr > 0.1f) t.V = t.V < 0f ? Mathf.Min(0f, t.V + Brake * 2f * dt) : Mathf.Min(MaxSpeed, t.V + Accel * dt);
+            else if (thr < -0.1f) t.V = t.V > 0f ? Mathf.Max(0f, t.V - Brake * 2f * dt) : Mathf.Max(-ReverseMax, t.V - Accel * 0.6f * dt);
+            else t.V = Mathf.MoveTowards(t.V, 0f, 0.1f * dt);                       // coasting
+            bool due = Time.time >= t.NextExtend;                                  // the rail search is not free
+            if (t.Steer != t.SteerBuilt || (due && t.TrackLength - t.S < 40f)) ExtendAhead(t);
+            if (due && t.S - t.Length < 25f) ExtendBehind(t);
+            if (due) t.NextExtend = Time.time + 0.5f;
+            float before = t.S;
+            float min = t.Length + 0.3f;
+            t.S = Mathf.Clamp(t.S + t.V * dt, min, t.TrackLength);
+            if ((t.S >= t.TrackLength && t.V > 0f) || (t.S <= min && t.V < 0f)) t.V = 0f;   // end of the line
+            float moved = Mathf.Abs(t.S - before);
+            t.Fuel = Mathf.Max(0f, t.Fuel - moved * FuelPerMetre(t));
+            t.State = Mathf.Abs(t.V) > 0.05f ? "moving" : "stopped";
+            if (moved > 0.01f) t.AtStation = new Vector3i(0, int.MinValue, 0);
+        }
+
+        /// <summary>Lay the rails ahead of the head again (60 m), taking the branch the driver chose.</summary>
+        static void ExtendAhead(Train t)
+        {
+            t.SteerBuilt = t.Steer;
+            float keep = Mathf.Min(t.TrackLength, t.S + 2f);
+            List<Vector3> pts = new List<Vector3>();
+            for (int i = 0; i < t.Track.Count; i++) if (t.Cum[i] < keep - 0.01f) pts.Add(t.Track[i]);
+            Vector3 end = t.At(keep);
+            pts.Add(end);
+            Vector3 heading = end - t.At(keep - 0.5f);
+            if (heading.sqrMagnitude < 0.0001f) return;
+            List<Vector3> more = Rails.WalkFrom(end, heading.normalized, 60f, t.Steer);
+            for (int i = 1; i < more.Count; i++) pts.Add(more[i]);
+            float s = t.S;
+            t.Track = pts;
+            t.Recum();
+            t.S = Mathf.Min(s, t.TrackLength);
+            if (t.TrackLength > t.S + 300f) return;
+            t.Trim();
+        }
+
+        /// <summary>Lay more rails behind the last car (reversing).</summary>
+        static void ExtendBehind(Train t)
+        {
+            if (t.Track.Count < 2) return;
+            Vector3 start = t.Track[0];
+            Vector3 heading = start - t.Track[1];
+            if (heading.sqrMagnitude < 0.0001f) return;
+            List<Vector3> more = Rails.WalkFrom(start, heading.normalized, 60f, 0);
+            if (more.Count < 2) return;
+            float added = TrainSim.PolyLen(more);
+            more.Reverse();
+            more.RemoveAt(more.Count - 1);                                       // = start
+            more.AddRange(t.Track);
+            t.Track = more;
+            t.Recum();
+            t.S += added;
         }
 
         static float Advance(Train t, float dt)
@@ -530,6 +601,8 @@ namespace ForgedInAshes
             best.Cars.Add(c);
             TrainStore.Dirty = true;
             TrainStore.Save();
+            Log.Out(ForgedInAshesMod.LogPrefix + "train " + best.Id + ": " + kind + " wagon coupled (car " + (best.Cars.Count - 1)
+                    + ", " + bd.ToString("0.0") + " m away; track behind the head " + best.S.ToString("0.0") + " m, train " + best.Length.ToString("0.0") + " m)");
             return true;
         }
 

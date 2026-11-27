@@ -1,10 +1,19 @@
 // D14 trains: what the player sees and touches (TrainSim moves the trains, this draws them).
 //
-//   Cars: the prefab <kind>Prefab from the mod bundle (feTrainLocoPrefab, feWagonCargoPrefab, feWagonTankPrefab,
-//   feWagonPassengerPrefab: made by the 3D models session, PENDENCIAS_ASSETS.md); until they exist, coloured boxes.
-//   Their colliders are switched off: trains collide with nothing (user 2026-11-27).
-//   Look at a car within 5 m: the prompt shows what it is; E on the locomotive (or a cargo / tank wagon) opens the
-//   Train Panel; E on the passenger wagon (or the locomotive while crouching) takes a seat, E again (or jump) leaves.
+//   Cars: the prefab <kit>CarPrefab from the mod bundle (feTrainLocoCarPrefab, feWagonCargoCarPrefab,
+//   feWagonTankCarPrefab, feWagonPassengerCarPrefab: Art/feHD/build_feHD.py; <kit>Prefab is the kit block's crate);
+//   without the bundle, coloured boxes. TrainCarVisual animates them: wheels (FeSpin_r<radius>_*) roll with the
+//   distance run, the locomotive's rods follow its crank pins, smoke and steam while it runs.
+//   Their colliders are switched off: trains collide with no block and no other train (user 2026-11-27). The
+//   PLAYER does not pass through them (user 2026-11-27: "make the wagons solid"): Solid() keeps the player out of each
+//   car's shape (boxes per kind, SolidBoxes) every frame and lets them stand on the roofs, carried along as the
+//   train moves. Done by hand, not with physics colliders: the game's block raycasts and the rails stay untouched.
+//   Look at a car within 6 m: the prompt shows what it is. E on the locomotive takes the driver's place in its cab
+//   and the camera goes outside (third person, pulled back to show the train): W accelerates, S brakes / reverses,
+//   space brakes, A / D pick the branch at the next switches, crouch opens the Train Panel (its Run = autopilot on
+//   the route), E gets off. E on the passenger wagon: a seat with the same outside view, E or jump gets off. E on a
+//   cargo / tank wagon (or crouch + E on the locomotive) opens the Train Panel (user 2026-11-27: "the game should
+//   understand it as a vehicle"; "the passenger only gets the outside view of the wagon").
 //   Riding keeps the player at the seat every frame (no fall damage).
 //
 // Client side, single player / host. C# 5 only.
@@ -22,6 +31,10 @@ namespace ForgedInAshes
             public GameObject Go;
             public string Kind;
             public int Seen;
+            public Vector3 Pos, LastPos;
+            public Quaternion Rot, LastRot;
+            public bool HasLast;
+            public float Length;
         }
 
         readonly Dictionary<string, CarGo> cars = new Dictionary<string, CarGo>();
@@ -33,7 +46,7 @@ namespace ForgedInAshes
 
         static GameObject Prefab(string kind)
         {
-            string name = TrainCar.KitOf(kind) + "Prefab";
+            string name = TrainCar.KitOf(kind) + "CarPrefab";
             GameObject g;
             if (prefabs.TryGetValue(name, out g)) return g;
             g = null;
@@ -67,6 +80,7 @@ namespace ForgedInAshes
             }
             foreach (Collider c in go.GetComponentsInChildren<Collider>(true)) c.enabled = false;
             foreach (Rigidbody rb in go.GetComponentsInChildren<Rigidbody>(true)) rb.isKinematic = true;
+            if (p != null) go.AddComponent<TrainCarVisual>();
             return go;
         }
 
@@ -92,14 +106,100 @@ namespace ForgedInAshes
                     Vector3 pos;
                     Quaternion rot;
                     t.CarPose(i, out pos, out rot);
-                    if (cg.Go != null) cg.Go.transform.SetPositionAndRotation(pos - Origin.position, rot);
+                    cg.LastPos = cg.Pos;
+                    cg.LastRot = cg.Rot;
+                    cg.HasLast = cg.Pos != Vector3.zero;
+                    cg.Pos = pos;
+                    cg.Rot = rot;
+                    cg.Length = t.Cars[i].Length;
+                    if (cg.Go != null)
+                    {
+                        cg.Go.transform.SetPositionAndRotation(pos - Origin.position, rot);
+                        TrainCarVisual vis = cg.Go.GetComponent<TrainCarVisual>();
+                        if (vis != null) vis.Step(pos, rot, t.Run && Mathf.Abs(t.V) > 0.05f, Mathf.Abs(t.V));
+                    }
                 }
             }
             List<string> gone = new List<string>();
             foreach (KeyValuePair<string, CarGo> kv in cars) if (kv.Value.Seen != frame) gone.Add(kv.Key);
             foreach (string k in gone) { if (cars[k].Go != null) Destroy(cars[k].Go); cars.Remove(k); }
             Ride(world, pl);
+            if (RideTrain < 0) Solid(pl);
             Interact(world, pl);
+        }
+
+        // ------------------------------------------------------------ the player does not walk through cars
+        // Boxes per car kind in car space (x across, y up from the rail top, z forward): min x, max x, bottom, top,
+        // min z, max z. They follow the models: the locomotive is low over the boiler and tanks (front) and high at the
+        // cab and bunker (back).
+        static float[][] SolidBoxes(string kind, float L)
+        {
+            switch (kind)
+            {
+                case "loco":
+                    return new float[][] { new float[] { -1.3f, 1.3f, 0.1f, 2.85f, -1.30f, 4.0f },
+                                           new float[] { -1.3f, 1.3f, 0.1f, 3.52f, -4.0f, -1.30f } };
+                case "tank":
+                    return new float[][] { new float[] { -1.27f, 1.27f, 0.1f, 3.32f, -L / 2, L / 2 } };
+                case "passenger":
+                    return new float[][] { new float[] { -1.31f, 1.31f, 0.1f, 3.42f, -L / 2, L / 2 } };
+            }
+            return new float[][] { new float[] { -1.3f, 1.3f, 0.1f, 3.35f, -L / 2, L / 2 } };
+        }
+
+        const float PlayerRadius = 0.35f, PlayerHeight = 1.75f, StepUp = 0.55f;
+        string standingOn;
+
+        void Solid(EntityPlayerLocal pl)
+        {
+            if (pl.IsDead()) { standingOn = null; return; }
+            Vector3 p = pl.position;
+            bool moved = false, stood = false;
+            string onNow = null;
+            // standing on a roof last frame: ride along with that car's motion (and turn)
+            CarGo carrier;
+            if (standingOn != null && cars.TryGetValue(standingOn, out carrier) && carrier.HasLast)
+            {
+                Vector3 local = Quaternion.Inverse(carrier.LastRot) * (p - carrier.LastPos);
+                Vector3 np = carrier.Pos + carrier.Rot * local;
+                if ((np - p).sqrMagnitude > 0.000001f) { p = np; moved = true; }
+            }
+            foreach (KeyValuePair<string, CarGo> kv in cars)
+            {
+                CarGo c = kv.Value;
+                if ((c.Pos - p).sqrMagnitude > (c.Length * 0.5f + 4f) * (c.Length * 0.5f + 4f)) continue;
+                Quaternion inv = Quaternion.Inverse(c.Rot);
+                foreach (float[] b in SolidBoxes(c.Kind, c.Length))
+                {
+                    Vector3 l = inv * (p - c.Pos);
+                    float x0 = b[0] - PlayerRadius, x1 = b[1] + PlayerRadius, z0 = b[4] - PlayerRadius, z1 = b[5] + PlayerRadius;
+                    if (l.x <= x0 || l.x >= x1 || l.z <= z0 || l.z >= z1) continue;          // not over / in the box
+                    if (l.y >= b[3] + 0.02f || l.y + PlayerHeight <= b[2]) continue;          // above it or under it
+                    if (l.y >= b[3] - StepUp)
+                    {
+                        l.y = b[3];                                                          // on the roof
+                        stood = true;
+                        onNow = kv.Key;
+                    }
+                    else
+                    {
+                        // push out through the nearest side or end
+                        float dl = l.x - x0, dr = x1 - l.x, db = l.z - z0, df = z1 - l.z;
+                        float m = Mathf.Min(Mathf.Min(dl, dr), Mathf.Min(db, df));
+                        if (m == dl) l.x = x0; else if (m == dr) l.x = x1; else if (m == db) l.z = z0; else l.z = z1;
+                    }
+                    p = c.Pos + c.Rot * l;
+                    moved = true;
+                }
+            }
+            standingOn = onNow;
+            if (!moved) return;
+            pl.SetPosition(p, false);
+            if (stood)
+            {
+                if (pl.motion.y < 0f) pl.motion = new Vector3(pl.motion.x, 0f, pl.motion.z);
+                pl.fallDistance = 0f;
+            }
         }
 
         void Clear()
@@ -111,6 +211,15 @@ namespace ForgedInAshes
 
         // ------------------------------------------------------------ aiming at a car
         /// <summary>The car under the crosshair within maxDist (ray against the car boxes).</summary>
+        static bool InsideCar(Train t, int i, Vector3 p, float pad)
+        {
+            Vector3 pos;
+            Quaternion rot;
+            t.CarPose(i, out pos, out rot);
+            Vector3 l = Quaternion.Inverse(rot) * (p - pos);
+            return Mathf.Abs(l.x) < 1.4f + pad && l.y > -0.5f - pad && l.y < 3.6f + pad && Mathf.Abs(l.z) < t.Cars[i].Length * 0.5f + pad;
+        }
+
         static bool Aim(EntityPlayerLocal pl, float maxDist, out Train train, out int car, out float dist)
         {
             train = null;
@@ -148,32 +257,163 @@ namespace ForgedInAshes
             return kind;
         }
 
+        float nextDiag;
+        bool activateWas, jumpWas, crouchWas, leftWas, rightWas;
+
+        // ------------------------------------------------------------ outside view while riding
+        bool viewSaved, wasFirstPerson;
+        Vector3 offset0;
+
+        static Vector3 ViewOffset(string kind)
+        {
+            // vp_FPCamera.Position3rdPersonOffset: up, back from the rider (the vehicles do the same through
+            // EntityVehicle.GetCameraOffset -> EntityPlayerLocal.RefreshDrivingCameraPositions, IL 3.4.0 b10)
+            return kind == "loco" ? new Vector3(0f, 1.6f, -9f) : new Vector3(0f, 1.8f, -10f);
+        }
+
+        void EnterView(EntityPlayerLocal pl)
+        {
+            if (viewSaved) return;
+            wasFirstPerson = pl.bFirstPersonView;
+            vp_FPCamera cam = pl.vp_FPCamera;
+            if (cam != null) offset0 = cam.Position3rdPersonOffset;
+            viewSaved = true;
+            pl.SetFirstPersonView(false, true);
+        }
+
+        void KeepView(EntityPlayerLocal pl, string kind)
+        {
+            vp_FPCamera cam = pl.vp_FPCamera;
+            if (cam != null) cam.Position3rdPersonOffset = ViewOffset(kind);
+            if (pl.bFirstPersonView) pl.SetFirstPersonView(false, true);
+        }
+
+        void LeaveView(EntityPlayerLocal pl)
+        {
+            if (!viewSaved || pl == null) return;
+            viewSaved = false;
+            vp_FPCamera cam = pl.vp_FPCamera;
+            if (cam != null) cam.Position3rdPersonOffset = offset0;
+            pl.SetFirstPersonView(wasFirstPerson, true);
+        }
+
+        static string SteerName(int s)
+        {
+            return s < 0 ? Kinetic.Text("feTrainSteerL", "left") : s > 0 ? Kinetic.Text("feTrainSteerR", "right")
+                 : Kinetic.Text("feTrainSteerS", "straight");
+        }
+
+        // E is read from BOTH action sets with our own edge detection: the game delivers Activate through
+        // PlayerActionsPermanent (the local set's Activate.WasPressed never fired: test 2026-11-27 17:25, no
+        // "train use" line at all). Same pattern as Crank.IsActivateHeld.
+        static bool ActivateHeld(EntityPlayerLocal pl)
+        {
+            PlayerActionsLocal input = pl.playerInput;
+            if (input == null) return false;
+            if (input.Activate != null && input.Activate.IsPressed) return true;
+            PlayerActionsPermanent perm = input.PermanentActions;
+            return perm != null && perm.Activate != null && perm.Activate.IsPressed;
+        }
+
+        static bool JumpHeld(EntityPlayerLocal pl)
+        {
+            PlayerActionsLocal input = pl.playerInput;
+            if (input == null) return false;
+            if (input.Jump != null && input.Jump.IsPressed) return true;
+            return input.VehicleActions != null && input.VehicleActions.Hop != null && input.VehicleActions.Hop.IsPressed;
+        }
+
         void Interact(World world, EntityPlayerLocal pl)
         {
             LocalPlayerUI ui = LocalPlayerUI.GetUIForPlayer(pl);
             bool free = ui != null && ui.windowManager != null && !ui.windowManager.IsModalWindowOpen();
             PlayerActionsLocal input = pl.playerInput;
-            bool press = input != null && input.Activate != null && input.Activate.WasPressed;
+            bool held = ActivateHeld(pl), jheld = JumpHeld(pl);
+            bool press = held && !activateWas, jumpPress = jheld && !jumpWas;
+            activateWas = held;
+            jumpWas = jheld;
             if (RideTrain >= 0)
             {
+                Train rt = TrainStore.Get(RideTrain);
+                bool driver = rt != null && RideCar >= 0 && RideCar < rt.Cars.Count && rt.Cars[RideCar].Kind == "loco";
+                bool ch = input != null && input.Crouch != null && input.Crouch.IsPressed;
+                bool lh = input != null && input.MoveLeft != null && input.MoveLeft.IsPressed;
+                bool rh = input != null && input.MoveRight != null && input.MoveRight.IsPressed;
+                bool crouchPress = ch && !crouchWas, leftPress = lh && !leftWas, rightPress = rh && !rightWas;
+                crouchWas = ch;
+                leftWas = lh;
+                rightWas = rh;
+                if (press || jumpPress)
+                    Log.Out(ForgedInAshesMod.LogPrefix + "train " + RideTrain + ": riding car " + RideCar + ", " + (press ? "E" : "jump")
+                            + " pressed, free=" + free);
+                if (driver)
+                {
+                    // the controls go to the train (the rider is held at the seat every frame, so walking does nothing)
+                    bool fw = free && input != null && input.MoveForward != null && input.MoveForward.IsPressed;
+                    bool bk = free && input != null && input.MoveBack != null && input.MoveBack.IsPressed;
+                    rt.Throttle = fw ? 1f : bk ? -1f : 0f;
+                    rt.Brake = free && jheld;
+                    if (free && (fw || bk) && !rt.Manual)
+                    {
+                        rt.Manual = true;                                            // the driver takes over
+                        rt.Run = false;
+                        TrainStore.Dirty = true;
+                    }
+                    if (free && leftPress) rt.Steer = rt.Steer > 0 ? 0 : -1;
+                    if (free && rightPress) rt.Steer = rt.Steer < 0 ? 0 : 1;
+                    string txt = Kinetic.Text("feTrainDriving",
+                        "Driving {2} km/h - W accelerate, S brake / reverse, space brake, A/D next switch: {1}, crouch: Train Panel, {0} get off")
+                        .Replace("{0}", "[action:local:Activate]").Replace("{1}", SteerName(rt.Steer))
+                        .Replace("{2}", Mathf.RoundToInt(rt.V * 3.6f).ToString());
+                    if (rt.Run) txt += "\n" + Kinetic.Text("feTrainAutopilot", "Autopilot on the route (W or S takes over)");
+                    if (rt.Fuel <= 0f) txt += "\n" + Kinetic.Text("feTrainNoFuel", "No fuel");
+                    SetPrompt(ui, txt);
+                    if (free && crouchPress) { TrainPanel.Open(pl, RideTrain); return; }
+                    if (free && press) GetOff(world, pl);
+                    return;
+                }
                 SetPrompt(ui, Kinetic.Text("feTrainRiding", "Riding - press {0} or jump to get off").Replace("{0}", "[action:local:Activate]"));
-                bool jump = input != null && input.Jump != null && input.Jump.WasPressed;
-                if (free && (press || jump)) GetOff(world, pl);
+                if (free && (press || jumpPress)) GetOff(world, pl);
                 return;
             }
-            Train t;
-            int car;
-            float dist;
-            float block = pl.HitInfo != null && pl.HitInfo.bHitValid ? Mathf.Sqrt(pl.HitInfo.hit.distanceSq) : 99f;
-            if (!free || !Aim(pl, 5f, out t, out car, out dist) || dist > block + 0.1f) { SetPrompt(ui, null); return; }
+            Train t = null;
+            int car = -1;
+            float dist = 99f;
+            bool aimed = free && Aim(pl, 6f, out t, out car, out dist);
+            float block = 99f;
+            if (aimed && pl.HitInfo != null && pl.HitInfo.bHitValid)
+            {
+                // a block in front of the car hides it; one inside the car's box (the rail, the ground under the
+                // wheels, the kit's spot) does not
+                Vector3 hp = pl.HitInfo.hit.pos;
+                if (!InsideCar(t, car, hp, 0.3f)) block = Mathf.Sqrt(pl.HitInfo.hit.distanceSq);
+            }
+            if (press && Time.time >= nextDiag)
+            {
+                nextDiag = Time.time + 0.5f;
+                Log.Out(ForgedInAshesMod.LogPrefix + "train use: aimed=" + aimed + (aimed ? " train " + t.Id + " car " + car + " (" + t.Cars[car].Kind
+                        + ") dist " + dist.ToString("0.00") : "") + " block " + (block > 90f ? "none" : block.ToString("0.00")) + " free=" + free
+                        + " trains=" + TrainStore.All.Count);
+            }
+            if (!aimed || dist > block + 0.1f) { SetPrompt(ui, null); return; }
             TrainCar c = t.Cars[car];
             string what = KindName(c.Kind) + " - " + string.Format(Kinetic.Text("feTrainNumber", "train {0}"), t.Id);
             bool crouch = pl.IsCrouching;
-            bool seat = c.Kind == "passenger" || (c.Kind == "loco" && crouch);
-            string act = seat ? Kinetic.Text("feTrainBoard", "{0} take a seat") : Kinetic.Text("feTrainOpenPanel", "{0} Train Panel");
+            bool seat = c.Kind == "passenger" || (c.Kind == "loco" && !crouch);
+            string act = c.Kind == "loco" && seat ? Kinetic.Text("feTrainCab", "{0} get into the cab (crouch: Train Panel)")
+                       : seat ? Kinetic.Text("feTrainBoard", "{0} take a seat") : Kinetic.Text("feTrainOpenPanel", "{0} Train Panel");
             SetPrompt(ui, what + "\n" + act.Replace("{0}", "[action:local:Activate]"));
             if (!press) return;
-            if (seat) { RideTrain = t.Id; RideCar = car; return; }
+            if (seat)
+            {
+                RideTrain = t.Id;
+                RideCar = car;
+                crouchWas = leftWas = rightWas = true;                             // no stale presses on the way in
+                jumpWas = true;
+                EnterView(pl);
+                Log.Out(ForgedInAshesMod.LogPrefix + "train " + t.Id + ": player boards car " + car + " (" + c.Kind + ")");
+                return;
+            }
             TrainPanel.Open(pl, t.Id);
         }
 
@@ -194,26 +434,34 @@ namespace ForgedInAshes
         {
             Vector3 pos;
             Quaternion rot;
-            t.CarPose(Mathf.Clamp(car, 0, t.Cars.Count - 1), out pos, out rot);
-            return pos + Vector3.up * 1.0f;
+            car = Mathf.Clamp(car, 0, t.Cars.Count - 1);
+            t.CarPose(car, out pos, out rot);
+            // feTrainLocoCar: cab floor 1.45 m, 2.2 m behind the middle; feWagonPassengerCar: floor 1.0 m, middle
+            Vector3 local = t.Cars[car].Kind == "loco" ? new Vector3(0f, 1.47f, -2.2f) : new Vector3(0f, 1.02f, 0f);
+            return pos + rot * local;
         }
 
         void Ride(World world, EntityPlayerLocal pl)
         {
             if (RideTrain < 0) return;
             Train t = TrainStore.Get(RideTrain);
-            if (t == null || pl.IsDead() || RideCar >= t.Cars.Count) { RideTrain = RideCar = -1; return; }
+            if (t == null || pl.IsDead() || RideCar >= t.Cars.Count) { RideTrain = RideCar = -1; LeaveView(pl); return; }
+            if (t.Cars[RideCar].Kind == "loco") t.Driver = true;
+            KeepView(pl, t.Cars[RideCar].Kind);
             Vector3 seat = Seat(t, RideCar);
             pl.SetPosition(seat, false);
             pl.motion = Vector3.zero;
             pl.fallDistance = 0f;
         }
 
-        static void GetOff(World world, EntityPlayerLocal pl)
+        void GetOff(World world, EntityPlayerLocal pl)
         {
             Train t = TrainStore.Get(RideTrain);
+            LeaveView(pl);
             if (t != null)
             {
+                t.Driver = false;
+                t.Throttle = 0f;
                 Vector3 pos;
                 Quaternion rot;
                 t.CarPose(Mathf.Clamp(RideCar, 0, t.Cars.Count - 1), out pos, out rot);
@@ -407,7 +655,7 @@ namespace ForgedInAshes
                 int k = i;
                 Hook("feTRt" + i, (s, m) => { RemoveLeg(k); });
             }
-            Hook("feTRun", (s, m) => { Train t = TrainPanel.Current; if (t != null) { t.Run = !t.Run; TrainStore.Dirty = true; } Refresh(); });
+            Hook("feTRun", (s, m) => { Train t = TrainPanel.Current; if (t != null) { t.Run = !t.Run; if (t.Run) { t.Manual = false; t.V = Mathf.Max(0f, t.V); t.State = "stopped"; } TrainStore.Dirty = true; } Refresh(); });
             Hook("feTClear", (s, m) => { Train t = TrainPanel.Current; if (t != null) { t.Route.Clear(); t.Leg = 0; TrainStore.Dirty = true; } Refresh(); });
             Hook("feTFuel", (s, m) => { Train t = TrainPanel.Current; if (t != null && FeUi.Player != null) TrainPanel.Refuel(FeUi.Player, t); Refresh(); });
             Hook("feTPrev", (s, m) => { if (page > 0) page--; Refresh(); });
@@ -497,6 +745,150 @@ namespace ForgedInAshes
                 return true;
             }
             return false;
+        }
+    }
+
+    /// <summary>Animation of a train car model (client side): FeSpin_r<radius>_* wheels roll with the distance the car
+    /// moved along its own forward; on the locomotive, FeTrainPin_n (empty on a driving wheel's crank pin) drives
+    /// FeTrainCouple_n (coupling rod: moves with the pin), FeTrainCross_n (crosshead: slides along the car, at the
+    /// main rod's length from the pin) and FeTrainMain_n (main rod: from the crosshead pin to the crank pin);
+    /// FeFx_Smoke / FeFx_Steam particles run while the train runs. Captured once from the pristine model, in the
+    /// car root's space.</summary>
+    public class TrainCarVisual : MonoBehaviour
+    {
+        class Wheel
+        {
+            public Transform T;
+            public float R = 0.45f;
+        }
+
+        class Rods
+        {
+            public Transform Wheel, Couple, Cross, Main;
+            public Vector3 PinInWheel, Pin0, Couple0, Cross0, MainOff, Dir0;
+            public Quaternion Main0;
+            public float L, Sign;
+        }
+
+        readonly List<Wheel> wheels = new List<Wheel>();
+        readonly List<Rods> rods = new List<Rods>();
+        readonly List<ParticleSystem> smoke = new List<ParticleSystem>();
+        bool captured, hasLast, puffing;
+        Vector3 last;
+
+        void Capture()
+        {
+            captured = true;
+            Dictionary<string, Transform> byName = new Dictionary<string, Transform>();
+            foreach (Transform t in GetComponentsInChildren<Transform>(true))
+            {
+                byName[t.name] = t;
+                if (!t.name.StartsWith("FeSpin", System.StringComparison.Ordinal)) continue;
+                Wheel w = new Wheel { T = t };
+                foreach (string tok in t.name.Split('_'))
+                {
+                    float r;
+                    if (tok.Length > 1 && tok[0] == 'r' && float.TryParse(tok.Substring(1), System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out r) && r > 0.05f) w.R = r;
+                }
+                wheels.Add(w);
+            }
+            for (int n = 1; n <= 4; n++)
+            {
+                Transform pin;
+                if (!byName.TryGetValue("FeTrainPin_" + n, out pin)) continue;
+                Rods r = new Rods();
+                float bestD = float.MaxValue;
+                foreach (Wheel w in wheels)
+                {
+                    float d = (w.T.position - pin.position).sqrMagnitude;
+                    if (d < bestD) { bestD = d; r.Wheel = w.T; }
+                }
+                if (r.Wheel == null) continue;
+                byName.TryGetValue("FeTrainCouple_" + n, out r.Couple);
+                byName.TryGetValue("FeTrainCross_" + n, out r.Cross);
+                byName.TryGetValue("FeTrainMain_" + n, out r.Main);
+                r.PinInWheel = r.Wheel.InverseTransformPoint(pin.position);
+                r.Pin0 = transform.InverseTransformPoint(pin.position);
+                if (r.Couple != null) r.Couple0 = transform.InverseTransformPoint(r.Couple.position);
+                if (r.Cross != null)
+                {
+                    r.Cross0 = transform.InverseTransformPoint(r.Cross.position);
+                    Vector3 w0 = r.Cross0 - r.Pin0;
+                    r.L = w0.magnitude;
+                    r.Sign = w0.z >= 0f ? 1f : -1f;
+                    r.Dir0 = (r.Pin0 - r.Cross0).normalized;
+                    if (r.Main != null)
+                    {
+                        r.MainOff = transform.InverseTransformPoint(r.Main.position) - r.Cross0;
+                        r.Main0 = Quaternion.Inverse(transform.rotation) * r.Main.rotation;
+                    }
+                }
+                rods.Add(r);
+            }
+            foreach (ParticleSystem ps in GetComponentsInChildren<ParticleSystem>(true))
+                if (ps.name.StartsWith("FeFx_Smoke", System.StringComparison.Ordinal) || ps.name.StartsWith("FeFx_Steam", System.StringComparison.Ordinal))
+                    smoke.Add(ps);
+        }
+
+        /// <summary>Called by TrainView after placing the car: pos / rot in absolute world space.</summary>
+        public void Step(Vector3 pos, Quaternion rot, bool running, float speed)
+        {
+            if (!captured) Capture();
+            float ds = 0f;
+            if (hasLast)
+            {
+                Vector3 d = pos - last;
+                if (d.sqrMagnitude < 400f) ds = Vector3.Dot(d, rot * Vector3.forward);
+            }
+            last = pos;
+            hasLast = true;
+            if (Mathf.Abs(ds) > 0.00001f)
+            {
+                foreach (Wheel w in wheels)
+                {
+                    if (w.T == null) continue;
+                    // rolling forward = turning about the car's +X; the part turns about its own +Z
+                    float sgn = Vector3.Dot(transform.InverseTransformDirection(w.T.forward), Vector3.right) >= 0f ? 1f : -1f;
+                    w.T.Rotate(Vector3.forward, sgn * ds / w.R * Mathf.Rad2Deg, Space.Self);
+                }
+                foreach (Rods r in rods) Solve(r);
+            }
+            if (running != puffing)
+            {
+                puffing = running;
+                foreach (ParticleSystem ps in smoke)
+                {
+                    if (ps == null) continue;
+                    if (running) ps.Play(true);
+                    else ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                }
+            }
+            if (running)
+                foreach (ParticleSystem ps in smoke)
+                {
+                    if (ps == null) continue;
+                    ParticleSystem.EmissionModule em = ps.emission;
+                    em.rateOverTimeMultiplier = 6f + speed * 2.5f;
+                }
+        }
+
+        void Solve(Rods r)
+        {
+            if (r.Wheel == null) return;
+            Vector3 pin = transform.InverseTransformPoint(r.Wheel.TransformPoint(r.PinInWheel));
+            if (r.Couple != null) r.Couple.position = transform.TransformPoint(r.Couple0 + (pin - r.Pin0));
+            if (r.Cross == null) return;
+            // the crosshead stays on its line along the car (x, y of the built pose), the rod's length from the pin
+            float dy = pin.y - r.Cross0.y, dx = pin.x - r.Cross0.x;
+            float dz = Mathf.Sqrt(Mathf.Max(0f, r.L * r.L - dy * dy - dx * dx));
+            Vector3 cross = new Vector3(r.Cross0.x, r.Cross0.y, pin.z + r.Sign * dz);
+            r.Cross.position = transform.TransformPoint(cross);
+            if (r.Main != null)
+            {
+                r.Main.position = transform.TransformPoint(cross + r.MainOff);
+                r.Main.rotation = transform.rotation * (Quaternion.FromToRotation(r.Dir0, (pin - cross).normalized) * r.Main0);
+            }
         }
     }
 }
