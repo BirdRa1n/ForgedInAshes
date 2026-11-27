@@ -1455,6 +1455,13 @@
 			<ingredient name="feResourceIronPlate" count="4"/>
 			<ingredient name="fePipe" count="2"/>
 		</recipe>
+		<recipe name="feHydroTower" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="4"/>
+			<ingredient name="fePipe" count="3"/>
+			<ingredient name="feLightBulb" count="4"/>
+			<ingredient name="feElectricMotorSmall" count="1"/>
+			<ingredient name="resourceCropCottonPlant" count="4"/>
+		</recipe>
 		<recipe name="feBoilerFirebox" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
 			<ingredient name="feFirebox" count="1"/>
 			<ingredient name="resourceClayLump" count="10"/>
@@ -1609,6 +1616,10 @@
 		<recipe name="feMoldRocket" count="1" craft_area="feLathe" craft_time="20" always_unlocked="true">
 			<ingredient name="resourceForgedIron" count="10"/>
 			<ingredient name="resourceClayLump" count="10"/>
+		</recipe>
+		<recipe name="feFertilizer" count="1" craft_time="10" always_unlocked="true">
+			<ingredient name="foodRottingFlesh" count="3"/>
+			<ingredient name="resourceBone" count="1"/>
 		</recipe>
 		<recipe name="gunHandgunT1PistolParts" count="1" craft_area="feAssembler" craft_time="10" always_unlocked="true">
 			<ingredient name="feSteelPlate" count="2"/>

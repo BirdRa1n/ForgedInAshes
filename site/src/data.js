@@ -131,7 +131,7 @@ export function plan(db, id, qty = 1, choice = {}) {
 export const KIND_VERB = {
   melt: "Derreta", cast: "Molde", press: "Prense", turn: "Torneie", crush: "Triture", wash: "Lave", mix: "Misture",
   dry: "Seque / aqueça", distill: "Destile", spin: "Fie / centrifugue", assemble: "Encaixe", sequence: "Feche",
-  boil: "Cozinhe / ferva",
+  boil: "Cozinhe / ferva", grow: "Cultive",
 };
 
 export function fmtQty(n) {

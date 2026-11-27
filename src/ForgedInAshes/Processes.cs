@@ -34,6 +34,12 @@ namespace ForgedInAshes
         public float Chance = 1f;
         public float Pressure;
         public bool Heat;
+        // 2026-11-27 (machine farming): inputs that are NOT used up (keep="plantedCorn1": the seed stays planted) and
+        // an optional booster item (boost="feFertilizer" boost_speed="2.5"): with one in the stock the run goes
+        // boost_speed times faster and uses one booster
+        public string[] Keep = new string[0];
+        public string Boost;
+        public float BoostSpeed = 1f;
     }
 
     public class FluidDef
@@ -129,6 +135,9 @@ namespace ForgedInAshes
                     p.Extra = S(e, "extra");
                     if (S(e, "extra_count") != null) p.ExtraCount = (int)F(e, "extra_count");
                     if (S(e, "chance") != null) p.Chance = F(e, "chance");
+                    if (S(e, "keep") != null) p.Keep = S(e, "keep").Split(',');
+                    p.Boost = S(e, "boost");
+                    if (S(e, "boost_speed") != null) p.BoostSpeed = F(e, "boost_speed");
                     if (S(e, "out_count") != null) p.OutCount = (int)F(e, "out_count");
                     if (S(e, "fluid_in") != null)
                     {

@@ -1393,3 +1393,45 @@ Encontrado e ainda não feito (por prioridade; precisam de teste no jogo):
 - FxVisual: a fornalha acesa liga `working` (soprador e alimentador giram); a caldeira produzindo vapor liga a
   bomba de alimentação.
 - DLL, validadores ok (check_xpath 778/0, processes 229/0, phase3 23/23, coverage 0). **Não verificado no jogo.**
+
+## 2026-11-27: sons das máquinas
+
+- **14 loops originais**, sintetizados por código (`Art/feSounds/make_sounds.py`; sem áudio de terceiros, loops
+  sem emenda: ruído montado no domínio da frequência, tons com ciclos inteiros no loop, batidas com ataque de 2 ms
+  e fora da emenda): turbina (assobio do rotor + tom das palhetas + vapor + ronco), motor a vapor / a carvão (dois
+  bufos e uma batida de biela por volta), vapor escapando, motor elétrico / dínamo (zumbido de rede + harmônicos),
+  caixa de engrenagens, britador / moinho, ventilador, bomba, esteira, borbulhas (biodigestor, fermentador),
+  furadeira, serra, prensa, zumbido elétrico (forno de indução, soldadora...).
+- **Integração pelo sistema de som do jogo** (`MachineSound.cs`): `Audio.Manager.Play(blockPos, grupo)` /
+  `Stop(...)`, como a armadilha de lâminas (`BlockBladeTrap.OnBlockUnloaded`, IL 3.4.0 b10). `KineticSpinner`
+  (eixo girando) e `FxVisual` (fogo, trabalho, vapor) avisam o estado; o som fica ligado enquanto houve aviso
+  "ligado" no último 1,2 s e toca só a até 24 m do jogador (o jogo corta loops distantes sozinho:
+  `Audio.Manager.StopDistantLoopingPositionalSounds`). Som por bloco: propriedade `FeLoopSound` ou a tabela por
+  prefixo de nome; fogo usa os grupos do próprio jogo (`FireMediumLoop`, `FireSmallLoop`) e o motor a gás o
+  `generator_run`, pelo nome (nada do jogo é copiado).
+- `Config/sounds.xml`: 14 `SoundDataNode` (fonte `AudioSource_Generators` do jogo: volume das opções, distância,
+  mixer), clipes em `forgedinashes.unity3d?<nome>`. `FeBuild.SyncSounds` põe os `.wav` no pacote (mono, Vorbis).
+- Jogo abriu até o menu sem erro (Player.log: `Harmony: 39 method(s) patched`, sem ERR/WRN do mod). Validadores ok.
+  **Não verificado no jogo** (ouvir os sons num mundo).
+
+## 2026-11-27: plantação por máquina (Torre Hidropônica + Adubo) e Roda d'Água 3x3
+
+- **Torre Hidropônica** (`feHydroTower`, elétrica 60 W, 1x2 blocos): a semente entra por mão, esteira ou braço e
+  **fica plantada**; com água por cano (atrás) e energia ela planta, colhe e replanta sozinha, e a colheita sai na
+  frente. 13 processos `hydro_*` (milho, batata, mirtilo, cogumelo, abóbora, iúca, algodão, café, solidago, aloe,
+  crisântemo, lúpulo, milho da graça; sementes `planted<Planta>1` do jogo), 10 L de água por ciclo, 7 a 12 min.
+- **Adubo** (`feFertilizer`): com adubo no estoque o ciclo anda 2,5x mais rápido e gasta 1 por colheita. Feito no
+  Biodigestor (`compost`: 4 carne podre + 2 osso + 10 L de água → 4) ou na mão (3 carne podre + 1 osso).
+- Processos ganharam `keep` (ingrediente que não é gasto) e `boost` / `boost_speed` (item que acelera e é gasto 1 por
+  ciclo): `Processes.cs`, `ProcessMachine.cs` (estoque aceita o reforço, velocidade, consumo); `gen_chain.proc`,
+  `check_processes.py` e o site conhecem o tipo `grow`.
+- Modelo da torre: bacia, coluna com copos em 4 níveis, gaiola, tubos de luz de cultivo (acesos enquanto cresce,
+  `FeGrowLight`), caixa de controle; as plantas (`FeGrow_*`) **crescem com o progresso** e voltam pequenas na colheita
+  (FxVisual). Som: borbulhas. Ícones de torre, roda e adubo renderizados dos modelos (sem IA de imagem).
+- **Roda d'Água 3x3** (`MultiBlockDim 3,3,1`, origem = célula do meio embaixo): modelo novo (roda de madeira com aros
+  cintados, raios, 16 pás, cubo de ferro, cavaletes com mancais). Na rede de torque (`TorqueNetwork.IsMultiWheel`):
+  o eixo é a célula do **centro** (1,5 m) e liga nos dois sentidos do eixo; a água conta sob a fileira de baixo e em
+  volta dela. Turbina e Moinho de Vento herdam da roda: `Extends param1="MultiBlockDim"` (gerado por `gen_chain`,
+  `NO_INHERIT`) para continuarem 1x1. Torque da roda segue 128 UT.
+- Validadores ok (check_xpath 779/0, processes 243/0, phase3 23/23, coverage 0, assets 0 pendentes). Pacote ok.
+  **Não verificado no jogo.**

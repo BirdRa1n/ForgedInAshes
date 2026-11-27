@@ -245,6 +245,7 @@
 	<machine name="feReflowOven" text="Forno de Refusão"/>
 	<machine name="feItemDrain" text="Dreno de Itens"/>
 	<machine name="feFan" text="Ventilador Industrial"/>
+	<machine name="feHydroTower" text="Torre Hidropônica"/>
 	<!-- molds and items -->
 	<item name="feMoldPellet" text="feMoldPellet" metals="molten_polymer"/>
 	<item name="feMoldBoard" text="feMoldBoard" metals="molten_polymer"/>
@@ -344,6 +345,7 @@
 	<item name="fePlaster" text="Gesso em Pó"/>
 	<item name="feEngineerWrench" text="Chave de Engenheiro"/>
 	<item name="feEngineerManual" text="Manual do Engenheiro"/>
+	<item name="feFertilizer" text="Adubo"/>
 	<item name="feBoilerShell" text="Corpo de Caldeira"/>
 	<item name="feFirebox" text="Fornalha"/>
 	<item name="feSteamCylinderRaw" text="Carcaça de Turbina Bruta"/>
@@ -481,6 +483,20 @@
 	<process id="bend_rim" kind="press" machine="feBender" input="feSteelPlate" count="2" output="feRim" out_count="1" time="3" torque="64" text="Aro."/>
 	<process id="weld_frame" kind="assemble" machine="feWelder" input="feProfile" count="4" output="feChassisFrame" out_count="1" time="6" text="Quadro soldado."/>
 	<process id="reflow_board" kind="dry" machine="feReflowOven" input="feCircuitPopulated" count="1" output="feCircuitBoard" out_count="1" time="4" text="Solda a placa."/>
+	<process id="compost" kind="mix" machine="feBiodigester" input="foodRottingFlesh,resourceBone" count="4,2" fluid_in="water" liters="10" output="feFertilizer" out_count="4" time="120" text="Carne podre com osso e água vira adubo."/>
+	<process id="hydro_corn" kind="grow" machine="feHydroTower" input="plantedCorn1" count="1" fluid_in="water" liters="10" output="foodCropCorn" out_count="3" time="480" keep="plantedCorn1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_potato" kind="grow" machine="feHydroTower" input="plantedPotato1" count="1" fluid_in="water" liters="10" output="foodCropPotato" out_count="3" time="480" keep="plantedPotato1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_blueberry" kind="grow" machine="feHydroTower" input="plantedBlueberry1" count="1" fluid_in="water" liters="10" output="foodCropBlueberries" out_count="3" time="480" keep="plantedBlueberry1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_mushroom" kind="grow" machine="feHydroTower" input="plantedMushroom1" count="1" fluid_in="water" liters="10" output="foodCropMushrooms" out_count="3" time="420" keep="plantedMushroom1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_pumpkin" kind="grow" machine="feHydroTower" input="plantedPumpkin1" count="1" fluid_in="water" liters="10" output="foodCropPumpkin" out_count="2" time="600" keep="plantedPumpkin1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_yucca" kind="grow" machine="feHydroTower" input="plantedYucca1" count="1" fluid_in="water" liters="10" output="foodCropYuccaFruit" out_count="3" time="480" keep="plantedYucca1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_cotton" kind="grow" machine="feHydroTower" input="plantedCotton1" count="1" fluid_in="water" liters="10" output="resourceCropCottonPlant" out_count="4" time="480" keep="plantedCotton1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_coffee" kind="grow" machine="feHydroTower" input="plantedCoffee1" count="1" fluid_in="water" liters="10" output="resourceCropCoffeeBeans" out_count="3" time="540" keep="plantedCoffee1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_goldenrod" kind="grow" machine="feHydroTower" input="plantedGoldenrod1" count="1" fluid_in="water" liters="10" output="resourceCropGoldenrodPlant" out_count="3" time="420" keep="plantedGoldenrod1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_aloe" kind="grow" machine="feHydroTower" input="plantedAloe1" count="1" fluid_in="water" liters="10" output="resourceCropAloeLeaf" out_count="3" time="480" keep="plantedAloe1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_chrysanthemum" kind="grow" machine="feHydroTower" input="plantedChrysanthemum1" count="1" fluid_in="water" liters="10" output="resourceCropChrysanthemumPlant" out_count="3" time="480" keep="plantedChrysanthemum1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_hop" kind="grow" machine="feHydroTower" input="plantedHop1" count="1" fluid_in="water" liters="10" output="resourceCropHopsFlower" out_count="3" time="480" keep="plantedHop1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
+	<process id="hydro_gracecorn" kind="grow" machine="feHydroTower" input="plantedGraceCorn1" count="1" fluid_in="water" liters="10" output="foodCropGraceCorn" out_count="2" time="720" keep="plantedGraceCorn1" boost="feFertilizer" boost_speed="2.5" text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido)."/>
 	<process id="fan_wash_nitrate" kind="wash" machine="feFan" input="resourcePotassiumNitratePowder" count="2" output="feNitratePure" out_count="2" time="3" text="Ventilador: lava no ar (água na frente)."/>
 	<process id="fan_wash_nitre_earth" kind="wash" machine="feFan" input="feNitreEarth" count="1" output="resourcePotassiumNitratePowder" out_count="4" time="6" text="Ventilador: lava no ar (água na frente)."/>
 	<process id="fan_wash_coagulum" kind="wash" machine="feFan" input="feRubberCoagulum" count="1" output="feRubberSheetRaw" out_count="1" time="4" text="Ventilador: lava no ar (água na frente)."/>

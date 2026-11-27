@@ -30,7 +30,7 @@ AREA_PT = {"workbench": "Bancada", "forge": "Forja", "chemistryStation": "Estaç
            "cementMixer": "Betoneira", "": "Inventário"}
 KIND_PT = {"melt": "Fundir", "cast": "Moldar", "press": "Prensar", "turn": "Tornear", "crush": "Triturar",
            "wash": "Lavar", "mix": "Misturar", "dry": "Secar / aquecer", "distill": "Destilar", "spin": "Fiar / centrifugar",
-           "assemble": "Encaixar", "sequence": "Fechar (sequência)", "boil": "Cozinhar / ferver"}
+           "assemble": "Encaixar", "sequence": "Fechar (sequência)", "boil": "Cozinhar / ferver", "grow": "Cultivar"}
 BASE_FLUIDS = {"water": ("Água", "liquid"), "steam": ("Vapor", "gas"), "oil": ("Óleo", "liquid"),
                "gasoline": ("Gasolina", "liquid"), "lubricant": ("Lubrificante", "liquid"),
                "molten_brass": ("Latão Fundido", "molten"), "molten_lead": ("Chumbo Fundido", "molten"),

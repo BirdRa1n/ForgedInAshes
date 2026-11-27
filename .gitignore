@@ -59,3 +59,7 @@ site/dist/
 # Mods/ForgedInAshes/Resources/README.md.
 Mods/ForgedInAshes/Resources/*.unity3d
 Mods/ForgedInAshes/Resources/*.manifest
+
+# sound clips copied from Art/feSounds by FeBuild.SyncSounds
+Art/UnityProject/Assets/Sounds/
+Art/UnityProject/Assets/Sounds.meta

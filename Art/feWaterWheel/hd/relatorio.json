@@ -1,0 +1,16 @@
+{
+ "nome": "feWaterWheel",
+ "config": "F:\\IA\\fe_blender\\configs\\feWaterWheel.json",
+ "triangulos_antes": 9116,
+ "triangulos_depois": 3452,
+ "atlas": 2048,
+ "arquivos": [
+  "feWaterWheel_Albedo.png",
+  "feWaterWheel_Normal.png",
+  "feWaterWheel_MetallicSmoothness.png",
+  "feWaterWheel_Roughness.png",
+  "feWaterWheel_HD.fbx",
+  "feWaterWheel_HD.blend"
+ ],
+ "segundos": 40.0
+}

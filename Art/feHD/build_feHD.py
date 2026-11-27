@@ -52,10 +52,11 @@ MATS = {
     "feHD_Glow":      ((1.00, 0.35, 0.05), 0.50, 0.00, 6.0),
     "feHD_Red":       ((0.45, 0.07, 0.05), 0.65, 0.20, 0),    # handwheels, gas bottles, pressure bands
     "feHD_Leather":   ((0.36, 0.22, 0.12), 0.85, 0.00, 0),    # hides
+    "feHD_Leaf":      ((0.22, 0.48, 0.12), 0.60, 0.00, 0),    # plants (Hydroponic Tower)
 }
 MI = {n: i for i, n in enumerate(MATS)}
 (IRON, CAST, STEEL, RUST, PAINT, HAZ, BRICK, SOOT, SAND, BRASS, COPPER, WOOD, GLASS, IN, OUT,
- MOLTEN, LIQUID, GAS, GLOW, RED, LEATHER) = range(len(MATS))
+ MOLTEN, LIQUID, GAS, GLOW, RED, LEATHER, LEAF) = range(len(MATS))
 
 AXIS = {"Z": Matrix.Identity(4), "Y": Matrix.Rotation(math.pi / 2, 4, "X"), "X": Matrix.Rotation(math.pi / 2, 4, "Y")}
 
@@ -4408,7 +4409,122 @@ def model_turbine_rotor():
     return [to_object(b, "feTurbineRotor_Base", bevel=0.002)]
 
 
-ITEM_MODELS = {"feTurbineRotor": model_turbine_rotor}
+def model_fertilizer():
+    """Fertilizer (item feFertilizer): a tied burlap sack with a heap of dark compost spilled in front."""
+    b = bmesh.new()
+    cyl(b, 0.20, 0.36, (0, 0.04, 0.18), "Z", LEATHER, segs=20, r2=0.15)                   # sack body
+    cyl(b, 0.15, 0.08, (0, 0.04, 0.40), "Z", LEATHER, segs=16, r2=0.05)                   # neck
+    ring(b, 0.06, 0.045, 0.025, (0, 0.04, 0.43), "Z", RUST, segs=12)                      # tie
+    cyl(b, 0.07, 0.06, (0, 0.04, 0.48), "Z", LEATHER, segs=12, r2=0.10)                   # tuft
+    box(b, (0.16, 0.012, 0.10), (0, -0.155, 0.22), PAINT)                                 # label patch
+    for k in range(9):                                                                     # compost heap
+        a_ = k * 0.7
+        cyl(b, 0.05 + 0.01 * (k % 3), 0.03 + 0.01 * (k % 2), (0.10 * math.cos(a_) + 0.02, -0.20 + 0.05 * math.sin(a_), 0.02),
+            "Z", SOOT, segs=10, r2=0.02)
+    return [to_object(b, "feFertilizer_Base", bevel=0.002)]
+
+
+ITEM_MODELS = {"feTurbineRotor": model_turbine_rotor, "feFertilizer": model_fertilizer}
+
+
+# ================================================================ machine farming + big water wheel (2026-11-27)
+def model_hydro_tower():
+    """Hydroponic Tower (1 x 2 blocks): a red basin with water, a white grow column with planter cups on 4 levels,
+    a rod cage with grow-light tubes (feHD_Glow: lit while it grows), a control box; water in at the back, the
+    harvest out of the low chute in front, power wire on top. Each plant (FeGrow_*) grows from its cup with the
+    progress of the run (FxVisual)."""
+    objs = []
+    b = bmesh.new()
+    box(b, (0.90, 0.90, 0.04), (0, 0, 0.02), IRON)
+    cyl(b, 0.40, 0.26, (0, 0, 0.17), "Z", RED, segs=36, r2=0.36)                         # basin
+    ring(b, 0.42, 0.38, 0.03, (0, 0, 0.31), "Z", CAST, segs=36)
+    cyl(b, 0.36, 0.01, (0, 0, 0.27), "Z", LIQUID, segs=32)                                # water in it
+    cyl(b, 0.12, 1.56, (0, 0, 1.08), "Z", STEEL, segs=24)                                 # grow column
+    for z in (0.60, 1.10, 1.60):
+        cyl(b, 0.125, 0.02, (0, 0, z), "Z", IRON, segs=24)                                # column joints
+    cyl(b, 0.14, 0.06, (0, 0, 1.88), "Z", CAST, segs=20)                                  # drip head
+    pipe_run(b, [(0, 0.48, C), (0, 0.30, C), (0, 0.30, 0.30)], r=0.035)                   # water in (back)
+    flange(b, (0, 0.485, C), "Y", IN)
+    pipe_run(b, [(0.05, 0.10, 0.30), (0.05, 0.10, 1.80), (0.0, 0.0, 1.86)], r=0.014, mat=STEEL)   # riser to the top
+    for k in range(6):                                                                    # rod cage
+        a_ = 2 * math.pi * k / 6 + 0.3
+        cyl(b, 0.012, 1.66, (0.38 * math.cos(a_), 0.38 * math.sin(a_), 1.13), "Z", IRON, segs=8)
+    for z in (0.40, 0.95, 1.50, 1.95):
+        ring(b, 0.395, 0.375, 0.015, (0, 0, z), "Z", IRON, segs=36)
+    for a_ in (0.9, 3.0, 5.1):                                                            # grow lights
+        x, y = 0.33 * math.cos(a_), 0.33 * math.sin(a_)
+        cyl(b, 0.022, 1.30, (x, y, 1.12), "Z", GLOW, segs=10)
+        for z in (0.46, 1.78):
+            cyl(b, 0.03, 0.04, (x, y, z), "Z", STEEL, segs=10)
+    box(b, (0.12, 0.06, 0.14), (0.26, -0.36, 1.20), SOOT)                                 # control box on a post
+    cyl(b, 0.035, 0.02, (0.26, -0.395, 1.22), "Y", IN, segs=12)
+    cyl(b, 0.01, 1.0, (0.26, -0.36, 0.75), "Z", STEEL, segs=6)
+    low_chute(b)
+    objs.append(to_object(b, "feHydroTower_Base", bevel=0.002))
+    # planter cups + plants: 4 levels x 4 directions (staggered)
+    pc = bmesh.new()
+    n = 0
+    for lv, z in enumerate((0.55, 0.95, 1.35, 1.72)):
+        for k in range(4):
+            a_ = k * math.pi / 2 + (lv % 2) * math.pi / 4
+            cx, cy = 0.15 * math.cos(a_), 0.15 * math.sin(a_)
+            cyl(pc, 0.045, 0.07, (cx, cy, z), "Z", STEEL, segs=12, r2=0.035)
+            pl = bmesh.new()
+            for j in range(6):                                                            # a rosette of leaves
+                t = j * math.pi / 3 + 0.4 * lv
+                m = Matrix.Rotation(t, 4, "Z") @ Matrix.Rotation(-(0.55 + 0.25 * (j % 2)), 4, "Y")   # leaves up and out
+                box(pl, (0.16, 0.075, 0.006), tuple(m @ Vector((0.08, 0, 0))), LEAF, m)
+            cyl(pl, 0.012, 0.06, (0, 0, -0.01), "Z", LEAF, segs=6)
+            objs.append(to_object(pl, "FeGrow_%02d" % n, location=(cx + 0.03 * math.cos(a_), cy + 0.03 * math.sin(a_), z + 0.04),
+                                  rotation=(0, 0.35 * math.cos(a_ + math.pi / 2) * 0, a_)))
+            n += 1
+    objs.append(to_object(pc, "feHydroTower_Cups", bevel=0.001))
+    wire(objs, (0, 0, 1.92))
+    return objs
+
+
+def model_water_wheel():
+    """Water Wheel, 3 x 3 blocks (MultiBlockDim 3,3,1; origin = the bottom middle cell): a timber wheel with two
+    iron-banded rims, spokes, 16 paddles and an iron hub, on two timber trestles with bearings. The axle is the
+    centre cell (1.5 m up) and comes out on both faces (couplings), turning with the wheel (FeSpin_Wheel)."""
+    objs = []
+    WZ = 1.5
+    b = bmesh.new()
+    for sy in (-1, 1):                                                                    # trestles
+        y = sy * 0.44
+        box(b, (2.6, 0.08, 0.10), (0, y, 0.05), WOOD)                                     # sill
+        for sx in (-1, 1):
+            beam(b, (sx * 1.05, y, 0.08), (sx * 0.10, y, WZ - 0.08), 0.10, 0.07, WOOD)    # legs
+        beam(b, (-0.70, y, 0.55), (0.70, y, 0.55), 0.08, 0.06, WOOD)                     # brace
+        for sx in (-1, 1):
+            beam(b, (sx * 0.62, y, 0.58), (sx * 0.18, y, 1.10), 0.06, 0.05, WOOD)
+        box(b, (0.26, 0.10, 0.18), (0, y, WZ - 0.12), CAST)                               # bearing block
+        box(b, (0.22, 0.11, 0.06), (0, y, WZ + 0.10), IRON)                               # bearing cap
+        for sx in (-1, 1):
+            cyl(b, 0.012, 0.30, (sx * 0.09, y, WZ - 0.02), "Z", STEEL, segs=6)
+        for x in (-1.0, 1.0):
+            box(b, (0.14, 0.10, 0.03), (x, y, 0.015), RUST)                               # foot plates
+    objs.append(to_object(b, "feWaterWheel_Base", bevel=0.003))
+    w = bmesh.new()                                                                        # the wheel (built round Y)
+    shaft_end(w, 0.0, -0.5)
+    shaft_end(w, 0.0, 0.5)
+    cyl(w, 0.20, 0.50, (0, 0, 0), "Y", CAST, segs=24)                                     # hub
+    for sy in (-1, 1):
+        bolt_circle(w, 8, 0.15, (0, sy * 0.255, 0), "Y", STEEL, r=0.014, d=0.02)
+        ring(w, 1.42, 1.30, 0.07, (0, sy * 0.32, 0), "Y", WOOD, segs=48)                  # rims
+        ring(w, 1.44, 1.41, 0.075, (0, sy * 0.32, 0), "Y", IRON, segs=48)                 # iron band
+        for k in range(8):                                                                 # spokes
+            a_ = 2 * math.pi * k / 8 + (0.2 if sy > 0 else 0.2)
+            p0 = Vector((0.18 * math.cos(a_), sy * 0.24, 0.18 * math.sin(a_)))
+            p1 = Vector((1.32 * math.cos(a_), sy * 0.32, 1.32 * math.sin(a_)))
+            beam(w, tuple(p0), tuple(p1), 0.08, 0.06, WOOD)
+    for k in range(16):                                                                    # paddles
+        a_ = 2 * math.pi * k / 16
+        m = Matrix.Rotation(-a_, 4, "Y")
+        box(w, (0.30, 0.74, 0.04), (1.32 * math.cos(a_), 0, 1.32 * math.sin(a_)), WOOD, m)
+        box(w, (0.05, 0.76, 0.05), (1.44 * math.cos(a_), 0, 1.44 * math.sin(a_)), IRON, m)   # strap at the tip
+    objs.append(to_object(w, "FeSpin_Wheel", location=(0, 0, WZ), bevel=0.002))
+    return objs
 
 
 MODELS = {
@@ -4448,6 +4564,8 @@ MODELS = {
     **D12_MODELS,
     **PLANT_MODELS,
     **ITEM_MODELS,
+    "feHydroTower": model_hydro_tower,
+    "feWaterWheel": model_water_wheel,
     **D13_MODELS,
 }
 

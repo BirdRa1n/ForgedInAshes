@@ -35,6 +35,8 @@ public static class FeBuild
         "feMechDrill", "feMechSaw", "feMechHarvester", "feDeployer", "feFan", "feMechPiston", "fePistonHead", "feCogwheel", "feWindmill", "feHosePulley", "feDepot", "feItemChute", "feItemVault", "feItemDrain", "feDisplayPanel", "feSignalAnalog", "feWirelessTx", "feWirelessRx", "feBeltTunnel",
         // thermal power plant (PLANT_MODELS)
         "feBoilerFirebox", "feBoilerDrum", "feSteamTurbine",
+        // machine farming (2026-11-27)
+        "feHydroTower",
         // D12 (Art/feHD/build_feHD.py, D12_MODELS)
         "fePipeHP", "feValveShutoff", "feValveCheck", "feValveRegulator", "feValveSeparator", "feValveRelief", "feGauge", "feCompressor", "feTankLiquid", "feTankGas", "feGasBurner", "feSapTapper", "feTowerSection", "feDistillTower", "feShaleRetort", "feCracker", "feGasScrubber", "fePolymerReactor", "feCoagTank", "feCalender", "feVulcanizer", "feSteelConverter", "feSpringCoiler", "feTemperFurnace", "feSpinner", "feTannery", "feFermenter", "feCentrifuge", "feAutoclave", "feCookerIndustrial", "feMill", "feJuicePress", "feCanner", "feInjector", "feGasMotor", "feInlinePress", "feDoser", "feInserter", "feCrimper", "feWireDrawer", "feGrinder", "feBender", "feWelder", "feReflowOven", "feMechArm", "feSignalLever", "feSignalReceiver", "feBeltSplitter", "feBeltGate", "feBeltCounter",
         "feM_Foundry", "feM_Press", "feM_Lathe", "feM_Kiln", "feM_Ammo", "feM_Assembler", "feM_ModBench", "feM_Loom", "feM_Refinery", "feM_Lab", "feM_Kitchen", "feM_Electronics", "feM_MetalShop", "feM_Sawmill", "feM_Mixer", "feM_Garage", "feM_Robotics"
@@ -55,7 +57,38 @@ public static class FeBuild
     {
         SyncModels();
         BuildPrefabs();
+        SyncSounds();
         BuildBundle();
+    }
+
+    const string SoundDir = "Assets/Sounds";
+
+    /// <summary>Machine sound loops (Art/feSounds/*.wav, made by make_sounds.py) into the bundle under their file
+    /// name: Config/sounds.xml refers to them as forgedinashes.unity3d?fe_turbine_lp. Mono, Vorbis, decompressed on
+    /// load (short loops, played often).</summary>
+    [MenuItem("ForgedInAshes/2b. Sync sounds")]
+    public static void SyncSounds()
+    {
+        var src = Path.Combine(ArtDir, "feSounds");
+        if (!Directory.Exists(src)) return;
+        Directory.CreateDirectory(Path.Combine(ProjectRoot, SoundDir));
+        foreach (var f in Directory.GetFiles(src, "*.wav"))
+            File.Copy(f, Path.Combine(ProjectRoot, SoundDir, Path.GetFileName(f)), true);
+        AssetDatabase.Refresh();
+        foreach (var guid in AssetDatabase.FindAssets("t:AudioClip", new[] { SoundDir }))
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var ai = (AudioImporter)AssetImporter.GetAtPath(path);
+            ai.forceToMono = true;
+            var st = ai.defaultSampleSettings;
+            st.loadType = AudioClipLoadType.DecompressOnLoad;
+            st.compressionFormat = AudioCompressionFormat.Vorbis;
+            st.quality = 0.8f;
+            ai.defaultSampleSettings = st;
+            ai.assetBundleName = BundleName;
+            ai.SaveAndReimport();
+            Debug.Log($"[FE] sound {path}");
+        }
     }
 
     [MenuItem("ForgedInAshes/1. Sync FBX from Art")]

@@ -385,3 +385,23 @@ modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
 5. Fornalha acesa: o rotor do soprador (atrás) e a rosca do alimentador (lado) giram; apagada, param.
 6. Caldeira produzindo vapor: o volante da bomba de alimentação (atrás, embaixo) gira.
 7. Pacote em alta qualidade (458 MB): conferir nitidez das texturas, uso de memória e tempo de carregamento.
+
+## 23. Sons das máquinas
+
+1. Turbina girando: assobio agudo + vapor; motor a vapor / a carvão: "tchuf-tchuf" com batida; motor elétrico e
+   dínamo: zumbido; caixa de engrenagens: chiado de engrenagem; britador: moagem com batidas; ventilador; bomba;
+   esteira (baixo); biodigestor: borbulhas; furadeira; serra; prensa: batidas; forno de indução: zumbido.
+2. Fornalha de Caldeira / Queimador / Fundição acesos: som de fogo do jogo. Caldeira cheia (válvula soprando): chiado.
+3. O som para quando a máquina para, some ao se afastar (> 24 m) e volta ao chegar perto; o volume segue a opção de
+   efeitos do jogo. Muitas esteiras juntas não devem virar barulho demais (limite de vozes).
+
+## 24. Plantação por máquina e Roda d'Água 3x3
+
+1. Torre Hidropônica (2 de altura) com energia e água por cano atrás: ponha 1 semente (ex. milho, `plantedCorn1`):
+   as luzes acendem, as plantas crescem no modelo e, no fim do ciclo, sai milho na frente e as plantas voltam
+   pequenas; a semente continua lá (painel) e o ciclo recomeça.
+2. Sem água ou sem energia: o painel diz o motivo e para.
+3. Adubo (Biodigestor: carne podre + osso + água; ou na mão): ponha na torre: ciclo 2,5x mais rápido, gasta 1 por
+   colheita.
+4. Roda d'Água: ocupa 3x3 (não deixa construir dentro), eixo saindo do centro dos dois lados; com água sob ela ou
+   em volta da fileira de baixo, gira e dá torque a um eixo encostado no centro. Turbina e Moinho continuam 1x1.

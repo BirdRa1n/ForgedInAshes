@@ -19,7 +19,7 @@ from lxml import etree
 import fe_common as fe
 
 FILE = fe.MOD_DIR / "Data" / "fe_processes.xml"
-KINDS = {"melt", "cast", "press", "turn", "crush", "wash", "mix", "dry", "distill", "spin", "assemble", "sequence", "boil"}
+KINDS = {"melt", "cast", "press", "turn", "crush", "wash", "mix", "dry", "distill", "spin", "assemble", "sequence", "boil", "grow"}
 BASE_FLUIDS = set()
 
 

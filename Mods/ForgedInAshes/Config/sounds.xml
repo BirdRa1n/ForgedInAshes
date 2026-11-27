@@ -1,0 +1,48 @@
+<!-- Machine sound loops (MachineSound.cs). The clips are original, synthesized by Art/feSounds/make_sounds.py and
+     built into the asset bundle; the AudioSource is the game's own generator source (volume / distance / mixer). -->
+<configs>
+	<append xpath="/Sounds">
+		<SoundDataNode name="fe_turbine_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_turbine_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="8"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_engine_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_engine_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="8"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_steam_hiss_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_steam_hiss_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_motor_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_motor_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="8"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_gear_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_gear_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="8"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_crusher_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_crusher_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_fan_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_fan_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_pump_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_pump_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_belt_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_belt_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_bubble_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_bubble_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_drill_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_drill_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="4"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_saw_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_saw_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="4"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_press_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_press_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+		<SoundDataNode name="fe_buzz_lp"> <AudioSource name="@:Sounds/Prefabs/AudioSource_Generators.prefab"/>
+			<AudioClip ClipName="#@modfolder:Resources/forgedinashes.unity3d?fe_buzz_lp" Loop="true"/>
+			<LocalCrouchVolumeScale value="1.0"/> <CrouchNoiseScale value="0.5"/> <NoiseScale value="1"/> <MaxVoices value="6"/> <MaxRepeatRate value="0.001"/> </SoundDataNode>
+	</append>
+</configs>

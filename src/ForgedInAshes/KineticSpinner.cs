@@ -265,6 +265,7 @@ namespace ForgedInAshes
             }
             overloaded = net.Overloaded;
             locked = net.Locked;
+            MachineSound.Report(transform, pos, world.GetBlock(pos).Block, running && targetRpm > 0.5f);
             Vector3i o;
             if (net.Omega.TryGetValue(node, out o)) omega = o.ToVector3();
 

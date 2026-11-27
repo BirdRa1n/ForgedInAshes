@@ -330,8 +330,11 @@ namespace ForgedInAshes
             int n = 0;
             bool inline = IsInline(b);
             foreach (Process p in Allowed(b, s))
+            {
                 for (int i = inline ? 1 : 0; i < p.Inputs.Length; i++)
                     if (p.Inputs[i] == item) n = Mathf.Max(n, p.Counts[i]);
+                if (p.Boost == item) n = Mathf.Max(n, 1);                // boosters: up to StockCrafts of them
+            }
             return n;
         }
 
@@ -487,6 +490,9 @@ namespace ForgedInAshes
                 {
                     if (run.Id != s.Mold) { s.Mold = run.Id; s.Steam = 0f; }
                     float v = Speed(world, p, run, s);
+                    int boosts;
+                    bool boosted = run.Boost != null && d.TryGetValue(run.Boost, out boosts) && boosts > 0;
+                    if (boosted) v *= run.BoostSpeed;
                     if (v > 0f)
                     {
                         s.Note = "";
@@ -494,7 +500,9 @@ namespace ForgedInAshes
                         if (s.Steam >= run.Time)
                         {
                             s.Steam = 0f;
-                            for (int i = 0; i < run.Inputs.Length; i++) d[run.Inputs[i]] = d[run.Inputs[i]] - run.Counts[i];
+                            for (int i = 0; i < run.Inputs.Length; i++)
+                                if (System.Array.IndexOf(run.Keep, run.Inputs[i]) < 0) d[run.Inputs[i]] = d[run.Inputs[i]] - run.Counts[i];
+                            if (boosted) d[run.Boost] = d[run.Boost] - 1;
                             SetStock(s, d);
                             for (int i = 0; i < run.FluidIns.Length; i++)
                             {

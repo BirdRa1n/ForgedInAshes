@@ -736,6 +736,9 @@
 			<property name="Extends" value="feShaft"/>
 			<property name="FeKinetic" value="waterwheel"/>
 			<property name="OnlySimpleRotations" value="true"/>
+			<!-- a big wheel (user 2026-11-27): 3 wide x 3 high x 1 deep, the axle in the centre cell (TorqueNetwork.IsMultiWheel). The
+			     blocks that extend it (Steam Turbine, Windmill) leave this out (Extends param1="MultiBlockDim"). -->
+			<property name="MultiBlockDim" value="3,3,1"/>
 			<property name="FeTorqueOutput" value="128"/>
 			<property name="FeSourceRpm" value="16"/>
 			<property name="DescriptionKey" value="feWaterWheelDesc"/>
@@ -2559,7 +2562,7 @@
 		<block name="feWindmill">
 			<property name="CustomIcon" value="feWindmill"/>
 			<property name="CustomIconTint" value="ffffff"/>
-			<property name="Extends" value="feWaterWheel"/>
+			<property name="Extends" value="feWaterWheel" param1="MultiBlockDim"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feWindmillDesc"/>
 			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feWindmillPrefab"/>
@@ -2628,6 +2631,18 @@
 			<property name="FeFluid" value="processor"/>
 			<property name="FeFluidBuffer" value="100"/>
 		</block>
+		<block name="feHydroTower">
+			<property name="CustomIcon" value="feHydroTower"/>
+			<property name="CustomIconTint" value="ffffff"/>
+			<property name="Extends" value="feRetortKiln"/>
+			<property name="CreativeMode" value="Player"/>
+			<property name="DescriptionKey" value="feHydroTowerDesc"/>
+			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feHydroTowerPrefab"/>
+			<property name="RequiredPower" value="60"/>
+			<property name="FeFluidBuffer" value="60"/>
+			<property name="MultiBlockDim" value="1,2,1"/>
+			<property name="FeGrowLight" value="true"/>
+		</block>
 		<block name="feBoilerFirebox">
 			<property name="CustomIcon" value="feBoilerFirebox"/>
 			<property name="CustomIconTint" value="ffffff"/>
@@ -2657,7 +2672,7 @@
 		<block name="feSteamTurbine">
 			<property name="CustomIcon" value="feSteamTurbine"/>
 			<property name="CustomIconTint" value="ffffff"/>
-			<property name="Extends" value="feWaterWheel"/>
+			<property name="Extends" value="feWaterWheel" param1="MultiBlockDim"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DescriptionKey" value="feSteamTurbineDesc"/>
 			<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?feSteamTurbinePrefab"/>

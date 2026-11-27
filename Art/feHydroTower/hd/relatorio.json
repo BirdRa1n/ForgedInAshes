@@ -1,0 +1,16 @@
+{
+ "nome": "feHydroTower",
+ "config": "F:\\IA\\fe_blender\\configs\\feHydroTower.json",
+ "triangulos_antes": 10836,
+ "triangulos_depois": 5500,
+ "atlas": 2048,
+ "arquivos": [
+  "feHydroTower_Albedo.png",
+  "feHydroTower_Normal.png",
+  "feHydroTower_MetallicSmoothness.png",
+  "feHydroTower_Roughness.png",
+  "feHydroTower_HD.fbx",
+  "feHydroTower_HD.blend"
+ ],
+ "segundos": 150.2
+}

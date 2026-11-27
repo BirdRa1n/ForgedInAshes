@@ -60,6 +60,11 @@ namespace ForgedInAshes
         }
         // FeNeedle_* on a process machine (gas / steam gauges): pressure while it works (the Condenser's is
         // CondenserVisual's)
+        // FeGrow_*: plants of a farming machine (Hydroponic Tower): they grow with the progress of the run (seedling ->
+        // full size) and are small again after each harvest
+        readonly List<Transform> grows = new List<Transform>();
+        readonly List<Vector3> grows0 = new List<Vector3>();
+        float growGoal, growNow;
         readonly List<Transform> needles = new List<Transform>();
         readonly List<Quaternion> needles0 = new List<Quaternion>();
         float pressure;
@@ -113,7 +118,7 @@ namespace ForgedInAshes
             foreach (Transform c in t.GetComponentsInChildren<Transform>(true))
                 if (c.name.StartsWith("FeLever", System.StringComparison.Ordinal) || c.name.StartsWith("FeWorkSpin", System.StringComparison.Ordinal) ||
                     c.name.StartsWith("FeArmYaw", System.StringComparison.Ordinal) || c.name.StartsWith("FeNeedle", System.StringComparison.Ordinal) ||
-                    c.name.StartsWith("FeSurface", System.StringComparison.Ordinal)) return true;
+                    c.name.StartsWith("FeSurface", System.StringComparison.Ordinal) || c.name.StartsWith("FeGrow", System.StringComparison.Ordinal)) return true;
             foreach (Renderer r in t.GetComponentsInChildren<Renderer>(true))
                 foreach (Material m in r.sharedMaterials)
                     if (m != null && (m.name.StartsWith("FeMolten") || m.name.StartsWith("FeLiquid") || m.name.StartsWith("FeGlow")))
@@ -138,6 +143,7 @@ namespace ForgedInAshes
             steam.Clear(); smoke.Clear(); sparks.Clear(); fire.Clear(); splash.Clear(); dust.Clear();
             drip.Clear(); spray.Clear(); bubbles.Clear(); workSpins.Clear(); surfaces.Clear();
             needles.Clear(); needles0.Clear(); pressure = 0f;
+            grows.Clear(); grows0.Clear(); growGoal = growNow = 0f;
             armYaw = null; armOn = false; armT = 0f;
             castMetal = null;
             lever = null;
@@ -189,6 +195,11 @@ namespace ForgedInAshes
                                 System.Globalization.CultureInfo.InvariantCulture, out r)) sf.Range = r;
                     }
                     surfaces.Add(sf);
+                }
+                if (t.name.StartsWith("FeGrow", System.StringComparison.Ordinal))
+                {
+                    grows.Add(t);
+                    grows0.Add(t.localScale);
                 }
                 if (k != FluidKind.Condenser && t.name.StartsWith("FeNeedle", System.StringComparison.Ordinal))
                 {
@@ -455,11 +466,23 @@ namespace ForgedInAshes
                     burning = working && (fluid == "mash" || heat);               // biogas flare / heated machines
                     sparking = working;                                           // grinder, welder (if they have sparks)
                     glowGoal = working && heat ? 1f : 0f;
+                    if (grows.Count > 0)
+                    {
+                        // farming: the plants follow the run's progress; grow lights on while it grows
+                        Process gp = null;
+                        foreach (Process pr in ProcessMachine.Of(bv.Block)) if (pr.Id == s.Mold) { gp = pr; break; }
+                        growGoal = gp != null && gp.Time > 0f ? Mathf.Clamp01(s.Steam / gp.Time) : 0f;
+                        if (bv.Block.Properties != null && bv.Block.Properties.Contains("FeGrowLight")) glowGoal = working ? 1f : 0f;
+                    }
                     break;
                 default:
                     steaming = smoking = sparking = s.LastFlow > 0.01f;
                     break;
             }
+            // machine sound (MachineSound.cs): a boiler / relief valve sounds while it blows steam, the rest while
+            // they burn or work
+            bool loud = kind == FluidKind.Boiler || kind == FluidKind.Valve ? steaming : (working || burning);
+            MachineSound.Report(transform, pos, bv.Block, loud);
             Show();
         }
 
@@ -538,6 +561,13 @@ namespace ForgedInAshes
                                                : Mathf.MoveTowards(castHeat, castHeatGoal, 0.5f * dt);
             glowNow = Mathf.MoveTowards(glowNow, glowGoal, dt);
             workSpeed = Mathf.MoveTowards(workSpeed, working ? 1f : 0f, 0.8f * dt);           // spins up / runs down
+            if (grows.Count > 0)
+            {
+                // grow smoothly; after a harvest (goal drops) snap back to seedlings
+                growNow = growGoal < growNow - 0.2f ? growGoal : Mathf.MoveTowards(growNow, growGoal, 0.2f * dt);
+                float sc = 0.2f + 0.8f * growNow;
+                for (int i = 0; i < grows.Count; i++) if (grows[i] != null) grows[i].localScale = grows0[i] * sc;
+            }
             if (armYaw != null && armOn)
             {
                 // the arm swings from behind (pick) to the front (place) and back once per transfer period

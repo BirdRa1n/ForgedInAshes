@@ -384,10 +384,31 @@ namespace ForgedInAshes
             return cell == new Vector3i(parent.x + dir.x, parent.y + dir.y, parent.z + dir.z);
         }
 
+        // 2026-11-27: the Water Wheel is a big multiblock (3 x 3, MultiBlockDim). Its axle is the CENTRE cell (half
+        // its height up from the parent, which is the bottom middle cell) and it connects along its axis both ways,
+        // like a shaft; the other cells are not nodes.
+        public static bool IsMultiWheel(Block b)
+        {
+            return b != null && b.isMultiBlock && b.multiBlockPos != null && Kind(b) == KineticKind.WaterWheel;
+        }
+
+        public static Vector3i WheelCentre(World world, Vector3i cell, BlockValue bv, out BlockValue parentBv)
+        {
+            Vector3i parent = Fluids.ParentOf(world, cell, bv);
+            parentBv = world.GetBlock(parent);
+            BoundsInt bb = bv.Block.multiBlockPos.GetBlockBounds();
+            return new Vector3i(parent.x, parent.y + bb.yMin + bb.size.y / 2, parent.z);
+        }
+
         /// <summary>The torque node of the block at pos (the port cell for a multiblock engine).</summary>
         public static Vector3i NodeOf(World world, Vector3i pos)
         {
             BlockValue bv = world.GetBlock(pos);
+            if (IsMultiWheel(bv.Block))
+            {
+                BlockValue pb;
+                return WheelCentre(world, pos, bv, out pb);
+            }
             if (!IsMultiEngine(bv.Block)) return pos;
             Vector3i parent, dir;
             EnginePort(world, pos, bv, out parent, out dir);
@@ -396,6 +417,12 @@ namespace ForgedInAshes
 
         public static Vector3i NodeAxis(World world, Vector3i pos, BlockValue bv)
         {
+            if (IsMultiWheel(bv.Block))
+            {
+                BlockValue pb;
+                WheelCentre(world, pos, bv, out pb);
+                return Axis(pb);
+            }
             if (!IsMultiEngine(bv.Block)) return Axis(bv);
             Vector3i parent, dir;
             EnginePort(world, pos, bv, out parent, out dir);
@@ -405,6 +432,13 @@ namespace ForgedInAshes
         public static bool NodeHasFace(World world, Vector3i pos, BlockValue bv, Vector3i d)
         {
             if (Kind(bv.Block) == KineticKind.Conveyor) return Belt.HasTorqueFace(world, pos, bv, d);
+            if (IsMultiWheel(bv.Block))
+            {
+                BlockValue pb;
+                if (WheelCentre(world, pos, bv, out pb) != pos) return false;
+                Vector3i a = Axis(pb);
+                return d == a || d == new Vector3i(-a.x, -a.y, -a.z);
+            }
             if (!IsMultiEngine(bv.Block)) return HasFace(bv, d);
             Vector3i parent, dir;
             return EnginePort(world, pos, bv, out parent, out dir) && d == dir;
@@ -511,6 +545,25 @@ namespace ForgedInAshes
         /// it and, on the two sides that are not its axle, the side cells and the ones below them.</summary>
         public static int WaterTouching(World world, Vector3i pos, BlockValue bv)
         {
+            if (IsMultiWheel(bv.Block))
+            {
+                // the big wheel: water under its bottom row, or beside / in front of / behind the bottom row
+                BlockValue pb;
+                WheelCentre(world, pos, bv, out pb);
+                Vector3i parent = Fluids.ParentOf(world, pos, bv);
+                Vector3i ax = Axis(pb);
+                Vector3i sd = ax.x != 0 ? new Vector3i(0, 0, 1) : new Vector3i(1, 0, 0);
+                int w = 0;
+                for (int s = -2; s <= 2; s++)
+                    for (int f = -1; f <= 1; f++)
+                        for (int dy = -1; dy <= 0; dy++)
+                        {
+                            if (dy == 0 && f == 0 && s >= -1 && s <= 1) continue;          // the wheel's own cells
+                            int x = parent.x + s * sd.x + f * ax.x, y = parent.y + dy, z = parent.z + s * sd.z + f * ax.z;
+                            if (world.IsWater(x, y, z)) w++;
+                        }
+                return w;
+            }
             Vector3i a = Axis(bv);
             Vector3i side = a.x != 0 ? new Vector3i(0, 0, 1) : new Vector3i(1, 0, 0);
             int n = 0;

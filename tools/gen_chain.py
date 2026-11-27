@@ -359,9 +359,10 @@ P = []
 
 
 def proc(pid, kind, machine, inputs=(), out=None, n=1, time=5, fin=(), fout=(), torque=0, extra=None, extra_n=1, chance=1.0,
-         pressure=0, heat=False, mold=None, text=""):
+         pressure=0, heat=False, mold=None, text="", keep=(), boost=None, boost_speed=1.0):
     P.append(dict(id=pid, kind=kind, machine=machine, inputs=list(inputs), out=out, n=n, time=time, fin=list(fin), fout=list(fout),
-                  torque=torque, extra=extra, extra_n=extra_n, chance=chance, pressure=pressure, heat=heat, mold=mold, text=text))
+                  torque=torque, extra=extra, extra_n=extra_n, chance=chance, pressure=pressure, heat=heat, mold=mold, text=text,
+                  keep=list(keep), boost=boost, boost_speed=boost_speed))
 
 
 # petroleum
@@ -730,6 +731,34 @@ machine("feItemDrain", "Item Drain", "Dreno de Itens", "Empties fluid items (jar
         PL, {"FeFluid": "processor", "FeFluidBuffer": "100"}, "feFluidFillerPrefab", "feFluidFiller", "60a0ff", [(R_PLATE, 4), ("fePipe", 2)])
 MACHINES.append(("feFan", "Ventilador Industrial"))
 
+# ================================================================================================ machine farming (2026-11-27)
+# "o jogador coloca a semente na máquina e com água e energia o sistema planta, colhe e replanta": the Hydroponic
+# Tower keeps the seed planted (keep), drinks water from a pipe at its back, needs power, and gives a harvest every
+# cycle; Fertilizer in its stock makes the plants grow 2.5x faster (one per cycle).
+item("feFertilizer", "Fertilizer", "Adubo", "resourceClayLump", "604020",
+     "Rotten flesh and bone, composted. Put it in a Hydroponic Tower: its plants grow 2.5x faster (one per harvest).",
+     "Carne podre e osso compostados. Ponha numa Torre Hidropônica: as plantas crescem 2,5x mais rápido (um por colheita).")
+machine("feHydroTower", "Hydroponic Tower", "Torre Hidropônica",
+        "Electric (60 W), 2 blocks tall. Put one seed in (hand, belt or arm) and water by pipe at its back: it plants, "
+        "harvests and replants by itself; the harvest comes out in front. Fertilizer makes it 2.5x faster.",
+        "Elétrica (60 W), 2 blocos de altura. Ponha uma semente (mão, esteira ou braço) e água por cano atrás: ela planta, "
+        "colhe e replanta sozinha; a colheita sai na frente. Adubo deixa 2,5x mais rápido.",
+        EL, {"RequiredPower": "60", "FeFluidBuffer": "60", "MultiBlockDim": "1,2,1", "FeGrowLight": "true"},
+        "feBiodigesterPrefab", "feBiodigester", "80ff80",
+        [("feSteelPlate", 4), ("fePipe", 3), ("feLightBulb", 4), ("feElectricMotorSmall", 1), ("resourceCropCottonPlant", 4)])
+proc("compost", "mix", "feBiodigester", [("foodRottingFlesh", 4), ("resourceBone", 2)], "feFertilizer", 4, 120, fin=[("water", 10)],
+     text="Carne podre com osso e água vira adubo.")
+RECIPES.append(("feFertilizer", 1, "", 10, [("foodRottingFlesh", 3), ("resourceBone", 1)]))
+for seed, crop, n, t in [("plantedCorn1", "foodCropCorn", 3, 480), ("plantedPotato1", "foodCropPotato", 3, 480),
+                         ("plantedBlueberry1", "foodCropBlueberries", 3, 480), ("plantedMushroom1", "foodCropMushrooms", 3, 420),
+                         ("plantedPumpkin1", "foodCropPumpkin", 2, 600), ("plantedYucca1", "foodCropYuccaFruit", 3, 480),
+                         ("plantedCotton1", "resourceCropCottonPlant", 4, 480), ("plantedCoffee1", "resourceCropCoffeeBeans", 3, 540),
+                         ("plantedGoldenrod1", "resourceCropGoldenrodPlant", 3, 420), ("plantedAloe1", "resourceCropAloeLeaf", 3, 480),
+                         ("plantedChrysanthemum1", "resourceCropChrysanthemumPlant", 3, 480), ("plantedHop1", "resourceCropHopsFlower", 3, 480),
+                         ("plantedGraceCorn1", "foodCropGraceCorn", 2, 720)]:
+    proc("hydro_" + seed[7:-1].lower(), "grow", "feHydroTower", [(seed, 1)], crop, n, t, fin=[("water", 10)], keep=[seed],
+         boost="feFertilizer", boost_speed=2.5, text="A Torre planta, colhe e replanta sozinha (com adubo, 2,5x mais rápido).")
+
 # fan processes (machine feFan, kind wash = through water, dry = through a lit burner)
 for pid, kind, i, n, o, on, t in [
         ("fan_wash_nitrate", "wash", "resourcePotassiumNitratePowder", 2, "feNitratePure", 2, 3),
@@ -834,6 +863,11 @@ def item_xml(i):
 		</item>"""
 
 
+# properties a child must not inherit from its base (Extends param1, as the game's own blocks.xml does): the Water
+# Wheel is 3 x 3 blocks, the Steam Turbine and the Windmill built on it are not
+NO_INHERIT = {"feWaterWheel": ' param1="MultiBlockDim"'}
+
+
 def block_xml(b):
     name, en, pt, den, dpt, base, props, model, icon, tint, recipe, count = b
     # a block that got its own HD model (Art/<block>/hd/<block>_HD.fbx, built into <block>Prefab by FeBuild) and its
@@ -843,7 +877,7 @@ def block_xml(b):
     if (fe.MOD_DIR / "UIAtlases" / "ItemIconAtlas" / f"{name}.png").exists():
         icon, tint = name, "ffffff"
     lines = [f'\t\t<block name="{name}">',
-             f'\t\t\t<property name="Extends" value="{base}"/>',
+             f'\t\t\t<property name="Extends" value="{base}"' + NO_INHERIT.get(base, "") + '/>',
              f'\t\t\t<property name="CustomIcon" value="{icon}"/>',
              f'\t\t\t<property name="CustomIconTint" value="{tint}"/>',
              f'\t\t\t<property name="CreativeMode" value="Player"/>',
@@ -926,6 +960,10 @@ def proc_xml(p):
         a.append(f'pressure="{fmt(p["pressure"])}"')
     if p["heat"]:
         a.append('heat="true"')
+    if p.get("keep"):
+        a.append('keep="%s"' % ",".join(p["keep"]))
+    if p.get("boost"):
+        a.append(f'boost="{p["boost"]}" boost_speed="{fmt(p["boost_speed"])}"')
     if p["text"]:
         a.append(f'text="{esc(p["text"])}"')
     return "\t<process " + " ".join(a) + "/>"

@@ -1,0 +1,16 @@
+{
+ "nome": "feFertilizer",
+ "config": "F:\\IA\\fe_blender\\configs\\feFertilizer.json",
+ "triangulos_antes": 1336,
+ "triangulos_depois": 612,
+ "atlas": 1024,
+ "arquivos": [
+  "feFertilizer_Albedo.png",
+  "feFertilizer_Normal.png",
+  "feFertilizer_MetallicSmoothness.png",
+  "feFertilizer_Roughness.png",
+  "feFertilizer_HD.fbx",
+  "feFertilizer_HD.blend"
+ ],
+ "segundos": 17.9
+}
