@@ -600,7 +600,7 @@ feMillDesc,blocks,Block,,,,Torque 32: corn into corn meal.,,,,,,,,,Torque 32: mi
 feJuicePress,blocks,Block,,,,Juice Press,,,,,,,,,Prensa de Suco,,,,
 feJuicePressDesc,blocks,Block,,,,"Torque 32: fruit into juice, concentrate, pigment, herb extract and vegetable fat.",,,,,,,,,"Torque 32: fruta em suco, concentrado, pigmento, extrato de ervas e gordura vegetal.",,,,
 feCanner,blocks,Block,,,,Canner,,,,,,,,,Enlatadora,,,,
-feCannerDesc,blocks,Block,,,,Steam in at the back: empty tin can + cooked food = canned food (it never spoils).,,,,,,,,,Vapor entra atrás: lata vazia + comida pronta = comida enlatada (não estraga).,,,,
+feCannerDesc,blocks,Block,,,,"Steam in at the back: empty tin can + cooked food, raw meat, chicken, bones, mushrooms or rotting flesh = canned food (it never spoils). Choose the can in its panel.",,,,,,,,,"Vapor entra atrás: lata vazia + comida pronta, carne crua, frango, ossos, cogumelos ou carne podre = comida enlatada (não estraga). Escolha a lata no painel.",,,,
 feInjector,blocks,Block,,,,Injection Moulder,,,,,,,,,Injetora de Plástico,,,,
 feInjectorDesc,blocks,Block,,,,Electric (120 W) casting table for molten polymer (and every other molten material): fast; holds a mold like the Casting Table.,,,,,,,,,Mesa de moldagem elétrica (120 W) para polímero fundido (e qualquer outro material fundido): rápida; usa molde como a Mesa de Moldagem.,,,,
 feGasMotor,blocks,Block,,,,Gas Engine,,,,,,,,,Motor a Gás,,,,

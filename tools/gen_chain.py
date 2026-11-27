@@ -305,8 +305,8 @@ machine("feMill", "Mill", "Moinho", "Torque 32: corn into corn meal.", "Torque 3
 machine("feJuicePress", "Juice Press", "Prensa de Suco", "Torque 32: fruit into juice, concentrate, pigment, herb extract and vegetable fat.",
         "Torque 32: fruta em suco, concentrado, pigmento, extrato de ervas e gordura vegetal.", TQ, {"FeTorqueCost": "32"}, "feChemMixerPrefab", "feChemMixer", "c040c0",
         [(R_PLATE, 4), (R_GEAR, 2), (R_SHAFT, 1)])
-machine("feCanner", "Canner", "Enlatadora", "Steam in at the back: empty tin can + cooked food = canned food (it never spoils).",
-        "Vapor entra atrás: lata vazia + comida pronta = comida enlatada (não estraga).", PL, {"FeFluid": "processor", "FeFluidBuffer": "40"},
+machine("feCanner", "Canner", "Enlatadora", "Steam in at the back: empty tin can + cooked food, raw meat, chicken, bones, mushrooms or rotting flesh = canned food (it never spoils). Choose the can in its panel.",
+        "Vapor entra atrás: lata vazia + comida pronta, carne crua, frango, ossos, cogumelos ou carne podre = comida enlatada (não estraga). Escolha a lata no painel.", PL, {"FeFluid": "processor", "FeFluidBuffer": "40"},
         "feFluidBottlerPrefab", "feFluidBottler", "c0c0c0", [(R_PLATE, 6), (SPRING, 2)])
 # casting tables for plastic
 block("feInjector", "Injection Moulder", "Injetora de Plástico", "Electric (120 W) casting table for molten polymer (and every other molten material): fast; holds a mold like the Casting Table.",
@@ -476,6 +476,15 @@ proc("mill_corn", "crush", "feMill", [("foodCropCorn", 2)], "foodCornMeal", 1, 3
 # canner
 for food, can in [("foodBoiledMeat", "foodCanBeef"), ("foodVegetableStew", "foodCanSoup"), ("foodMeatStew", "foodCanChili"), ("foodSpaghetti", "foodCanPasta")]:
     proc("can_" + can[7:].lower(), "boil", "feCanner", [("feTinCan", 1), (food, 1)], can, 1, 10, fin=[("steam", 2)], text="Lata + comida pronta = enlatado.")
+# cans the game only gave as loot, made from raw ingredients the world (or the coop) gives (2026-11-26 food review).
+# Peas, pears, salmon and tuna stay loot-only: the game has no pea, pear or fish to can.
+for pid, ins, can, n in [("can_chicken", [("feTinCan", 2), ("domesticatedChicken", 1)], "foodCanChicken", 2),
+                         ("can_lamb", [("feTinCan", 1), ("foodRawMeat", 3)], "foodCanLamb", 1),
+                         ("can_stock", [("feTinCan", 1), ("resourceBone", 4), ("drinkJarBoiledWater", 1)], "foodCanStock", 1),
+                         ("can_miso", [("feTinCan", 1), ("foodCropMushrooms", 2), ("drinkJarBoiledWater", 1)], "foodCanMiso", 1),
+                         ("can_dogfood", [("feTinCan", 1), ("foodRottingFlesh", 2)], "foodCanDogfood", 1),
+                         ("can_catfood", [("feTinCan", 1), ("foodRottingFlesh", 1), ("resourceBone", 1)], "foodCanCatfood", 1)]:
+    proc(pid, "boil", "feCanner", ins, can, n, 12, fin=[("steam", 2)], text="Lata + ingredientes cozidos no vapor = enlatado.")
 # boiled water in the cooker
 proc("cook_boiled_water", "boil", "feCookerIndustrial", [("drinkJarEmpty", 4)], "drinkJarBoiledWater", 4, 20, fin=[("water", 4)], heat=True,
      text="Água do cano + potes vazios = água fervida.")
@@ -1254,6 +1263,9 @@ def main():
     write_processes()
     write_fallback()
     write_localization()
+    # same icon placement as apply_icons.py (icon first), so running both leaves no diff
+    import subprocess
+    subprocess.run([sys.executable, str(fe.REPO / "tools" / "apply_icons.py")], check=True, stdout=subprocess.DEVNULL)
     print(f"wrote {len(I)} items, {len(B) + len(TREE)} blocks, {len(P)} processes, {len(RECIPES) + len(B)} recipes, "
           f"{len(APPEND)} recipe appends, {len(REMOVE_ING) + len(REMOVE_RECIPE)} removals")
     return 0

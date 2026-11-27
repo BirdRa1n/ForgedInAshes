@@ -17,7 +17,8 @@ import fe_common as fe
 
 LOOT_ONLY = ["resourceSpring", "resourceMechanicalParts", "resourceElectricParts", "resourceScrapPolymers", "resourceAcid",
              "resourceSewingKit", "resourceHeadlight", "smallEngine", "resourceRadiator", "toolBeaker", "drugVitamins",
-             "foodCanBeef", "foodCanSoup", "foodCanChili", "foodCanPasta", "resourceAnimalFat"]
+             "foodCanBeef", "foodCanSoup", "foodCanChili", "foodCanPasta", "resourceAnimalFat",
+             "foodCanChicken", "foodCanLamb", "foodCanStock", "foodCanMiso", "foodCanDogfood", "foodCanCatfood"]
 HIDDEN = {"forge", "workbench", "chemistryStation", "cementMixer"}
 # the vanilla stations themselves are hidden on purpose (D1); the forge still "smelts back" raw materials
 EXEMPT = {"forge", "workbench", "chemistryStation", "cementMixer"}

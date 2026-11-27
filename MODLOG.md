@@ -1320,3 +1320,22 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
 - `AGENTS.md` na raiz e em `src/ForgedInAshes`, `tools`, `Art`, `site`, `docs`.
 - Validadores: check_xpath 778/0, processes 223/0, phase3 23/23, coverage 0 sobrando; DLL compila; site compila.
 - **Não verificado no jogo** (carregar o mod com o nome novo e um save antigo).
+
+## 2026-11-26: revisão de alimentos e nova verificação dos itens e receitas do jogo
+
+- Alimentos: as 87 comidas/bebidas do jogo conferidas. Toda receita de comida da fogueira continua na fogueira e
+  tem lote de 4 na Cozinha Industrial (43 processos); fubá (Moinho), suco de mandioca, gordura (Prensa de Suco),
+  água fervida (Cozinha, Ventilador), carne tostada (Ventilador), frascos (Mesa de Moldagem), cerveja (Cozinha).
+  Ovos, penas e frango doméstico vêm do galinheiro do jogo (`cntChickenCoop`, fabricado na Cozinha do mod), mel
+  do apiário, água dos coletores.
+- Lacuna: só 4 dos 14 enlatados eram fabricados. Enlatadora ganhou 6: frango (2 latas + frango doméstico → 2),
+  cordeiro (3 carnes cruas), caldo (4 ossos + água fervida), missô (2 cogumelos + água fervida), ração de cão
+  (2 carnes podres) e de gato (carne podre + osso), todos com vapor. Ervilha, pera, salmão e atum continuam só
+  saque: o jogo não tem ervilha, pera nem peixe.
+- `tools/check_reach.py` (novo): fecha o conjunto do que o jogador consegue a partir do mundo (saque, drops,
+  colheita de animais, comerciantes, encher recipientes, produção de galinheiro/apiário/coletor) repetindo
+  receitas (com estação e ferramenta alcançáveis) e processos (máquina, itens e fluidos alcançáveis). Resultado:
+  0 itens fabricados inalcançáveis, 0 ingredientes/estações sem origem, 0 fluidos sem fonte (os `unit_*` da forja
+  são internos e ficam de fora). `check_coverage`: 559/559 e 22/22 itens só de saque agora fabricados.
+- `gen_chain.py` chama `apply_icons.py` no fim: rodar o gerador não reordena mais as propriedades de ícone.
+- **Não verificado no jogo.**
