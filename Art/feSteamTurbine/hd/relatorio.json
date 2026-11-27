@@ -1,9 +1,9 @@
 {
  "nome": "feSteamTurbine",
  "config": "F:\\IA\\fe_blender\\configs\\feSteamTurbine.json",
- "triangulos_antes": 8840,
- "triangulos_depois": 3432,
- "atlas": 1024,
+ "triangulos_antes": 25380,
+ "triangulos_depois": 8872,
+ "atlas": 2048,
  "arquivos": [
   "feSteamTurbine_Albedo.png",
   "feSteamTurbine_Normal.png",
@@ -12,5 +12,5 @@
   "feSteamTurbine_HD.fbx",
   "feSteamTurbine_HD.blend"
  ],
- "segundos": 31.0
+ "segundos": 173.2
 }

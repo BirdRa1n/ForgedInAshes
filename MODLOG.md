@@ -1365,3 +1365,31 @@ Encontrado e ainda não feito (por prioridade; precisam de teste no jogo):
    reutilizar coleções para evitar pausas do coletor de lixo.
 6. Diagnósticos do texto ao olhar (`LookTextProbe` a cada quadro, `UiWatchdog` a cada 0,25 s): baratos, mas sair
    quando o problema for fechado.
+
+## 2026-11-27: pacote fora do git, pacote em alta qualidade, usina termelétrica refeita
+
+- **Pacote compilado fora do repositório:** `Mods/ForgedInAshes/Resources/forgedinashes.unity3d` saiu do índice
+  (`git rm --cached`) e entrou no `.gitignore`, para as texturas poderem ter a qualidade que quisermos. Os jogadores
+  baixam o pacote separado (Assets da release no GitHub): `Resources/README.md` explica, e a instalação
+  (docs en / pt-BR / es) ganhou o passo. As texturas-fonte em `Art/*/hd` continuam versionadas.
+- **Qualidade do pacote (FeBuild):** sem crunch, compressão BC7 de alta qualidade (`CompressedHQ`, qualidade 100),
+  até 4096 px (o limite de 512 nos mapas de metal saiu). Pacote: 94 MB → 458 MB (só local).
+- **Usina refeita** (`build_feHD.py`, mais detalhe, visual 7DTD, atlas 2048, 64 amostras):
+  - Turbina a Vapor: base de vigas I, mancais com tampa, prisioneiros e copo de óleo, carcaça bipartida com
+    junta parafusada e **janela de inspeção gradeada** (o rotor de 3 rodas de palhetas aparece girando,
+    `FeSpin_x8_Rotor`), engrenagem de giro lento + pinhão engrenado (`FeSpin_BarringGear`,
+    `FeSpin_x3.7_Rev_BarringPinion`) com motor, regulador de esferas no mancal (`FeSpin_x2_Governor`),
+    **bomba de óleo de êmbolo** (manivela `FeSpin_PumpCrank` + biela + êmbolo pelo solver biela-manivela do
+    KineticSpinner), linhas de óleo de cobre, válvula de bloqueio com volante, caixa de vapor com válvula do
+    regulador e manômetro, escape com nervuras, vapor nas duas gaxetas.
+  - Fornalha de Caldeira: corpo de tijolo em quadro de aço com cintas e rebites, frente de ferro fundido com
+    portas duplas, dobradiças, respiros, visor e brasa, gaveta de cinzas, alavanca da grelha, **alimentador
+    mecânico** (caçamba com carvão, rosca `FeWorkSpin_x0.6_Stoker` numa calha aberta) e **soprador de tiragem
+    forçada** atrás (`FeWorkSpin_x6_Blower` atrás da grade); gás no centro da face de trás.
+  - Tambor de Caldeira: revestimento de ripas de madeira com cintas de aço, tampos com rebites e flanges (emendam
+    no vizinho), boca de visita com travessa, visor de nível com torneiras e grades, manômetro com sifão, duas
+    válvulas de segurança, apito, válvulas de retenção na alimentação, descarga de fundo e **bomba de alimentação
+    a vapor** com volante (`FeWorkSpin_x1.5_FeedPump`).
+- FxVisual: a fornalha acesa liga `working` (soprador e alimentador giram); a caldeira produzindo vapor liga a
+  bomba de alimentação.
+- DLL, validadores ok (check_xpath 778/0, processes 229/0, phase3 23/23, coverage 0). **Não verificado no jogo.**

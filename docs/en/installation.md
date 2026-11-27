@@ -34,6 +34,10 @@
          └─ UIAtlases/
    ```
 
+   **The 3D models and textures come in a separate download:** in the same release, under *Assets*, download
+   **`forgedinashes.unity3d`** and put it in `Mods/ForgedInAshes/Resources/` (the repository does not carry it).
+   Without it the mod loads, but the machines have no models.
+
 4. Start the game **without EAC**. On the main menu, open *Mods*: **ForgedInAshes** must be listed.
 
 > [!TIP]

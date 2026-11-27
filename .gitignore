@@ -53,3 +53,9 @@ Mods/ForgedInAshes/debug.txt
 # Site de tutoriais (site/): dependências e build local (a Vercel compila no deploy)
 site/node_modules/
 site/dist/
+
+# Compiled asset bundle (models + textures, built by Unity FeBuild): not versioned any more (2026-11-27) so the
+# textures can be as large / high quality as we want. Players download it separately (GitHub Releases); see
+# Mods/ForgedInAshes/Resources/README.md.
+Mods/ForgedInAshes/Resources/*.unity3d
+Mods/ForgedInAshes/Resources/*.manifest

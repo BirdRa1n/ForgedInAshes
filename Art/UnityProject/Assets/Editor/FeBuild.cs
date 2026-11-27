@@ -94,11 +94,12 @@ public static class FeBuild
                 Set(ti.sRGBTexture, false, v => ti.sRGBTexture = v);
             if (path.StartsWith(FxDir) && !path.Contains("molten"))
                 Set(ti.alphaIsTransparency, true, v => ti.alphaIsTransparency = v);
-            // metal / smoothness maps at 512 (they hardly show up close; keeps the bundle under GitHub's 100 MiB per file)
-            Set(ti.maxTextureSize, path.EndsWith("_MetallicSmoothness.png") ? 512 : 2048, v => ti.maxTextureSize = v);
-            // crunch: ~5x smaller bundle (35 MB -> ~7 MB for the first seven HD models); small loss, fine for props
-            Set(ti.crunchedCompression, true, v => ti.crunchedCompression = v);
-            Set(ti.compressionQuality, 60, v => ti.compressionQuality = v);
+            // High quality (2026-11-27): the bundle is no longer in git (players download it separately), so no size
+            // limit: full resolution up to 4096, no crunch (it smeared the atlases), BC7 high-quality compression.
+            Set(ti.maxTextureSize, 4096, v => ti.maxTextureSize = v);
+            Set(ti.crunchedCompression, false, v => ti.crunchedCompression = v);
+            Set(ti.textureCompression, TextureImporterCompression.CompressedHQ, v => ti.textureCompression = v);
+            Set(ti.compressionQuality, 100, v => ti.compressionQuality = v);
             if (changed) ti.SaveAndReimport();
         }
     }

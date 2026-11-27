@@ -380,3 +380,8 @@ modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
 2. Tambor em cima da fornalha, cano de água num lado: o visor de nível sobe; com fogo, o ponteiro sobe; vapor
    pela válvula de segurança quando enche. Dois tambores lado a lado em X emendam visualmente.
 3. Turbina com vapor atrás: o eixo e o regulador giram, sai um pouco de vapor da gaxeta; escape na frente.
+4. (refeitos 2026-11-27) Turbina: o rotor gira rápido visto pela janela gradeada de cima, o pinhão da engrenagem de
+   giro lento gira ao contrário, o êmbolo da bomba de óleo sobe e desce com a manivela, o regulador gira.
+5. Fornalha acesa: o rotor do soprador (atrás) e a rosca do alimentador (lado) giram; apagada, param.
+6. Caldeira produzindo vapor: o volante da bomba de alimentação (atrás, embaixo) gira.
+7. Pacote em alta qualidade (458 MB): conferir nitidez das texturas, uso de memória e tempo de carregamento.

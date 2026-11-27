@@ -388,6 +388,7 @@ namespace ForgedInAshes
                     burning = s.Steam > 0.5f;                                   // heat stored = lit
                     glowGoal = burning ? 1f : 0f;
                     smoking = burning;
+                    working = burning;                                          // Boiler Firebox: blower + stoker turn
                     break;
                 case FluidKind.Tapper:
                     dripping = s.LastFlow > 0.01f || s.Amount > 0.01f;
@@ -425,6 +426,7 @@ namespace ForgedInAshes
                     fluid = s.Amount > 0.01f ? "water" : "";
                     needleGoal = scap > 0f ? Mathf.Clamp01(s.Steam / scap) : 0f;
                     steaming = scap > 0f && s.Steam > 0.9f * scap;
+                    working = s.Steam > 1f && s.Amount > 1f;                    // the feed pump runs while it boils
                     break;
                 }
                 case FluidKind.Turbine:

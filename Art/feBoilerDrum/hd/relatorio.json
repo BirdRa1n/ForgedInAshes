@@ -1,9 +1,9 @@
 {
  "nome": "feBoilerDrum",
  "config": "F:\\IA\\fe_blender\\configs\\feBoilerDrum.json",
- "triangulos_antes": 12428,
- "triangulos_depois": 4716,
- "atlas": 1024,
+ "triangulos_antes": 20344,
+ "triangulos_depois": 7480,
+ "atlas": 2048,
  "arquivos": [
   "feBoilerDrum_Albedo.png",
   "feBoilerDrum_Normal.png",
@@ -12,5 +12,5 @@
   "feBoilerDrum_HD.fbx",
   "feBoilerDrum_HD.blend"
  ],
- "segundos": 25.6
+ "segundos": 26.1
 }
