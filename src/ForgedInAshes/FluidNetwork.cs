@@ -39,6 +39,39 @@ namespace ForgedInAshes
     public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor,
                             GasTank, Valve, Gauge, Burner, Tapper, TowerSection, Boiler, Turbine }
 
+    /// <summary>Identity of a port (owner, cell, side, direction) for sets and lookups, without building strings.</summary>
+    public struct PortKey : System.IEquatable<PortKey>
+    {
+        public Vector3i Owner, Cell, Dir;
+        public bool Out;
+
+        public PortKey(FluidPort p)
+        {
+            Owner = p.Owner; Cell = p.Cell; Dir = p.Dir; Out = p.Out;
+        }
+
+        public bool Equals(PortKey o)
+        {
+            return Out == o.Out && Owner == o.Owner && Cell == o.Cell && Dir == o.Dir;
+        }
+
+        public override bool Equals(object o)
+        {
+            return o is PortKey && Equals((PortKey)o);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int h = Owner.GetHashCode();
+                h = h * 397 ^ Cell.GetHashCode();
+                h = h * 397 ^ Dir.GetHashCode();
+                return h * 2 + (Out ? 1 : 0);
+            }
+        }
+    }
+
     public class FluidPort
     {
         public Vector3i Owner;     // device parent position
@@ -210,9 +243,24 @@ namespace ForgedInAshes
             return k;
         }
 
+        static readonly Dictionary<string, int> propIds = new Dictionary<string, int>();
+        static readonly Dictionary<long, float> propCache = new Dictionary<long, float>();
+
+        /// <summary>A float block property, or def when the block does not have it. Cached per (block id, name):
+        /// DynamicProperties.GetFloat parses the text on every call, and the fluid tick asks for these per device and
+        /// per port twice a second. Block properties never change while a game runs.</summary>
         public static float Prop(Block b, string name, float def)
         {
-            return b.Properties != null && b.Properties.Contains(name) ? b.Properties.GetFloat(name) : def;
+            int id;
+            if (!propIds.TryGetValue(name, out id)) { id = propIds.Count; propIds[name] = id; }
+            long key = ((long)b.blockID << 16) | (long)id;
+            float v;
+            if (!propCache.TryGetValue(key, out v))
+            {
+                v = b.Properties != null && b.Properties.Contains(name) ? b.Properties.GetFloat(name) : float.NaN;
+                propCache[key] = v;
+            }
+            return float.IsNaN(v) ? def : v;
         }
 
         public static Vector3i Rot(BlockValue bv, Vector3 local)
@@ -417,7 +465,7 @@ namespace ForgedInAshes
             Queue<Vector3i> open = new Queue<Vector3i>();
             open.Enqueue(first);
             net.Pipes.Add(first);
-            HashSet<string> seenPorts = new HashSet<string>();
+            HashSet<PortKey> seenPorts = new HashSet<PortKey>();
             while (open.Count > 0 && net.Pipes.Count < 2048)
             {
                 Vector3i p = open.Dequeue();
@@ -436,8 +484,7 @@ namespace ForgedInAshes
                     foreach (FluidPort port in Ports(world, owner))
                     {
                         if (port.Cell != n || port.Dir != Neg(d) || port.Metal != start.Metal) continue;
-                        string key = port.Owner + "|" + port.Cell + "|" + port.Dir + "|" + port.Out;
-                        if (seenPorts.Add(key)) net.Ports.Add(port);
+                        if (seenPorts.Add(new PortKey(port))) net.Ports.Add(port);
                     }
                 }
             }
@@ -743,16 +790,30 @@ namespace ForgedInAshes
             all.AddRange(demand.Keys);
             all.AddRange(tankPorts);
             all.AddRange(readers);
+            // our port objects by identity (Ports() builds new objects each call, so the net's ports are other objects)
+            Dictionary<PortKey, FluidPort> byKey = new Dictionary<PortKey, FluidPort>();
+            Dictionary<FluidPort, int> order = new Dictionary<FluidPort, int>();
+            foreach (FluidPort a in all)
+            {
+                PortKey ak = new PortKey(a);
+                if (!byKey.ContainsKey(ak)) byKey[ak] = a;
+                if (!order.ContainsKey(a)) order[a] = order.Count;
+            }
             foreach (FluidPort start in all)
             {
                 if (done.Contains(start)) continue;
                 FluidNet net = Fluids.NetFrom(world, start, null);
-                // match the ports of the net to our port objects (Ports() builds new objects each call)
+                // match the ports of the net to our port objects (was a scan of every port for every net port)
                 List<FluidPort> members = new List<FluidPort>();
-                foreach (FluidPort a in all)
-                    foreach (FluidPort b in net.Ports)
-                        if (a.Owner == b.Owner && a.Cell == b.Cell && a.Dir == b.Dir && a.Out == b.Out) { members.Add(a); break; }
-                if (!members.Contains(start)) members.Add(start);
+                HashSet<FluidPort> inNet = new HashSet<FluidPort>();
+                foreach (FluidPort b in net.Ports)
+                {
+                    FluidPort a;
+                    if (byKey.TryGetValue(new PortKey(b), out a) && inNet.Add(a)) members.Add(a);
+                }
+                // same order as before (the order of "all"): the share-out in Flow follows it
+                members.Sort(delegate (FluidPort x, FluidPort y) { return order[x].CompareTo(order[y]); });
+                if (inNet.Add(start)) members.Add(start);
                 foreach (FluidPort m in members) done.Add(m);
                 foreach (Vector3i pp in net.Pipes) NetByPipe[pp] = net;
                 Flow(world, net, members, offer, demand, offerBar, dt);

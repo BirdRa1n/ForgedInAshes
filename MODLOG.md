@@ -1339,3 +1339,29 @@ Fase 1 — (feito) F1-T01: itens `feResourceIronPlate`, `feResourceIronShaft`, `
   são internos e ficam de fora). `check_coverage`: 559/559 e 22/22 itens só de saque agora fabricados.
 - `gen_chain.py` chama `apply_icons.py` no fim: rodar o gerador não reordena mais as propriedades de ícone.
 - **Não verificado no jogo.**
+
+## 2026-11-26: análise de desempenho do código e otimizações seguras
+
+Feito (mesmo comportamento, só menos trabalho; compila, **não medido no jogo**):
+- `Dynamo.Is` em cache por id de bloco: `Kinetic.Kind` cai nela para todo vizinho que não é do mod (terra, ar) a cada
+  reconstrução de rede de torque.
+- `Fluids.Prop` em cache por (id do bloco, nome): `DynamicProperties.GetFloat` reinterpretava o texto a cada chamada,
+  e o tick de fluidos chama por dispositivo e por porta 2 vezes por segundo.
+- `PortKey` (struct) no lugar da chave em texto `Owner|Cell|Dir|Out` montada para cada porta em cada inundação de
+  rede (lixo de memória a cada tick).
+- Tick de fluidos: casar as portas de cada rede era `todas as portas × portas da rede` (quadrático); agora dicionário
+  por `PortKey`, mantendo a mesma ordem de antes na partilha (`Flow`).
+
+Encontrado e ainda não feito (por prioridade; precisam de teste no jogo):
+1. Fluidos: toda rede de canos é refeita do zero a cada 0,5 s (inundação + `Ports()` alocando listas para cada
+   vizinho). Guardar a topologia e refazer só quando um cano/dispositivo é colocado, removido ou girado.
+2. Torque: o cache de rede expira por tempo (0,5 s) e os `KineticSpinner` perguntam 4×/s, então cada rede é
+   reconstruída (BFS com 6 `GetBlock` por nó) cerca de 2×/s mesmo sem mudança. Invalidar por evento
+   (colocar/remover/girar bloco de torque; `Invalidate()` já existe para caixa/embreagem).
+3. Esteiras (`BeltRenderer.LateUpdate`): todo quadro percorre todas as esteiras do mundo, mede distância e faz
+   `GetBlock` nas que têm itens. Manter a lista das esteiras perto do jogador, renovada a cada 0,5 s.
+4. Visual dos canos: cada cano refaz 6 consultas de porta + `GetBlock` a cada 0,5 s; pode ser por evento ou a 2 s.
+5. Alocações por tick (listas/dicionários novos no tick de fluidos, cópia das chaves no `Belt.Move`, `Ports()`):
+   reutilizar coleções para evitar pausas do coletor de lixo.
+6. Diagnósticos do texto ao olhar (`LookTextProbe` a cada quadro, `UiWatchdog` a cada 0,25 s): baratos, mas sair
+   quando o problema for fechado.

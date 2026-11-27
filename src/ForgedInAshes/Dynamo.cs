@@ -1,4 +1,4 @@
-// Dynamo (user, 2026-11-23: "which item turns mechanical energy into electricity?"): a torque CONSUMER that is
+﻿// Dynamo (user, 2026-11-23: "which item turns mechanical energy into electricity?"): a torque CONSUMER that is
 // an electric power SOURCE. Vanilla Class="Generator" (TileEntityPowerSource + PowerGenerator, wires like any
 // generator) with <property name="FeDynamo" value="true"/>:
 //   - in the torque network it is a node with its shaft on local Z (both ends; the Industrial Dynamo is a 3x2x3
@@ -27,9 +27,17 @@ namespace ForgedInAshes
     {
         static readonly Dictionary<Vector3i, int> contribution = new Dictionary<Vector3i, int>();
 
+        static readonly Dictionary<int, bool> dynamoByBlock = new Dictionary<int, bool>();
+
+        /// <summary>Cached per block id: Kinetic.Kind asks it for every non-mod neighbour while building a network.</summary>
         public static bool Is(Block b)
         {
-            return b != null && b.Properties != null && b.Properties.Contains("FeDynamo") && b.Properties.GetBool("FeDynamo");
+            if (b == null) return false;
+            bool v;
+            if (dynamoByBlock.TryGetValue(b.blockID, out v)) return v;
+            v = b.Properties != null && b.Properties.Contains("FeDynamo") && b.Properties.GetBool("FeDynamo");
+            dynamoByBlock[b.blockID] = v;
+            return v;
         }
 
         public static bool Is(TileEntityPowerSource te)
