@@ -1,4 +1,4 @@
-// D13 (user 2026-11-25: "um Create com pé no chão"): torque machines that act on the world. Each is a torque
+﻿// D13 (user 2026-11-25: "um Create com pé no chão"): torque machines that act on the world. Each is a torque
 // consumer (FeKinetic=pump: a shaft on its left or right, FeTorqueCost UT) with FeWorld=<kind>; its FRONT is where
 // it works. Ticked every 0.5 s by BeltTicker (server / host).
 //
@@ -95,6 +95,8 @@ namespace ForgedInAshes
                         case "deployer": Deploy(world, p, bv, 0.5f); break;
                         case "piston": Piston(world, p, bv, 0.5f); break;
                         case "fan": Fan.Tick(world, p, bv, 0.5f); break;
+                        case "miner": GiantMachines.TickMiner(world, p, bv, 0.5f); break;      // D14 Mining Rig
+                        case "oilwell": GiantMachines.TickOilWell(world, p, bv, 0.5f); break;  // D14 Oil Extractor
                     }
                 }
                 catch (System.Exception e)
@@ -161,7 +163,7 @@ namespace ForgedInAshes
         }
 
         /// <summary>The Harvest drops of a block, collected as stacks (they are not spawned).</summary>
-        static List<ItemStack> Drops(World world, BlockValue bv, Vector3i pos, Vector3 at)
+        public static List<ItemStack> Drops(World world, BlockValue bv, Vector3i pos, Vector3 at)
         {
             List<ItemStack> l = new List<ItemStack>();
             if (bv.Block.itemsToDrop == null) return l;

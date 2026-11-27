@@ -37,7 +37,7 @@ using UnityEngine;
 namespace ForgedInAshes
 {
     public enum FluidKind { None, Pipe, Tank, MechPump, ElecPump, Condenser, SteamEngine, Filler, Bottler, Refinery, Chute, Smelter, Caster, Processor,
-                            GasTank, Valve, Gauge, Burner, Tapper, TowerSection, Boiler, Turbine }
+                            GasTank, Valve, Gauge, Burner, Tapper, TowerSection, Boiler, Turbine, OilWell, Station }
 
     /// <summary>Identity of a port (owner, cell, side, direction) for sets and lookups, without building strings.</summary>
     public struct PortKey : System.IEquatable<PortKey>
@@ -237,6 +237,8 @@ namespace ForgedInAshes
                     case "towersection": k = FluidKind.TowerSection; break;
                     case "boiler": k = FluidKind.Boiler; break;
                     case "turbine": k = FluidKind.Turbine; break;
+                    case "oilwell": k = FluidKind.OilWell; break;     // D14 Oil Extractor (GiantMachines.cs)
+                    case "station": k = FluidKind.Station; break;     // D14 Train Station (Trains.cs)
                 }
             }
             kindByBlock[b.blockID] = k;
@@ -296,11 +298,27 @@ namespace ForgedInAshes
             {
                 case FluidKind.Tank:
                 case FluidKind.GasTank:
+                    if (bv.Block.isMultiBlock)
+                    {
+                        // D14 Storage Tank (5x6x5): pipes on any outer side of its bottom layer
+                        foreach (KeyValuePair<Vector3i, Vector3i> f in MultiCells.BottomFaces(bv, pos))
+                        {
+                            l.Add(new FluidPort { Owner = pos, Cell = f.Key, Dir = f.Value, Out = true, Fluid = "" });
+                            l.Add(new FluidPort { Owner = pos, Cell = f.Key, Dir = f.Value, Out = false, Fluid = "" });
+                        }
+                        break;
+                    }
                     foreach (Vector3i d in Dirs)
                     {
                         l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = d, Out = true, Fluid = "" });
                         l.Add(new FluidPort { Owner = pos, Cell = pos, Dir = d, Out = false, Fluid = "" });
                     }
+                    break;
+                case FluidKind.OilWell:
+                    GiantMachines.OilWellPorts(world, pos, bv, l);
+                    break;
+                case FluidKind.Station:
+                    TrainStations.Ports(world, pos, bv, l);
                     break;
                 case FluidKind.MechPump:
                 case FluidKind.ElecPump:
@@ -756,6 +774,14 @@ namespace ForgedInAshes
                         case FluidKind.TowerSection:
                             if (s.Amount > 0.01f && s.Fluid.Length > 0) { offer[port] = s.Amount; offerBar[port] = 1.5f; }
                             break;
+                        case FluidKind.OilWell:
+                            if (s.Amount > 0.01f && s.Fluid.Length > 0) { offer[port] = s.Amount; offerBar[port] = Fluids.Prop(bv.Block, "FeOutBar", 8f); }
+                            break;
+                        case FluidKind.Station:
+                            // one tank behind ~24 ports all around: each port offers / asks its share (never the whole tank)
+                            if (port.Out) { if (s.Amount > 0.01f && s.Fluid.Length > 0) offer[port] = s.Amount / Mathf.Max(1, devPorts.Count); }
+                            else demand[port] = Mathf.Max(0f, Fluids.Prop(bv.Block, "FeFluidCapacity", 20000f) - s.Amount) / Mathf.Max(1, devPorts.Count);
+                            break;
                         case FluidKind.MechPump:
                         case FluidKind.ElecPump:
                             offer[port] = PumpRate(world, p, bv, s) * dt / 60f;
@@ -996,7 +1022,12 @@ namespace ForgedInAshes
             // what the offers really gave and the demands really got
             float given = direct + tankIn;            // taken from the offers
             float received = direct + tankOut;        // delivered to the demands
-            if (gas && P > net.MaxBar + 0.01f)
+            // D14: a source that pushes harder than the pipes stand (Oil Extractor: FeNeedPipeBar 12, High Pressure
+            // Pipes) makes the network leak, liquids too
+            float needBar = 0f;
+            foreach (FluidPort o in offers)
+                if (offer[o] > 0.0001f) needBar = Mathf.Max(needBar, Fluids.Prop(world.GetBlock(o.Owner).Block, "FeNeedPipeBar", 0f));
+            if ((gas && P > net.MaxBar + 0.01f) || (net.Pipes.Count > 0 && needBar > net.MaxBar + 0.01f))
             {
                 // above what the pipes stand: it leaks (a fifth of what moves and 2% of the tanks per tick)
                 net.Leak = true;
@@ -1049,7 +1080,7 @@ namespace ForgedInAshes
             FluidKind k = Fluids.Kind(world.GetBlock(o.Owner).Block);
             if (k == FluidKind.Condenser || k == FluidKind.SteamEngine || k == FluidKind.Boiler || k == FluidKind.Turbine) s.Steam = Mathf.Max(0f, s.Steam - amount);
             else if (k == FluidKind.Filler || k == FluidKind.Smelter || k == FluidKind.Tapper || k == FluidKind.TowerSection
-                     || k == FluidKind.Valve)
+                     || k == FluidKind.Valve || k == FluidKind.OilWell || k == FluidKind.Station)
             {
                 s.Amount = Mathf.Max(0f, s.Amount - amount);
                 if (s.Amount <= 0.01f) { s.Amount = 0f; s.Fluid = ""; }
@@ -1079,7 +1110,7 @@ namespace ForgedInAshes
             {
                 if (amount > 0f) { FluidControl.BurnerGot(bv, s, amount); s.LastFlow += amount / dt * 60f; }
             }
-            else if (k == FluidKind.Bottler || k == FluidKind.Refinery)
+            else if (k == FluidKind.Bottler || k == FluidKind.Refinery || k == FluidKind.Station)
             {
                 if (amount > 0f && fluid.Length > 0) { s.Amount += amount; s.Fluid = fluid; s.LastFlow += amount / dt * 60f; }
             }

@@ -397,6 +397,67 @@
 				<label depth="4" pos="1042,-768" width="150" height="32" justify="center" text="Fechar" font_size="24" />
 			</rect>
 		</window>
+		<window name="feTrain" width="1500" height="900" pos="-750,450" anchor="Center" depth="15" cursor_area="true"
+		        controller="ForgedInAshes.FeTrain, ForgedInAshes">
+			<rect name="header" height="43" depth="1">
+				<headerbg />
+				<sprite depth="2" name="windowIcon" style="icon32px" pos="4,-5" sprite="ui_game_symbol_map_trader"/>
+				<label style="header.name" text="{fetitle}" width="1400" />
+			</rect>
+			<rect name="content" pos="0,-46" height="854" depth="1">
+				<sprite depth="8" name="backgroundMain" sprite="menu_empty3px" pos="0,0" width="1500" color="[black]" type="sliced" fillcenter="false" />
+				<sprite color="[darkGrey]" type="sliced" />
+				<texture depth="3" name="feTMap" pos="12,-10" width="520" height="520" material="Materials/Transparent Colored" />
+				<label depth="3" pos="12,-540" width="520" height="28" text="Rota (clique para tirar):" font_size="22" />
+				<button depth="3" name="feTRt0" pos="12,-572" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv0}"/>
+				<label depth="5" pos="22,-578" width="500" height="28" text="{fert0}" font_size="22" />
+				<button depth="3" name="feTRt1" pos="12,-608" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv1}"/>
+				<label depth="5" pos="22,-614" width="500" height="28" text="{fert1}" font_size="22" />
+				<button depth="3" name="feTRt2" pos="12,-644" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv2}"/>
+				<label depth="5" pos="22,-650" width="500" height="28" text="{fert2}" font_size="22" />
+				<button depth="3" name="feTRt3" pos="12,-680" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv3}"/>
+				<label depth="5" pos="22,-686" width="500" height="28" text="{fert3}" font_size="22" />
+				<button depth="3" name="feTRt4" pos="12,-716" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv4}"/>
+				<label depth="5" pos="22,-722" width="500" height="28" text="{fert4}" font_size="22" />
+				<button depth="3" name="feTRt5" pos="12,-752" width="520" height="32" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{ferv5}"/>
+				<label depth="5" pos="22,-758" width="500" height="28" text="{fert5}" font_size="22" />
+				<label depth="3" pos="550,-10" text="{febody}" width="930" height="170" font_size="24" />
+				<label depth="3" pos="550,-190" width="900" height="28" text="Estações (clique para pôr na rota; o número é o do mapa):" font_size="22" />
+				<button depth="3" name="feTSt0" pos="550,-225" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv0}"/>
+				<label depth="5" pos="560,-231" width="910" height="28" text="{fest0}" font_size="22" />
+				<button depth="3" name="feTSt1" pos="550,-265" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv1}"/>
+				<label depth="5" pos="560,-271" width="910" height="28" text="{fest1}" font_size="22" />
+				<button depth="3" name="feTSt2" pos="550,-305" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv2}"/>
+				<label depth="5" pos="560,-311" width="910" height="28" text="{fest2}" font_size="22" />
+				<button depth="3" name="feTSt3" pos="550,-345" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv3}"/>
+				<label depth="5" pos="560,-351" width="910" height="28" text="{fest3}" font_size="22" />
+				<button depth="3" name="feTSt4" pos="550,-385" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv4}"/>
+				<label depth="5" pos="560,-391" width="910" height="28" text="{fest4}" font_size="22" />
+				<button depth="3" name="feTSt5" pos="550,-425" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv5}"/>
+				<label depth="5" pos="560,-431" width="910" height="28" text="{fest5}" font_size="22" />
+				<button depth="3" name="feTSt6" pos="550,-465" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv6}"/>
+				<label depth="5" pos="560,-471" width="910" height="28" text="{fest6}" font_size="22" />
+				<button depth="3" name="feTSt7" pos="550,-505" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv7}"/>
+				<label depth="5" pos="560,-511" width="910" height="28" text="{fest7}" font_size="22" />
+				<button depth="3" name="feTSt8" pos="550,-545" width="930" height="36" sprite="menu_empty" defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{fesv8}"/>
+				<label depth="5" pos="560,-551" width="910" height="28" text="{fest8}" font_size="22" />
+				<button depth="3" name="feTPrev" pos="550,-600" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="550,-606" width="150" height="32" justify="center" text="&lt;&lt;" font_size="24" />
+				<label depth="4" pos="710,-606" width="200" height="32" justify="center" text="{fepage}" font_size="24" />
+				<button depth="3" name="feTNext" pos="920,-600" width="150" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="920,-606" width="150" height="32" justify="center" text="&gt;&gt;" font_size="24" />
+				<button depth="3" name="feTRun" pos="8,-802" width="220" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="8,-808" width="220" height="32" justify="center" text="{ferun}" font_size="24" />
+				<button depth="3" name="feTFuel" pos="236,-802" width="220" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="236,-808" width="220" height="32" justify="center" text="Abastecer (mão)" font_size="24" />
+				<button depth="3" name="feTClear" pos="464,-802" width="220" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="464,-808" width="220" height="32" justify="center" text="Limpar rota" font_size="24" />
+				<button depth="3" name="feTPick" pos="692,-802" width="220" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="692,-808" width="220" height="32" justify="center" text="Recolher trem" font_size="24" />
+				<button depth="3" name="feTClose" pos="920,-802" width="220" height="40" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0"/>
+				<label depth="4" pos="920,-808" width="220" height="32" justify="center" text="Fechar" font_size="24" />
+			</rect>
+		</window>
 	</append>
 	<!-- END D12 windows -->
 </configs>

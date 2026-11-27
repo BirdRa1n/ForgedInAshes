@@ -28,4 +28,10 @@
 	<set xpath="/lootcontainers/lootgroup/item[@name='workbench']/@name">feAssembler</set>
 	<set xpath="/lootcontainers/lootgroup/item[@name='chemistryStation']/@name">feRefinery</set>
 	<set xpath="/lootcontainers/lootgroup/item[@name='cementMixer']/@name">feMixer</set>
+	<!-- D14 Train Station storage (Trains.cs): 100 slots -->
+	<append xpath="/lootcontainers">
+		<lootcontainer name="feStationStorage" count="0" size="10,10" sound_open="UseActions/crate_iron_open" sound_close="UseActions/crate_iron_close" loot_quality_template="qualBaseTemplate">
+			<item name="cobweb" count="0"/>
+		</lootcontainer>
+	</append>
 </configs>

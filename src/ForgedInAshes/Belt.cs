@@ -989,6 +989,13 @@ namespace ForgedInAshes
         public static bool Insert(World world, Vector3i parent, ItemStack st)
         {
             if (st == null || st.IsEmpty()) return true;
+            if (TrainStations.Is(world.GetBlock(parent).Block))
+            {
+                // D14: train fuel arriving at a station fills its fuel store first (while not full)
+                int trainFuel = TrainStations.AddFuel(parent, st);
+                if (trainFuel > 0) { st.count -= trainFuel; BeltStore.MarkDirty(); Note(world, parent, "train fuel +" + trainFuel); }
+                if (st.count <= 0) return true;
+            }
             if (IsStorage(world.GetBlock(parent).Block)) return InsertStorage(world, parent, st);
             if (Fluids.Kind(world.GetBlock(parent).Block) == FluidKind.Filler)
             {

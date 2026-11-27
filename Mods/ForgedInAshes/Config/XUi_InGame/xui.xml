@@ -41,6 +41,9 @@
 		<window_group name="feGuide" defaultselected="feGClose">
 			<window name="feGuide" />
 		</window_group>
+		<window_group name="feTrain" defaultselected="feTClose">
+			<window name="feTrain" />
+		</window_group>
 	</append>
 	<!-- END D12 windows -->
 </configs>

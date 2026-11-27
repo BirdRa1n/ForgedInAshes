@@ -405,3 +405,17 @@ modelos emprestados (lista em `PENDENCIAS_ASSETS.md`).
    colheita.
 4. Roda d'Água: ocupa 3x3 (não deixa construir dentro), eixo saindo do centro dos dois lados; com água sob ela ou
    em volta da fileira de baixo, gira e dá torque a um eixo encostado no centro. Turbina e Moinho continuam 1x1.
+
+## 25. Máquinas gigantes e trens (D14)
+
+- [ ] Mineradora: 7x9x7 em terreno plano, 2048 UT no encaixe (olhar mostra "Precisa de 2048 UT"); esteira na frente.
+      Olhar: camada, blocos trabalhados, minério. Cavar ao lado: pedra/minério viraram terra, sem buracos; só o poço no centro.
+- [ ] Extratora no deserto perto de xisto: "Medindo o solo" -> reserva em L. 512 UT: bombeia. Cano comum: vaza;
+      Cano de Alta Pressão: chega ao Tanque de Armazenamento; do tanque para a Torre de Destilação.
+- [ ] Trilhos: reto, curva (gira e fecha um quadrado), rampa, desvio. Estação ao lado de cada ponta, etiqueta com nome.
+- [ ] Locomotiva no trilho vira trem (caixa vermelha). E: Painel do Trem com mapa. Abastecer com carvão na mão.
+      Pôr 2 estações na rota, Ligar: vai, para 12 s, volta (invertendo os vagões no fim da linha).
+- [ ] Vagão de carga engatado; estação A modo Carregar com itens (esteira), estação B modo Descarregar: itens chegam.
+- [ ] Vagão-tanque: cano enchendo a estação A; descarrega na B; cano saindo da B.
+- [ ] Vagão de passageiros: E senta, viaja junto, E ou pulo desce (ver se não treme nem dá dano).
+- [ ] Sair e voltar ao mundo: trens, rota, carga e combustível continuam.

@@ -28,6 +28,8 @@ flowchart LR
 7. [Señales y automatización](#7-señales-y-automatización)
 8. [Máquinas en el mundo](#8-máquinas-en-el-mundo)
 9. [Recursos: caucho, petróleo y química](#9-recursos-caucho-petróleo-y-química)
+10. [Máquinas gigantes: Mining Rig y Oil Extractor](#10-máquinas-gigantes-mining-rig-y-oil-extractor)
+11. [Ferrocarriles y trenes](#11-ferrocarriles-y-trenes)
 
 ---
 
@@ -241,6 +243,34 @@ El árbol de caucho **no** aparece en el mapa: tú fabricas el plantón.
 La **Refinery** (refinería), las torres de destilación, los **Biodigesters**, lavadoras, autoclaves y mezcladores
 químicos transforman petróleo, biomasa y minerales en combustibles, plástico, caucho, ácidos y medicinas. Usa la
 Guía de Producción para seguir cualquier cadena.
+
+## 10. Máquinas gigantes: Mining Rig y Oil Extractor
+
+> [!NOTE]
+> Novedad aún no probada en el juego. Sus modelos 3D todavía se están haciendo: hasta entonces usan modelos más pequeños prestados.
+
+| Máquina | Tamaño | Energía | Qué hace |
+|---|---|---|---|
+| **Mining Rig** (minera) | base 7×7, 9 de alto | **2048 UT** en su toma de motor | Trabaja todo el chunk alrededor (radio 16), capa por capa hasta la roca madre. Piedra, mineral, arena, grava y tierra dan sus objetos; todo bloque que no es tierra **se vuelve tierra**, así el suelo conserva su forma. El único agujero es el pozo del taladro. Los productos salen por su **frente** (cinta, cofre, tobogán) y se detiene mientras la salida está llena. Cada bloque se trabaja una vez: al final se agota. |
+| **Oil Extractor** (extractora de petróleo) | base 5×5, 11 de alto | **512 UT** en su toma de motor | Colócala cerca de una veta de esquisto (desierto). Mide el suelo en un radio de 24 bloques **sin romper nada**; el esquisto que encuentra es su reserva (300 L de petróleo por bloque). Bombea 120 L/min por su frente, a una presión que solo aguanta la **High Pressure Pipe**. |
+| **Storage Tank** (tanque de almacenamiento) | base 5×5, 6 de alto | — | 100.000 L de un líquido; tuberías en cualquier lado exterior de la capa inferior. Envía aquí el petróleo y de aquí a la refinería. |
+
+Mantén E sobre una máquina gigante para encenderla o apagarla; mírala para ver el progreso, la reserva y el torque.
+
+## 11. Ferrocarriles y trenes
+
+> [!NOTE]
+> Novedad aún no probada en el juego. Los modelos de vía, tren y estación todavía se están haciendo: hasta entonces los vagones son cajas de colores.
+
+**Vías.** Las piezas se unen donde se encuentran sus extremos: **Rail** (1 bloque), **Rail Curve** (90°, 5×5, radio 4,5 — gírala para cualquier esquina), **Rail Ramp** (sube 1 en 3) y **Rail Switches** (izquierda / derecha). El tren elige el ramal que pide su ruta; solo da la vuelta en las estaciones. Los trenes **no colisionan**, ni entre sí ni con nada.
+
+**Estaciones.** La **Train Station** es una plataforma de 9×3 colocada **junto a** las vías (el tren para en la vía más cercana, hasta 12 m). Escribe su nombre en su etiqueta (mantén E). Es un almacén de 100 espacios con un tanque de 20.000 L:
+
+- cintas, brazos y embudos la llenan o vacían como un cofre; las tuberías en sus lados exteriores llenan o vacían el tanque;
+- **modo Load** (cargar): los trenes que llegan se llevan sus objetos y fluido (lo que quepa en los vagones); **modo Unload** (descargar): dejan los suyos;
+- su **depósito de combustible** (Coal, Gas Cans, Fuel Gas Canisters — nada de madera, carbón vegetal ni biocombustible) reabastece a todo tren que para; llénalo a mano (mantén E) o por cinta.
+
+**Trenes.** Coloca una **Locomotive** sobre una vía (o a hasta 4 m); coloca **vagones** a hasta 10 m para engancharlos: **Cargo** (40 espacios), **Tank** (20.000 L de un fluido), **Passenger** (míralo, E para viajar, E o salta para bajar). Mira la locomotora y pulsa E para el **Panel del Tren**: mapa de vías y estaciones, la ruta (clic en las estaciones para añadirlas, clic en la ruta para quitarlas), **Run / Stop**, repostar con lo que tienes en la mano, recoger el tren. Después el tren va solo de estación en estación, esperando 12 s en cada una.
 
 ---
 

@@ -31,10 +31,29 @@ CONTRACTS = {
     "holder": "flat top at 0.82 m (the depot's item sits there); the chute is a closed vertical tube",
     "signal": "a lever / box; the Display Panel writes its digits on the +Z face 0.52 m from the centre (DisplayVisual)",
     "tree": "uses the planted oak models (a Rubber Tree look: lighter bark, the sap cup)",
+    "giant": "D14 giant machine, the WHOLE multi-block (MultiBlockDim: Mining Rig 7x9x7, Oil Extractor 5x11x5; origin = centre of the "
+             "bottom layer, +Z = front). Products / oil leave by the middle of the FRONT face at ground level; the motor socket is on its "
+             "side (PowerGate.SocketPos). Mining Rig: a drill tower over the centre, `FeSpin_*` (drill / gears), the shaft hole under the "
+             "centre. Oil Extractor: a pumpjack / derrick, `FeSpin_*` crank, an outlet flange on the front (High Pressure Pipe size)",
+    "rail": "D14 track piece at rail height 0.15 m, two rails 1.435 m apart on sleepers; ends exactly on the cell edges: straight 1x1 "
+            "(-Z edge to +Z edge), curve 5x5 (quarter circle radius 4.5: from x=-2 on the -Z edge to z=+2 on the +X edge), ramp 1x2x3 "
+            "(rises 1 over 3), switches 5x5 = straight on the left (R) / right (L) column + the curve. Rails.cs LocalPaths is the source of truth",
+    "station": "D14 platform 9x4x3 (9 along the rails, the rails run along its +Z side, outside it): roof, benches, a sign board with a "
+               "`TextMesh` child for the vanilla writable label (TEFeatureSignable), a fuel bunker, a small tank on the side",
+    "trainkit": "D14 kit block (a crate on a pallet with the car's silhouette painted): it turns into the train car when placed. The CARS "
+                "themselves are separate prefabs (section below)",
 }
 
 
 def kind_of(props):
+    if props.get("FeWorld") in ("miner", "oilwell"):
+        return "giant"
+    if props.get("FeRail"):
+        return "rail"
+    if props.get("FeTrainStation") == "true":
+        return "station"
+    if "FeTrainKit" in props.get("Class", ""):
+        return "trainkit"
     if props.get("FeInline") == "true":
         return "inline"
     if props.get("FeWorld"):
@@ -134,6 +153,16 @@ def main():
             "| Item | Nome | Ícone emprestado (tinta) |", "|---|---|---|"]
     for n, icon, tint in sorted(rows_i):
         out.append(f"| `{n}` | {loc.get(n, '')} | `{icon}` ({tint}) |")
+    out += ["", "## Vagões do trem (prefabs que não são blocos)", "",
+            "O trem (Trains.cs / TrainView.cs) desenha cada vagão com o prefab `<kit>Prefab` do pacote; sem ele usa uma caixa colorida.",
+            "Precisam entrar no `FeBuild.cs` como prefabs soltos (não são blocos). Origem no centro do vagão, no topo do trilho (y=0),",
+            "+Z = frente, sem colisores (o código desliga os que houver: trens não colidem).", "",
+            "| Prefab | Comprimento | O que é | Partes que ajudam |", "|---|---|---|---|",
+            "| `feTrainLocoPrefab` | 8 m | locomotiva a vapor/fóssil (caldeira, cabine, chaminé) | `FeSpin_*` rodas, `FeFx_Smoke_*` chaminé |",
+            "| `feWagonCargoPrefab` | 7 m | vagão fechado de carga | `FeSpin_*` rodas |",
+            "| `feWagonTankPrefab` | 7 m | vagão-tanque (cilindro deitado) | `FeSpin_*` rodas, `FeLevelLiquid` |",
+            "| `feWagonPassengerPrefab` | 9 m | vagão de passageiros com bancos | `FeSpin_*` rodas, assento a 1 m de altura no centro |",
+            "", "Largura 2,6 m, altura até 3,6 m (o código usa essa caixa para a mira: olhar e apertar E).", ""]
     out += ["", "## Outros assets", "",
             "- **Sons**: nenhuma máquina nova tem som próprio (manivela, prensa, furadeira, serra, ventilador, compressor, pistão).",
             "- **Partículas novas** que ajudariam: vento do Ventilador (`FeFx_Wind`), serragem da Serra, poeira da Furadeira,",

@@ -1435,3 +1435,55 @@ Encontrado e ainda não feito (por prioridade; precisam de teste no jogo):
   `NO_INHERIT`) para continuarem 1x1. Torque da roda segue 128 UT.
 - Validadores ok (check_xpath 779/0, processes 243/0, phase3 23/23, coverage 0, assets 0 pendentes). Pacote ok.
   **Não verificado no jogo.**
+
+## 2026-11-27: D14 máquinas gigantes (Mineradora, Extratora de Petróleo, Tanque de Armazenamento) e trens
+
+Pedido: duas máquinas gigantes que trabalham uma área do tamanho de um chunk, e a lógica de trens (curvas, estações
+com nome, cargas de itens e líquidos, passageiros, painel com mapa e rota automática, sem colisão, combustível fóssil,
+estação que é armazém e carrega/descarrega). Modelos ficam para a sessão de modelos.
+
+Referência: o mod Ashen Rails (Downloads, 3.3.3.2, Red_Torch_TV) foi só estudado (estrutura: trilho = bloco com
+geometria em arco, trem = veículo que segue a geometria). Nada do código nem dos modelos dele foi copiado (código
+sem licença declarada; modelos CC BY de terceiros). Tudo aqui é código próprio.
+
+- **Mineradora** (`feMiningRig`, 7x9x7, `FeWorld=miner`, 2048 UT no encaixe): `GiantMachines.TickMiner` percorre o
+  disco de raio 16 (do centro para fora) camada por camada até a rocha-mãe (y<3); cada célula de terreno (pedra,
+  minério, areia, cascalho, terra) dá os drops de Harvest (`WorldMachines.Drops`, agora público) e, se não é terra,
+  vira `terrDirt` com a mesma densidade (`SetBlocksRPC` em lote). A coluna do centro vira ar (poço da broca).
+  Cursor em LogicStore (`y`, `i`), cada célula uma vez; buffer de saída (`buf`, 40 pilhas) empurrado para a frente
+  (esteira/baú/máquina); 8 células/s x velocidade; para quando o buffer enche.
+- **Extratora de Petróleo** (`feOilExtractor`, 5x11x5, `FeWorld=oilwell`, `FeFluid=oilwell`, 512 UT): mede o disco
+  de raio 24 até a rocha-mãe sem quebrar nada (3000 células por tick) contando `terrOreOilDeposit`; reserva = xisto x
+  300 L; bombeia 120 L/min x velocidade para o próprio tanque (2000 L), oferecido na porta da frente
+  (`FluidKind.OilWell`). `FeNeedPipeBar=12`: na rede com cano comum (4 bar) **vaza** (regra nova no `Flow`, vale
+  também para líquido).
+- **Tanque de Armazenamento** (`feStorageTank`, 5x6x5, 100.000 L): tanque multibloco; `Ports()` de tanques multibloco
+  agora põe portas em todas as faces de fora da camada de baixo (`MultiCells.BottomFaces`).
+- **Trilhos** (`Rails.cs`): `BlockFeRail` guarda cada peça (`RailStore`, `ForgedInAshes_rails.txt`); geometria local
+  por tipo (reto 1x1, curva 5x5 raio 4,5, rampa 1x2x3, desvio D/E 5x5); grafo por pontas (grade de 0,1 m);
+  Dijkstra com continuidade de direção (>60 graus não passa: nada de voltar pelo outro ramo do desvio).
+- **Trens** (`Trains.cs`): `TrainStore` (`ForgedInAshes_trains.txt`: vagões, carga, rota, combustível, trilho);
+  `TrainSim` move a cabeça ao longo do trilho (14 m/s, aceleração 0,8, frenagem 1,2), consome combustível por metro,
+  espera 12 s na estação, planeja a próxima perna e **inverte** a composição se voltar for mais curto. Kits
+  (`BlockFeTrainKit`): locomotiva a até 4 m de um trilho vira trem; vagão a até 10 m de um trem é engatado.
+  Combustível: Carvão 25, Galão 4, Botijão de Gás 60 unidades (nada vegetal).
+- **Estação** (`feTrainStation`, 9x4x3, `BlockFeStation : BlockCompositeTileEntity`): armazenamento de 100
+  espaços (`feStationStorage` em loot.xml), tranca e **etiqueta gravável do jogo = nome** (sem campo de texto nosso:
+  um textfield em janela do mod já quebrou o XUi). Esteiras/funis/braços como num baú; combustível de trem chegando
+  por esteira vai primeiro para o depósito de combustível (2000); comandos E: pôr combustível da mão, modo
+  Carregar/Descarregar. Tanque de 20.000 L (`FluidKind.Station`, portas em todas as faces de fora, cada uma com a sua
+  fração). Na chegada: abastece, carrega ou descarrega vagões de carga e tanque.
+- **Visual e interação** (`TrainView.cs`): cada vagão usa `<kit>Prefab` do pacote ou uma caixa colorida; colisores
+  desligados; mira por raio contra a caixa do vagão; E na locomotiva = Painel do Trem, E no vagão de passageiros
+  (ou agachado na locomotiva) = sentar (posição presa ao assento a cada quadro, sem dano de queda), E ou pulo desce.
+- **Painel do Trem** (`feTrain`, gen_ui.py, `XUiC_FeTrain`): mapa 512x512 desenhado em textura (trilhos, estações
+  numeradas, rota, trens), lista de estações (clique = pôr na rota), rota (clique = tirar), Ligar/Parar, Abastecer
+  (mão), Limpar rota, Recolher trem.
+- gen_chain: blocos, receitas (Montadora), traduções EN/PT e comandos; `block_xml` aceita `__xml` (propriedades
+  aninhadas). `build.ps1` referencia `Unity.Addressables` e `Unity.ResourceManager` (`DataLoader.LoadAsset`).
+  `list_assets.py`: contratos giant/rail/station/trainkit e a seção dos prefabs de vagão. Docs EN/PT/ES seções 10 e 11.
+- Validadores: check_xpath 780/0, processes 243/0, phase3 23/23, coverage 0, check_reach 0/0/0. DLL compilada e no
+  mod (link). PENDENCIAS_ASSETS: 13 blocos + 4 prefabs de vagão.
+- **Não verificado no jogo.** Riscos conhecidos: andar sentado no vagão (o controle do jogador pode brigar com a
+  posição presa), modelos provisórios (caixas), desempenho do Painel com muitas estações, a Mineradora gera muitos
+  itens (só anda na velocidade em que a saída escoa).

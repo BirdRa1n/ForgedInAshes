@@ -97,6 +97,35 @@ guide = frame('feGuide', 'FeGuide', W5, H5, 'ui_game_symbol_book',
     + btn('feGNext', W5 - 158 - 158, -(H5 - 46) + 52, 150, '&gt;&gt;') + '\n'
     + btn('feGClose', W5 - 158, -(H5 - 46) + 52, 150, 'Fechar'))
 
+# D14 Train Panel (TrainView.cs XUiC_FeTrain): map texture, status, stations (click = add to the route), route
+# (click = remove), buttons
+W6, H6 = 1500, 900
+CH6 = H6 - 46
+
+
+def plain_rows(btn_prefix, bind_prefix, n, x, y0, w, step):
+    out = []
+    for i in range(n):
+        y = y0 - i * step
+        out.append(f'\t\t\t\t<button depth="3" name="{btn_prefix}{i}" pos="{x},{y}" width="{w}" height="{step - 4}" sprite="menu_empty" '
+                   f'defaultcolor="[darkGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" visible="{{{bind_prefix}v{i}}}"/>')
+        out.append(f'\t\t\t\t<label depth="5" pos="{x + 10},{y - 6}" width="{w - 20}" height="28" text="{{{bind_prefix}t{i}}}" font_size="22" />')
+    return '\n'.join(out)
+
+
+train = frame('feTrain', 'FeTrain', W6, H6, 'ui_game_symbol_map_trader',
+    '\t\t\t\t<texture depth="3" name="feTMap" pos="12,-10" width="520" height="520" material="Materials/Transparent Colored" />\n'
+    + '\t\t\t\t<label depth="3" pos="12,-540" width="520" height="28" text="Rota (clique para tirar):" font_size="22" />\n'
+    + plain_rows('feTRt', 'fer', 6, 12, -572, 520, 36) + '\n'
+    + f'\t\t\t\t<label depth="3" pos="550,-10" text="{{febody}}" width="{W6 - 570}" height="170" font_size="24" />\n'
+    + '\t\t\t\t<label depth="3" pos="550,-190" width="900" height="28" text="Estações (clique para pôr na rota; o número é o do mapa):" font_size="22" />\n'
+    + plain_rows('feTSt', 'fes', 9, 550, -225, W6 - 570, 40) + '\n'
+    + btn('feTPrev', 550, -600, 150, '&lt;&lt;') + '\n'
+    + f'\t\t\t\t<label depth="4" pos="710,-606" width="200" height="32" justify="center" text="{{fepage}}" font_size="24" />\n'
+    + btn('feTNext', 920, -600, 150, '&gt;&gt;') + '\n'
+    + bar(-CH6 + 52, [('feTRun', '{ferun}'), ('feTFuel', 'Abastecer (mão)'), ('feTClear', 'Limpar rota'), ('feTPick', 'Recolher trem'),
+                      ('feTClose', 'Fechar')], W6))
+
 block = f'''	{BEGIN}
 	<append xpath="/windows">
 {machine}
@@ -104,6 +133,7 @@ block = f'''	{BEGIN}
 {config}
 {network}
 {guide}
+{train}
 	</append>
 	{END}'''
 s = open(P, encoding='utf-8').read()
@@ -115,7 +145,7 @@ open(P, 'w', encoding='utf-8', newline='').write(s)
 
 groups = ''.join(f'\t\t<window_group name="{n}" defaultselected="{d}">\n\t\t\t<window name="{n}" />\n\t\t</window_group>\n'
                  for n, d in [('feMachine', 'feMBtnClose'), ('fePicker', 'fePClose'), ('feConfig', 'feCClose'),
-                              ('feNetwork', 'feNClose'), ('feGuide', 'feGClose')])
+                              ('feNetwork', 'feNClose'), ('feGuide', 'feGClose'), ('feTrain', 'feTClose')])
 xb = f'\t{BEGIN}\n\t<append xpath="/xui">\n{groups}\t</append>\n\t{END}'
 x = open(X, encoding='utf-8').read()
 if BEGIN in x:

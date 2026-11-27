@@ -1479,6 +1479,82 @@
 			<ingredient name="feGasket" count="4"/>
 			<ingredient name="fePipeHP" count="2"/>
 		</recipe>
+		<recipe name="feMiningRig" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="80"/>
+			<ingredient name="feMechDrill" count="4"/>
+			<ingredient name="feChassisFrame" count="6"/>
+			<ingredient name="feSpeedBox" count="2"/>
+			<ingredient name="feGearbox" count="2"/>
+			<ingredient name="resourceMechanicalParts" count="20"/>
+		</recipe>
+		<recipe name="feOilExtractor" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="60"/>
+			<ingredient name="fePipeHP" count="20"/>
+			<ingredient name="feMechPump" count="2"/>
+			<ingredient name="feTankLiquid" count="1"/>
+			<ingredient name="feGasket" count="10"/>
+			<ingredient name="feGearbox" count="1"/>
+		</recipe>
+		<recipe name="feStorageTank" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="60"/>
+			<ingredient name="fePipeHP" count="4"/>
+			<ingredient name="feGasket" count="8"/>
+		</recipe>
+		<recipe name="feTrainStation" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="30"/>
+			<ingredient name="resourceConcreteMix" count="20"/>
+			<ingredient name="feBeltCrate" count="2"/>
+			<ingredient name="fePipe" count="4"/>
+			<ingredient name="feTankLiquid" count="1"/>
+		</recipe>
+		<recipe name="feRailStraight" count="4" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feRod" count="2"/>
+			<ingredient name="resourceWood" count="2"/>
+		</recipe>
+		<recipe name="feRailCurve" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feRod" count="10"/>
+			<ingredient name="resourceWood" count="10"/>
+		</recipe>
+		<recipe name="feRailRamp" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feRod" count="4"/>
+			<ingredient name="resourceWood" count="6"/>
+		</recipe>
+		<recipe name="feRailSwitchR" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feRod" count="12"/>
+			<ingredient name="resourceWood" count="10"/>
+			<ingredient name="resourceSpring" count="1"/>
+		</recipe>
+		<recipe name="feRailSwitchL" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feRod" count="12"/>
+			<ingredient name="resourceWood" count="10"/>
+			<ingredient name="resourceSpring" count="1"/>
+		</recipe>
+		<recipe name="feTrainLoco" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="smallEngine" count="2"/>
+			<ingredient name="feBoilerFirebox" count="1"/>
+			<ingredient name="feSteelPlate" count="40"/>
+			<ingredient name="feRim" count="8"/>
+			<ingredient name="feChassisFrame" count="4"/>
+		</recipe>
+		<recipe name="feWagonCargo" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="20"/>
+			<ingredient name="feRim" count="8"/>
+			<ingredient name="feChassisFrame" count="2"/>
+		</recipe>
+		<recipe name="feWagonTank" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="24"/>
+			<ingredient name="feRim" count="8"/>
+			<ingredient name="feChassisFrame" count="2"/>
+			<ingredient name="feTankLiquid" count="2"/>
+			<ingredient name="feGasket" count="4"/>
+		</recipe>
+		<recipe name="feWagonPassenger" count="1" craft_area="feAssembler" craft_time="20" always_unlocked="true">
+			<ingredient name="feSteelPlate" count="16"/>
+			<ingredient name="feRim" count="8"/>
+			<ingredient name="feChassisFrame" count="2"/>
+			<ingredient name="resourceCloth" count="10"/>
+			<ingredient name="resourceWood" count="20"/>
+		</recipe>
 		<recipe name="feHub" count="1" craft_area="feLathe" craft_time="6" always_unlocked="true">
 			<ingredient name="resourceForgedIron" count="2"/>
 		</recipe>

@@ -863,6 +863,98 @@ def item_xml(i):
 		</item>"""
 
 
+# ------------------------------------------------------------------------------------------------ D14 (2026-11-27)
+# Giant machines (GiantMachines.cs), the Storage Tank, railways and trains (Rails.cs, Trains.cs, TrainView.cs).
+# Their own 3D models are made by the models session: until then they borrow a model (PENDENCIAS_ASSETS.md).
+GIANT = {"Class": "ForgedInAshes.FeGiant, ForgedInAshes", "Shape": "ModelEntity", "DisplayType": "blockMulti",
+         "Material": "Msteel", "MaxDamage": "20000", "StabilitySupport": "true", "Place": "TowardsPlacerInverted",
+         "AllowedRotations": "Basic90"}
+block("feMiningRig", "Mining Rig", "Mineradora",
+      "A giant (7x7 base, 9 high). Needs 2048 UT in its motor socket. Works the whole chunk around it (radius 16), layer by layer down to bedrock: "
+      "stone, ores, sand, gravel and soil give their drops and become soil, so the ground keeps its shape; the only hole is its drill shaft. "
+      "Products leave by its front (belt, crate, chute). Each block is worked once: in the end it is exhausted.",
+      "Gigante (base 7x7, 9 de altura). Precisa de 2048 UT no encaixe de motor. Trabalha o chunk inteiro em volta (raio 16), camada por camada até a rocha-mãe: "
+      "pedra, minério, areia, cascalho e terra dão seus itens e viram terra, o chão fica como estava; o único buraco é o poço da broca. "
+      "Os produtos saem pela frente (esteira, baú, calha). Cada bloco é trabalhado uma vez: no fim ela se esgota.",
+      PLAIN, dict(GIANT, **{"MultiBlockDim": "7,9,7", "FeWorld": "miner", "FeMinPower": "2048", "FeMineRadius": "16", "FeMineRate": "8",
+                            "FeMineBuffer": "40"}),
+      "feCrusherPrefab", "feMechDrill", "ffb060",
+      [("feSteelPlate", 80), ("feMechDrill", 4), ("feChassisFrame", 6), ("feSpeedBox", 2), ("feGearbox", 2), ("resourceMechanicalParts", 20)])
+block("feOilExtractor", "Oil Extractor", "Extratora de Petróleo",
+      "A giant (5x5 base, 11 high). Put it near a shale vein (desert): it surveys the ground within 24 blocks without breaking anything, and the shale it finds "
+      "is its reserve of crude oil (300 L per shale block). With 512 UT in its motor socket it pumps 120 L/min out of its front, at a pressure only High Pressure Pipes stand.",
+      "Gigante (base 5x5, 11 de altura). Coloque perto de um veio de xisto (deserto): ela mede o solo num raio de 24 blocos sem quebrar nada, e o xisto que encontra "
+      "é a sua reserva de petróleo (300 L por bloco de xisto). Com 512 UT no encaixe de motor ela bombeia 120 L/min pela frente, numa pressão que só o Cano de Alta Pressão aguenta.",
+      PLAIN, dict(GIANT, **{"MultiBlockDim": "5,11,5", "FeWorld": "oilwell", "FeFluid": "oilwell", "FeMinPower": "512", "FeSurveyRadius": "24",
+                            "FeLitresPerShale": "300", "FeFluidRate": "120", "FeFluidBuffer": "2000", "FeOutBar": "8", "FeNeedPipeBar": "12"}),
+      "feRetortKilnPrefab", "feMechPump", "303030",
+      [("feSteelPlate", 60), ("fePipeHP", 20), ("feMechPump", 2), ("feTankLiquid", 1), ("feGasket", 10), ("feGearbox", 1)])
+block("feStorageTank", "Storage Tank", "Tanque de Armazenamento",
+      "A giant liquid tank (5x5 base, 6 high): 100,000 L. Pipes on any outer side of its bottom layer. For crude oil and the refinery's products.",
+      "Tanque gigante de líquido (base 5x5, 6 de altura): 100.000 L. Canos em qualquer lado de fora da camada de baixo. Para petróleo e os produtos da refinaria.",
+      "feTankLiquid", {"MultiBlockDim": "5,6,5", "DisplayType": "blockMulti", "FeFluidCapacity": "100000", "MaxDamage": "12000"},
+      "feWaterTankPrefab", "feWaterTank", "c08040", [("feSteelPlate", 60), ("fePipeHP", 4), ("feGasket", 8)])
+STATION_XML = """\t\t\t<property class="CompositeFeatures">
+\t\t\t\t<property class="TEFeatureStorage">
+\t\t\t\t\t<property name="LootList" value="feStationStorage"/>
+\t\t\t\t</property>
+\t\t\t\t<property class="TEFeatureLockable"/>
+\t\t\t\t<property class="TEFeatureSignable">
+\t\t\t\t\t<property name="FontSize" value="90"/>
+\t\t\t\t\t<property name="LineCount" value="2"/>
+\t\t\t\t\t<property name="LineWidth" value="3"/>
+\t\t\t\t\t<property name="LineSpacing" value="1"/>
+\t\t\t\t</property>
+\t\t\t</property>"""
+block("feTrainStation", "Train Station", "Estação de Trem",
+      "A platform (9 long, 3 deep, 4 high) to stand beside the rails: trains stop at the nearest rail. Write its name on it (its label). It is a big storage: "
+      "belts, arms and funnels fill or empty it, pipes on its outer sides fill or empty its 20,000 L tank. Mode Load: trains take its items and fluid; "
+      "mode Unload: trains leave theirs. Its own fuel store (Coal, Gas Cans, Fuel Gas Canisters: by hand, or arriving by belt) refuels the trains.",
+      "Plataforma (9 de comprimento, 3 de fundo, 4 de altura) para ficar ao lado dos trilhos: os trens param no trilho mais perto. Escreva o nome dela (a etiqueta). "
+      "É um armazém grande: esteiras, braços e funis enchem ou esvaziam; canos nos lados de fora enchem ou esvaziam o tanque de 20.000 L. Modo Carregar: os trens levam "
+      "os itens e o fluido; modo Descarregar: os trens deixam os seus. O depósito de combustível dela (Carvão, Galões de Gasolina, Botijões de Gás: na mão ou pela esteira) abastece os trens.",
+      "feBeltCrate", {"Class": "ForgedInAshes.FeStation, ForgedInAshes", "MultiBlockDim": "9,4,3", "DisplayType": "blockMulti",
+                      "FeTrainStation": "true", "FeFluid": "station", "FeFluidCapacity": "20000", "MaxDamage": "10000", "__xml": STATION_XML},
+      "feBeltCratePrefab", "feBeltCrate", "4cc3d9",
+      [("feSteelPlate", 30), ("resourceConcreteMix", 20), ("feBeltCrate", 2), ("fePipe", 4), ("feTankLiquid", 1)])
+RAIL = {"Class": "ForgedInAshes.FeRail, ForgedInAshes", "Shape": "ModelEntity", "Material": "Mmetal", "MaxDamage": "800",
+        "Place": "TowardsPlacer", "OnlySimpleRotations": "true", "Collide": "melee,bullet,arrow,rocket", "WaterFlow": "permitted",
+        "StabilitySupport": "false"}
+for rid, en, pt, typ, dim, den, dpt, rec, cnt in [
+        ("feRailStraight", "Rail", "Trilho", "straight", "1,1,1", "A straight piece of track, one block long. Pieces join where their ends meet.",
+         "Trilho reto de um bloco. As peças se ligam onde as pontas se encontram.", [("feRod", 2), ("resourceWood", 2)], 4),
+        ("feRailCurve", "Rail Curve", "Curva de Trilho", "curve", "5,1,5", "A 90-degree curve (5x5 blocks, radius 4.5). Turn it to make any corner.",
+         "Curva de 90 graus (5x5 blocos, raio 4,5). Gire para fazer qualquer canto.", [("feRod", 10), ("resourceWood", 10)], 1),
+        ("feRailRamp", "Rail Ramp", "Rampa de Trilho", "ramp", "1,2,3", "Climbs one block over three.", "Sobe um bloco em três.",
+         [("feRod", 4), ("resourceWood", 6)], 1),
+        ("feRailSwitchR", "Rail Switch (right)", "Desvio de Trilho (direita)", "switchR", "5,1,5",
+         "A straight track with a curve branching to the right: trains take the branch their route needs.",
+         "Trilho reto com uma curva saindo para a direita: o trem segue o ramo que a rota pede.", [("feRod", 12), ("resourceWood", 10), (SPRING, 1)], 1),
+        ("feRailSwitchL", "Rail Switch (left)", "Desvio de Trilho (esquerda)", "switchL", "5,1,5",
+         "A straight track with a curve branching to the left: trains take the branch their route needs.",
+         "Trilho reto com uma curva saindo para a esquerda: o trem segue o ramo que a rota pede.", [("feRod", 12), ("resourceWood", 10), (SPRING, 1)], 1)]:
+    block(rid, en, pt, den, dpt, PLAIN, dict(RAIL, **{"FeRail": typ, "MultiBlockDim": dim}), "feConveyorPrefab", "feConveyor", "a08060", rec, cnt)
+KIT = {"Class": "ForgedInAshes.FeTrainKit, ForgedInAshes", "Shape": "ModelEntity", "Material": "Mmetal", "Place": "TowardsPlacerInverted",
+       "AllowedRotations": "Basic90"}
+for kid, en, pt, den, dpt, rec in [
+        ("feTrainLoco", "Locomotive", "Locomotiva",
+         "Place it on (or within 4 m of) a rail: it becomes a train facing your way. Look at it and press E for the Train Panel (route, run, fuel). "
+         "Burns Coal, Gas Cans or Fuel Gas Canisters (no wood, charcoal or biofuel).",
+         "Coloque em cima de um trilho (ou a até 4 m): vira um trem virado para o seu lado. Olhe e aperte E para o Painel do Trem (rota, ligar, combustível). "
+         "Queima Carvão, Galões de Gasolina ou Botijões de Gás (nada de madeira, carvão vegetal ou biocombustível).",
+         [("smallEngine", 2), ("feBoilerFirebox", 1), ("feSteelPlate", 40), ("feRim", 8), ("feChassisFrame", 4)]),
+        ("feWagonCargo", "Cargo Wagon", "Vagão de Carga", "40 slots of items. Place it within 10 m of a train: it is coupled at its end.",
+         "40 espaços de itens. Coloque a até 10 m de um trem: é engatado no fim dele.", [("feSteelPlate", 20), ("feRim", 8), ("feChassisFrame", 2)]),
+        ("feWagonTank", "Tank Wagon", "Vagão-Tanque", "20,000 L of one liquid or gas. Place it within 10 m of a train: it is coupled at its end.",
+         "20.000 L de um líquido ou gás. Coloque a até 10 m de um trem: é engatado no fim dele.",
+         [("feSteelPlate", 24), ("feRim", 8), ("feChassisFrame", 2), ("feTankLiquid", 2), ("feGasket", 4)]),
+        ("feWagonPassenger", "Passenger Wagon", "Vagão de Passageiros", "Seats for the survivors: look at it and press E to ride, E again (or jump) to get off. "
+         "Place it within 10 m of a train: it is coupled at its end.",
+         "Bancos para os sobreviventes: olhe e aperte E para viajar, E de novo (ou pule) para descer. Coloque a até 10 m de um trem: é engatado no fim dele.",
+         [("feSteelPlate", 16), ("feRim", 8), ("feChassisFrame", 2), ("resourceCloth", 10), ("resourceWood", 20)])]:
+    block(kid, en, pt, den, dpt, PLAIN, KIT, "feBeltCratePrefab", "feBeltCrate", "c05030", rec)
+
+
 # properties a child must not inherit from its base (Extends param1, as the game's own blocks.xml does): the Water
 # Wheel is 3 x 3 blocks, the Steam Turbine and the Windmill built on it are not
 NO_INHERIT = {"feWaterWheel": ' param1="MultiBlockDim"'}
@@ -884,7 +976,12 @@ def block_xml(b):
              f'\t\t\t<property name="DescriptionKey" value="{name}Desc"/>',
              f'\t\t\t<property name="Model" value="#@modfolder:Resources/forgedinashes.unity3d?{model}"/>']
     for k, v in props.items():
+        if k == "__xml":
+            continue
         lines.append(f'\t\t\t<property name="{k}" value="{v}"/>')
+    if "__xml" in props:
+        # nested properties a flat dict cannot hold (the Train Station's composite features)
+        lines.append(props["__xml"])
     lines.append('\t\t</block>')
     return "\n".join(lines)
 
@@ -1029,7 +1126,9 @@ def loc_rows():
 
 
 COMMANDS = [("fe_panel", "Panel", "Painel"), ("fe_config", "Settings", "Configurações"), ("fe_net", "Network", "Rede"),
-            ("fe_craft_pick", "Choose recipe", "Escolher receita"), ("fe_lever", "Pull", "Puxar")]
+            ("fe_craft_pick", "Choose recipe", "Escolher receita"), ("fe_lever", "Pull", "Puxar"),
+            ("fe_onoff", "On / Off", "Liga / Desliga"), ("fe_station_fuel", "Put train fuel (hand)", "Pôr combustível de trem (mão)"),
+            ("fe_station_mode", "Load / Unload", "Carregar / Descarregar")]
 UI_TEXT = [[k, "UI", "Text", en, pt] for k, en, pt in [
     ("feHintPanel", "{0} panel - hold {0}: put, recipe, take", "{0} painel - segure {0}: pôr, receita, retirar"),
     ("feHintConfig", "{0} settings - hold {0}: take", "{0} configurações - segure {0}: pegar"),
@@ -1161,6 +1260,55 @@ UI_TEXT = [[k, "UI", "Text", en, pt] for k, en, pt in [
     ("feTurbineHow", "Steam in at the back, used steam out at the front; Dynamos on its shaft make electricity", "Vapor entra atrás, vapor usado sai na frente; Dínamos no eixo geram eletricidade"),
     ("feHowBoiler", "fireboxes under or beside it; water by pipe on its sides; steam out at the top; join drums for a bigger boiler", "fornalhas embaixo ou ao lado; água por cano nos lados; vapor sai em cima; junte tambores para uma caldeira maior"),
     ("feHowTurbine", "steam in at the back, used steam out at the front (to a Condenser); shaft on its sides; Dynamos on the shaft for electricity", "vapor entra atrás, vapor usado sai na frente (para a Condensadora); eixo nos lados; Dínamos no eixo para eletricidade"),
+    # D14 giant machines (GiantMachines.cs)
+    ("feMinerInfo", "Layer {0} below its base, radius {1} - {2} blocks worked, {3} of them ore", "Camada {0} abaixo da base, raio {1} - {2} blocos trabalhados, {3} de minério"),
+    ("feMinerBuffer", "Waiting to leave by the front: {0} stacks", "Esperando para sair pela frente: {0} pilhas"),
+    ("feOilSurvey", "Surveying the ground: layer {0}, {1} shale blocks so far", "Medindo o solo: camada {0}, {1} blocos de xisto até agora"),
+    ("feOilReserve", "Reserve: {0} of {1} L of crude oil ({2} shale blocks)", "Reserva: {0} de {1} L de petróleo ({2} blocos de xisto)"),
+    ("feOilBuffer", "In the tank: {0} L - needs High Pressure Pipes", "No tanque: {0} L - precisa de Cano de Alta Pressão"),
+    ("feGiantTorque", "Needs {0} UT in its motor socket", "Precisa de {0} UT no encaixe de motor"),
+    ("feMinerDone", "Exhausted: it reached bedrock", "Esgotada: chegou à rocha-mãe"),
+    ("feGiantOff", "Switched off", "Desligada"),
+    ("feGiantFull", "Waiting: its output is full", "Esperando: a saída está cheia"),
+    ("feGiantNoTorque", "Stopped: not enough torque in its motor socket", "Parada: falta torque no encaixe de motor"),
+    ("feGiantChunk", "Waiting for that part of the area to load", "Esperando aquela parte da área carregar"),
+    ("feOilSurveying", "Surveying the shale vein...", "Medindo o veio de xisto..."),
+    ("feOilDry", "Dry: the vein is exhausted (or there is no shale in reach)", "Seca: o veio acabou (ou não há xisto no alcance)"),
+    ("feGiantHint", "{0} on / off", "{0} liga / desliga"),
+    # D14 trains (Trains.cs, TrainView.cs)
+    ("feStationNoName", "Station {0},{1}", "Estação {0},{1}"),
+    ("feStationInfo", "Station \"{0}\" - mode: {1}", "Estação \"{0}\" - modo: {1}"),
+    ("feStationUnload", "trains UNLOAD here", "os trens DESCARREGAM aqui"),
+    ("feStationLoad", "trains LOAD here", "os trens CARREGAM aqui"),
+    ("feStationFuel", "Train fuel: {0} / {1}", "Combustível de trem: {0} / {1}"),
+    ("feStationTank", "tank: {0} L of {1}", "tanque: {0} L de {1}"),
+    ("feStationNoRail", "No rail within 12 m: trains cannot stop here", "Nenhum trilho a até 12 m: os trens não podem parar aqui"),
+    ("feStationFuelHint", "Hold Coal, Gas Cans or Fuel Gas Canisters (no wood, charcoal or biofuel)", "Segure Carvão, Galões de Gasolina ou Botijões de Gás (nada de madeira, carvão vegetal ou biocombustível)"),
+    ("feTrainNeedRail", "Place the locomotive on (or within 4 m of) a rail", "Coloque a locomotiva em cima de um trilho (ou a até 4 m)"),
+    ("feWagonNeedTrain", "Place the wagon within 10 m of a train", "Coloque o vagão a até 10 m de um trem"),
+    ("feTrainLoco", "Locomotive", "Locomotiva"),
+    ("feWagonCargo", "Cargo Wagon", "Vagão de Carga"),
+    ("feWagonTank", "Tank Wagon", "Vagão-Tanque"),
+    ("feWagonPassenger", "Passenger Wagon", "Vagão de Passageiros"),
+    ("feTrainRiding", "Riding - press {0} or jump to get off", "Viajando - aperte {0} ou pule para descer"),
+    ("feTrainNumber", "train {0}", "trem {0}"),
+    ("feTrainBoard", "{0} take a seat", "{0} sentar"),
+    ("feTrainOpenPanel", "{0} Train Panel", "{0} Painel do Trem"),
+    ("feTrainGone", "This train is gone.", "Este trem não existe mais."),
+    ("feTrainMoving", "Running to {0} - {1} km/h", "Indo para {0} - {1} km/h"),
+    ("feTrainDwell", "At {0}, leaving in {1} s", "Em {0}, sai em {1} s"),
+    ("feTrainNoFuel", "OUT OF FUEL: refuel it here (fuel in hand) or at a station", "SEM COMBUSTÍVEL: abasteça aqui (combustível na mão) ou numa estação"),
+    ("feTrainNoRoute", "No route: add stations below", "Sem rota: adicione estações abaixo"),
+    ("feTrainNoWay", "No way along the rails to the next station", "Não há caminho pelos trilhos até a próxima estação"),
+    ("feTrainStopped", "Stopped", "Parado"),
+    ("feTrainFuelLine", "Fuel {0} / {1} - {2} cars", "Combustível {0} / {1} - {2} vagões"),
+    ("feTrainCargo", "Cargo: {0} items in {1} / {2} slots", "Carga: {0} itens em {1} / {2} espaços"),
+    ("feTrainLiquid", "Tanks: {0} / {1} L", "Tanques: {0} / {1} L"),
+    ("feTrainSeats", "Passenger seats: {0}", "Lugares de passageiros: {0}"),
+    ("feTrainPanel", "Train Panel", "Painel do Trem"),
+    ("feTrainPanelN", "Train Panel - train {0}", "Painel do Trem - trem {0}"),
+    ("feTrainBtnStop", "Stop", "Parar"),
+    ("feTrainBtnRun", "Run", "Ligar"),
 ]]
 
 

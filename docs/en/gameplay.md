@@ -24,6 +24,8 @@ flowchart LR
 7. [Signals and automation](#7-signals-and-automation)
 8. [World machines](#8-world-machines)
 9. [Resources: rubber, oil and chemistry](#9-resources-rubber-oil-and-chemistry)
+10. [Giant machines: Mining Rig and Oil Extractor](#10-giant-machines-mining-rig-and-oil-extractor)
+11. [Railways and trains](#11-railways-and-trains)
 
 ---
 
@@ -228,6 +230,34 @@ Rubber trees do **not** spawn in the world — you make the sapling:
 
 The **Refinery**, distillation towers, **Biodigesters**, washers, autoclaves and chemistry mixers turn crude oil,
 biomass and minerals into fuels, plastics, rubber, acids and medicine. Use the Production Guide to follow any chain.
+
+## 10. Giant machines: Mining Rig and Oil Extractor
+
+> [!NOTE]
+> New and not tested in game yet. Their 3D models are still being made: until then they borrow smaller models.
+
+| Machine | Size | Power | What it does |
+|---|---|---|---|
+| **Mining Rig** | 7×7 base, 9 high | **2048 UT** in its motor socket | Works the whole chunk around it (radius 16), layer by layer down to bedrock. Stone, ores, sand, gravel and soil give their drops; every block that is not soil **becomes soil**, so the ground keeps its shape. The only hole is its drill shaft. Products leave by its **front** (belt, crate, chute) and it pauses while that is full. Each block is worked once: in the end it is exhausted. |
+| **Oil Extractor** | 5×5 base, 11 high | **512 UT** in its motor socket | Place it near a shale vein (desert). It surveys the ground within 24 blocks **without breaking anything**; the shale it finds is its reserve (300 L of crude oil per shale block). It pumps 120 L/min out of its front at a pressure only the **High Pressure Pipe** stands. |
+| **Storage Tank** | 5×5 base, 6 high | — | 100,000 L of one liquid; pipes on any outer side of its bottom layer. Send the crude oil here and on to the refinery. |
+
+Hold E on a giant machine to switch it on or off; look at it for its progress, reserve and torque.
+
+## 11. Railways and trains
+
+> [!NOTE]
+> New and not tested in game yet. Track, train and station models are still being made: until then the cars are coloured boxes.
+
+**Track.** Pieces join where their ends meet: **Rail** (1 block), **Rail Curve** (90°, 5×5, radius 4.5 — turn it for any corner), **Rail Ramp** (up 1 over 3) and **Rail Switches** (left / right). Trains choose the branch their route needs; they never turn back except at stations. Trains **do not collide** — with each other or with anything.
+
+**Stations.** The **Train Station** is a 9×3 platform placed **beside** the rails (trains stop at the nearest rail, up to 12 m away). Write its name on its label (hold E). It is a 100-slot storage with a 20,000 L tank:
+
+- belts, arms and funnels fill or empty it like a crate; pipes on its outer sides fill or empty its tank;
+- **mode Load**: arriving trains take its items and fluid (as much as the wagons hold); **mode Unload**: they leave theirs;
+- its own **fuel store** (Coal, Gas Cans, Fuel Gas Canisters — no wood, charcoal or biofuel) refuels every train that stops; fill it by hand (hold E) or by belt.
+
+**Trains.** Place a **Locomotive** on or within 4 m of a rail; place **wagons** within 10 m of it to couple them: **Cargo** (40 slots), **Tank** (20,000 L of one fluid), **Passenger** (look at it, E to ride, E or jump to get off). Look at the locomotive and press E for the **Train Panel**: a map of the rails and stations, the route (click stations to add them, click the route to remove), **Run / Stop**, refuel from your hand, pick the train up. The train then drives itself from station to station, waiting 12 s at each one.
 
 ---
 

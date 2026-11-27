@@ -24,6 +24,8 @@ flowchart LR
 7. [Sinais e automação](#7-sinais-e-automação)
 8. [Máquinas no mundo](#8-máquinas-no-mundo)
 9. [Recursos: borracha, petróleo e química](#9-recursos-borracha-petróleo-e-química)
+10. [Máquinas gigantes: Mineradora e Extratora de Petróleo](#10-máquinas-gigantes-mineradora-e-extratora-de-petróleo)
+11. [Ferrovias e trens](#11-ferrovias-e-trens)
 
 ---
 
@@ -228,6 +230,34 @@ A seringueira **não** nasce no mapa — você fabrica a muda:
 A **Refinaria**, as torres de destilação, os **Biodigestores**, lavadoras, autoclaves e misturadores químicos
 transformam petróleo, biomassa e minerais em combustíveis, plástico, borracha, ácidos e remédios. Use o Guia de
 Produção para seguir qualquer cadeia.
+
+## 10. Máquinas gigantes: Mineradora e Extratora de Petróleo
+
+> [!NOTE]
+> Novidade ainda não testada no jogo. Os modelos 3D ainda estão sendo feitos: até lá usam modelos menores emprestados.
+
+| Máquina | Tamanho | Energia | O que faz |
+|---|---|---|---|
+| **Mineradora** | base 7×7, 9 de altura | **2048 UT** no encaixe de motor | Trabalha o chunk inteiro em volta (raio 16), camada por camada até a rocha-mãe. Pedra, minério, areia, cascalho e terra dão seus itens; todo bloco que não é terra **vira terra**, então o chão fica como estava. O único buraco é o poço da broca. Os produtos saem pela **frente** (esteira, baú, calha) e ela pausa enquanto a saída está cheia. Cada bloco é trabalhado uma vez: no fim ela se esgota. |
+| **Extratora de Petróleo** | base 5×5, 11 de altura | **512 UT** no encaixe de motor | Coloque perto de um veio de xisto (deserto). Ela mede o solo num raio de 24 blocos **sem quebrar nada**; o xisto encontrado é a reserva (300 L de petróleo por bloco). Bombeia 120 L/min pela frente, numa pressão que só o **Cano de Alta Pressão** aguenta. |
+| **Tanque de Armazenamento** | base 5×5, 6 de altura | — | 100.000 L de um líquido; canos em qualquer lado de fora da camada de baixo. Mande o petróleo para cá e daqui para a refinaria. |
+
+Segure E numa máquina gigante para ligar ou desligar; olhe para ela para ver o progresso, a reserva e o torque.
+
+## 11. Ferrovias e trens
+
+> [!NOTE]
+> Novidade ainda não testada no jogo. Os modelos de trilho, trem e estação ainda estão sendo feitos: até lá os vagões são caixas coloridas.
+
+**Trilhos.** As peças se ligam onde as pontas se encontram: **Trilho** (1 bloco), **Curva de Trilho** (90°, 5×5, raio 4,5 — gire para qualquer canto), **Rampa de Trilho** (sobe 1 em 3) e **Desvios** (esquerda / direita). O trem escolhe o ramo que a rota pede; só volta para trás nas estações. Trens **não colidem** — nem entre si nem com nada.
+
+**Estações.** A **Estação de Trem** é uma plataforma 9×3 colocada **ao lado** dos trilhos (o trem para no trilho mais perto, até 12 m). Escreva o nome dela na etiqueta (segure E). É um armazém de 100 espaços com tanque de 20.000 L:
+
+- esteiras, braços e funis enchem ou esvaziam como um baú; canos nos lados de fora enchem ou esvaziam o tanque;
+- **modo Carregar**: os trens que chegam levam os itens e o fluido (o quanto os vagões aguentam); **modo Descarregar**: deixam os deles;
+- o **depósito de combustível** dela (Carvão, Galões de Gasolina, Botijões de Gás — nada de madeira, carvão vegetal ou biocombustível) abastece todo trem que para; encha na mão (segure E) ou pela esteira.
+
+**Trens.** Coloque uma **Locomotiva** em cima de um trilho (ou a até 4 m); coloque **vagões** a até 10 m dela para engatar: **Carga** (40 espaços), **Tanque** (20.000 L de um fluido), **Passageiros** (olhe, E para viajar, E ou pule para descer). Olhe para a locomotiva e aperte E para o **Painel do Trem**: mapa dos trilhos e estações, a rota (clique nas estações para pôr, clique na rota para tirar), **Ligar / Parar**, abastecer com o que está na mão, recolher o trem. Depois o trem anda sozinho de estação em estação, esperando 12 s em cada uma.
 
 ---
 
